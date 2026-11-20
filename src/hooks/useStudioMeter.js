@@ -11,9 +11,9 @@ export default function useStudioMeter(stream){
   const resume=()=>{void meter.resume().catch(()=>{if(!stopped)setState(previous=>({...previous,status:'waiting'}));});};
   const tick=now=>{
    if(stopped)return;
-   if(now-last>=1000/30){
+   if(now-last>=50){
     const reading=meter.read();ballistics=advanceMeter(ballistics,reading.db,last?(now-last)/1000:0);last=now;
-    setState({...ballistics,...reading});
+    setState(previous=>previous.levelDb===ballistics.levelDb&&previous.peakDb===ballistics.peakDb&&previous.clip===ballistics.clip&&previous.db===reading.db&&previous.status===reading.status?previous:{...ballistics,...reading});
    }
    frame=requestAnimationFrame(tick);
   };

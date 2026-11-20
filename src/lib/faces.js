@@ -12,10 +12,20 @@ export function loadFaceDetector() {
 }
 let lastStamp = 0;
 // Detects faces in a video/canvas; boxes are {cx,cy,w,h,score} as fractions of the picture. Timestamps must increase, also across callers.
+// The detector reads a small copy of the frame: the short-range model resizes its input to ~128 px anyway, so a 1080p readback is wasted work on the main thread.
+const DETECT_WIDTH = 320;
+let scratch = null;
 export function detectFaces(detector, source, width, height) {
   const stamp = Math.max(performance.now(), lastStamp + 1); lastStamp = stamp;
-  return (detector.detectForVideo(source, stamp).detections || []).filter(d => d.boundingBox)
-    .map(d => { const b = d.boundingBox; return { cx: (b.originX + b.width / 2) / width, cy: (b.originY + b.height / 2) / height, w: b.width / width, h: b.height / height, score: d.categories?.[0]?.score }; });
+  let input = source, w = width, h = height;
+  if (width > DETECT_WIDTH && typeof document !== 'undefined') {
+    w = DETECT_WIDTH; h = Math.max(1, Math.round(height * DETECT_WIDTH / width));
+    scratch ||= document.createElement('canvas');
+    if (scratch.width !== w || scratch.height !== h) { scratch.width = w; scratch.height = h; }
+    scratch.getContext('2d').drawImage(source, 0, 0, w, h); input = scratch;
+  }
+  return (detector.detectForVideo(input, stamp).detections || []).filter(d => d.boundingBox)
+    .map(d => { const b = d.boundingBox; return { cx: (b.originX + b.width / 2) / w, cy: (b.originY + b.height / 2) / h, w: b.width / w, h: b.height / h, score: d.categories?.[0]?.score }; });
 }
 // Who is DJ Khalil: the face nearest to where he was last seen (anchor). Without an anchor the biggest face is assumed until the editor clicks him.
 // Returns {anchor, others}; others = every other face. A DJ who cannot be matched is not trusted: everyone is blurred (privacy first),

@@ -46,7 +46,7 @@ export default function VideoSourceControls({getElement,loadVideo,onOpen,onCurre
   };
   useEffect(()=>{
     const read=()=>{const player=getElement();if(!player)return;const end=player.buffered?.length?player.buffered.end(player.buffered.length-1):0;
-      setState(current=>({...current,...(current.seeking?{}:{time:player.currentTime||0}),duration:Number.isFinite(player.duration)?player.duration:0,playing:!player.paused&&!player.ended,ended:player.ended,rate:player.playbackRate,w:player.videoWidth||0,h:player.videoHeight||0,buffered:end}));
+      setState(current=>{const next={...current,...(current.seeking?{}:{time:player.currentTime||0}),duration:Number.isFinite(player.duration)?player.duration:0,playing:!player.paused&&!player.ended,ended:player.ended,rate:player.playbackRate,w:player.videoWidth||0,h:player.videoHeight||0,buffered:end};return Object.keys(next).every(key=>next[key]===current[key])?current:next;});
       const {a,b}=latest.current.loop;if(a!==null&&b!==null&&!player.paused&&player.currentTime>=b)player.currentTime=a;};
     read();const timer=setInterval(read,200);return()=>clearInterval(timer);
   },[getElement]);

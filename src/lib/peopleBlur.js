@@ -8,20 +8,22 @@ export const subscribePeopleBlur = fn => { listeners.add(fn); return () => liste
 export function setPeopleBlur(patch) { Object.assign(peopleBlur, patch); listeners.forEach(fn => fn()); }
 export function setPortraitBlur(patch) { Object.assign(portraitBlur, patch); listeners.forEach(fn => fn()); }
 
-// One pass per camera processor: detect (about every 90 ms), then pixel-blur the other faces on the already composed frame.
+const sameBoxes = (a, b) => a.length === b.length && a.every((x, i) => Math.abs(x.cx - b[i].cx) < .01 && Math.abs(x.cy - b[i].cy) < .01 && Math.abs(x.w - b[i].w) < .01);
+// One pass per camera processor: detect (about every 150 ms), then pixel-blur the other faces on the already composed frame.
 export function createBlurPass(cfg = peopleBlur) {
   let detector = null, loading = false, last = 0, others = [], state = { lost: 0 }, small = null;
   return function run(ctx, canvas, width, height) {
     if (!peopleBlur.enabled) { others = []; return; }
     if (!detector && !loading) { loading = true; loadFaceDetector().then(d => { detector = d; setPeopleBlur({ error: '' }); }).catch(() => setPeopleBlur({ error: 'Face detection could not load.' })).finally(() => { loading = false; }); }
     const now = performance.now();
-    if (detector && now - last > 90) {
+    if (detector && now - last > 150) {
       last = now;
       try {
         const boxes = detectFaces(detector, canvas, width, height), result = splitPeople(boxes, cfg.anchor, state);
         state = result.state; others = result.others;
+        const moved = !sameBoxes(cfg.boxes, boxes);
         cfg.boxes = boxes; if (result.anchor !== cfg.anchor) cfg.anchor = result.anchor;
-        listeners.forEach(fn => fn()); // the preview squares follow the faces
+        if (moved) listeners.forEach(fn => fn()); // the preview squares follow the faces; no React render when nothing moved
       } catch { /* skip this detection */ }
     }
     if (!others.length) return;
