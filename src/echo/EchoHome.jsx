@@ -1,7 +1,6 @@
 import ClientAppBadge from './ClientAppBadge';
 import SkipLoginOption from './SkipLoginOption';
 import {track} from '../lib/analytics';
-import {apiRequest} from '../lib/api';
 import HeroLoader from './HeroLoader';
 import HeroRingButton from './HeroRingButton';
 import useHeroHeadphoneAnimation from './useHeroHeadphoneAnimation';
@@ -78,7 +77,7 @@ export function ServiceCards({ lang }) {
   </div>;
 }
 
-function EchoHomeContent({ lang, user, token }) {
+function EchoHomeContent({ lang, user }) {
   const { t } = lang;
   const ar = lang.lang === 'ar';
   const tr = (en, arabic) => ar ? arabic : en;
@@ -169,11 +168,6 @@ function EchoHomeContent({ lang, user, token }) {
     return () => { window.removeEventListener('scroll', schedule); motion.removeEventListener('change', schedule); cancelAnimationFrame(frame); };
   }, []);
   // Leaves the home page for the Music page: the hero slides away first (no animation when reduced motion is on).
-  // "Don't show this page again": once set, a logged-in visit that starts here goes straight to Music. Coming from inside the site (the Home link) still shows it. Clicking the button again turns it off.
-  // The choice lives on the client's account (not the browser), so it follows them to any device.
-  const [skipHome,setSkipHome]=useState(Boolean(user?.skipHome));
-  useEffect(()=>{if(user&&skipHome&&!document.referrer.startsWith(location.origin))location.replace('/music');},[]);// eslint-disable-line react-hooks/exhaustive-deps
-  const toggleSkipHome=()=>{if(!user||!token)return;const next=!skipHome;setSkipHome(next);apiRequest('/auth/profile',{method:'PATCH',token,body:{skipHome:next}}).catch(()=>setSkipHome(!next));};
   const leaveForMusic=place=>{track('hero_cta_click',{place});window.location.assign('/music');};
   return fitHomepageViewports(<>
     <div className="echo-artist-sequence echo-headphone-study hero-introduction" ref={headphone.sceneRef} data-language-selected={heroLanguageChosen?'true':'false'} data-hero-loading={heroPictureReady?undefined:'true'} data-headphone-playing={headphone.playing?'':undefined}>
@@ -191,7 +185,7 @@ function EchoHomeContent({ lang, user, token }) {
         {!copyGone&&<h1 className="echo-hero-title"><span className="is-active">{tr('DJ, sound, lighting & LED walls for your event','دي جي وصوت وإضاءة وشاشات LED لفعاليتك')}</span></h1>}
         {!copyGone&&<p className="echo-hero-subline">{tr('For weddings, engagements and parties across the GTA. Arabic and multicultural music, premium sound, lighting and LED walls, and one team that looks after every detail from the first call to the last song.','لحفلات الزفاف والخطوبة والمناسبات في منطقة تورونتو الكبرى. موسيقى عربية ومتعددة الثقافات، وصوت وإضاءة وشاشات LED احترافية، وفريق واحد يهتم بكل التفاصيل من أول اتصال حتى آخر أغنية.')}</p>}
         <HeroIntroductionAudio hideAppBadge={Boolean(user&&!user.isAdmin)} onSkip={()=>leaveForMusic('skip')} lang={lang} animationReady={headphone.ready} animationFailed={headphone.failed} onAnimationRetry={headphone.retry} onLanguageSelect={()=>{setHeroLanguageChosen(true);try{sessionStorage.setItem('echo-home-language-selected','1');}catch{}}} onLanguageReset={()=>{setHeroLanguageChosen(false);try{sessionStorage.removeItem('echo-home-language-selected');sessionStorage.removeItem('echo-home-section');}catch{}setGreetingStart(0);setGreetingReady(0);}} onTransportState={setIntroTransport} animationComplete={greetingReady} onBegin={()=>{setGreetingReady(0);setGreetingStart(value=>Math.abs(value)+1);}} onStop={()=>{setGreetingReady(0);setGreetingStart(value=>-(Math.abs(value)+1));}}/>
-        {heroLanguageChosen&&<HeroRingButton label={tr('Skip to content','انتقل إلى المحتوى')} hidden={skipHome} hideLabel={skipHome?tr('This page is set to be skipped after logging in','سيتم تخطي هذه الصفحة بعد تسجيل الدخول'):tr("Don't show this page again",'لا تعرض هذه الصفحة مجدداً')} onClick={()=>leaveForMusic('hero')} onHide={user?toggleSkipHome:undefined}/>}
+        {heroLanguageChosen&&<HeroRingButton label={tr('Skip to content','انتقل إلى المحتوى')} onClick={()=>leaveForMusic('hero')}/>}
         {heroLanguageChosen&&!(user&&!user.isAdmin)&&<ClientAppBadge tr={tr}/>}
       </div><div className="hero-copy-stage" aria-hidden="true"/></div></div>
       <div className="echo-hero-visual" ref={heroVisual}/>
