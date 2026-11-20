@@ -15,3 +15,8 @@ test('Cloudinary saving off starts a device-only live with one request and no qu
  const result=await startStudioBroadcast({title:'Set',saveRecording:true,localOnly:true,hasFolder:()=>true,makeId:()=>'id',askLocalOnly:async()=>assert.fail('no prompt'),request:async body=>{bodies.push(body);return {roomName:'room'};}});
  assert.equal(bodies.length,1);assert.equal(bodies[0].saveRecording,false);assert.deepEqual(result.recording,{mode:'local',id:'local-id'});
 });
+test('a restricted live sends its audience on every request',async()=>{
+ const bodies=[];
+ await startStudioBroadcast({title:'Set',saveRecording:true,localOnly:true,audience:'specific',audienceUserIds:['u1'],hasFolder:()=>true,makeId:()=>'id',askLocalOnly:async()=>true,request:async body=>{bodies.push(body);return {};}});
+ assert.deepEqual([bodies[0].audience,bodies[0].audienceUserIds],['specific',['u1']]);
+});

@@ -23,7 +23,7 @@ export function RatioCards({format,onChange,locked,both=false,fixed=''}){
   const active=fixed||(format==='portrait'?'portrait':'landscape');
   return <div className="studio-inputs collab-format"><span className="studio-label">Live output ratio</span>
    <div className="studio-source-grid ratio-grid" role="group" aria-label="Live output ratio">
-    {RATIO_CARDS.map(([id,text,description,Icon])=><button key={id} type="button" aria-pressed={both||active===id} disabled={locked||both||Boolean(fixed)} title={both?'The 2 windows scenario sends both Landscape and Portrait.':fixed?'The Collab scenario sends one landscape picture that contains both cameras.':locked?'Stop the live to change the ratio.':text} onClick={()=>onChange(id)}><Icon size={20} aria-hidden="true"/><span><strong>{text}</strong><small>{description}</small></span><i aria-hidden="true"/></button>)}
+    {RATIO_CARDS.map(([id,text,description,Icon])=><button key={id} type="button" aria-pressed={both||active===id} disabled={locked||both||Boolean(fixed)} title={both?'The 2 windows scenario sends both Landscape and Portrait.':fixed?'The Collab scenario sends one landscape picture that contains both cameras.':locked?'Stop the live to change the ratio.':text} onClick={()=>onChange(id)}><Icon size={20} aria-hidden="true"/><span><strong>{text}</strong><small>{description}</small></span></button>)}
    </div></div>;
 }
 // The first decision: how many sources this live uses; with one source, which outputs it sends.

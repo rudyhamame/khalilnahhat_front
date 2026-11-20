@@ -2151,7 +2151,7 @@ html.echo-builder-window .admin-workspace .djb-main .djb-tools .djb-lib{flex:1 1
 #admin-live-stream#admin-live-stream button.studio-column-button:hover,#admin-live-stream#admin-live-stream button.studio-column-button:focus-visible{color:#e0c18d;background:none!important}
 /* Wider middle column: slimmer controls and recording columns. */
 #admin-live-stream#admin-live-stream:not([data-hide-left]) .admin-live-single.has-requests-aside>.admin-live-preview:not(.is-portrait-only){grid-template-columns:minmax(clamp(300px,22vw,380px),max-content) minmax(0,1fr)!important}
-#admin-live-stream#admin-live-stream:not([data-hide-right]) .admin-live-single.has-requests-aside{grid-template-columns:minmax(0,1fr) minmax(clamp(280px,18vw,340px),max-content)!important}
+#admin-live-stream#admin-live-stream:not([data-hide-right]) .admin-live-single.has-requests-aside{grid-template-columns:minmax(0,1fr) clamp(300px,20vw,360px)!important}
 /* Side columns: titles stay on one line; descriptive lines wrap inside the column instead of spilling. */
 #admin-live-stream#admin-live-stream :is(.studio-control-dock,.studio-recording-card) :is(h3,h4,legend,strong,.studio-control-step,.studio-control-card-aside,.studio-control-status){white-space:nowrap}
 #admin-live-stream#admin-live-stream :is(.studio-control-dock,.studio-recording-card) :is(p,small,li,span,label,em){white-space:normal;overflow-wrap:anywhere;min-width:0}
@@ -2184,3 +2184,58 @@ html.echo-builder-window .admin-workspace .djb-main .djb-tools .djb-lib{flex:1 1
 #admin-live-stream .studio-set-list-picker>small{color:var(--sc-muted,#8e9692);font-size:12px;line-height:1.5}
 #admin-live-stream .studio-set-list-picker>p{margin:0;font-size:12px}
 .studio-preview-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;min-height:30px;padding:0 4px 6px}.studio-preview-toolbar-crop{display:inline-flex}
+.studio-audience-row select{max-width:180px}.studio-audience-clients{display:grid;gap:6px;padding:6px 0}.studio-audience-clients ul{margin:0;padding:0;list-style:none;max-height:140px;overflow:auto}.studio-audience-clients li label{display:flex;gap:6px;align-items:center;font-size:12.5px}
+
+/* ═══ Output control column — restyle: tabbed card, one tile per setting ═══ */
+.admin-workspace #admin-live-stream .studio-recording-slot>.rec-card{border-radius:16px;border:1px solid #ffffff1f;background:radial-gradient(120% 60% at 50% 0,#2a2620 0,transparent 55%),linear-gradient(180deg,#1d1e21,#141517);box-shadow:inset 0 1px 0 #ffffff14,0 18px 40px -22px #000}
+.rec-card .rec-head{padding:14px 16px;border-bottom:1px solid #ffffff14;background:linear-gradient(180deg,#ffffff08,transparent)}
+.rec-card .rec-title h3{display:flex;align-items:center;gap:9px;font:700 12.5px/1 'Manrope',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#f1ece2}
+.rec-card .rec-title h3:before{content:'';width:8px;height:8px;border-radius:50%;background:#b99a67;box-shadow:0 0 0 3px #b99a6730}
+.rec-card .rec-scroll{gap:0;padding:14px 14px 18px;scrollbar-width:thin}
+.rec-card [role=tabpanel]{display:grid;gap:10px;align-content:start}
+.rec-card [role=tabpanel][hidden]{display:none}
+.rec-card .rec-toggle-row,.rec-card .studio-audience-clients,.rec-card .rec-flow,.rec-card .rec-block,.rec-card .rec-off,.rec-card .studio-control-card{padding:12px 14px;border:1px solid #ffffff14;border-radius:12px;background:#ffffff07}
+.rec-card .rec-toggle-row{gap:14px}
+.rec-card .rec-toggle-row strong{font-size:13px;color:#f1ece2}
+.rec-card .rec-block{gap:12px}
+.rec-card .rec-label{font-size:11.5px;color:#b99a67}
+.rec-card .studio-control-card-heading{display:block;margin:0 0 10px;padding:0;border:0}
+.rec-card .studio-control-step{display:none}
+.rec-card .studio-control-card-heading h4{margin:0;font:700 11.5px/1.2 'Manrope',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#b99a67}
+.rec-card .studio-control-card-heading p{margin:4px 0 0;font-size:12px;line-height:1.45;color:#9aa0a6}
+.rec-card .studio-control-card .studio-block{padding:0;border:0;background:transparent}
+.rec-card .studio-source-grid.ratio-grid{grid-template-columns:minmax(0,1fr)!important;gap:8px}
+.rec-card .studio-source-grid.ratio-grid>button{border-radius:11px;border:1px solid #ffffff1c;background:#ffffff06;transition:border-color .15s,background .15s}
+.rec-card .studio-source-grid.ratio-grid>button:hover:not(:disabled){border-color:#b99a6788}
+.rec-card .studio-source-grid.ratio-grid>button[aria-pressed=true]{border-color:#b99a67;background:#b99a6718}
+.rec-card .studio-hint{margin:10px 0 0;font-size:12px;line-height:1.5;color:#9aa0a6}
+.rec-card select,.rec-card .studio-audience-clients input[type=search]{min-height:34px;padding:0 10px;border:1px solid #ffffff2b;border-radius:9px;background:#0000005c;color:#f1ece2;font-size:12.5px}
+.rec-card select:focus-visible,.rec-card input[type=search]:focus-visible{outline:2px solid #b99a67;outline-offset:2px}
+.rec-card .studio-audience-row{flex-wrap:wrap}
+.rec-card .studio-audience-row select{flex:1 1 100%;max-width:none}
+.rec-card .studio-audience-clients{gap:8px}
+.rec-card .studio-audience-clients ul{max-height:160px;scrollbar-width:thin}
+.rec-card .studio-audience-clients li label{padding:6px 4px;border-radius:7px}
+.rec-card .studio-audience-clients li label:hover{background:#ffffff0a}
+.rec-card .rec-block .rec-toggle-row{padding:0;border:0;background:transparent}
+/* Same tabs as the left column; the Output tab stays compact so the column never grows. */
+.rec-card>.studio-settings-tabs{display:flex;flex-direction:row;flex-wrap:nowrap;align-items:center;align-self:stretch;gap:4px;padding:8px;min-width:0;overflow-x:auto;border:0;border-bottom:1px solid var(--aw-line,#34363a);background:#ffffff02;scrollbar-width:thin}
+.rec-card>.studio-settings-tabs [role=tab]{display:flex;flex:none;align-items:center;justify-content:center;gap:8px;min-height:36px;padding:7px 9px;font-size:12px;white-space:nowrap}
+.rec-card .studio-control-card-heading p,.rec-card .studio-hint{display:none}
+.rec-card .studio-control-card{padding:10px 12px}.rec-card .studio-control-card-heading{margin:0 0 8px}
+.rec-card .studio-source-grid.ratio-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px}
+.rec-card .studio-source-grid.ratio-grid>button{padding:8px;min-height:0;gap:8px}
+.rec-card .studio-source-grid.ratio-grid>button small{display:none}
+.rec-card .rec-toggle-row{padding:8px 12px}
+.rec-card .rec-scroll{padding:12px}.rec-card [role=tabpanel]{gap:8px}
+/* Live output ratio: the title sits on top of its two cards. */
+.rec-card .studio-ratio-card .studio-label{display:none}
+.rec-card .studio-ratio-card .studio-source-grid.ratio-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+.rec-card .rec-ratio{flex:none;padding:12px 12px 0}
+/* The two ratio cards share the full width: nothing is left empty on their right. */
+.rec-card .studio-ratio-card .collab-format{display:block;width:100%}
+.rec-card .studio-ratio-card .studio-source-grid.ratio-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;width:100%}
+.rec-card .studio-ratio-card .studio-source-grid.ratio-grid>button{width:100%;min-width:0;justify-content:center}
+/* Output control keeps one width whichever tab, mode or content is showing. */
+#admin-live-stream#admin-live-stream .studio-recording-slot,#admin-live-stream#admin-live-stream .studio-recording-slot>.rec-card{min-width:0;max-width:100%}
+.rec-card .studio-output-quantity{margin-top:10px}.rec-card .studio-output-quantity .studio-label{display:block!important;margin:0 0 6px;font-size:11.5px;color:#9aa0a6}.rec-card .studio-output-quantity .ratio-grid>button:disabled{opacity:1;cursor:default}.rec-card .studio-output-quantity .ratio-grid>button:not([aria-pressed=true]){opacity:.55}
