@@ -12,6 +12,7 @@ import {useAutoDuck} from '../hooks/useAutoDuck';
 import RatioCards from './RatioCards';
 import {useOutputFormat} from '../hooks/useOutputFormat';
 import ObsBroadcast from './ObsBroadcast';
+import ObsQualityGuide from './ObsQualityGuide';
 import WebrtcViewer from './WebrtcViewer';
 import StudioPreviewMirror from './StudioPreviewMirror';
 import LiveDestinations from './LiveDestinations';
@@ -238,9 +239,10 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
     <select aria-label="Live session domain" value={isLiveOnAir?(liveStream?.audience||'all'):audience} disabled={webrtc.isConnecting||reserved||isLiveOnAir} onChange={event=>setAudience(event.target.value)}><option value="all">All (guests, clients, admins)</option><option value="admins">Admins only</option><option value="clients">Clients only (and admins)</option><option value="specific">Specific clients</option></select></div>
    {audience==='specific'&&!isLiveOnAir&&<div className="studio-audience-clients"><input type="search" placeholder="Search clients" aria-label="Search clients" value={clientQuery} onChange={event=>setClientQuery(event.target.value)}/>{audienceIds.length===0&&<small>Pick at least one client, or only admins will see this live.</small>}<ul>{clientRows.map(client=><li key={client.id}><label><input type="checkbox" checked={audienceIds.includes(client.id)} onChange={event=>setAudienceIds(ids=>event.target.checked?[...ids,client.id]:ids.filter(id=>id!==client.id))}/> {client.name||client.username} <small>{client.email}</small></label></li>)}</ul></div>}
  <StudioControlSection step="02a" title="Live output ratio" description="Choose what the live sends. The picture is composed in OBS." className="studio-ratio-card"><div className="studio-block"><RatioCards format={output.format} locked={webrtc.isBroadcasting} onChange={output.setFormat}/></div></StudioControlSection>
- <StudioControlSection step="02b" title="Picture quality" description="Sets what is sent to the server. Match it to the output size in OBS."><div className="studio-block">
+ <StudioControlSection step="02b" title="Picture quality" description="Two options, 720p or 1080p. For OBS, set the matching values below."><div className="studio-block">
   <div className="studio-source-grid ratio-grid" role="group" aria-label="Picture quality">{Object.values(LIVE_QUALITY).map(item=>{const [name,detail]=item.label.split(' · ');return <button key={item.id} type="button" aria-pressed={liveQuality===item.id} disabled={webrtc.isBroadcasting||webrtc.previewBusy||qualityBusy} title={webrtc.isBroadcasting?'Stop the live to change the quality.':item.label} onClick={()=>void changeLiveQuality(item.id)}><Video size={20} aria-hidden="true"/><span><strong>{name}{detail?` · ${detail}`:''}</strong><small>{item.detail}</small></span><i aria-hidden="true"/></button>;})}</div>
   <p className="studio-hint">{qualityBusy?'Restarting the private preview at the new resolution…':LIVE_QUALITY[liveQuality].detail} {webrtc.isPreviewing?'The open private preview updates immediately.':'The selected resolution applies when you open the preview or go live.'} A higher setting needs a stronger upload connection at the venue.</p>
+  <ObsQualityGuide/>
  </div></StudioControlSection>
  </div>
  </div>

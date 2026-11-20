@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Copy } from 'lucide-react';
 import { apiRequest } from '../lib/api';
 import './obsBroadcast.css';
+import ObsQualityGuide from './ObsQualityGuide';
 
 export default function ObsBroadcast({ token, title, item, onUpdate }) {
   const [busy, setBusy] = useState(false);
@@ -62,15 +63,7 @@ export default function ObsBroadcast({ token, title, item, onUpdate }) {
       </div>
       <p className="obs-help">Keep the key private. Prepare a new connection for each live stream.</p>
     </details> : null}
-    {obs?.transport === 'ovh' ? <details className="obs-setup-guide" aria-label="OBS Studio setup instructions">
-      <summary>OBS Studio setup</summary>
-      <ol>
-        <li><b>Stream:</b> Service <b>WHIP</b>. Paste the Server and Bearer token below. Prepare a fresh connection for every live stream and start within 2 minutes.</li>
-        <li><b>Output:</b> Output Mode <b>Simple</b>; Streaming Encoder <b>x264</b>; Video Bitrate <b>2,500–4,000 Kbps</b>. Enable <b>Advanced Encoder Settings</b> and set x264 Options to <code>profile=baseline bframes=0 keyint=60</code>. Keep audio as <b>Opus</b>.</li>
-        <li><b>Video:</b> Output Resolution <b>1280×720</b>; Common FPS Values <b>30</b>. A keyframe interval of 60 frames is 2 seconds at 30 fps.</li>
-      </ol>
-      <p className="obs-help">This relay sends WebRTC directly and does not remux or transcode. These encoder settings are required.</p>
-    </details> : !obs?.roomName ? <p className="obs-help">OBS → Settings → Stream → Custom. Paste the server and key, then start streaming.</p> : null}
+    {obs?.transport === 'ovh' ? <details className="obs-setup-guide" aria-label="OBS Studio setup instructions"><summary>OBS Studio setup (720p and 1080p)</summary><ObsQualityGuide /></details> : !obs?.roomName ? <p className="obs-help">OBS → Settings → Stream → Custom. Paste the server and key, then start streaming.</p> : null}
     {message || obs?.error ? <p className="obs-help" role="status">{message || obs?.error}</p> : null}
     </div>
   </div>;

@@ -34,3 +34,8 @@
 .admin-preview-sound-slot { min-width:0; }
 .admin-preview-sound-slot .admin-preview-sound-control { display:flex; align-items:center; justify-content:center; gap:6px; }
 @media(max-width:600px) { .obs-connection-fields { grid-template-columns:minmax(0,1fr); } .obs-session-toolbar { gap:10px 12px; } .obs-recording-option { margin-inline-start:0; } .obs-session-toolbar>.admin-live-control { margin-inline-start:auto; } }
+.obs-quality-guide{display:grid;gap:10px;min-width:0}
+.obs-quality-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:10px}
+.obs-quality-option{min-width:0;padding:10px 12px;border:1px solid var(--aw-line,#ffffff1f);border-radius:8px}
+.obs-quality-option h5{margin:0 0 6px;font-size:13px}
+.obs-quality-option ol{margin:0;padding-inline-start:18px;display:grid;gap:4px;font-size:12px;line-height:1.45}

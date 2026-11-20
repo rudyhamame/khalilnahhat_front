@@ -1,0 +1,54 @@
+/* Audience comments: a chat-style column. Class names are unique to this panel so the older studio rules cannot reach it. */
+#admin-live-stream .admin-live-comments-aside{padding:0!important;gap:0!important}
+#admin-live-stream .alc{display:flex;flex-direction:column;min-height:0;height:100%;width:100%;min-width:0;color:var(--aw-text,#e9eae8)}
+#admin-live-stream .alc-head{flex:none;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-bottom:1px solid #ffffff14}
+#admin-live-stream .alc-head h3{display:flex;align-items:center;gap:7px;margin:0;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+#admin-live-stream .alc-count{min-width:20px;padding:1px 7px;border-radius:999px;background:#ffffff14;font-size:11px;font-weight:600;letter-spacing:0;text-align:center}
+#admin-live-stream .alc-status{display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border:1px solid #ffffff1f;border-radius:999px;font-size:11px;font-weight:600;white-space:nowrap}
+#admin-live-stream .alc-status i{width:6px;height:6px;border-radius:50%;background:#8b8f94}
+#admin-live-stream .alc-status[data-state=on]{border-color:#52d59a55;color:#8fe5bd}
+#admin-live-stream .alc-status[data-state=on] i{background:#52d59a;box-shadow:0 0 6px #52d59a99}
+#admin-live-stream .alc-status[data-state=warn]{border-color:#f0b13c66;color:#ffd27a}
+#admin-live-stream .alc-status[data-state=warn] i{background:#f0b13c;animation:alc-blink 1s ease-in-out infinite}
+@keyframes alc-blink{50%{opacity:.35}}
+#admin-live-stream .alc-notice{flex:none;display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin:8px 12px 0;padding:7px 10px;border:1px solid #e5484d66;border-radius:8px;background:#e5484d1a;color:#ffb4b6;font-size:12px;line-height:1.4}
+#admin-live-stream .alc-notice button{flex:none;display:grid;place-items:center;width:20px;height:20px;padding:0;border:0;background:none;color:inherit;cursor:pointer}
+#admin-live-stream .alc-body{position:relative;flex:1 1 auto;display:flex;flex-direction:column;min-height:0}
+#admin-live-stream .alc-empty{margin:0;padding:18px 14px;text-align:center;color:var(--aw-muted,#98a0a6);font-size:12.5px}
+#admin-live-stream .alc-flow{flex:1 1 auto;min-height:0;margin:0;padding:8px 10px;list-style:none;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:2px;scrollbar-width:thin}
+#admin-live-stream .alc-item{display:flex;gap:9px;padding:7px 6px;border-radius:10px;transition:background .15s}
+#admin-live-stream .alc-item:hover,#admin-live-stream .alc-item:focus-within{background:#ffffff0a}
+#admin-live-stream .alc-avatar{flex:none;display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:hsl(var(--hue) 38% 30%);color:hsl(var(--hue) 80% 85%);font-size:12px;font-weight:700}
+#admin-live-stream .alc-main{flex:1 1 auto;min-width:0}
+#admin-live-stream .alc-meta{display:flex;align-items:baseline;gap:7px;min-width:0}
+#admin-live-stream .alc-meta strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px;font-weight:600}
+#admin-live-stream .alc-meta time{flex:none;font-size:11px;color:var(--aw-muted,#98a0a6)}
+#admin-live-stream .alc-tag{flex:none;padding:0 6px;border-radius:5px;background:#f0b13c22;color:#ffd27a;font-size:10.5px;font-style:normal}
+#admin-live-stream .alc-text{margin:2px 0 0;font-size:13px;line-height:1.45;overflow-wrap:anywhere;white-space:pre-wrap}
+#admin-live-stream .alc-item.is-hidden .alc-text{opacity:.45;text-decoration:line-through}
+#admin-live-stream .alc-item.is-mine .alc-avatar{background:#b99a67;color:#17130b}
+#admin-live-stream .alc-item.is-pending{opacity:.6}
+#admin-live-stream .alc-item.is-failed{background:#e5484d14}
+#admin-live-stream .alc-state{display:flex;align-items:center;gap:8px;margin-top:3px;font-size:11.5px;color:var(--aw-muted,#98a0a6)}
+#admin-live-stream .alc-state.is-error{color:#ffb4b6;flex-wrap:wrap}
+#admin-live-stream .alc-state button{display:inline-flex;align-items:center;gap:4px;padding:1px 7px;border:1px solid #ffffff26;border-radius:6px;background:none;color:inherit;font-size:11px;cursor:pointer}
+#admin-live-stream .alc-reply{display:flex;gap:6px;margin:5px 0 0;padding:6px 9px;border-left:2px solid #b99a67;border-radius:0 8px 8px 0;background:#b99a6714;font-size:12.5px;line-height:1.4}
+#admin-live-stream .alc-reply svg{flex:none;margin-top:2px;color:#b99a67}
+#admin-live-stream .alc-reply b{color:#e0c18d}
+#admin-live-stream .alc-actions{display:flex;gap:6px;margin-top:4px;opacity:0;transition:opacity .12s}
+#admin-live-stream .alc-item:hover .alc-actions,#admin-live-stream .alc-item:focus-within .alc-actions{opacity:1}
+@media(hover:none){#admin-live-stream .alc-actions{opacity:1}}
+#admin-live-stream .alc-actions button{display:inline-flex;align-items:center;gap:5px;min-height:24px;padding:2px 9px;border:1px solid #ffffff1f;border-radius:999px;background:none;color:var(--aw-muted,#b4bbc0);font-size:11.5px;cursor:pointer}
+#admin-live-stream .alc-actions button:hover:not(:disabled){border-color:#b99a67;color:#e0c18d}
+#admin-live-stream .alc-actions button:disabled,#admin-live-stream .alc-reply-form button:disabled{opacity:.45;cursor:not-allowed}
+#admin-live-stream .alc-reply-form{display:flex;gap:6px;margin-top:5px}
+#admin-live-stream .alc-reply-form input{flex:1 1 auto;min-width:0;min-height:30px;padding:4px 10px;border:1px solid #ffffff26;border-radius:8px;background:#0000002e;color:inherit;font-size:12.5px}
+#admin-live-stream .alc-reply-form button{flex:none;min-height:30px;padding:2px 11px;border:1px solid #b99a67;border-radius:8px;background:#b99a6722;color:#e0c18d;font-size:12px;cursor:pointer}
+#admin-live-stream .alc-reply-form button.is-quiet{border-color:#ffffff26;background:none;color:var(--aw-muted,#b4bbc0)}
+#admin-live-stream .alc-latest{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border:1px solid #b99a67;border-radius:999px;background:#1b1c1f;color:#e0c18d;font-size:11.5px;box-shadow:0 4px 14px #0008;cursor:pointer}
+#admin-live-stream .alc-compose{flex:none;display:flex;gap:8px;padding:9px 10px;border-top:1px solid #ffffff14}
+#admin-live-stream .alc-compose input{flex:1 1 auto;min-width:0;min-height:36px;padding:6px 14px;border:1px solid #ffffff26;border-radius:999px;background:#0000002e;color:inherit;font-size:13px}
+#admin-live-stream .alc-compose input:focus{outline:2px solid #b99a6788;outline-offset:1px;border-color:#b99a67}
+#admin-live-stream .alc-compose button{flex:none;display:grid;place-items:center;width:36px;height:36px;padding:0;border:0;border-radius:50%;background:#b99a67;color:#17130b;cursor:pointer}
+#admin-live-stream .alc-compose button:disabled{opacity:.4;cursor:not-allowed}
+@media(prefers-reduced-motion:reduce){#admin-live-stream .alc-status i{animation:none!important}}

@@ -2,7 +2,7 @@ import {NEXT_LIVE_DATE} from '../config/features';
 import {useViewportPhase} from './useViewportPhase';
 import {fitViewport} from './fitViewport';
 import {useEffect,useLayoutEffect,useRef,useState} from 'react';
-import {AudioLines,Disc3,Maximize2,Radio,Volume2,VolumeX} from 'lucide-react';
+import {AudioLines,Disc3,ListMusic,Maximize2,Radio,Volume2,VolumeX} from 'lucide-react';
 import {useLiveStatus,liveSessionIdentity} from '../hooks/useLiveStatus';
 import LiveSignInPrompt from './LiveSignInPrompt';
 import WebrtcViewer from '../components/WebrtcViewer';
@@ -13,6 +13,7 @@ import {useLiveSetList} from '../hooks/useLiveSetList';
 import './live.css';
 import './homeLiveConsole.css';
 import './livePanelLayout.css';
+import './livePhonePortrait.css';
 
 export default function HomeLiveConsole({lang,user,token,liveStream,liveSessions=[],isSessionReady}) {
   const ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en;
@@ -25,6 +26,10 @@ export default function HomeLiveConsole({lang,user,token,liveStream,liveSessions
   const section=useRef(null),preview=useRef(null);
   const [active,setActive]=useState(false),[error,setError]=useState('');
   const [muted,setMuted]=useState(true);
+  // Phone portrait: the picture fills the console; set list / requests open as sheets, comments float over the bottom.
+  const [phone,setPhone]=useState(()=>matchMedia('(orientation:portrait) and (max-width:760px)').matches);
+  const [panel,setPanel]=useState('');
+  useEffect(()=>{const q=matchMedia('(orientation:portrait) and (max-width:760px)'),on=()=>setPhone(q.matches);q.addEventListener('change',on);return()=>q.removeEventListener('change',on);},[]);
   const toggleSound=()=>setMuted(value=>!value);
   const {item:stream}=useLiveStatus({token,initial:liveStream,enabled:active});
   const signedIn=Boolean(user&&token);
@@ -43,7 +48,7 @@ export default function HomeLiveConsole({lang,user,token,liveStream,liveSessions
   const phase=useViewportPhase(section);
   return fitViewport(<section className="echo-home-live echo-section" id="live" ref={section} dir={ar?'rtl':'ltr'} aria-label={tr('Live','البث المباشر')}>
     <div className="home-live-layout">
-    <div className={`home-live-console home-live-switcher home-live-columns has-comments${phase==='in'?' is-in':` is-away is-away-${phase}`}`}>
+    <div data-panel={panel} className={`home-live-console home-live-switcher home-live-columns has-comments${phone?' is-phone':''}${phase==='in'?' is-in':` is-away is-away-${phase}`}`}>
 
       <div className="home-live-grid">
         <aside className="home-live-catalog home-live-card" id="home-live-catalog" aria-labelledby="home-live-catalog-title"><header><span><Disc3 size={16}/><h3 id="home-live-catalog-title">{tr('The set list','قائمة الأغاني')}</h3></span><small>{String(planned.length).padStart(2,'0')}</small></header><p className="home-live-subtitle">{tr('Planned for this live','مخطط لها في هذا البث')}</p><ol>{planned.map((song,index)=><li key={song.id} className={song.playState==='live'?'is-current':''}><span className="home-live-song-art">{song.coverImage?<img src={song.coverImage} alt="" loading="lazy"/>:<Disc3 size={20}/>}</span><div><strong>{song.track}</strong><small>{song.artist||song.genre||'DJ Khalil'}</small></div><span className="home-live-song-number">{song.playState==='live'?<AudioLines size={14}/>:String(index+1).padStart(2,'0')}<small>{song.duration}</small></span></li>)}</ol>{!planned.length&&<div className="home-live-empty"><Disc3 size={28}/><p>{isSessionReady?tr('Khalil’s next set list will appear here.','ستظهر قائمة البث القادم هنا.'):tr('Loading the set list…','جارٍ تحميل القائمة…')}</p></div>}<footer><Radio size={14}/><span>{tr('Selected by Khalil. Shaped by you.','يختارها خليل. ويكملها ذوقك.')}</span></footer></aside>
@@ -51,12 +56,12 @@ export default function HomeLiveConsole({lang,user,token,liveStream,liveSessions
         <div className="home-live-preview" id="home-live-preview" role="region" aria-label={tr('Live preview','معاينة البث')} ref={preview}>
           {active&&live&&signedIn?(webRtc?<WebrtcViewer token={token} sessionIdentity={sessionIdentity} key={sessionIdentity} lang={lang.lang} muted={muted} volume={.75}/>:stream?.streamUrl?<LiveStreamPlayer key={sessionIdentity} liveStream={stream} token={token}/>:null):null}
           {!signedIn?<div className="home-live-standby"><LiveSignInPrompt ar={ar} kind="watch"/></div>:(!active||!live||(!webRtc&&!stream?.streamUrl))&&<div className="home-live-standby"><div className="home-live-stage-lines" aria-hidden="true"/><Radio size={38} strokeWidth={1}/><span>ECHO / LIVE SESSIONS</span><h3>{!isSessionReady?tr('Checking the stage…','جارٍ التحقق…'):tr('Next set. Same energy.','البث القادم. نفس الطاقة.')}</h3><p>{tr('The live picture appears here when Khalil goes on air.','تظهر صورة البث هنا عند بدء بث خليل.')}</p>{nextLiveLabel&&<p className="home-live-next"><strong>{tr('Next live:','البث القادم:')}</strong> {nextLiveLabel}</p>}</div>}
-          <div className="home-live-preview-top home-live-player-controls">{signedIn&&live&&webRtc&&<button type="button" className="home-live-sound-toggle" onClick={toggleSound} aria-label={muted?tr('Enable live sound','تشغيل صوت البث'):tr('Mute live sound','كتم صوت البث')} aria-pressed={!muted}>{muted?<Volume2 size={15}/>:<VolumeX size={15}/>}</button>}<button type="button" onClick={fullscreen} disabled={!signedIn} aria-label={tr('Fullscreen preview','معاينة بملء الشاشة')}><Maximize2 size={15}/></button></div>
+          <div className="home-live-preview-top home-live-player-controls">{signedIn&&live&&webRtc&&<button type="button" className="home-live-sound-toggle" onClick={toggleSound} aria-label={muted?tr('Enable live sound','تشغيل صوت البث'):tr('Mute live sound','كتم صوت البث')} aria-pressed={!muted}>{muted?<Volume2 size={15}/>:<VolumeX size={15}/>}</button>}<button type="button" className="home-live-phone-tool" onClick={()=>setPanel(p=>p==='catalog'?'':'catalog')} aria-pressed={panel==='catalog'} aria-label={tr('Set list','قائمة الأغاني')}><Disc3 size={15}/></button><button type="button" className="home-live-phone-tool" onClick={()=>setPanel(p=>p==='requests'?'':'requests')} aria-pressed={panel==='requests'} aria-label={tr('Request a song','طلب أغنية')}><ListMusic size={15}/></button><button type="button" onClick={fullscreen} disabled={!signedIn} aria-label={tr('Fullscreen preview','معاينة بملء الشاشة')}><Maximize2 size={15}/></button></div>
           {error&&<p className="home-live-preview-error" role="status">{error}</p>}
           <span className={`home-live-status${live?' is-live':''}`} role="status" title={live?tr('Live','مباشر'):tr('Offline','غير متصل')}><span className="home-live-status-label">{live?tr('Live','مباشر'):tr('Offline','غير متصل')}</span></span>
 
         </div>
-          <div className="home-live-comments-wrapper" id="home-live-comments" role="region" aria-label={tr('Live comments','التعليقات المباشرة')}><LiveComments key={sessionIdentity} user={user} token={token} live={live} active={active} ar={ar} sessionIdentity={sessionIdentity} startedAt={stream?.liveStartedAt}/></div>
+          <div className="home-live-comments-wrapper" id="home-live-comments" role="region" aria-label={tr('Live comments','التعليقات المباشرة')}><LiveComments key={sessionIdentity} user={user} token={token} live={live} active={active} ar={ar} sessionIdentity={sessionIdentity} startedAt={stream?.liveStartedAt} overlay={phone}/></div>
         </div>
 
         <div className="home-live-requests" id="home-live-requests" role="region" aria-label={tr('Song requests','طلبات الأغاني')}><LiveSongRequest key={sessionIdentity} user={user} token={token} sessionIdentity={sessionIdentity} live={live} ar={ar}/></div>
