@@ -128,7 +128,8 @@ test('direct recorder must start before on-air confirmation and finishes before 
 
 test('choosing camera opens private preview immediately without reserving a live room',async()=>{
  const h=harness({capture:options=>[{kind:options.video?'video':'audio',stop(){}}]});
- await h.hook.selectSource('camera');
+ await h.hook.selectSource('camera');assert.equal(h.captures.length,0);// a scenario never opens a camera by itself
+ await h.hook.preparePreview();
  assert.equal(h.captures.length,2);assert.equal(h.rooms.length,0);assert.equal(h.ready,0);h.unmount();
 });
 for(const kind of ['display','image','video'])test(`choosing ${kind} previews the selected source before React commits state`,async()=>{
@@ -252,7 +253,7 @@ test('recording destination gate prevents preview media access, including source
  let allowed=false,checks=0;
  const h=harness({beforePreview:()=>{checks++;return allowed;}});
  await h.hook.preparePreview();
- await h.hook.selectSource('camera');
+ await h.hook.selectSource('camera');await h.hook.preparePreview();
  assert.equal(checks,2);assert.equal(h.captures.length,0);assert.equal(h.rooms.length,0);
  allowed=true;await h.hook.preparePreview();
  assert.equal(checks,3);assert.ok(h.captures.length>0);assert.equal(h.rooms.length,0);h.unmount();
@@ -291,10 +292,10 @@ test('two cameras start separate recordings under the same live session',async()
  assert.ok(recorded[0].tracks.some(track=>track.id==='collab'));assert.ok(!recorded[0].tracks.some(track=>track.id==='portrait-b'));assert.ok(recorded[1].tracks.some(track=>track.id==='portrait-b'));assert.ok(recorded[1].tracks.some(track=>track.kind==='audio'));h.unmount();
 });
 
-test('choosing an input opens the private preview at once, and a second input replaces it without locking',async()=>{
+test('a camera input opens the preview only when asked, and a second input replaces it without locking',async()=>{
  const h=harness({capture:()=>[{kind:'video',stop(){}}]});
- await h.hook.selectSource('camera');assert.ok(h.captures.length>0);const first=h.captures.length;
- await h.hook.selectSource('camera');assert.ok(h.captures.length>first);assert.equal(h.rooms.length,0);h.unmount();
+ await h.hook.selectSource('camera');await h.hook.preparePreview();assert.ok(h.captures.length>0);const first=h.captures.length;
+ await h.hook.selectSource('camera');await h.hook.preparePreview();assert.ok(h.captures.length>first);assert.equal(h.rooms.length,0);h.unmount();
 });
 test('Tab / window: choosing it opens the picker once and the preview shows that very capture',async()=>{
  let captures=0,cleaned=0;
@@ -535,7 +536,7 @@ test('a cancelled paused audio capture releases the replacement without touching
 
 test('changing the paused camera preserves the independently selected mixer',async()=>{
  const mic={kind:'audio',mediaStreamTrack:{id:'mixer'},stop(){}},camera={kind:'video',mediaStreamTrack:{id:'camera'},stop(){}};
- const h=harness({capture:options=>options.video?[camera]:[mic]});await h.hook.selectSource('camera',null,'mic');await h.hook.goLive('Keep audio');h.hook.pauseLive({id:'hold'});
+ const h=harness({capture:options=>options.video?[camera]:[mic]});await h.hook.selectSource('camera',null,'mic');await h.hook.preparePreview();await h.hook.goLive('Keep audio');h.hook.pauseLive({id:'hold'});
  const mixer=h.mixers[0];assert.equal(await h.hook.selectSource('camera'),true);assert.equal(mixer.microphone,mic.mediaStreamTrack);assert.equal(h.mixers.length,1);h.unmount();
 });
 

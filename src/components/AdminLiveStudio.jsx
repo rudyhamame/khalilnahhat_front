@@ -264,23 +264,16 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  useEffect(()=>{if(webrtc.isPreviewing&&webrtc.sourceKind==='cameras')webrtc.setSourceOverlay(overlay);},[overlay,webrtc.isPreviewing,webrtc.sourceKind,webrtc.selectedVideoDeviceId,webrtc.overlayVideoDeviceId]);// eslint-disable-line react-hooks/exhaustive-deps
  const choosePhoto=file=>{setPhotoView(DEFAULT_CROP);setPickingGallery(false);void webrtc.selectSource('image',file);};
  const chooseScenario=item=>{if(scenario?.id===item.id){webrtc.deselectSource();return;}setScenarioId(item.id);try{localStorage.setItem('echo-studio-scenario',item.id);}catch{/* still applies */}const setup=scenarioSetup(item);
-  // Two cameras: Camera 1 and Camera 2 must be two different devices; they are picked here so the preview can open at once.
-  let devices=null;
+  // Cameras are chosen by hand in Live Source; a scenario never selects them.
   if(webrtc.selectedVideoDeviceId==='none')webrtc.setSelectedVideoDeviceId('');// a window left without a device is forgotten when the scenario changes
-  if(setup.kind==='cameras'){
-   const list=webrtc.videoInputs;
-   const has=id=>Boolean(id)&&list.some(entry=>entry.deviceId===id);
-   const first=has(webrtc.selectedVideoDeviceId)?webrtc.selectedVideoDeviceId:list[0]?.deviceId||'';
-   const second=has(webrtc.overlayVideoDeviceId)&&webrtc.overlayVideoDeviceId!==first?webrtc.overlayVideoDeviceId:list.find(entry=>entry.deviceId!==first)?.deviceId||'';
-   webrtc.setSelectedVideoDeviceId(first);webrtc.setOverlayVideoDeviceId(second);devices={cameraId:first,overlayId:second,windows:Boolean(setup.windows)};
-  }
+  const devices=null;
   void webrtc.selectSource(setup.kind,null,setup.audio,devices);};
  // Picking another mixer device while the private preview is open reopens the preview on it.
  const lastMixer=useRef(webrtc.selectedAudioDeviceId);
  useEffect(()=>{if(lastMixer.current===webrtc.selectedAudioDeviceId)return;lastMixer.current=webrtc.selectedAudioDeviceId;if(webrtc.isPreviewing&&webrtc.audioMode==='mic'){if(webrtc.paused||webrtc.inputLost)void webrtc.setPausedAudio('mic');else if(!webrtc.isBroadcasting)void webrtc.preparePreview();}},[webrtc.selectedAudioDeviceId]);// eslint-disable-line react-hooks/exhaustive-deps
  // Picking another camera while the private preview is open reopens the preview on it.
  const lastCamera=useRef(webrtc.selectedVideoDeviceId);
- useEffect(()=>{if(lastCamera.current===webrtc.selectedVideoDeviceId)return;lastCamera.current=webrtc.selectedVideoDeviceId;if(webrtc.isPreviewing&&webrtc.sourceKind==='camera'){if(webrtc.paused||webrtc.inputLost)void webrtc.setPausedInput({kind:'camera'});else if(!webrtc.isBroadcasting)void webrtc.preparePreview();}},[webrtc.selectedVideoDeviceId]);// eslint-disable-line react-hooks/exhaustive-deps
+ useEffect(()=>{if(lastCamera.current===webrtc.selectedVideoDeviceId)return;lastCamera.current=webrtc.selectedVideoDeviceId;if(webrtc.isPreviewing&&webrtc.sourceKind==='camera'){if(webrtc.paused||webrtc.inputLost)void webrtc.setPausedInput({kind:'camera'});else if(!webrtc.isBroadcasting)void webrtc.preparePreview();}else if(!webrtc.isPreviewing&&webrtc.sourceChosen&&webrtc.sourceKind==='camera'&&webrtc.selectedVideoDeviceId&&webrtc.selectedVideoDeviceId!=='none'&&!webrtc.previewBusy&&!webrtc.isBroadcasting)void webrtc.preparePreview();},[webrtc.selectedVideoDeviceId]);// eslint-disable-line react-hooks/exhaustive-deps
  // Two cameras: picking another Camera 1 or Camera 2 reopens the preview on it.
  const lastCameras=useRef(`${webrtc.selectedVideoDeviceId}|${webrtc.overlayVideoDeviceId}`);
  useEffect(()=>{const now=`${webrtc.selectedVideoDeviceId}|${webrtc.overlayVideoDeviceId}`;if(lastCameras.current===now)return;lastCameras.current=now;if(webrtc.sourceKind!=='cameras'||!webrtc.sourceChosen||!webrtc.selectedVideoDeviceId||!webrtc.overlayVideoDeviceId||(webrtc.isBroadcasting&&!webrtc.paused&&!webrtc.inputLost)||webrtc.previewBusy)return;if(webrtc.paused||webrtc.inputLost)void webrtc.setPausedInput({kind:'cameras',devices:{windows:windowsRef.current}});else void webrtc.preparePreview({devices:{windows:windowsRef.current}});},[webrtc.selectedVideoDeviceId,webrtc.overlayVideoDeviceId]);// eslint-disable-line react-hooks/exhaustive-deps

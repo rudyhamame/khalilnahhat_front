@@ -367,7 +367,9 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     }
     // Setting an input opens the private preview at once (inside the click, which screen sharing and video playback need).
     // A preview that is already open is replaced by the new input.
-    if(kind==='camera'||kind==='cameras'||kind==='display'||file)return preparePreview({kind,file,devices,...(audio!==undefined?{audio,audioSourceFile:null}:{})});
+    // Cameras are never picked for the operator: a camera scenario only records the choice and releases any open camera; the preview opens once a camera is chosen by hand.
+    if(kind==='camera'||kind==='cameras'){if(previewTracks.current.length||programRef.current)closePreview();return;}
+    if(kind==='display'||file)return preparePreview({kind,file,devices,...(audio!==undefined?{audio,audioSourceFile:null}:{})});
     // A scenario without a camera must not leave the camera open: switching to a photo or video viewer closes a camera preview.
     if(previewTracks.current.length||programRef.current)closePreview();
   };

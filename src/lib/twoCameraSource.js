@@ -43,16 +43,26 @@ export function drawCover(ctx,video,W,H,pan=.5){
   if(!ready(video))return;
   const f=fitRect(video.videoWidth,video.videoHeight,{x:0,y:0,w:W,h:H},'cover',pan);ctx.drawImage(video,f.sx,f.sy,f.sw,f.sh,f.dx,f.dy,f.dw,f.dh);
 }
+// The soft shadow behind the overlay is a blur: costly to repaint 30 times a second, so it is painted once per overlay position/shape/size and reused.
+let overlayShadow=null,overlayShadowKey='';
+function drawShadow(ctx,dest,shape,W,H){
+  const key=[W,H,shape,dest.x,dest.y,dest.w,dest.h].map(v=>typeof v==='string'?v:Math.round(v)).join('|');
+  if(key!==overlayShadowKey||!overlayShadow){
+    overlayShadow||=(ctx.canvas.ownerDocument||document).createElement('canvas');
+    overlayShadow.width=W;overlayShadow.height=H;const c=overlayShadow.getContext('2d');
+    c.shadowColor='#000a';c.shadowBlur=Math.round(W/64);c.shadowOffsetY=Math.round(W/320);
+    shapePath(c,dest,shape);c.fillStyle='#000';c.fill();overlayShadowKey=key;
+  }
+  ctx.drawImage(overlayShadow,0,0);
+}
 /** One frame: Camera 1 fills the frame (cover), Camera 2 is cut and laid over it with a soft shadow and a thin white edge. */
 export function drawTwoCameras(ctx,a,b,overlay,W,H){
   ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
   if(ready(a)){const f=fitRect(a.videoWidth,a.videoHeight,{x:0,y:0,w:W,h:H},'cover',.5);ctx.drawImage(a,f.sx,f.sy,f.sw,f.sh,f.dx,f.dy,f.dw,f.dh);}
   if(!ready(b))return;
   const {src,dest}=overlayBox(W,H,overlay,b.videoWidth,b.videoHeight);
+  drawShadow(ctx,dest,overlay.shape,W,H);
   ctx.save();
-  ctx.shadowColor='#000a';ctx.shadowBlur=Math.round(W/64);ctx.shadowOffsetY=Math.round(W/320);
-  shapePath(ctx,dest,overlay.shape);ctx.fillStyle='#000';ctx.fill();
-  ctx.shadowColor='transparent';
   shapePath(ctx,dest,overlay.shape);ctx.clip();
   ctx.drawImage(b,src.sx,src.sy,src.sw,src.sh,dest.x,dest.y,dest.w,dest.h);
   ctx.restore();
