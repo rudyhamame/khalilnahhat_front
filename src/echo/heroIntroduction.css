@@ -143,7 +143,8 @@ html[dir=rtl] .hero-introduction.is-sliding-out{animation-name:hero-slide-out-rt
 @keyframes hero-slide-out{to{transform:translateX(-100%);opacity:.4}}
 @keyframes hero-slide-out-rtl{to{transform:translateX(100%);opacity:.4}}
 /* Loader sits in the middle of the whole home page. */
-.hero-introduction[data-hero-loading] .hero-loader{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:50}
+/* html may be zoomed: a fixed 50% is then 50% of the shrunken box, so use screen units divided by the zoom (same rule the language modal uses). */
+.hero-introduction[data-hero-loading] .hero-loader{position:fixed;left:calc(50vw / var(--echo-css-zoom,1));top:calc(50dvh / var(--echo-css-zoom,1));transform:translate(-50%,-50%);z-index:50}
 /* While the record video / character load: plain dark page, no glow, no text (only the centred loader). */
 .echo[data-page=home][data-theme] #echo-main .hero-introduction[data-hero-loading]{background:#0D1418!important}
 .echo[data-page=home][data-theme] #echo-main .hero-introduction[data-hero-loading]::before{display:none}

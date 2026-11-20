@@ -1,5 +1,3 @@
-import ClientAppBadge from './ClientAppBadge';
-import SkipLoginOption from './SkipLoginOption';
 import {track} from '../lib/analytics';
 import HeroLoader from './HeroLoader';
 import HeroRingButton from './HeroRingButton';
@@ -184,12 +182,10 @@ function EchoHomeContent({ lang, user }) {
         {!copyGone&&user&&<p className="hero-returning-greeting">{tr('Welcome back','أهلاً بعودتك')}{clientName&&<>{ar?'، ':', '}<bdi className="echo-client-name">{clientName}</bdi></>}</p>}
         {!copyGone&&<h1 className="echo-hero-title"><span className="is-active">{tr('DJ, sound, lighting & LED walls for your event','دي جي وصوت وإضاءة وشاشات LED لفعاليتك')}</span></h1>}
         {!copyGone&&<p className="echo-hero-subline">{tr('For weddings, engagements and parties across the GTA. Arabic and multicultural music, premium sound, lighting and LED walls, and one team that looks after every detail from the first call to the last song.','لحفلات الزفاف والخطوبة والمناسبات في منطقة تورونتو الكبرى. موسيقى عربية ومتعددة الثقافات، وصوت وإضاءة وشاشات LED احترافية، وفريق واحد يهتم بكل التفاصيل من أول اتصال حتى آخر أغنية.')}</p>}
-        <HeroIntroductionAudio hideAppBadge={Boolean(user&&!user.isAdmin)} onSkip={()=>leaveForMusic('skip')} lang={lang} animationReady={headphone.ready} animationFailed={headphone.failed} onAnimationRetry={headphone.retry} onLanguageSelect={()=>{setHeroLanguageChosen(true);try{sessionStorage.setItem('echo-home-language-selected','1');}catch{}}} onLanguageReset={()=>{setHeroLanguageChosen(false);try{sessionStorage.removeItem('echo-home-language-selected');sessionStorage.removeItem('echo-home-section');}catch{}setGreetingStart(0);setGreetingReady(0);}} onTransportState={setIntroTransport} animationComplete={greetingReady} onBegin={()=>{setGreetingReady(0);setGreetingStart(value=>Math.abs(value)+1);}} onStop={()=>{setGreetingReady(0);setGreetingStart(value=>-(Math.abs(value)+1));}}/>
+        <HeroIntroductionAudio onSkip={()=>leaveForMusic('skip')} lang={lang} animationReady={headphone.ready} animationFailed={headphone.failed} onAnimationRetry={headphone.retry} onLanguageSelect={()=>{setHeroLanguageChosen(true);try{sessionStorage.setItem('echo-home-language-selected','1');}catch{}}} onLanguageReset={()=>{setHeroLanguageChosen(false);try{sessionStorage.removeItem('echo-home-language-selected');sessionStorage.removeItem('echo-home-section');}catch{}setGreetingStart(0);setGreetingReady(0);}} onTransportState={setIntroTransport} animationComplete={greetingReady} onBegin={()=>{setGreetingReady(0);setGreetingStart(value=>Math.abs(value)+1);}} onStop={()=>{setGreetingReady(0);setGreetingStart(value=>-(Math.abs(value)+1));}}/>
         {heroLanguageChosen&&<HeroRingButton label={tr('Skip to content','انتقل إلى المحتوى')} onClick={()=>leaveForMusic('hero')}/>}
-        {heroLanguageChosen&&!(user&&!user.isAdmin)&&<ClientAppBadge tr={tr}/>}
       </div><div className="hero-copy-stage" aria-hidden="true"/></div></div>
       <div className="echo-hero-visual" ref={heroVisual}/>
-      {!user&&<div className="hero-skip-login"><SkipLoginOption tr={tr}/></div>}
 
     </section>
     <HeroEquipmentShowcase/>

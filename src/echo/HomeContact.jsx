@@ -43,8 +43,6 @@ export default function HomeContact({lang}) {
       <div className="home-contact-intro">
         <h2 id="home-contact-title">{tr('Let’s make','لنصنع')}<br/><span>{tr('something memorable.','لحظات لا تُنسى.')}</span></h2>
         <p>{tr('Have a question or an idea for your next event? Send Khalil a message.','لديك سؤال أو فكرة لفعاليتك القادمة؟ أرسل رسالة إلى خليل.')}</p>
-        <a className="home-contact-address" href={`mailto:${contactEmail}`}><span dir="ltr">{contactEmail}</span><ArrowUpRight size={20}/></a>
-        <small>{tr('Your message goes straight to our bookings inbox.','تصل رسالتك مباشرة إلى صندوق بريد الحجوزات.')}</small>
       </div>
       <div className="home-contact-panel">
         {state === 'sent' ? <div className="home-contact-success" role="status" tabIndex={-1}>
@@ -64,5 +62,9 @@ export default function HomeContact({lang}) {
       </div>
     </ViewportFit>
   </section>
+  <div className="home-contact-direct" dir={ar?'rtl':'ltr'}>
+    <a className="home-contact-address" href={`mailto:${contactEmail}`}><span dir="ltr">{contactEmail}</span><ArrowUpRight size={20}/></a>
+    <small>{tr('Your message goes straight to our bookings inbox.','تصل رسالتك مباشرة إلى صندوق بريد الحجوزات.')}</small>
+  </div>
   </>;
 }

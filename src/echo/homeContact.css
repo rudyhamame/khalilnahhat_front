@@ -118,3 +118,7 @@ html body .echo.echo-public-page[data-page=home][data-theme]:has(#contact.home-c
  html body .echo[data-page=home][data-theme] #contact .home-contact-panel textarea{min-height:44px;height:44px}
  html body .echo[data-page=home][data-theme] #contact .home-contact-panel{padding:10px 16px}
 }
+
+/* The direct-email address sits at the bottom of the Contact page, under the form. */
+.home-contact-direct{display:flex;flex-direction:column;align-items:center;gap:8px;padding:clamp(24px,4vw,48px) var(--echo-viewport-gutter,16px) clamp(32px,5vw,64px);text-align:center}
+.home-contact-direct small{color:#b7c8bd;font-size:13px}

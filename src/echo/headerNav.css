@@ -343,8 +343,8 @@ html body .echo .echo-header>.echo-header-nav.is-home{display:none!important}
 @media(min-width:721px) and (max-width:1400px) and (orientation:landscape) and (any-pointer:coarse){
  html:is(.echo-ipad,:root) body .echo[data-page=home][data-theme]>.echo-header{padding-inline:48px!important;min-height:92px!important}
  html:is(.echo-ipad,:root) body .echo[data-page=home][data-theme]{--echo-viewport-gutter:48px}
- html:is(.echo-ipad,:root) body .echo[data-page=home][data-theme] .echo-header .echo-lang{width:68px!important;height:68px!important;min-height:68px!important;padding:14px!important;margin-inline-end:8px}
- html:is(.echo-ipad,:root) body .echo[data-page=home][data-theme] .echo-header .echo-lang>svg{width:36px!important;height:36px!important}
+ html:is(.echo-ipad,:root) body .echo[data-page=home][data-theme] .echo-header .echo-lang{--lang-size:clamp(40px,4.6vw,68px);width:var(--lang-size)!important;height:var(--lang-size)!important;min-height:var(--lang-size)!important;padding:calc(var(--lang-size) * .2)!important;margin-inline-end:8px}
+ html:is(.echo-ipad,:root) body .echo[data-page=home][data-theme] .echo-header .echo-lang>svg{width:calc(var(--lang-size) * .52)!important;height:calc(var(--lang-size) * .52)!important}
  html:is(.echo-ipad,:root) body .echo[data-page=home][data-theme] .echo-header>.echo-logo{width:auto!important;max-width:none!important;flex:none}
  html:is(.echo-ipad,:root) body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair{display:flex!important;width:auto!important;justify-content:flex-start!important;gap:0!important}
  html:is(.echo-ipad,:root) body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img{width:auto!important;max-width:none!important;flex:none;height:54px!important;max-height:54px!important}
@@ -395,3 +395,18 @@ html body .echo[data-theme]>.echo-header>.header-mini-player:not(#_){grid-column
 
 /* The language button sits on the opposite side of the header from the menu: at the start, right after the DJ Khalil logo. */
 html body .echo[data-theme]>.echo-header>.echo-lang-start:not(#_){position:absolute!important;inset:50% auto auto auto!important;inset-inline-start:calc(var(--hdr-pad,16px) + var(--hdr-dj,200px) + 12px)!important;transform:translateY(-50%);margin:0!important;z-index:3}
+/* Login page, landscape: the language button sits inside the form column, just before the vertical tear line (the line's box starts at 100vw - --cw - 110px; --cw is the photo column's width). */
+@media(min-width:1001px) and (orientation:landscape){
+html.echo-access-open body .echo[data-theme]>.echo-header>.echo-lang-start:not(#_){inset-inline:auto!important;left:calc(100vw - min(46vw,calc(100svh * .66 + 4vw)) - 110px + 20px - var(--lang-size,60px))!important}
+html[dir=rtl].echo-access-open body .echo[data-theme]>.echo-header>.echo-lang-start:not(#_){left:calc(min(46vw,calc(100svh * .66 + 4vw)) + 120px)!important}
+}
+
+/* Header: white bare Android icon (no box); the language button's size follows the screen on every layout. */
+html body .echo[data-theme] .echo-header .echo-android:not(#_){color:#fff!important;background:none!important;border:0!important;box-shadow:none!important;padding:0!important;display:inline-grid;place-items:center}
+html body .echo[data-theme] .echo-header .echo-android>svg:not(#_){width:calc(var(--lang-size,48px) * .55);height:calc(var(--lang-size,48px) * .55);fill:currentColor}
+html body .echo[data-page=home][data-theme] .echo-header .echo-lang:not(#_){--lang-size:clamp(40px,4.4vw,60px);width:var(--lang-size)!important;height:var(--lang-size)!important;min-height:var(--lang-size)!important;padding:calc(var(--lang-size) * .2)!important}
+html body .echo[data-page=home][data-theme] .echo-header .echo-lang>svg:not(#_){width:calc(var(--lang-size) * .52)!important;height:calc(var(--lang-size) * .52)!important}
+html body .echo[data-page=home][data-theme] .echo-header .echo-android:not(#_){--lang-size:clamp(40px,4.4vw,60px);width:var(--lang-size)!important;height:var(--lang-size)!important}
+/* Menu button: same responsive size as the language and Android buttons. */
+html body .echo[data-page=home][data-theme] .echo-header .echo-account-menu>.echo-icon-button:not(#_){--lang-size:clamp(40px,4.4vw,60px);width:var(--lang-size)!important;height:var(--lang-size)!important;min-height:var(--lang-size)!important;padding:calc(var(--lang-size) * .2)!important}
+html body .echo[data-page=home][data-theme] .echo-header .echo-account-menu>.echo-icon-button>svg:not(#_){width:calc(var(--lang-size) * .52)!important;height:calc(var(--lang-size) * .52)!important}

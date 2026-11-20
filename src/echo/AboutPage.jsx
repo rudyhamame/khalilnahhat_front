@@ -52,7 +52,7 @@ export default function AboutPage({lang}){
    </div>
    <figure className="ab-hero-art" data-reveal aria-hidden="false">
     <span className="ab-ring ab-ring-1" aria-hidden="true"/><span className="ab-ring ab-ring-2" aria-hidden="true"/><span className="ab-ring ab-ring-3" aria-hidden="true"/>
-    <img src="/echo/seated-jade-full-body.webp" width="1122" height="1402" alt={tr('Illustration of DJ Khalil seated, wearing sunglasses and headphones.','رسم تعبيري لدي جي خليل جالساً بنظارة شمسية وسمّاعات.')} fetchPriority="high"/>
+    <img src={ar?'/echo/seated-jade-full-body-rtl.webp':'/echo/seated-jade-full-body.webp'} width="1122" height="1402" alt={tr('Illustration of DJ Khalil seated, wearing sunglasses and headphones.','رسم تعبيري لدي جي خليل جالساً بنظارة شمسية وسمّاعات.')} fetchPriority="high"/>
    </figure>
   </section>
 

@@ -1,4 +1,4 @@
-/* Phone portrait: full-bleed picture, tool buttons over it, set list/requests as bottom sheets, Instagram-style comments. */
+/* Live page, portrait and landscape: full-bleed picture, tool buttons over it, set list/requests as bottom sheets, Instagram-style comments. */
 .home-live-phone-tool{display:none!important}
 html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-switcher.home-live-columns.is-phone .home-live-phone-tool{display:grid!important}
 html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-switcher.home-live-columns.is-phone .home-live-phone-tool[aria-pressed=true]{color:#7fdcb3}
@@ -19,18 +19,19 @@ html body .echo[data-page=home][data-theme] #live .home-live-layout>.home-live-c
 html body .echo[data-page=home][data-theme] #live .home-live-layout:has(.is-phone){row-gap:0;padding:0}
 html body .echo[data-page=home][data-theme] #live>.viewport-fit-content:has(.is-phone){padding:0!important;margin:0!important}
 /* The Live section itself carries no padding in portrait (outranks every per-chapter gutter rule). */
-@media(orientation:portrait){
-html body body .echo:not(.echo-public-page)[data-page=home][data-theme] :is(#echo-main,.event-order-main)>section#live.echo-home-live.echo-section.viewport-fit-section{padding:0!important;padding-block:0!important;padding-inline:0!important;padding-block-end:0!important}
-}
+html body body .echo:not(.echo-public-page)[data-page=home][data-theme] :is(#echo-main,.event-order-main)>section#live.echo-home-live.echo-section.viewport-fit-section:has(.is-phone){padding:0!important;padding-block:0!important;padding-inline:0!important;padding-block-end:0!important}
 /* Top inset: the Live content starts below the header. */
-@media (orientation:portrait) and (max-width:760px),(pointer:coarse) and (max-width:1366px){
-html body .echo[data-page=home][data-theme] #live>.viewport-fit-content{padding-top:var(--echo-header-height,0px)!important;box-sizing:border-box}
-}
+html body .echo[data-page=home][data-theme] #live>.viewport-fit-content:has(.is-phone){padding-top:var(--echo-header-height,0px)!important;box-sizing:border-box}
 /* Public /live page: same as the music page, the section has no padding (publicSectionPage.css gives every section a gutter). */
-@media (orientation:portrait) and (max-width:760px),(pointer:coarse) and (max-width:1366px){
-html body .echo.echo-public-page[data-page=home][data-theme] #echo-main>section#live{padding:0!important}
-}
+html body .echo.echo-public-page[data-page=home][data-theme] #echo-main>section#live:has(.is-phone){padding:0!important}
 /* Live page: header one layer higher. */
 html.echo-live-page-open body .echo[data-page=home][data-theme] .echo-header{z-index:11!important}
 html.echo-live-page-open body .echo[data-page=home][data-theme] .echo-header{box-shadow:0 6px 18px #000a!important}
 html.echo-live-page-open body .echo[data-page=home][data-theme] .echo-header{border-bottom:3px solid #ffffffa6!important}
+
+/* Landscape: the set list and the song requests slide over the picture from the end side instead of rising from the bottom, and the comments sit over the picture's lower start corner. */
+@media(orientation:landscape){
+html body .echo[data-page=home][data-theme] #live>.viewport-fit-content:has(.is-phone){padding-top:0!important}
+html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-switcher.home-live-columns.is-phone :is(.home-live-catalog,.home-live-requests){inset:12px 12px 12px auto;width:min(400px,40%);height:auto;max-height:none;border-radius:18px}
+html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-switcher.home-live-columns.is-phone .home-live-comments-wrapper{inset:auto auto 0 0;width:min(440px,42%);padding:56px 16px 16px}
+}

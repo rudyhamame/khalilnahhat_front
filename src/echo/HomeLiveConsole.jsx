@@ -16,7 +16,8 @@ import './livePanelLayout.css';
 import './livePhonePortrait.css';
 
 // Phones in portrait, plus touch tablets (iPad) in either orientation.
-const PHONE_QUERY='(orientation:portrait) and (max-width:760px), (pointer:coarse) and (max-width:1366px)';
+// The edge-to-edge layout (picture fills the page; comments, set list and requests float over it) now applies in portrait AND landscape, on every screen.
+const PHONE_QUERY='(orientation:portrait), (orientation:landscape)';
 export default function HomeLiveConsole({lang,user,token,liveStream,liveSessions=[],isSessionReady}) {
   const ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en;
   useLayoutEffect(()=>{

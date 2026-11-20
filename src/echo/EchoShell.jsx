@@ -4,7 +4,7 @@ import {cloudAsset} from '../lib/cloudAsset';
 import { UserRound, Languages } from 'lucide-react';
 import AccountMenu from './AccountMenu';
 import './headerNav.css';
-import ClientAppBadge from './ClientAppBadge';
+import ClientAppBadge,{AndroidIconLink} from './ClientAppBadge';
 import SkipLoginOption from './SkipLoginOption';
 import LanguageOverlay from './LanguageOverlay';
 import {useBrowserChromeTheme} from './useBrowserChromeTheme';
@@ -121,6 +121,7 @@ export default function EchoShell({ lang, user, onLogout, children }) {
         {(current==='/'||current==='/login')&&<button type="button" className="echo-icon-button echo-lang echo-lang-start" onClick={()=>{if(current==='/')window.dispatchEvent(new Event('echo:hero-language-request'));else setLanguageOpen(true);}} aria-label={tr('Choose language','اختار اللغة')} title={tr('Choose language','اختار اللغة')}><Languages size={22} aria-hidden="true"/></button>}
         {pageTitle&&<h1 className="echo-page-title">{pageTitle}</h1>}
         <div className="echo-header-actions">
+          {current==='/'&&!(user&&!user.isAdmin)&&<AndroidIconLink tr={tr}/>}
           {(()=>{
             const badge=(()=>{
             // Two initials like "RH": first and last name, else the first and last word of the display name, else one letter.
