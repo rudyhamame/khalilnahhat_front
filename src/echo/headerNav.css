@@ -374,12 +374,15 @@ html body .echo[data-theme]>.echo-header .echo-brand-pair{display:flex!important
 html body .echo[data-theme]>.echo-header>.echo-logo.echo-logo--paired{align-items:flex-start!important}
 html[dir=rtl] body .echo[data-theme]>.echo-header>.echo-logo.echo-logo--paired{align-items:flex-end!important}
 
-/* Home page, landscape: the same logo spacing as the login header, the DJ Khalil logo at one edge and the Echo logo at the other, with the language/account icons tucked in beside the Echo logo. */
+/* Home page, landscape: the same logo spacing as the login header, the DJ Khalil logo at one edge and the Echo logo at the other, with the language/account icons just left of the Echo logo, inside the header. */
 @media(min-width:721px) and (orientation:landscape){
  html body .echo[data-page=home][data-theme]>.echo-header{position:relative}
  html body .echo[data-page=home][data-theme]>.echo-header>.echo-logo.echo-logo--paired{grid-column:1/-1!important;justify-self:stretch!important;flex:1 1 auto!important;width:100%!important;max-width:none!important}
  html body .echo[data-page=home][data-theme]>.echo-header .echo-brand-pair{width:100%!important;justify-content:space-between!important}
  html body .echo[data-page=home][data-theme]>.echo-header .echo-brand-pair>img+img:not(#_){margin-inline:0!important;object-position:right center!important}
  html[dir=rtl] body .echo[data-page=home][data-theme]>.echo-header .echo-brand-pair>img+img:not(#_){object-position:left center!important}
- html body .echo[data-page=home][data-theme]>.echo-header>.echo-header-actions{position:absolute!important;inset-inline-end:calc(clamp(16px,4vw,48px) + 100px);top:50%;transform:translateY(-50%);margin:0}
+ /* Arabic mirrors the English header: Echo at the left edge with the buttons just right of it, DJ Khalil at the right edge (the logo pair is always laid out left-to-right, so reverse it). */
+ html[dir=rtl] body .echo[data-page=home][data-theme]>.echo-header .echo-brand-pair{flex-direction:row-reverse!important;justify-content:space-between!important}
+ html[dir=rtl] body .echo[data-page=home][data-theme]>.echo-header .echo-brand-pair>img+img:not(#_){margin-inline-end:0!important}
+ html body .echo[data-page=home][data-theme]>.echo-header>.echo-header-actions{position:absolute!important;inset:50% auto auto auto;inset-inline-end:calc(clamp(16px,4vw,48px) + 96px);transform:translateY(-50%);margin:0}
 }

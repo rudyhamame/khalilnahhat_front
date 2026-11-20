@@ -93,13 +93,18 @@ function EchoHomeContent({ lang, user, token }) {
     const timer=setTimeout(()=>setCopyGone(true),matchMedia('(prefers-reduced-motion: reduce)').matches?0:460);
     return()=>clearTimeout(timer);
   },[engaged]);
+  // Where the square sits the moment the greeting starts (title and paragraph still in place): the glide starts from exactly there.
   useLayoutEffect(()=>{
-    const player=document.querySelector('.hero-introduction .hero-intro-frame')||document.querySelector('.hero-introduction .hero-intro-player');if(!player)return;
-    const box=player.getBoundingClientRect(),from=playerTop.current;playerTop.current={x:box.left,y:box.top};
+    const player=document.querySelector('.hero-introduction .hero-intro-frame');
+    if(engaged&&player&&!copyGone){const box=player.getBoundingClientRect();playerTop.current={x:box.left,y:box.top};}
+    if(!engaged)playerTop.current=null;
+  },[engaged]);
+  useLayoutEffect(()=>{
+    const player=document.querySelector('.hero-introduction .hero-intro-frame');if(!player||!copyGone)return;
+    const box=player.getBoundingClientRect(),from=playerTop.current;playerTop.current=null;
     if(!from||(Math.abs(from.x-box.left)<2&&Math.abs(from.y-box.top)<2)||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
-    // free route: it glides along a direct path from where it was to its final central spot
-    const dx=from.x-box.left,dy=from.y-box.top;
-    player.animate([{transform:`translate(${dx}px,${dy}px)`},{transform:'translate(0,0)'}],{duration:950,easing:'cubic-bezier(.35,.1,.2,1)'});
+    // fastest route: a straight glide from that spot to its final central position
+    player.animate([{transform:`translate(${from.x-box.left}px,${from.y-box.top}px)`},{transform:'translate(0,0)'}],{duration:700,easing:'cubic-bezier(.3,.8,.3,1)'});
   },[copyGone]);
   // Keep the chosen introduction language when returning through a page link.
   const [heroLanguageChosen,setHeroLanguageChosen]=useState(()=>{try{const saved=sessionStorage.getItem('echo-home-section');return sessionStorage.getItem('echo-home-language-selected')==='1'||Boolean(saved&&saved!=='home');}catch{return false;}});
@@ -160,6 +165,10 @@ function EchoHomeContent({ lang, user, token }) {
     return () => { window.removeEventListener('scroll', schedule); motion.removeEventListener('change', schedule); cancelAnimationFrame(frame); };
   }, []);
   // Leaves the home page for the Music page: the hero slides away first (no animation when reduced motion is on).
+  // "Don't show this page again": once set, a logged-in visit that starts here goes straight to Music. Coming from inside the site (the Home link) still shows it. Clicking the button again turns it off.
+  const [skipHome,setSkipHome]=useState(()=>{try{return localStorage.getItem('echo-skip-home')==='1';}catch{return false;}});
+  useEffect(()=>{if(user&&skipHome&&!document.referrer.startsWith(location.origin))location.replace('/music');},[]);// eslint-disable-line react-hooks/exhaustive-deps
+  const toggleSkipHome=()=>setSkipHome(value=>{const next=!value;try{if(next)localStorage.setItem('echo-skip-home','1');else localStorage.removeItem('echo-skip-home');}catch{}return next;});
   const leaveForMusic=place=>{track('hero_cta_click',{place});window.location.assign('/music');};
   return fitHomepageViewports(<>
     <div className="echo-artist-sequence echo-headphone-study hero-introduction" ref={headphone.sceneRef} data-language-selected={heroLanguageChosen?'true':'false'} data-hero-loading={heroPictureReady?undefined:'true'} data-headphone-playing={headphone.playing?'':undefined}>
@@ -177,9 +186,9 @@ function EchoHomeContent({ lang, user, token }) {
         {!copyGone&&<h1 className="echo-hero-title"><span className="is-active">{tr('DJ, sound, lighting & LED walls for your event','دي جي وصوت وإضاءة وشاشات LED لفعاليتك')}</span></h1>}
         {!copyGone&&<p className="echo-hero-subline">{tr('For weddings, engagements and parties across the GTA. Arabic and multicultural music, premium sound, lighting and LED walls, and one team that looks after every detail from the first call to the last song.','لحفلات الزفاف والخطوبة والمناسبات في منطقة تورونتو الكبرى. موسيقى عربية ومتعددة الثقافات، وصوت وإضاءة وشاشات LED احترافية، وفريق واحد يهتم بكل التفاصيل من أول اتصال حتى آخر أغنية.')}</p>}
         <HeroIntroductionAudio hideAppBadge={Boolean(user&&!user.isAdmin)} onSkip={()=>leaveForMusic('skip')} lang={lang} animationReady={headphone.ready} animationFailed={headphone.failed} onAnimationRetry={headphone.retry} onLanguageSelect={()=>{setHeroLanguageChosen(true);try{sessionStorage.setItem('echo-home-language-selected','1');}catch{}}} onLanguageReset={()=>{setHeroLanguageChosen(false);try{sessionStorage.removeItem('echo-home-language-selected');sessionStorage.removeItem('echo-home-section');}catch{}setGreetingStart(0);setGreetingReady(0);}} onTransportState={setIntroTransport} animationComplete={greetingReady} onBegin={()=>{setGreetingReady(0);setGreetingStart(value=>Math.abs(value)+1);}} onStop={()=>{setGreetingReady(0);setGreetingStart(value=>-(Math.abs(value)+1));}}/>
-        {heroLanguageChosen&&<HeroRingButton label={tr('Skip to content','انتقل إلى المحتوى')} onClick={()=>leaveForMusic('hero')}/>}
+        {heroLanguageChosen&&<HeroRingButton label={tr('Skip to content','انتقل إلى المحتوى')} hidden={skipHome} hideLabel={skipHome?tr('This page is set to be skipped after logging in','سيتم تخطي هذه الصفحة بعد تسجيل الدخول'):tr("Don't show this page again",'لا تعرض هذه الصفحة مجدداً')} onClick={()=>leaveForMusic('hero')} onHide={toggleSkipHome}/>}
         {heroLanguageChosen&&!(user&&!user.isAdmin)&&<ClientAppBadge tr={tr}/>}
-      </div></div></div>
+      </div><div className="hero-copy-stage" aria-hidden="true"/></div></div>
       <div className="echo-hero-visual" ref={heroVisual}/>
       {!user&&<div className="hero-skip-login"><SkipLoginOption tr={tr}/></div>}
 

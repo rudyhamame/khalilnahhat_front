@@ -13,3 +13,5 @@ html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-accou
 html body .echo .echo-header .echo-account-menu>.echo-icon-button[aria-expanded="true"] .echo-account-initial{box-shadow:0 0 0 3px #e7d6a455}
 @media(max-width:540px),(max-width:600px){html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-account-menu .echo-account-initial{width:32px;height:32px;font-size:12px}}
 html body .echo[data-page=home][data-theme] .echo-header .echo-account-menu .echo-account-initial{width:48px!important;height:48px!important;font-size:17px!important}
+.echo-account-dropdown a[aria-current=location]{background:#ffffff14;color:#a6e3ce}
+.echo-account-dropdown{max-height:calc(100vh - 100px);overflow:auto}

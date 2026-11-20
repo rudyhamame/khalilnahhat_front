@@ -11,9 +11,6 @@ const sequence=[
 
  // The 3D Room is introduced near the end of the greeting ("the three dimensional setup simulation").
  {id:'room-3d',hold:7,phrase:{en:'simulation',ar:'محاكاة'},label:['3D Room','الغرفة ثلاثية الأبعاد'],category:['SETUP SIMULATION','محاكاة التجهيز'],accent:'#c8b6f2'},
-
- // The six music boxes (Mix, Remix, Mashup, Medley, Cover, Reels) are named one after another near the end: one scene shows them all.
- {id:'music-boxes',hold:9,phrase:{en:'mixes',ar:'الميكسات'},label:['DJ Khalil’s work','أعمال دي جي خليل'],category:['MUSIC','الموسيقى'],accent:'#f0b25e'},
 ];
 function phraseIndex(words,phrase,from=0){
  const parts=normalize(phrase).split(/\s+/);

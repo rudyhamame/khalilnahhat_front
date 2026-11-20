@@ -236,3 +236,95 @@ html body .echo .hero-intro-frame .hero-intro-subtitle.hero-intro-lines.is-idle{
 .hero-intro-lines .hero-intro-list .is-current{opacity:1}
 .hero-intro-lines .hero-intro-list .is-next{opacity:.45}
 @media(prefers-reduced-motion:reduce){.hero-intro-lines .hero-intro-list{transition:none}}
+
+/* Bigger greeting lines; the spoken word is gold and bold, with no underline. */
+html body .echo .hero-intro-frame .hero-intro-subtitle.hero-intro-lines{font-size:clamp(19px,8.2cqw,44px)!important}
+html body .echo .hero-intro-frame .hero-intro-subtitle .is-active{text-decoration:none!important}
+
+/* The square grows a lot more for the 3D object: sideways and taller in landscape (smooth width/height transition), much taller in portrait. */
+.hero-intro-player .hero-intro-frame{aspect-ratio:auto!important;width:min(100%,340px);height:340px;transition:width .6s cubic-bezier(.3,.9,.3,1),height .6s cubic-bezier(.3,.9,.3,1)}
+@media(orientation:landscape){
+ .hero-intro-player .hero-intro-frame:has(.hero-intro-stage[data-active=true]){width:min(100vw - 120px,760px);height:min(76svh,470px)}
+ .hero-intro-frame .hero-intro-stage[data-active=true]{width:calc(54% - 16px)}
+ html body .echo .hero-intro-frame:has(.hero-intro-stage[data-active=true]) .hero-intro-subtitle{margin-inline-start:54%!important}
+}
+@media(orientation:portrait){
+ .hero-intro-frame .hero-intro-stage[data-active=true]{height:300px}
+ .hero-intro-player .hero-intro-frame:has(.hero-intro-stage[data-active=true]){height:min(86svh,640px)}
+}
+
+/* Greeting playing (landscape): the square is sized from the left column. It is a square filling 88% of the column's width (capped by the screen height) and stays centred in it; when a 3D object shows it widens to the full column width and grows taller. */
+@media(min-width:721px) and (orientation:landscape){
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group.is-engaged{--col:var(--title-room,calc(50vw - 24px));--sq:min(calc(var(--col) * .88),calc(100svh - 280px))}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .is-engaged .hero-intro-player{width:var(--col)!important;max-width:none}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .is-engaged .hero-intro-frame{width:var(--sq);height:var(--sq);margin-inline:auto}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .is-engaged .hero-intro-frame:has(.hero-intro-stage[data-active=true]){width:var(--col);height:min(calc(var(--col) * .72),calc(100svh - 240px))}
+}
+
+/* Home, landscape (tablet/desktop): two real columns of the same width. The left column is the left half of the page content (title, player, checkbox, Android badge), the right column the right half (the record/character complex and its glows, centred in it, with the Skip to content button under it). */
+@media(min-width:721px) and (orientation:landscape){
+ html body .echo[data-page=home][data-theme] .hero-introduction{--title-room:calc(50vw - var(--echo-viewport-gutter,48px) - 24px)!important;--cx:25vw!important}
+ html[dir=rtl] body .echo[data-page=home][data-theme] .hero-introduction{--cx:-25vw!important}
+}
+/* the complex fits inside its half (it never crosses the page edge or the column divider) */
+@media(min-width:721px) and (orientation:landscape){
+ html body .echo[data-page=home][data-theme] .hero-introduction .hero-character-window{scale:min(.88,calc((50vw - var(--echo-viewport-gutter,48px) * 2) / min(70vw, 86svh, 920px)))}
+}
+
+/* hero-copy-content is a real two-column grid of equal widths: [1] the content (title, player...), [2] the stage where the record/character complex stands. */
+@media(min-width:721px) and (orientation:landscape){
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-copy-content{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:0;align-items:stretch}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-copy-content>.hero-intro-heading-group{grid-column:1;width:100%!important;max-width:none!important;padding-inline-end:24px;box-sizing:border-box}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-copy-content>.hero-copy-stage{grid-column:2;min-height:1px}
+ html body .echo[data-page=home][data-theme] .hero-introduction{--title-room:calc(50vw - var(--echo-viewport-gutter,48px) - 24px)!important;--cx:calc(25vw - var(--echo-viewport-gutter,48px) / 2)!important}
+ html[dir=rtl] body .echo[data-page=home][data-theme] .hero-introduction{--cx:calc(-25vw + var(--echo-viewport-gutter,48px) / 2)!important}
+ html[dir=rtl] body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-copy-content>.hero-intro-heading-group{padding-inline-end:0;padding-inline-start:24px}
+}
+@media(max-width:720px),(orientation:portrait){.hero-copy-stage{display:none}}
+
+/* The greeting square is centred horizontally in its column. */
+@media(min-width:721px) and (orientation:landscape){
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .hero-intro-player{width:100%!important;margin-inline:0!important;position:static!important}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .hero-intro-frame{margin-inline:auto!important}
+}
+/* Android badge: centred in the left column (the column spans from the gutter to the page centre). */
+@media(min-width:721px) and (orientation:landscape){
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .client-app-badge--player,
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group.is-engaged .client-app-badge--player{inset:auto auto 26px calc(25vw + var(--echo-viewport-gutter,48px) / 2)!important}
+ html[dir=rtl] body .echo[data-page=home][data-theme] #echo-main .hero-introduction .client-app-badge--player{inset:auto auto 26px calc(75vw - var(--echo-viewport-gutter,48px) / 2)!important}
+}
+
+/* Even bigger greeting text in the square. */
+html body .echo .hero-intro-frame .hero-intro-subtitle.hero-intro-lines{font-size:clamp(24px,11cqw,56px)!important}
+
+/* The 3D object overlays the text: the square never grows. The stage covers the area between the label and the controls, above the transcript, which dims behind it. */
+html body .echo .hero-intro-frame .hero-intro-stage,
+html body .echo .hero-intro-frame .hero-intro-stage[data-active=true]{position:absolute!important;left:0!important;right:0!important;top:40px!important;bottom:56px!important;width:auto!important;height:auto!important;z-index:4;pointer-events:none;transition:none}
+.hero-intro-player .hero-intro-frame:has(.hero-intro-stage[data-active=true]),
+html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .is-engaged .hero-intro-frame:has(.hero-intro-stage[data-active=true]){width:min(100%,340px);height:340px}
+html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .is-engaged .hero-intro-frame:has(.hero-intro-stage[data-active=true]){width:var(--sq);height:var(--sq)}
+html body .echo .hero-intro-frame:has(.hero-intro-stage[data-active=true]) .hero-intro-subtitle{margin-inline-start:0!important;opacity:.18;transition:opacity .4s ease}
+.hero-intro-stage>.hero-equipment-showcase{inset:0!important}
+.hero-intro-stage .hero-equipment-object{height:calc(100% - 78px)}
+
+/* An older rule pinned the greeting text to 16px (!important, by id); this one is more specific, so the text really scales with the square. */
+html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-player .hero-intro-frame .hero-intro-subtitle.hero-intro-lines{font-size:clamp(26px,11.5cqw,60px)!important}
+html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-player .hero-intro-frame .hero-intro-lines,
+html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-player .hero-intro-frame .hero-intro-lines .hero-intro-list,
+html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-player .hero-intro-frame .hero-intro-lines .hero-intro-list p{text-align:center!important;text-align-last:center}
+.hero-intro-lines .hero-intro-list p span{margin-inline:0 .14em!important;padding:0!important}
+
+/* Highlighted words never change size or animate: same weight, no scale, no transition (only the colour switches). */
+html body .echo .hero-intro-frame .hero-intro-subtitle span,
+html body .echo .hero-intro-frame .hero-intro-subtitle .is-active,
+html body .echo .hero-intro-frame .hero-intro-subtitle .is-said,
+html body .echo .hero-intro-frame .hero-intro-subtitle[lang=ar] .is-active{transition:none!important;transform:none!important;font-weight:600!important;animation:none!important}
+html body .echo .hero-intro-frame .hero-intro-subtitle[lang=ar] span{font-weight:400!important}
+html body .echo .hero-intro-frame .hero-intro-subtitle[lang=ar] .is-active{font-weight:400!important}
+
+/* Same metrics for every word state (specific enough to beat the older bold rule): no weight, padding, margin or size difference between spoken, said and coming words, so the line never shifts sideways. */
+html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame .hero-intro-lines .hero-intro-list p>span,
+html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame .hero-intro-lines .hero-intro-list p>span.is-active,
+html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame .hero-intro-lines .hero-intro-list p>span.is-said{font-weight:600!important;font-style:italic;padding:0!important;margin-inline:0 .14em!important;letter-spacing:inherit!important;text-decoration:none!important;transform:none!important;transition:none!important}
+html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame .hero-intro-lines[lang=ar] .hero-intro-list p>span,
+html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame .hero-intro-lines[lang=ar] .hero-intro-list p>span.is-active{font-weight:400!important;font-style:normal}

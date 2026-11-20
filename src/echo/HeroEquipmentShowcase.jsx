@@ -79,8 +79,7 @@ function HeroEquipmentShowcaseScene(){
  const cue=started?equipmentCueAt(cues,position):null;
  const [reducedMotion,setReducedMotion]=useState(()=>matchMedia('(prefers-reduced-motion: reduce)').matches);
  useEffect(()=>{const query=matchMedia('(prefers-reduced-motion: reduce)'),change=()=>setReducedMotion(query.matches);query.addEventListener('change',change);return()=>query.removeEventListener('change',change);},[]);
- // Warm the next models before their spoken cues; release earlier scenes after their exit transition.
- const visible=started?cues.filter(item=>position>=item.start-20&&position<item.end+0.65):[];
+ const visible=cue?cues.filter(item=>item.id===cue.id):[]; // an object is mounted only while it is being mentioned, and unmounted the moment its cue ends
  // Landscape tablet/desktop: the 3D object is drawn inside the greeting player's square (its .hero-intro-stage), which grows to fit it while an object is on show.
  const [host,setHost]=useState(null),[wide,setWide]=useState(()=>matchMedia('(min-width:721px) and (orientation:landscape)').matches);
  useEffect(()=>{const query=matchMedia('(min-width:721px) and (orientation:landscape)'),change=()=>setWide(query.matches);query.addEventListener('change',change);return()=>query.removeEventListener('change',change);},[]);

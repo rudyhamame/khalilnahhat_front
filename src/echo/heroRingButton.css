@@ -56,3 +56,9 @@ html body .hero-introduction .hero-ring-cta{animation:hero-explore-guest-blink 1
 @media(min-width:1025px) and (orientation:landscape){html body .hero-introduction .hero-ring-cta{margin-top:clamp(40px,6svh,64px)}}
 @keyframes hero-explore-guest-blink{0%,100%{opacity:1;box-shadow:0 0 0 0 #d9b46e00}50%{opacity:.55;box-shadow:0 0 0 6px #d9b46e38}}
 @media(prefers-reduced-motion:reduce){html body .hero-introduction .hero-ring-cta{animation:none}}
+/* Split pill: two halves sharing one outline, divided by a thin line. */
+.hero-ring-split{padding:0!important;overflow:hidden}
+.hero-ring-split>button{display:flex;align-items:center;gap:10px;min-height:44px;padding:0 20px;border:0;background:none;color:inherit;font:inherit;letter-spacing:inherit;text-transform:inherit;cursor:pointer}
+.hero-ring-split>button+button{border-inline-start:1px solid #d9b46e80}
+.hero-ring-split>button:hover{background:#d9b46e30}
+.hero-ring-split>button:focus-visible{outline:3px solid #fff;outline-offset:-3px}

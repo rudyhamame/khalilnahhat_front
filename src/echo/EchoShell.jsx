@@ -2,8 +2,8 @@ import {publicPageSection} from '../lib/publicPages';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {cloudAsset} from '../lib/cloudAsset';
 import { UserRound, Languages } from 'lucide-react';
-import HeaderNav from './HeaderNav';
 import AccountMenu from './AccountMenu';
+import './headerNav.css';
 import SkipLoginOption from './SkipLoginOption';
 import LanguageOverlay from './LanguageOverlay';
 import {useBrowserChromeTheme} from './useBrowserChromeTheme';
@@ -118,7 +118,6 @@ export default function EchoShell({ lang, user, onLogout, children }) {
       <header ref={header} className="echo-header">
         <a className="echo-logo echo-logo--paired" href="/" aria-label="DJ Khalil Nahhat — Echo Event Entertainment home"><span className="echo-brand-pair"><img className="echo-brand-mark" src="/echo/dj-khalil-nahhat-logo.svg" alt="DJ Khalil Nahhat" width="240" height="90" /><img className="echo-event-brand-mark" src="/echo/echo-event-entertainment-white-original.png" alt="ECHO Event & Entertainment" width="1392" height="1130" /></span></a>
         {pageTitle&&<h1 className="echo-page-title">{pageTitle}</h1>}
-        {current!=='/login'&&<HeaderNav ar={ar} path={current} user={user} onLogout={onLogout}/>}
         <div className="echo-header-actions">
           <button type="button" className="echo-icon-button echo-lang" onClick={()=>{if(current==='/')window.dispatchEvent(new Event('echo:hero-language-request'));else setLanguageOpen(true);}} aria-label={tr('Choose language','اختار اللغة')} title={tr('Choose language','اختار اللغة')}><Languages size={22} aria-hidden="true"/></button>
           {(()=>{
@@ -129,7 +128,7 @@ export default function EchoShell({ lang, user, onLogout, children }) {
             const initials=(Array.from(first)[0]||'')+(Array.from(last)[0]||'');
             return user&&initials?<span className="echo-account-initial" aria-hidden="true">{initials.toLocaleUpperCase()}</span>:<UserRound size={22} aria-hidden="true"/>;
           })();
-            return user?<AccountMenu user={user} ar={ar} badge={badge} onLogout={onLogout}/>:<a className="echo-icon-button" href="/login" aria-label={t.nav.login} title={t.nav.login}>{badge}</a>;
+            return <AccountMenu user={user} path={current} ar={ar} badge={badge} onLogout={onLogout}/>;
           })()}
         </div>
       </header>
