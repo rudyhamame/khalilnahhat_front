@@ -117,7 +117,7 @@ export default function EchoShell({ lang, user, onLogout, children }) {
   return (
     <div className={`echo${(publicPageSection(current)&&current!=='/')||accessPage?' echo-public-page':''}${assistantOverlay?' echo-ai-overlay-page':''}`} data-theme="dark" data-page={publicPageSection(current)||accessPage ? "home" : "inner"} ref={shell}>
       <header ref={header} className="echo-header">
-        <a className="echo-logo echo-logo--paired" href="/" aria-label="DJ Khalil Nahhat — Echo Event Entertainment home"><span className="echo-brand-pair"><img className="echo-brand-mark" src="/echo/dj-khalil-nahhat-logo.svg" alt="DJ Khalil Nahhat" width="240" height="90" /><img className="echo-event-brand-mark" src="/echo/echo-event-entertainment-white-original.png" alt="ECHO Event & Entertainment" width="1392" height="1130" /></span></a>
+        <span className="echo-logo echo-logo--paired"><span className="echo-brand-pair"><img className="echo-brand-mark" src="/echo/dj-khalil-nahhat-logo.svg" alt="DJ Khalil Nahhat" width="240" height="90" /><img className="echo-event-brand-mark" src="/echo/echo-event-entertainment-white-original.png" alt="ECHO Event & Entertainment" width="1392" height="1130" /></span></span>
         {pageTitle&&<h1 className="echo-page-title">{pageTitle}</h1>}
         <div className="echo-header-actions">
           {(current==='/'||current==='/login')&&<button type="button" className="echo-icon-button echo-lang" onClick={()=>{if(current==='/')window.dispatchEvent(new Event('echo:hero-language-request'));else setLanguageOpen(true);}} aria-label={tr('Choose language','اختار اللغة')} title={tr('Choose language','اختار اللغة')}><Languages size={22} aria-hidden="true"/></button>}
@@ -136,7 +136,7 @@ export default function EchoShell({ lang, user, onLogout, children }) {
       <main id="echo-main" tabIndex={-1}>{children}</main>
       {languageOpen&&<LanguageOverlay current={lang.lang} onChoose={lang.setLanguage} onClose={()=>setLanguageOpen(false)}/>}
       {current==='/about' && <footer id="echo-footer" className="echo-footer">
-        <div className="echo-footer-brand"><a className="echo-logo echo-logo--paired" href="/" aria-label="DJ Khalil Nahhat — Echo Event Entertainment home"><span className="echo-brand-pair"><img className="echo-brand-mark" src="/echo/dj-khalil-nahhat-logo.svg" alt="DJ Khalil Nahhat" width="240" height="90" /><img className="echo-event-brand-mark" src="/echo/echo-event-entertainment-white-original.png" alt="ECHO Event & Entertainment" width="1392" height="1130" /></span><p>{t.tagline}</p></a></div>
+        <div className="echo-footer-brand"><div className="echo-logo echo-logo--paired"><span className="echo-brand-pair"><img className="echo-brand-mark" src="/echo/dj-khalil-nahhat-logo.svg" alt="DJ Khalil Nahhat" width="240" height="90" /><img className="echo-event-brand-mark" src="/echo/echo-event-entertainment-white-original.png" alt="ECHO Event & Entertainment" width="1392" height="1130" /></span><p>{t.tagline}</p></div></div>
         <div className="echo-footer-skip-login"><SkipLoginOption tr={tr}/></div>
         <div className="echo-footer-bottom"><span>© {new Date().getFullYear()} {t.brand}</span><span>{t.footer}</span></div>
         <div className="echo-builder-credit">
