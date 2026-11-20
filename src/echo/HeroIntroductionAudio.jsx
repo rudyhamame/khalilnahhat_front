@@ -200,6 +200,26 @@ export default function HeroIntroductionAudio({lang,onSkip,onBegin,animationComp
  useEffect(()=>{if(!frameOpen){setFrameShown(false);return undefined;}const t=setTimeout(()=>setFrameShown(true),window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:540);return()=>clearTimeout(t);},[frameOpen]);
  // Back to the one-line bar when the greeting is about to finish (last 1.5s).
  useEffect(()=>{if(playing&&duration>3&&position>=duration-1.5)setFrameOpen(false);},[playing,position,duration]);
+ // Continuous line: slide the whole message under the centre mark. The offset is interpolated between the centres of the current and next word by the audio time, so its speed and acceleration follow the speech (pauses when paused).
+ const tickerBox=useRef(null),tickerTrack=useRef(null);
+ useEffect(()=>{
+  if(!frameShown)return undefined;
+  let raf=0;
+  const step=()=>{
+   const box=tickerBox.current,track=tickerTrack.current,player=audio.current;
+   if(box&&track&&player){
+    const words=narration.words,t=Math.max(0,player.currentTime-(narration.playbackOffset||0)),i=wordAt(narration,t),spans=track.children,a=spans[i],b=spans[i+1]||a;
+    if(a){
+     const next=words[i+1],span=next?Math.max(0.05,next.start-words[i].start):1,f=next?Math.min(1,Math.max(0,(t-words[i].start)/span)):0;
+     const ca=a.offsetLeft+a.offsetWidth/2,cb=b.offsetLeft+b.offsetWidth/2;
+     track.style.transform=`translate3d(${(box.clientWidth/2-(ca+(cb-ca)*f)).toFixed(1)}px,0,0)`;
+    }
+   }
+   raf=requestAnimationFrame(step);
+  };
+  raf=requestAnimationFrame(step);
+  return()=>cancelAnimationFrame(raf);
+ },[frameShown,narration]);
  const togglePlay=()=>{if(selectedLanguage!==chosenLanguage||phase!=='started')chooseLanguage(chosenLanguage);else if(playing)pausePlayback();else void startPlayback();};
  // Tapping the collapsed greeting opens it and starts the greeting; tapping it again only collapses it (playback continues).
  const toggleFrame=()=>{if(!frameOpen){setFrameOpen(true);if(!playing&&!staging&&!waiting&&animationReady)togglePlay();}else setFrameOpen(false);};
@@ -211,6 +231,7 @@ export default function HeroIntroductionAudio({lang,onSkip,onBegin,animationComp
     <svg className="hero-intro-frame-line" width={box.w} height={box.h} viewBox={`0 0 ${box.w||1} ${box.h||1}`} aria-hidden="true"><rect className="is-track" x="2" y="2" width={Math.max(0,box.w-4)} height={Math.max(0,box.h-4)} rx="20"/><rect className="is-fill" x="2" y="2" width={Math.max(0,box.w-4)} height={Math.max(0,box.h-4)} rx="20" pathLength="100" strokeDasharray={`${duration?Math.min(100,position/duration*100):0} 100`}/></svg>
    <div className="hero-intro-meta"><span>{tr('ECHO GREETING','ترحيب إيكو')}</span><time dir="ltr">{introClock(position)} / {introClock(duration)}</time></div>
     <div className="hero-intro-stage" data-active="false"/>
+    <div className="hero-intro-ticker" ref={tickerBox} aria-hidden="true" dir={ar?'rtl':'ltr'} lang={ar?'ar':'en'}><div className="hero-intro-ticker-track" ref={tickerTrack}>{narration.words.map((word,index)=><span key={index} className={index===activeWord?'is-active':index<activeWord?'is-said':undefined}>{word.text} </span>)}</div></div>
    <div className={`hero-intro-subtitle hero-intro-lines${phase==='started'&&!staging&&(playing||position>0)&&cue?'':' is-idle'}`} dir={ar?'rtl':'ltr'} lang={ar?'ar':'en'} aria-hidden="true" ref={linesBox}>
     <div className="hero-intro-list" ref={linesList}>{/* Line by line: only the current line is mounted; the next line replaces it. */}{(cueIndex<0?[]:[narration.cues[cueIndex]]).map(line=><p key={cueIndex} className="is-current">{narration.words.slice(line.from,line.to).map((word,offset)=>{const index=line.from+offset;return <span key={index} className={index===activeWord?'is-active':index<activeWord?'is-said':undefined}>{word.text} </span>;})}</p>)}</div>
    </div>

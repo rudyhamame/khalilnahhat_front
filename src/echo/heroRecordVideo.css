@@ -467,15 +467,21 @@ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-audio-introduction .hero-intro-player .hero-intro-frame[data-open=true]:has(.hero-intro-stage[data-active=true]){width:calc(100vw - 32px)!important;height:44px!important;margin-inline:calc((100% - (100vw - 32px)) / 2)!important;transition:width .4s cubic-bezier(.4,0,.2,1)}
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame[data-open=true] :is(.hero-intro-stage,.hero-intro-seek,.hero-intro-controls){display:none!important}
  /* the current line fills the bar; before the first line, the label stays */
- html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame[data-open=true] .hero-intro-subtitle.hero-intro-lines:not(.is-idle){position:absolute!important;inset:0!important;display:block!important;margin:0!important;padding:0 18px!important;font-size:13px!important;line-height:1.25!important;opacity:1!important;-webkit-mask-image:none!important;mask-image:none!important}
- html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame[data-open=true] .hero-intro-subtitle.hero-intro-lines.is-idle{display:none!important}
- html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame[data-open=true]:has(.hero-intro-subtitle:not(.is-idle)) .hero-intro-meta{display:none!important}
 }
 @media(orientation:portrait) and (max-width:760px) and (prefers-reduced-motion:reduce){
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame[data-open=true]{transition:none!important}
 }
 @media(orientation:portrait) and (max-width:760px){
- html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame[data-open=true] .hero-intro-subtitle.hero-intro-lines:not(.is-idle){display:flex!important;align-items:center;justify-content:center;text-align:center}
- html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame[data-open=true] .hero-intro-subtitle .hero-intro-list{transform:none!important;position:static!important;width:100%;margin:0}
- html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame[data-open=true] .hero-intro-subtitle .hero-intro-list p{margin:0!important;padding:0!important}
+}
+
+
+/* Phones portrait, opened: the whole greeting is ONE continuous line of words; it slides under the centre mark at the pace of the speech (JS positions it from the audio time). */
+.hero-intro-ticker{display:none}
+@media(orientation:portrait) and (max-width:760px){
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame[data-open=true] :is(.hero-intro-meta,.hero-intro-subtitle){display:none!important}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame[data-open=true] .hero-intro-ticker{display:block;position:absolute;left:0;right:0;top:0;height:44px;overflow:hidden;pointer-events:none;-webkit-mask-image:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent);mask-image:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent)}
+ .hero-intro-ticker-track{position:absolute;left:0;top:0;display:block;height:44px;white-space:nowrap;font:italic 500 15px/44px 'Cormorant Garamond','Noto Sans Arabic',Georgia,serif;color:#6f817a;will-change:transform}
+ .hero-intro-ticker-track>span{display:inline}
+ .hero-intro-ticker-track>span.is-said{color:#d8e6dd}
+ .hero-intro-ticker-track>span.is-active{color:#e3c184;font-weight:700}
 }
