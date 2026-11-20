@@ -479,9 +479,9 @@ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-
 .hero-intro-ticker{display:none}
 @media(orientation:portrait) and (max-width:760px){
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame[data-open=true] :is(.hero-intro-meta,.hero-intro-subtitle){display:none!important}
- html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame[data-open=true] .hero-intro-ticker{display:block;position:absolute;left:0;right:0;top:0;height:44px;overflow:hidden;pointer-events:none;-webkit-mask-image:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent);mask-image:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent)}
- .hero-intro-ticker-track{position:absolute;left:0;top:0;display:block;height:44px;white-space:nowrap;font:italic 500 15px/44px 'Cormorant Garamond','Noto Sans Arabic',Georgia,serif;color:#6f817a;will-change:transform}
- .hero-intro-ticker-track>span{display:inline}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame[data-open=true] .hero-intro-ticker{display:block;position:absolute;left:0;right:0;top:0;bottom:0;height:auto;overflow:hidden;pointer-events:none;-webkit-mask-image:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent);mask-image:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent)}
+ .hero-intro-ticker-track{position:absolute;left:0;top:0;bottom:0;display:flex;align-items:center;white-space:nowrap;font:italic 500 24px/1 'Cormorant Garamond','Noto Sans Arabic',Georgia,serif;color:#6f817a;will-change:transform}
+ .hero-intro-ticker-track>span{display:block;white-space:pre;padding-bottom:3px}
  .hero-intro-ticker-track>span.is-said{color:#d8e6dd}
  .hero-intro-ticker-track>span.is-active{color:#e3c184;font-weight:700}
 }
