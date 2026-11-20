@@ -474,3 +474,8 @@ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-
 @media(orientation:portrait) and (max-width:760px) and (prefers-reduced-motion:reduce){
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame[data-open=true]{transition:none!important}
 }
+@media(orientation:portrait) and (max-width:760px){
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame[data-open=true] .hero-intro-subtitle.hero-intro-lines:not(.is-idle){display:flex!important;align-items:center;justify-content:center;text-align:center}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame[data-open=true] .hero-intro-subtitle .hero-intro-list{transform:none!important;position:static!important;width:100%;margin:0}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame[data-open=true] .hero-intro-subtitle .hero-intro-list p{margin:0!important;padding:0!important}
+}
