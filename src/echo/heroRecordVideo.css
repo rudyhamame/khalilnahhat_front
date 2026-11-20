@@ -458,3 +458,19 @@ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-audio-introduction .hero-intro-player .hero-intro-frame[data-open=true],
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-audio-introduction .hero-intro-player .hero-intro-frame[data-open=true]:has(.hero-intro-stage[data-active=true]){width:var(--sq)!important;height:var(--player-h,140px)!important;aspect-ratio:auto!important;margin-inline:auto}
 }
+
+/* ===== Phones portrait: the greeting never grows in height. It is a one-line bar (44px); a tap grows it in WIDTH ONLY, to the full screen width, and shows the current line (replaced line by line). ===== */
+@media(orientation:portrait) and (max-width:760px){
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-audio-introduction .hero-intro-player .hero-intro-frame,
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-audio-introduction .hero-intro-player .hero-intro-frame:has(.hero-intro-stage[data-active=true]){height:44px!important;min-height:0!important;overflow:hidden;cursor:pointer}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-audio-introduction .hero-intro-player .hero-intro-frame[data-open=true],
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-audio-introduction .hero-intro-player .hero-intro-frame[data-open=true]:has(.hero-intro-stage[data-active=true]){width:calc(100vw - 32px)!important;height:44px!important;margin-inline:calc((100% - (100vw - 32px)) / 2)!important;transition:width .4s cubic-bezier(.4,0,.2,1)}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame[data-open=true] :is(.hero-intro-stage,.hero-intro-seek,.hero-intro-controls){display:none!important}
+ /* the current line fills the bar; before the first line, the label stays */
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame[data-open=true] .hero-intro-subtitle.hero-intro-lines:not(.is-idle){position:absolute!important;inset:0!important;display:block!important;margin:0!important;padding:0 18px!important;font-size:13px!important;line-height:1.25!important;opacity:1!important;-webkit-mask-image:none!important;mask-image:none!important}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame[data-open=true] .hero-intro-subtitle.hero-intro-lines.is-idle{display:none!important}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame[data-open=true]:has(.hero-intro-subtitle:not(.is-idle)) .hero-intro-meta{display:none!important}
+}
+@media(orientation:portrait) and (max-width:760px) and (prefers-reduced-motion:reduce){
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame[data-open=true]{transition:none!important}
+}
