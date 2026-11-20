@@ -5,7 +5,7 @@ import './heroRingButton.css';
 export default function HeroRingButton({ label, hideLabel, onClick, onHide, hidden = false }) {
   return (
     <div className="hero-ring-cta hero-ring-split">
-      <button type="button" onClick={onHide} aria-pressed={hidden}>{hideLabel}</button>
+      {onHide&&<button type="button" onClick={onHide} aria-pressed={hidden}>{hideLabel}</button>}
       <button type="button" onClick={onClick}>
         <span>{label}</span>
         <ArrowRight className="hero-ring-arrow" size={18} aria-hidden="true" />
