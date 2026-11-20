@@ -94,9 +94,12 @@ function EchoHomeContent({ lang, user, token }) {
     return()=>clearTimeout(timer);
   },[engaged]);
   useLayoutEffect(()=>{
-    const player=document.querySelector('.hero-introduction .hero-intro-player');if(!player)return;
-    const top=player.getBoundingClientRect().top,from=playerTop.current;playerTop.current=top;
-    if(from!=null&&Math.abs(from-top)>2&&!matchMedia('(prefers-reduced-motion: reduce)').matches)player.animate([{transform:`translateY(${from-top}px)`},{transform:'none'}],{duration:650,easing:'cubic-bezier(.3,.9,.3,1)'});
+    const player=document.querySelector('.hero-introduction .hero-intro-frame')||document.querySelector('.hero-introduction .hero-intro-player');if(!player)return;
+    const box=player.getBoundingClientRect(),from=playerTop.current;playerTop.current={x:box.left,y:box.top};
+    if(!from||(Math.abs(from.x-box.left)<2&&Math.abs(from.y-box.top)<2)||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+    // free route: it glides along a direct path from where it was to its final central spot
+    const dx=from.x-box.left,dy=from.y-box.top;
+    player.animate([{transform:`translate(${dx}px,${dy}px)`},{transform:'translate(0,0)'}],{duration:950,easing:'cubic-bezier(.35,.1,.2,1)'});
   },[copyGone]);
   // Keep the chosen introduction language when returning through a page link.
   const [heroLanguageChosen,setHeroLanguageChosen]=useState(()=>{try{const saved=sessionStorage.getItem('echo-home-section');return sessionStorage.getItem('echo-home-language-selected')==='1'||Boolean(saved&&saved!=='home');}catch{return false;}});

@@ -365,3 +365,21 @@ html body .echo[data-theme]>.echo-header .echo-brand-pair>img+img:not(#_){height
 
 /* One header height for every page: 92px (68px Echo logo + 12px padding above and below). A page that adds a second row (the section links under the header on narrow screens) grows only by that row. */
 html body .echo[data-theme]>.echo-header{min-height:92px!important;height:auto!important}
+
+/* The Echo logo sits right next to the DJ Khalil logo on every page (the Echo artwork carries its own empty margin, so it is pulled in to close the gap). */
+html body .echo[data-theme]>.echo-header .echo-brand-pair{gap:0!important}
+html body .echo[data-theme]>.echo-header .echo-brand-pair>img+img:not(#_){margin-inline-start:-9px!important;margin-inline-end:0!important}
+html[dir=rtl] body .echo[data-theme]>.echo-header .echo-brand-pair>img+img:not(#_){margin-inline-start:-9px!important;margin-inline-end:0!important}
+html body .echo[data-theme]>.echo-header .echo-brand-pair{display:flex!important;width:auto!important;justify-content:flex-start!important;align-items:center}
+html body .echo[data-theme]>.echo-header>.echo-logo.echo-logo--paired{align-items:flex-start!important}
+html[dir=rtl] body .echo[data-theme]>.echo-header>.echo-logo.echo-logo--paired{align-items:flex-end!important}
+
+/* Home page, landscape: the same logo spacing as the login header, the DJ Khalil logo at one edge and the Echo logo at the other, with the language/account icons tucked in beside the Echo logo. */
+@media(min-width:721px) and (orientation:landscape){
+ html body .echo[data-page=home][data-theme]>.echo-header{position:relative}
+ html body .echo[data-page=home][data-theme]>.echo-header>.echo-logo.echo-logo--paired{grid-column:1/-1!important;justify-self:stretch!important;flex:1 1 auto!important;width:100%!important;max-width:none!important}
+ html body .echo[data-page=home][data-theme]>.echo-header .echo-brand-pair{width:100%!important;justify-content:space-between!important}
+ html body .echo[data-page=home][data-theme]>.echo-header .echo-brand-pair>img+img:not(#_){margin-inline:0!important;object-position:right center!important}
+ html[dir=rtl] body .echo[data-page=home][data-theme]>.echo-header .echo-brand-pair>img+img:not(#_){object-position:left center!important}
+ html body .echo[data-page=home][data-theme]>.echo-header>.echo-header-actions{position:absolute!important;inset-inline-end:calc(clamp(16px,4vw,48px) + 100px);top:50%;transform:translateY(-50%);margin:0}
+}

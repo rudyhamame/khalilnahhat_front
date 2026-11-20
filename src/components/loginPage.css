@@ -514,3 +514,21 @@ html[dir=rtl].echo-login-leaving .echo-access.is-leaving :is(.access-hero-photo,
  html.echo-access-open body .echo-access:not(.echo-order-access) .access-hero-vignette{box-shadow:none;background:linear-gradient(to right,#0000 calc(100% - var(--cw,45vw) - 4px),#000000b0 calc(100% - var(--cw,45vw)),#0000 calc(100% - var(--cw,45vw) + 150px))}
  html[dir=rtl].echo-access-open body .echo-access:not(.echo-order-access) .access-hero-vignette{background:linear-gradient(to right,#0000 calc(var(--cw,45vw) - 150px),#000000b0 var(--cw,45vw),#0000 calc(var(--cw,45vw) + 4px))}
 }
+
+/* Landscape: centre the DJ Khalil logo over the forms column and the character in his column (--cw = character column width). */
+@media(min-width:1001px) and (orientation:landscape){
+ html.echo-access-open{--cw:min(46vw,calc(100svh * .66 + 4vw))}
+ html.echo-access-open body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-brand-pair>img:first-child{transform:translateX(calc((100vw - var(--cw)) / 2 - 48px - 50%))}
+ html[dir=rtl].echo-access-open body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-brand-pair>img:last-child{transform:none}
+ html[dir=rtl].echo-access-open body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-brand-pair>img:first-child{transform:translateX(calc((100vw - var(--cw)) / -2 + 48px + 50%))}
+ html.echo-access-open body .echo-access:not(.echo-order-access) .access-hero-photo{right:calc((var(--cw) - 100svh * .6615) / 2)}
+ html[dir=rtl].echo-access-open body .echo-access:not(.echo-order-access) .access-hero-photo{right:auto;left:calc((var(--cw) - 100svh * .6615) / 2)}
+}
+
+/* Narrow landscape: the two forms share a small column, so stack the signup fields, drop the leading icons and shrink hints so no placeholder is cut off. */
+@media(min-width:1001px) and (max-width:1250px) and (orientation:landscape){
+ html body .echo-access:not(.echo-order-access) .access-pair .access-fields--signup{grid-template-columns:minmax(0,1fr)!important}
+ html body .echo-access:not(.echo-order-access) .access-pair .access-input>svg{display:none!important}
+ html body .echo-access:not(.echo-order-access) .access-pair .access-input{padding-inline:10px!important;gap:6px!important}
+ html body .echo-access:not(.echo-order-access) .access-pair .access-input input::placeholder{font-size:12px!important;letter-spacing:0!important}
+}

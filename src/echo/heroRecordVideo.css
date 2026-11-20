@@ -222,6 +222,17 @@ html body .echo .hero-intro-frame .hero-intro-subtitle{flex:1 1 auto;min-height:
 /* Landscape: the Android badge sits opposite the Skip to content button, centred at the bottom of the left column (the button is centred under the record/character on the right); the checkbox steps up above it. */
 @media(min-width:721px) and (orientation:landscape){
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .client-app-badge--player,
- html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group.is-engaged .client-app-badge--player{display:flex!important;position:absolute!important;inset:auto auto 26px calc(50% - var(--cx,0px))!important;transform:translateX(-50%);margin:0!important;z-index:8}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group.is-engaged .client-app-badge--player{display:flex!important;position:absolute!important;inset:auto auto 26px calc(var(--echo-viewport-gutter,48px) + var(--title-room,440px) / 2)!important;transform:translateX(-50%);margin:0!important;z-index:8}
  .hero-skip-login{bottom:calc(env(safe-area-inset-bottom,0px) + 88px)}
 }
+
+/* The greeting as a list: every line is shown, the list slides along so the spoken line stays centred, past lines fade up, coming lines wait below. The type scales with the square (cqw = 1% of its width). */
+.hero-intro-player .hero-intro-frame{container-type:inline-size}
+html body .echo .hero-intro-frame .hero-intro-subtitle.hero-intro-lines{display:block!important;position:relative;overflow:hidden!important;padding:0!important;text-align:center;font-size:clamp(15px,6.4cqw,34px)!important;line-height:1.35!important;-webkit-mask-image:linear-gradient(to bottom,transparent,#000 22%,#000 78%,transparent);mask-image:linear-gradient(to bottom,transparent,#000 22%,#000 78%,transparent);transition:opacity .4s ease}
+html body .echo .hero-intro-frame .hero-intro-subtitle.hero-intro-lines.is-idle{opacity:0}
+.hero-intro-lines .hero-intro-list{position:absolute;left:0;right:0;top:0;padding-inline:4px;transition:transform .7s cubic-bezier(.3,.9,.3,1)}
+.hero-intro-lines .hero-intro-list p{margin:0 0 .55em;transition:opacity .5s ease,color .5s ease}
+.hero-intro-lines .hero-intro-list .is-past{opacity:.35}
+.hero-intro-lines .hero-intro-list .is-current{opacity:1}
+.hero-intro-lines .hero-intro-list .is-next{opacity:.45}
+@media(prefers-reduced-motion:reduce){.hero-intro-lines .hero-intro-list{transition:none}}

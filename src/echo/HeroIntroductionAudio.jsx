@@ -179,6 +179,13 @@ export default function HeroIntroductionAudio({lang,onSkip,onBegin,animationComp
  // The progress line is a rounded square drawn around the transcript: its length fills clockwise as the greeting plays, and dragging or tapping along it seeks.
  const frame=useRef(null),[box,setBox]=useState({w:0,h:0});
  useEffect(()=>{const element=frame.current;if(!element||typeof ResizeObserver==='undefined')return undefined;const observer=new ResizeObserver(()=>setBox({w:element.offsetWidth,h:element.offsetHeight}));observer.observe(element);setBox({w:element.offsetWidth,h:element.offsetHeight});return()=>observer.disconnect();},[languageChosen]);
+ // The transcript is one list of all the greeting's lines; it slides along so the line being spoken stays in the middle of the square.
+ const linesBox=useRef(null),linesList=useRef(null);
+ useLayoutEffect(()=>{
+  const box=linesBox.current,list=linesList.current;if(!box||!list)return;
+  const line=list.children[Math.max(0,cueIndex)];if(!line)return;
+  list.style.transform=`translateY(${Math.round(box.clientHeight/2-(line.offsetTop+line.offsetHeight/2))}px)`;
+ },[cueIndex,box.w,box.h,languageChosen,narration]);
  const seekFromFrame=event=>{
   if(staging||phase!=='started'||!duration||!box.w)return;
   const rect=frame.current.getBoundingClientRect(),w=rect.width,h=rect.height;
@@ -196,7 +203,9 @@ export default function HeroIntroductionAudio({lang,onSkip,onBegin,animationComp
     <svg className="hero-intro-frame-line" width={box.w} height={box.h} viewBox={`0 0 ${box.w||1} ${box.h||1}`} aria-hidden="true"><rect className="is-track" x="2" y="2" width={Math.max(0,box.w-4)} height={Math.max(0,box.h-4)} rx="20"/><rect className="is-fill" x="2" y="2" width={Math.max(0,box.w-4)} height={Math.max(0,box.h-4)} rx="20" pathLength="100" strokeDasharray={`${duration?Math.min(100,position/duration*100):0} 100`}/></svg>
    <div className="hero-intro-meta"><span>{tr('ECHO GREETING','ترحيب إيكو')}</span><time dir="ltr">{introClock(position)} / {introClock(duration)}</time></div>
     <div className="hero-intro-stage" data-active="false"/>
-   <p className={`hero-intro-subtitle${phase==='started'&&!staging&&(playing||position>0)&&cue?'':' is-idle'}`} dir={ar?'rtl':'ltr'} lang={ar?'ar':'en'} aria-hidden="true">{phase==='started'&&!staging&&(playing||position>0)&&cue?narration.words.slice(cue.from,cue.to).map((word,offset)=>{const index=cue.from+offset;return <span key={index} className={index===activeWord?'is-active':index<activeWord?'is-said':undefined}>{word.text} </span>;}):''}</p>
+   <div className={`hero-intro-subtitle hero-intro-lines${phase==='started'&&!staging&&(playing||position>0)&&cue?'':' is-idle'}`} dir={ar?'rtl':'ltr'} lang={ar?'ar':'en'} aria-hidden="true" ref={linesBox}>
+    <div className="hero-intro-list" ref={linesList}>{narration.cues.map((line,lineIndex)=><p key={lineIndex} className={lineIndex===cueIndex?'is-current':lineIndex<cueIndex?'is-past':'is-next'}>{narration.words.slice(line.from,line.to).map((word,offset)=>{const index=line.from+offset;return <span key={index} className={index===activeWord?'is-active':index<activeWord?'is-said':undefined}>{word.text} </span>;})}</p>)}</div>
+   </div>
    <input type="range" className="hero-intro-seek" aria-label={tr('Greeting position','موضع الترحيب')} min="0" max={duration||1} step="0.1" value={Math.min(position,duration||1)} disabled={staging||phase!=='started'} style={{'--seek':`${duration?Math.min(100,position/duration*100):0}%`}} onChange={event=>seek(Number(event.target.value))}/>
    <div className="hero-intro-controls hero-intro-controls-inline" role="group" aria-label={tr('Introduction playback','التحكم بالمقدّمة')} aria-busy={staging||waiting} dir="ltr">
    <button type="button" className="hero-intro-launch hero-intro-transport-button" disabled={staging||waiting||!animationReady} aria-controls={`intro-audio-${id}`} aria-busy={staging||waiting||!animationReady} aria-label={chosenLanguage==='ar'?(playing&&chosenLanguage===selectedLanguage?'إيقاف المقدّمة مؤقتاً':'تشغيل المقدّمة بالعربية'):(playing&&chosenLanguage===selectedLanguage?'Pause introduction':'Play introduction in English')} onClick={()=>{if(selectedLanguage!==chosenLanguage||phase!=='started')chooseLanguage(chosenLanguage);else if(playing)pausePlayback();else void startPlayback();}}>
