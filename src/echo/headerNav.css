@@ -374,15 +374,21 @@ html body .echo[data-theme]>.echo-header .echo-brand-pair{display:flex!important
 html body .echo[data-theme]>.echo-header>.echo-logo.echo-logo--paired{align-items:flex-start!important}
 html[dir=rtl] body .echo[data-theme]>.echo-header>.echo-logo.echo-logo--paired{align-items:flex-end!important}
 
-/* Home page, landscape: the same logo spacing as the login header, the DJ Khalil logo at one edge and the Echo logo at the other, with the language/account icons just left of the Echo logo, inside the header. */
-@media(min-width:721px) and (orientation:landscape){
- html body .echo[data-page=home][data-theme]>.echo-header{position:relative}
- html body .echo[data-page=home][data-theme]>.echo-header>.echo-logo.echo-logo--paired{grid-column:1/-1!important;justify-self:stretch!important;flex:1 1 auto!important;width:100%!important;max-width:none!important}
- html body .echo[data-page=home][data-theme]>.echo-header .echo-brand-pair{width:100%!important;justify-content:space-between!important}
- html body .echo[data-page=home][data-theme]>.echo-header .echo-brand-pair>img+img:not(#_){margin-inline:0!important;object-position:right center!important}
- html[dir=rtl] body .echo[data-page=home][data-theme]>.echo-header .echo-brand-pair>img+img:not(#_){object-position:left center!important}
- /* Arabic mirrors the English header: Echo at the left edge with the buttons just right of it, DJ Khalil at the right edge (the logo pair is always laid out left-to-right, so reverse it). */
- html[dir=rtl] body .echo[data-page=home][data-theme]>.echo-header .echo-brand-pair{flex-direction:row-reverse!important;justify-content:space-between!important}
- html[dir=rtl] body .echo[data-page=home][data-theme]>.echo-header .echo-brand-pair>img+img:not(#_){margin-inline-end:0!important}
- html body .echo[data-page=home][data-theme]>.echo-header>.echo-header-actions{position:absolute!important;inset:50% auto auto auto;inset-inline-end:calc(clamp(16px,4vw,48px) + 96px);transform:translateY(-50%);margin:0}
-}
+/* ═══ ONE header for every page, every screen and every browser (home, login, all other pages; phones, tablets, iPads, desktops) ═══
+   The DJ Khalil logo sits at one edge and the Echo logo at the other, with the language/account icons just inside the Echo logo.
+   English: DJ Khalil left, Echo right. Arabic mirrors it. The :not(#_) lifts these rules above every older per-page, per-screen and iPad rule. */
+html body .echo[data-theme]:not(#_){--hdr-pad:clamp(16px,4vw,48px);--hdr-dj:144px;--hdr-echo-h:68px;--hdr-echo-w:84px;--hdr-dj-h:54px}
+@media(max-width:420px){html body .echo[data-theme]:not(#_){--hdr-pad:14px;--hdr-dj:112px;--hdr-dj-h:42px;--hdr-echo-h:54px;--hdr-echo-w:67px}}
+html body .echo[data-theme]>.echo-header:not(#_){position:relative!important;display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:auto!important;align-items:center!important;padding-inline:var(--hdr-pad)!important;gap:0!important;box-sizing:border-box}
+html body .echo[data-theme]>.echo-header>.echo-logo.echo-logo--paired:not(#_){grid-column:1!important;grid-row:1!important;justify-self:stretch!important;width:100%!important;max-width:none!important;flex:1 1 auto!important;margin:0!important}
+html body .echo[data-theme]>.echo-header .echo-brand-pair:not(#_){display:flex!important;width:100%!important;justify-content:space-between!important;align-items:center!important;gap:0!important}
+html body .echo[data-theme]>.echo-header .echo-brand-pair>img:not(#_){height:var(--hdr-dj-h)!important;max-height:var(--hdr-dj-h)!important;width:var(--hdr-dj)!important;max-width:none!important;flex:none!important;object-fit:contain}
+html body .echo[data-theme]>.echo-header .echo-brand-pair>img+img:not(#_){height:var(--hdr-echo-h)!important;max-height:var(--hdr-echo-h)!important;width:auto!important;margin:0!important;object-position:right center!important}
+html[dir=rtl] body .echo[data-theme]>.echo-header .echo-brand-pair:not(#_){flex-direction:row-reverse!important}
+html[dir=rtl] body .echo[data-theme]>.echo-header .echo-brand-pair>img+img:not(#_){object-position:left center!important}
+html body .echo[data-theme]>.echo-header>.echo-header-actions:not(#_){position:absolute!important;grid-column:auto!important;grid-row:auto!important;inset:50% auto auto auto!important;inset-inline-end:calc(var(--hdr-pad) + var(--hdr-echo-w) + 12px)!important;transform:translateY(-50%);margin:0!important;display:flex!important;flex-wrap:nowrap}
+html[dir=rtl] body .echo[data-theme]>.echo-header>.echo-header-actions:not(#_){inset:50% auto auto auto!important;inset-inline-end:calc(var(--hdr-pad) + var(--hdr-echo-w) + 12px)!important}
+/* The mini player (when a recording plays) takes its own row under the logos on every screen. */
+html body .echo[data-theme]>.echo-header>.header-mini-player:not(#_){grid-column:1!important;grid-row:2!important;justify-self:center!important}
+/* Phones: slightly smaller icon buttons so nothing touches the logos. */
+@media(max-width:420px){html body .echo[data-theme]>.echo-header .echo-icon-button:not(#_){width:38px!important;height:40px!important;min-height:40px!important}}

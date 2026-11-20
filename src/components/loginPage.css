@@ -253,7 +253,7 @@ html.echo-access-open body {position:fixed;inset:0;width:auto;height:auto;min-he
 html.echo-access-open :is(#root,.echo-page-surface) {height:100%;min-height:0;overflow:hidden}
 html.echo-access-open .echo {display:flex;flex-direction:column;height:var(--echo-access-height,100dvh);min-height:0;overflow:hidden}
 html.echo-access-open .echo-header {flex:none}
-html.echo-access-open .echo-header :is(.echo-account-menu,.echo-lang,a.echo-icon-button[href="/login"]){display:none!important}
+html.echo-access-open .echo-header a.echo-icon-button[href="/login"]{display:none!important}/* the language and account buttons stay: the header is the same on every page */
 html.echo-access-open body .echo.echo-public-page[data-theme][data-page]>.echo-header>.echo-logo.echo-logo--paired{grid-column:1/-1!important;justify-self:stretch!important;flex:1 1 auto!important;width:auto!important;max-width:none!important}
 html.echo-access-open body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-brand-pair{width:100%!important;justify-content:space-between!important}
 html.echo-access-open body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-event-brand-mark{object-position:right center!important;flex:none!important;width:auto!important}
@@ -518,9 +518,6 @@ html[dir=rtl].echo-login-leaving .echo-access.is-leaving :is(.access-hero-photo,
 /* Landscape: centre the DJ Khalil logo over the forms column and the character in his column (--cw = character column width). */
 @media(min-width:1001px) and (orientation:landscape){
  html.echo-access-open{--cw:min(46vw,calc(100svh * .66 + 4vw))}
- html.echo-access-open body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-brand-pair>img:first-child{transform:translateX(calc((100vw - var(--cw)) / 2 - 48px - 50%))}
- html[dir=rtl].echo-access-open body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-brand-pair>img:last-child{transform:none}
- html[dir=rtl].echo-access-open body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-brand-pair>img:first-child{transform:translateX(calc((100vw - var(--cw)) / -2 + 48px + 50%))}
  html.echo-access-open body .echo-access:not(.echo-order-access) .access-hero-photo{right:calc((var(--cw) - 100svh * .6615) / 2)}
  html[dir=rtl].echo-access-open body .echo-access:not(.echo-order-access) .access-hero-photo{right:auto;left:calc((var(--cw) - 100svh * .6615) / 2)}
 }

@@ -15,3 +15,5 @@ html body .echo .echo-header .echo-account-menu>.echo-icon-button[aria-expanded=
 html body .echo[data-page=home][data-theme] .echo-header .echo-account-menu .echo-account-initial{width:48px!important;height:48px!important;font-size:17px!important}
 .echo-account-dropdown a[aria-current=location]{background:#ffffff14;color:#a6e3ce}
 .echo-account-dropdown{max-height:calc(100vh - 100px);overflow:auto}
+.echo-account-dropdown .echo-account-initial:not(#_){display:grid!important;place-items:center;flex:none;width:22px!important;height:22px!important;border-radius:50%;background:#e7d6a4;color:#141c20;font:700 10px/1 'Manrope','Noto Sans Arabic',sans-serif!important;letter-spacing:.02em}
+.echo-account-dropdown>a>svg:first-child{flex:none}
