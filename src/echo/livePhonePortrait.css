@@ -35,3 +35,11 @@ html body .echo[data-page=home][data-theme] #live>.viewport-fit-content:has(.is-
 html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-switcher.home-live-columns.is-phone :is(.home-live-catalog,.home-live-requests){inset:12px 12px 12px auto;width:min(400px,40%);height:auto;max-height:none;border-radius:18px}
 html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-switcher.home-live-columns.is-phone .home-live-comments-wrapper{inset:auto auto 0 0;width:min(440px,42%);padding:56px 16px 16px}
 }
+
+/* The Live page is a full-screen overlay over the whole app, like the 3D Room: above the header, footer player, side navigation and launchers. */
+html body .echo.echo-public-page.echo-ai-overlay-page[data-page=home][data-theme]:has(#live){z-index:9990!important;isolation:isolate;background:#05080a}
+body:has(.echo-ai-overlay-page #live) :is(.echo-header,.home-section-nav,.echo-footer,.header-mini-player,.echo-cart-launch,.echo-chat-launch,.echo-rotate){display:none!important}
+html body .echo.echo-ai-overlay-page:has(#live)>.echo-header{display:none!important}
+html body .echo.echo-public-page.echo-ai-overlay-page[data-page=home][data-theme] #echo-main>#live{flex:1;min-height:0;height:100%!important;max-height:none!important;padding:0!important}
+.home-live-overlay-close{position:absolute;z-index:20;top:14px;inset-inline-end:14px;display:grid;place-items:center;width:40px;height:40px;padding:0;border:1px solid #ffffff26;border-radius:50%;background:#0d1012dd;color:#e5eee8;cursor:pointer}
+.home-live-overlay-close:hover{background:#ffffff1a}.home-live-overlay-close:focus-visible{outline:2px solid #e3d3a3;outline-offset:3px}

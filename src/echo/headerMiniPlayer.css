@@ -46,7 +46,7 @@ html body .echo[data-theme] .header-mini-player .hmp-art:not(#_){width:100%;heig
 
 /* The drop-down under the round record button. */
 html body .echo[data-theme] .header-mini-player .hmp-open:not(#_){display:grid;place-items:center;width:100%;height:100%;padding:0;border:0;background:none;cursor:pointer;border-radius:50%}
-.hmp-menu{position:absolute;inset-block-start:calc(100% + 10px);inset-inline-start:50%;translate:-50% 0;z-index:9000;display:flex;flex-direction:column;gap:4px;min-width:210px;padding:6px;border:1px solid #ffffff24;border-radius:14px;background:#0d1214f2;box-shadow:0 16px 40px #0008;backdrop-filter:blur(10px);animation:hmp-menu-in .18s ease both}
+.hmp-menu{position:absolute;inset-block-start:calc(100% + 10px);inset-inline-start:50%;translate:-50% 0;z-index:9000;display:flex;flex-direction:column;gap:4px;min-width:210px;padding:6px;border:1px solid #ffffff24;border-radius:14px;background:#0d1214;box-shadow:0 16px 40px #000a;animation:hmp-menu-in .18s ease both}
 [dir=rtl] .hmp-menu{translate:50% 0}
 .hmp-menu-title{margin:0;padding:6px 12px 8px;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#ffffffa6;font:600 12px/1.2 'Manrope','Noto Sans Arabic',sans-serif;border-bottom:1px solid #ffffff1c}
 html body .echo[data-theme] .header-mini-player .hmp-menu button:not(#_){display:flex;align-items:center;gap:10px;width:100%;height:auto;min-height:42px;padding:0 12px;border:0;border-radius:10px;background:none;color:#eef5f0;font:600 14px/1 'Manrope','Noto Sans Arabic',sans-serif;text-align:start;cursor:pointer}
@@ -64,3 +64,17 @@ html body .echo[data-theme] .header-mini-player .hmp-art:not(#_)::after{content:
 html body .echo[data-theme] .header-mini-player .hmp-open:not(#_){filter:drop-shadow(0 6px 8px #000a);transition:transform .25s cubic-bezier(.2,.8,.2,1)}
 html body .echo[data-theme] .header-mini-player .hmp-open:not(#_):hover{transform:translateY(-2px) scale(1.06)}
 html body .echo[data-theme] .header-mini-player .hmp-open:not(#_):active{transform:translateY(1px) scale(.97)}
+html body .echo[data-theme] .echo-header>.header-mini-player:not(#_){overflow:visible!important}
+
+/* Volume row in the drop-down. */
+.hmp-volume{display:flex;align-items:center;gap:10px;padding:6px 12px}
+html body .echo[data-theme] .header-mini-player .hmp-menu .hmp-volume-icon:not(#_){flex:none;display:grid;place-items:center;width:30px;min-width:0;height:30px;min-height:0;padding:0;border-radius:50%}
+.hmp-volume input[type=range]{flex:1;min-width:90px;height:4px;margin:0;appearance:none;-webkit-appearance:none;border-radius:999px;background:linear-gradient(90deg,#a6e3ce var(--vol,75%),#ffffff2e var(--vol,75%));cursor:pointer}
+.hmp-volume input[type=range]::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#fff;border:0;box-shadow:0 1px 4px #000a}
+.hmp-volume input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:#fff;border:0}
+.hmp-volume output{flex:none;min-width:2.2em;color:#ffffffa6;font:600 12px/1 'Manrope',sans-serif;text-align:end}
+
+/* Arabic: the volume row and its slider run right to left (the filled part grows from the right). */
+[dir=rtl] .hmp-volume input[type=range]{background:linear-gradient(270deg,#a6e3ce var(--vol,75%),#ffffff2e var(--vol,75%))}
+[dir=rtl] .hmp-volume output{text-align:start}
+[dir=rtl] .hmp-menu-title,[dir=rtl] .hmp-menu button{text-align:start}

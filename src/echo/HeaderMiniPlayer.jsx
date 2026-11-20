@@ -1,5 +1,5 @@
 import {useEffect,useRef,useState} from 'react';
-import {Disc3,X} from 'lucide-react';
+import {Disc3,Volume1,Volume2,VolumeX,X} from 'lucide-react';
 import {displayImageUrl} from '../lib/displayImage';
 import {useArchivePlayerState,useArchivePlaybackPosition} from '../hooks/useArchivePlayerState';
 import {archivePlayerCommand} from '../lib/archivePlayerBridge';
@@ -40,6 +40,8 @@ export default function HeaderMiniPlayer({ar=false,path}){
  const art=displayImageUrl(track.coverImage);
  const next=()=>{const list=player.tracks||[];if(list.length<2)return;const at=list.findIndex(item=>item.id===track.id),target=list[(at+1)%list.length];window.dispatchEvent(new CustomEvent('echo:archive-play',{detail:{id:target.id,ids:list.map(item=>item.id),inline:true}}));};
  const openPlayer=()=>{setMenu(false);if(path==='/music')window.dispatchEvent(new CustomEvent('echo:work-player-open',{detail:{type:track.workType}}));else window.location.assign(`/music?play=${encodeURIComponent(track.workType||'')}`);};
+ const volume=Number.isFinite(player.volume)?player.volume:.75,lastVolume=useRef(.75);
+ const toggleMute=()=>{if(volume>0){lastVolume.current=volume;archivePlayerCommand('volume',0);}else archivePlayerCommand('volume',lastVolume.current||.75);};
  const closeRecording=()=>{setMenu(false);archivePlayerCommand('eject');setDismissed(true);};
  // The round record button: tapping it drops a small menu (go to the player of this recording, or close the recording).
  return <div ref={root} className="header-mini-player" dir={ar?'rtl':'ltr'} role="group" aria-label={tr('Now playing','قيد التشغيل')}>
@@ -48,6 +50,11 @@ export default function HeaderMiniPlayer({ar=false,path}){
   </button>
   {menu&&<div className="hmp-menu" role="menu" aria-label={track.title}>
    <p className="hmp-menu-title" dir="auto">{track.title}</p>
+   <div className="hmp-volume" role="group" aria-label={tr('Volume','مستوى الصوت')}>
+    <button type="button" className="hmp-volume-icon" onClick={toggleMute} aria-label={volume>0?tr('Mute','كتم'):tr('Unmute','إلغاء الكتم')} aria-pressed={volume===0}>{volume===0?<VolumeX size={16} aria-hidden="true"/>:volume<.5?<Volume1 size={16} aria-hidden="true"/>:<Volume2 size={16} aria-hidden="true"/>}</button>
+    <input type="range" min="0" max="100" step="1" value={Math.round(volume*100)} onChange={event=>archivePlayerCommand('volume',Number(event.target.value)/100)} aria-label={tr('Volume','مستوى الصوت')} style={{'--vol':`${Math.round(volume*100)}%`}}/>
+    <output>{Math.round(volume*100)}</output>
+   </div>
    <button type="button" role="menuitem" onClick={openPlayer}><Disc3 size={16} aria-hidden="true"/><span>{tr('Go to music player','الذهاب إلى مشغل الموسيقى')}</span></button>
    <button type="button" role="menuitem" onClick={closeRecording}><X size={16} aria-hidden="true"/><span>{tr('Close recording','إغلاق التسجيل')}</span></button>
   </div>}

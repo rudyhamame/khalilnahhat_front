@@ -5,9 +5,9 @@
 html:has(.ab-page) :is(body,.echo-page-surface){height:auto!important;min-height:0}
 /* The Live page shares this page background (grain + tint); only its layout stays its own. */
 html body .echo.echo-public-page[data-page=home][data-theme]:has(#live){position:relative;isolation:isolate;background:#0d1418}
-html body .echo.echo-public-page[data-page=home][data-theme]:has(.ab-page){position:relative;isolation:isolate;height:auto!important;min-height:var(--echo-visible-viewport-height,100svh);background:#0d1418}
+html body .echo.echo-public-page[data-page=home][data-theme]:has(.ab-page){position:relative;isolation:isolate;height:auto!important;min-height:var(--echo-visible-viewport-height,100svh);background:transparent}
 html body .echo.echo-public-page[data-page=home][data-theme]:has(.ab-page) #echo-main{display:block;height:auto!important;max-height:none!important;overflow:visible!important}
-html body .echo.echo-public-page[data-page=home][data-theme]:is(:has(.ab-page),:has(#live))::after{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;
+html body .echo.echo-public-page[data-page=home][data-theme]:has(#live)::after{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;
  background:
   url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Cpath opacity='.17' fill='%23fff' filter='url(%23n)' d='M0 0h180v180H0z'/%3E%3C/svg%3E"),
   repeating-linear-gradient(125deg,#ffffff05 0 1px,transparent 1px 5px),
@@ -156,3 +156,14 @@ html body .echo .ab-page .ab-cta h2{text-align:center;margin-inline:auto}
 @media(max-width:1000px){.ab-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.ab-cards>.ab-instagram{grid-column:1/-1}}
 @media(max-width:640px){.ab-cards{grid-template-columns:minmax(0,1fr)}}
 html body .echo .ab-page .ab-links{margin-top:clamp(14px,1.8vw,24px)}
+
+/* About page: the same amber night-street backdrop and grain the old Services page had (fixed, edge to edge, behind the header too). */
+.ab-backdrop{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;
+ background:
+  radial-gradient(ellipse 34% 40% at 55% 0%,#214e3eb3,transparent 72%),
+  radial-gradient(ellipse 60% 38% at 30% 76%,#925e2299,transparent 74%),
+  radial-gradient(ellipse 70% 30% at 55% 92%,#795622aa,transparent 76%),
+  radial-gradient(ellipse 36% 36% at 4% 38%,#552c08cc,transparent 74%),
+  radial-gradient(ellipse 36% 36% at 98% 40%,#442f0acc,transparent 74%),
+  linear-gradient(180deg,#0f2a22 0%,#132b18 30%,#3a3314 62%,#4a3d17 100%)}
+.ab-backdrop::after{content:"";position:absolute;inset:0;opacity:.2;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Cpath fill='%23fff' filter='url(%23grain)' d='M0 0h180v180H0z'/%3E%3C/svg%3E")}

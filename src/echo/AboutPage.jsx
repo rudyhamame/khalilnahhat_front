@@ -40,6 +40,7 @@ export default function AboutPage({lang}){
  ];
 
  return <div className="ab-page" ref={root} dir={ar?'rtl':'ltr'}>
+  <div className="ab-backdrop" aria-hidden="true"/>
   <section className="ab-hero ab-wrap" aria-labelledby="ab-title">
    <div className="ab-hero-copy" data-reveal>
     <p className="ab-kicker">{tr('About','من نحن')}</p>
@@ -52,7 +53,7 @@ export default function AboutPage({lang}){
    </div>
    <figure className="ab-hero-art" data-reveal aria-hidden="false">
     <span className="ab-ring ab-ring-1" aria-hidden="true"/><span className="ab-ring ab-ring-2" aria-hidden="true"/><span className="ab-ring ab-ring-3" aria-hidden="true"/>
-    <img src={ar?'/echo/seated-jade-full-body-rtl.webp':'/echo/seated-jade-full-body.webp'} width="1122" height="1402" alt={tr('Illustration of DJ Khalil seated, wearing sunglasses and headphones.','رسم تعبيري لدي جي خليل جالساً بنظارة شمسية وسمّاعات.')} fetchPriority="high"/>
+    <img src={ar?'/echo/rentals-hero-khalil-rtl.webp':'/echo/rentals-hero-khalil.webp'} width="680" height="1444" alt={tr('DJ Khalil with headphones around his neck','دي جي خليل وسماعاته حول رقبته')} fetchPriority="high"/>
    </figure>
   </section>
 

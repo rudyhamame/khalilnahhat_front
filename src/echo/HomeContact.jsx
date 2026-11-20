@@ -1,5 +1,5 @@
 import {useRef, useState} from 'react';
-import {ArrowUpRight, Check, Send} from 'lucide-react';
+import {ArrowUpRight, Check, Mail, Send} from 'lucide-react';
 import {apiRequest} from '../lib/api';
 import {contactEmail} from '../lib/publicContact';
 import ViewportFit from './ViewportFit';
@@ -11,6 +11,7 @@ export default function HomeContact({lang}) {
   const tr = (en, arabic) => ar ? arabic : en;
   const [fields, setFields] = useState({name:'',email:'',subject:'',message:'',website:''});
   const [state, setState] = useState('idle');
+  const [formOpen, setFormOpen] = useState(false);// the form stays closed until the visitor asks for it
   const [error, setError] = useState('');
   const requestId = useRef(null);
   const busy = state === 'sending';
@@ -37,14 +38,18 @@ export default function HomeContact({lang}) {
   };
   return <>
   <div className="contact-backdrop" aria-hidden="true"/>
-  <section id="contact" className="home-contact viewport-fit-section" dir={ar?'rtl':'ltr'} aria-labelledby="home-contact-title">
+  <section id="contact" className={`home-contact viewport-fit-section${formOpen||state==='sent'?' is-form-open':' is-form-closed'}`} dir={ar?'rtl':'ltr'} aria-labelledby="home-contact-title">
     <img className="contact-photo" src={ar?'/echo/contact-hero-khalil-rtl.webp':'/echo/contact-hero-khalil.webp'} width="1196" height="937" alt={tr('DJ Khalil on the phone, ready to take your call','دي جي خليل على الهاتف جاهز لاستقبال اتصالك')} fetchPriority="high"/>
     <ViewportFit natural>
       <div className="home-contact-intro">
         <h2 id="home-contact-title">{tr('Let’s make','لنصنع')}<br/><span>{tr('something memorable.','لحظات لا تُنسى.')}</span></h2>
         <p>{tr('Have a question or an idea for your next event? Send Khalil a message.','لديك سؤال أو فكرة لفعاليتك القادمة؟ أرسل رسالة إلى خليل.')}</p>
+        <div className="home-contact-actions">
+          {!formOpen&&state!=='sent'&&<button type="button" className="home-contact-open" onClick={()=>setFormOpen(true)} aria-expanded="false" aria-controls="home-contact-form"><Send size={16} aria-hidden="true"/>{tr('Write a message','اكتب رسالة')}</button>}
+          <a className="home-contact-email" href={`mailto:${contactEmail}`}><Mail size={16} aria-hidden="true"/><span dir="ltr">{contactEmail}</span></a>
+        </div>
       </div>
-      <div className="home-contact-panel">
+      {(formOpen||state==='sent')&&<div className="home-contact-panel" id="home-contact-form">
         {state === 'sent' ? <div className="home-contact-success" role="status" tabIndex={-1}>
           <Check size={34}/><h3>{tr('Message sent.','تم إرسال الرسالة.')}</h3>
           <p>{tr('Thank you for reaching out. We’ll reply to the email address you provided.','شكراً لتواصلك. سنردّ على عنوان البريد الإلكتروني الذي أدخلته.')}</p>
@@ -59,7 +64,7 @@ export default function HomeContact({lang}) {
           {error && <p className="home-contact-error" role="alert">{error} <a href={`mailto:${contactEmail}`}>{tr('Email us','راسلنا')}</a></p>}
           <div className="home-contact-submit"><small>{tr('We use your details to respond to this message.','نستخدم بياناتك للردّ على هذه الرسالة.')}</small><button type="submit" disabled={locked}><Send size={16}/>{busy?tr('Sending…','جارٍ الإرسال…'):tr('Send message','أرسل الرسالة')}</button></div>
         </form>}
-      </div>
+      </div>}
     </ViewportFit>
   </section>
   <div className="home-contact-direct" dir={ar?'rtl':'ltr'}>

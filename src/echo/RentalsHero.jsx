@@ -21,7 +21,7 @@ export default function RentalsHero({ar=false}){
   // Skip: go on to the other services without adding the DJ service.
   const skip=()=>{setSkipped(true);setPrefs(false);scrollTo('booking-phase-4');};
   const closeForm=()=>{setPrefs(false);scrollTo('booking-step-6');};
-  const yesOn=djAdded||prefs;
+  const yesOn=prefs;// only selected when the client chooses it here, never because the DJ service was already in the booking
   return <>
     <img className="dj-service-hero" src="/echo/dj-service-hero.webp" width="1536" height="1024" alt={tr('A DJ at the decks, headphones on, mixing a live set','دي جي خلف الأجهزة يضع السماعات ويمزج مجموعة حيّة')} loading="lazy"/>
   <BookingStep number={6} className={`dj-service-step${prefs&&order?' is-prefs-open':''}`} title={tr('Would you like DJ Khalil at your event?','هل تريد دي جي خليل في فعاليتك؟')} cardTitle={tr('Your choice','اختيارك')}

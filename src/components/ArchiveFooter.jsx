@@ -32,6 +32,20 @@ function ArchiveMusicPlayer() {
   },[]);
   const audio = useRef(null);
   const scratch = useRef({active:false,was:false,timer:0});
+  // Song-to-song transition (like Anghami): the old song fades out, the next one fades in.
+  const fade = useRef({raf:0,pendingIn:false,hasPlayed:false});
+  const ramp = (to, ms, done) => {
+    const element = audio.current;
+    cancelAnimationFrame(fade.current.raf);
+    if (!element) { done?.(); return; }
+    const from = element.volume, start = performance.now();
+    const tick = now => {
+      const t = Math.min(1, (now - start) / ms), eased = t * t * (3 - 2 * t);
+      element.volume = Math.max(0, Math.min(1, from + (to - from) * eased));
+      if (t < 1) fade.current.raf = requestAnimationFrame(tick); else done?.();
+    };
+    fade.current.raf = requestAnimationFrame(tick);
+  };
   const [equalizer, setEqualizer] = useState(flatEqualizer);
   const [tracks, setTracks] = useState([]);
   const archiveQueue = useRef(null);
@@ -86,8 +100,8 @@ function ArchiveMusicPlayer() {
       const byId = new Map(catalog.songs.filter(song => song.audioUrl).map(song => [song.id, song]));
       const items = ids.map(id => byId.get(id)).filter(Boolean);
       if (!items.some(song => song.id === event.detail.id)) throw new Error('This recording is no longer published.');
-      setPlaying(false); setTracks(items); setSelected(event.detail.id); setEnabled(true);
-      beginPlayback({inline:event.detail.inline===true});
+      const open = () => { setPlaying(false); setTracks(items); setSelected(event.detail.id); setEnabled(true); beginPlayback({inline:event.detail.inline===true}); };
+      if (event.detail.id !== currentIdRef.current) fadeOutThen(open); else open();
     } catch (error) { setError(error.message || 'Could not open this recording.'); }
   };
   useEffect(() => {
@@ -126,6 +140,21 @@ function ArchiveMusicPlayer() {
     document.documentElement.classList.remove('echo-player-visible','echo-queue-open');
   }, []);
 
+  const volumeRef = useRef(volume);
+  volumeRef.current = volume;
+  const playingRef = useRef(false);
+  const currentIdRef = useRef('');
+  playingRef.current = playing;
+  currentIdRef.current = current?.id || '';
+  // A different recording than the one that was loaded: the next start fades in.
+  const lastTrackId = useRef(null);
+  useEffect(() => { if (lastTrackId.current && current?.id && lastTrackId.current !== current.id) fade.current.trackChanged = true; if (current?.id) lastTrackId.current = current.id; }, [current?.id]);
+  const fadeOutThen = run => {
+    const element = audio.current;
+    if (!element || !playingRef.current || element.paused) { run(); return; }
+    fade.current.pendingIn = true;
+    ramp(0, 450, run);
+  };
   useEffect(() => {
     if (!audio.current) return;
     audio.current.volume = volume;
@@ -151,8 +180,11 @@ function ArchiveMusicPlayer() {
     const element = audio.current;
     if (!element) return;
     let cancelled = false;
-    if (playing && currentUrl && enabled) element.play().catch(() => { if (!cancelled) { setPlaying(false); setError('Unable to play this recording. Try the next track.'); } });
-    else element.pause();
+    if (playing && currentUrl && enabled) {
+      const swap = fade.current.pendingIn || fade.current.hasPlayed && element.currentTime === 0 && fade.current.trackChanged;
+      if (swap) element.volume = 0; else { cancelAnimationFrame(fade.current.raf); element.volume = volumeRef.current; }
+      element.play().then(() => { fade.current.hasPlayed = true; if (swap) { fade.current.pendingIn = false; fade.current.trackChanged = false; ramp(volumeRef.current, 1100); } }).catch(() => { if (!cancelled) { setPlaying(false); setError('Unable to play this recording. Try the next track.'); } });
+    } else { cancelAnimationFrame(fade.current.raf); element.volume = volumeRef.current; element.pause(); }
     return () => { cancelled = true; element.pause(); };
   }, [playing, current?.id, currentUrl, enabled]);
 
@@ -163,7 +195,7 @@ function ArchiveMusicPlayer() {
     cancelPreparation();
     setError('');
     if (next.id === current?.id && audio.current) { audio.current.currentTime = 0; if (playing) audio.current.play().catch(() => setPlaying(false)); }
-    else setSelected(next.id);
+    else fadeOutThen(() => setSelected(next.id));
   };
 
   const remoteControl=useRef(null);

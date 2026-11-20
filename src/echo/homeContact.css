@@ -122,3 +122,31 @@ html body .echo.echo-public-page[data-page=home][data-theme]:has(#contact.home-c
 /* The direct-email address sits at the bottom of the Contact page, under the form. */
 .home-contact-direct{display:flex;flex-direction:column;align-items:center;gap:8px;padding:clamp(24px,4vw,48px) var(--echo-viewport-gutter,16px) clamp(32px,5vw,64px);text-align:center}
 .home-contact-direct small{color:#b7c8bd;font-size:13px}
+
+/* The button that opens the contact form. */
+.home-contact-open{display:inline-flex;align-items:center;gap:10px;margin-top:18px;min-height:48px;padding:0 24px;border:1px solid #c6e7d3;border-radius:999px;background:#c6e7d3;color:#0d1418;font:700 15px/1 'Manrope','Noto Sans Arabic',sans-serif;cursor:pointer;transition:transform .2s,box-shadow .2s}
+.home-contact-open:hover{transform:translateY(-2px);box-shadow:0 10px 26px #0006}
+.home-contact-open:focus-visible{outline:2px solid #fff;outline-offset:3px}
+.home-contact-panel{animation:home-contact-in .35s cubic-bezier(.2,.8,.2,1) both}
+@keyframes home-contact-in{from{opacity:0;transform:translateY(14px)}}
+@media(prefers-reduced-motion:reduce){.home-contact-panel{animation:none}}
+
+.home-contact-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:18px}
+.home-contact-actions .home-contact-open{margin-top:0}
+.home-contact-email{display:inline-flex;align-items:center;gap:10px;min-height:48px;padding:0 22px;border:1px solid #c6e7d3aa;border-radius:999px;color:#e9f3ec;font:600 15px/1 'Manrope',sans-serif;text-decoration:none;overflow-wrap:anywhere;transition:background .2s}
+.home-contact-email:hover{background:#c6e7d322}
+.home-contact-email:focus-visible{outline:2px solid #fff;outline-offset:3px}
+
+/* Closed: the intro sits centred in its column (both ways). Opening the form relocates it to the top and the form slides in under it. */
+html body .echo[data-page=home][data-theme] #contact.home-contact.is-form-closed>.viewport-fit-content{align-content:center!important;min-height:calc(var(--echo-viewport-height,100svh) - var(--echo-header-overlay-height,96px) - 24px)}
+html body .echo[data-page=home][data-theme] #contact.home-contact.is-form-closed .home-contact-intro{align-self:center;text-align:center;justify-self:center;width:100%}
+html body .echo[data-page=home][data-theme] #contact.home-contact.is-form-closed .home-contact-intro>p{margin-inline:auto}
+html body .echo[data-page=home][data-theme] #contact.home-contact.is-form-closed .home-contact-actions{justify-content:center}
+html body .echo[data-page=home][data-theme] #contact.home-contact.is-form-open .home-contact-intro{animation:home-contact-relocate .55s cubic-bezier(.2,.8,.2,1) both}
+@keyframes home-contact-relocate{from{transform:translateY(clamp(60px,22svh,220px))}to{transform:none}}
+@media(prefers-reduced-motion:reduce){html body .echo[data-page=home][data-theme] #contact.home-contact.is-form-open .home-contact-intro{animation:none}}
+/* Responsive text and buttons. */
+.home-contact-open,.home-contact-email{min-height:clamp(40px,5.6svh,48px);padding-inline:clamp(16px,1.9vw,24px);font-size:clamp(13px,1.15vw,15px)}
+.home-contact-actions{gap:clamp(8px,1vw,12px)}
+.home-contact-email span{min-width:0;overflow-wrap:anywhere}
+@media(max-width:480px){.home-contact-actions{flex-direction:column;align-items:stretch}.home-contact-open,.home-contact-email{justify-content:center;width:100%}}

@@ -2,7 +2,7 @@ import {NEXT_LIVE_DATE} from '../config/features';
 import {useViewportPhase} from './useViewportPhase';
 import {fitViewport} from './fitViewport';
 import {useEffect,useLayoutEffect,useRef,useState} from 'react';
-import {AudioLines,Disc3,ListMusic,Maximize2,Radio,Volume2,VolumeX} from 'lucide-react';
+import {AudioLines,Disc3,ListMusic,Maximize2,Radio,Volume2,VolumeX,X} from 'lucide-react';
 import {useLiveStatus,liveSessionIdentity} from '../hooks/useLiveStatus';
 import LiveSignInPrompt from './LiveSignInPrompt';
 import WebrtcViewer from '../components/WebrtcViewer';
@@ -18,7 +18,7 @@ import './livePhonePortrait.css';
 // Phones in portrait, plus touch tablets (iPad) in either orientation.
 // The edge-to-edge layout (picture fills the page; comments, set list and requests float over it) now applies in portrait AND landscape, on every screen.
 const PHONE_QUERY='(orientation:portrait), (orientation:landscape)';
-export default function HomeLiveConsole({lang,user,token,liveStream,liveSessions=[],isSessionReady}) {
+export default function HomeLiveConsole({lang,user,token,liveStream,liveSessions=[],isSessionReady,overlay=false}) {
   const ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en;
   useLayoutEffect(()=>{
     document.documentElement.classList.add('echo-live-page-open');
@@ -51,6 +51,7 @@ export default function HomeLiveConsole({lang,user,token,liveStream,liveSessions
   const phase=useViewportPhase(section);
   return fitViewport(<section className="echo-home-live echo-section" id="live" ref={section} dir={ar?'rtl':'ltr'} aria-label={tr('Live','البث المباشر')}>
     <div className="home-live-layout">
+    {overlay&&<button type="button" className="home-live-overlay-close" aria-label={tr('Close Live','إغلاق البث')} title={tr('Close Live','إغلاق البث')} onClick={()=>window.location.assign('/')}><X size={20} aria-hidden="true"/></button>}
     <div data-panel={panel} className={`home-live-console home-live-switcher home-live-columns has-comments${phone?' is-phone':''}${phase==='in'?' is-in':` is-away is-away-${phase}`}`}>
 
       <div className="home-live-grid">
