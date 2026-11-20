@@ -80,7 +80,7 @@ function Ladder({x,y,w=7,count=12,gap=1.5,h=3.2,metered,levelRef,level}){
   return <g ref={levelRef} className="ladder" style={level!==undefined?{'--channel-level':level}:undefined}>{Array.from({length:count},(_,i)=><rect key={i} className={i>count-3?'hot':i>count-6?'warn':''} x={x} y={y+(count-1-i)*(h+gap)} width={w} height={h} style={{'--i':i,'--n':count}}/>)}</g>;
 }
 
-function Deck({dx,n,real,player,eq}){
+function Deck({dx,n,real,player,eq,art}){
   const dur=player.duration||0,pos=player.position||0,ready=real&&Boolean(player.track)&&dur>0;
   const progress=ready?clamp(pos/dur,0,1):0,playing=real&&player.playing;
   const scrub=useRef(null);
@@ -88,8 +88,6 @@ function Deck({dx,n,real,player,eq}){
   const setTempo=value=>archivePlayerCommand('rate',Math.round((value+.5)*100)/100);
   const resetTempo=()=>archivePlayerCommand('rate',1);
   const C={x:189,y:194},DIM=36;
-  // The recording's artwork, cut to the circle of the left record (it turns with the platter).
-  const jogArt=player?.track?.coverImage?displayImageUrl(player.track.coverImage):'';
   const seek=t=>archivePlayerCommand('seek',clamp(t,0,dur));
   const ang=e=>{const p=toSvg(e,e.currentTarget);return Math.atan2(p.y-C.y,p.x-C.x-dx)*180/Math.PI;};
   return <g transform={`translate(${dx} 0)`} className={`deck${real?' is-real':''}`}>
@@ -107,14 +105,14 @@ function Deck({dx,n,real,player,eq}){
       <circle cx={C.x} cy={C.y} r="150" fill="#050606" stroke="#2a2d2f" strokeWidth="1.2"/><circle cx={C.x} cy={C.y} r="147" fill="none" stroke="#0e1011" strokeWidth="5"/>
       {Array.from({length:DIM},(_,i)=>{const a=rad(i*360/DIM-90);const on=real&&progress>0&&i/DIM<=progress;return <circle key={i} className={`dimple${on?' on':''}`} cx={C.x+Math.cos(a)*136} cy={C.y+Math.sin(a)*136} r="7.4"/>;})}
       <circle cx={C.x} cy={C.y} r="123" fill="url(#platter)" stroke="#000" strokeWidth="1.4"/>
-      <g className="platter" style={{animationPlayState:playing?'running':'paused'}}><circle cx={C.x} cy={C.y} r="123" fill="transparent"/>{real&&jogArt&&<><clipPath id={`jogArt${n}`}><circle cx={C.x} cy={C.y} r="122"/></clipPath><image href={jogArt} x={C.x-123} y={C.y-123} width="246" height="246" preserveAspectRatio="xMidYMid slice" clipPath={`url(#jogArt${n})`} opacity=".92"/></>}<line x1={C.x} y1={C.y-120} x2={C.x} y2={C.y-107} stroke="#2b2f31" strokeWidth="1.4"/>
+      <g className="platter" style={{animationPlayState:playing?'running':'paused'}}><circle cx={C.x} cy={C.y} r="123" fill="transparent"/><line x1={C.x} y1={C.y-120} x2={C.x} y2={C.y-107} stroke="#2b2f31" strokeWidth="1.4"/>
         <circle cx={C.x} cy={C.y} r="50" fill="#3d4143" stroke="#1b1e1f" strokeWidth="2"/><circle cx={C.x} cy={C.y} r="47" fill="none" stroke="#505558" strokeWidth=".6"/>
         <path d={`M${C.x-36} ${C.y-27} A45 45 0 0 1 ${C.x+36} ${C.y-27}`} fill="none" stroke="#2a2d2f" strokeWidth="2.4"/><path d={`M${C.x-36} ${C.y+27} A45 45 0 0 0 ${C.x+36} ${C.y+27}`} fill="none" stroke="#2a2d2f" strokeWidth="2.4"/></g>
       <circle cx={C.x} cy={C.y} r="150" fill="transparent" className="jog-hit" tabIndex={ready?0:-1} role="slider" aria-label="Jog wheel: drag to scratch and scrub" aria-valuemin={0} aria-valuemax={Math.round(dur)} aria-valuenow={Math.round(pos)}
         onKeyDown={e=>{if(ready&&(e.key==='ArrowRight'||e.key==='ArrowLeft')){e.preventDefault();seek(pos+(e.key==='ArrowRight'?5:-5));}}}
-        onPointerDown={e=>{if(!ready)return;e.currentTarget.setPointerCapture(e.pointerId);scrub.current={a:ang(e),t:pos,at:performance.now()};archivePlayerCommand('scratch',{phase:'start'});}}
-        onPointerMove={e=>{const s=scrub.current;if(!s)return;const a=ang(e);let d=a-s.a;if(d>180)d-=360;if(d<-180)d+=360;const now=performance.now(),step=d/360*1.8;s.a=a;s.t=clamp(s.t+step,0,dur);archivePlayerCommand('scratch',{phase:'move',pos:s.t,vel:step/Math.max(.008,(now-s.at)/1000)});s.at=now;}}
-        onPointerUp={()=>{if(scrub.current)archivePlayerCommand('scratch',{phase:'end'});scrub.current=null;}} onPointerCancel={()=>{if(scrub.current)archivePlayerCommand('scratch',{phase:'end'});scrub.current=null;}}/>
+        onPointerDown={e=>{if(!ready)return;e.currentTarget.setPointerCapture(e.pointerId);scrub.current={a:ang(e),t:pos,at:performance.now()};if(art)art.current.held=true;archivePlayerCommand('scratch',{phase:'start'});}}
+        onPointerMove={e=>{const s=scrub.current;if(!s)return;const a=ang(e);let d=a-s.a;if(d>180)d-=360;if(d<-180)d+=360;const now=performance.now(),step=d/360*1.8;if(art)art.current.angle+=d;s.a=a;s.t=clamp(s.t+step,0,dur);archivePlayerCommand('scratch',{phase:'move',pos:s.t,vel:step/Math.max(.008,(now-s.at)/1000)});s.at=now;}}
+        onPointerUp={()=>{if(scrub.current)archivePlayerCommand('scratch',{phase:'end'});if(art)art.current.held=false;scrub.current=null;}} onPointerCancel={()=>{if(scrub.current)archivePlayerCommand('scratch',{phase:'end'});if(art)art.current.held=false;scrub.current=null;}}/>
       <T x={98} y={326} s={5} f="#c5cacd">REV</T><T x={280} y={326} s={5} f="#c5cacd">FWD</T>
       <path d="M98 331 Q108 343 132 348" fill="none" stroke="#d6dbde" strokeWidth="1.1"/><path d="M280 331 Q270 343 246 348" fill="none" stroke="#d6dbde" strokeWidth="1.1"/>
     </g>
@@ -151,7 +149,25 @@ export default function DdjController({stems,mic,masterMeter}){
   // The status line (separating progress, notices) lives in the mixer face's footer when that footer exists.
   const footerStatus=document.getElementById('echo-channels-overlay-status')||document.getElementById('home-archive-mixer-status');
   const status=<div className="ddj-msg" role="status">{stemOn?'Stems on: faders, CUE (solo) and the A·THRU·B switch (mute) control Vocals, Drums, Bass and Music.':stems?<StemChannelControls stems={stems}/>:''}{mic?.notice?` ${mic.notice}`:''}</div>;
-  return <div className="ddj-host"><svg className="ddj-svg" viewBox={`0 0 ${W} ${H+LABEL_H}`} role="group" aria-label="Performance DJ controller" preserveAspectRatio="xMidYMid meet">
+  // The recording's artwork turns on the left record. It is a plain HTML image over the drawing (turned by the GPU, with a hole for the spindle), so the large SVG is never repainted while it spins.
+  const jogArt=player.track?.coverImage?displayImageUrl(player.track.coverImage):'';
+  const TH=H+LABEL_H,JC={x:189,y:194};
+  // Artwork rotation, in degrees. One turn = 1.8 s of music at 1x (the same mapping the jog wheel uses to scrub), so the artwork turns at the music's speed while playing,
+  // and while the record is held it follows the hand exactly (same direction, same speed) because the jog wheel adds its own angle changes here.
+  const art=useRef({angle:0,held:false,el:null,playing:false,rate:1});
+  art.current.playing=Boolean(player.playing);art.current.rate=Number(player.playbackRate)||1;
+  useEffect(()=>{
+    let frame=0,last=performance.now();
+    const tick=now=>{
+      const state=art.current,dt=Math.max(0,Math.min(.1,(now-last)/1000));last=now;
+      if(!state.held&&state.playing)state.angle+=360/1.8*state.rate*dt;
+      if(state.el)state.el.style.transform=`translateZ(0) rotate(${state.angle}deg)`;
+      frame=requestAnimationFrame(tick);
+    };
+    frame=requestAnimationFrame(tick);
+    return()=>cancelAnimationFrame(frame);
+  },[]);
+  return <div className="ddj-host"><div className="ddj-stage"><div className="ddj-frame" style={{aspectRatio:`${W} / ${TH}`,'--ratio':W/TH}}><svg className="ddj-svg" viewBox={`0 0 ${W} ${TH}`} role="group" aria-label="Performance DJ controller" preserveAspectRatio="xMidYMid meet">
     <defs>
       <linearGradient id="body" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#141618"/><stop offset="1" stopColor="#0a0b0c"/></linearGradient>
       <radialGradient id="knobBody" cx=".4" cy=".32"><stop offset="0" stopColor="#4d5357"/><stop offset=".6" stopColor="#15181a"/><stop offset="1" stopColor="#050606"/></radialGradient>
@@ -161,7 +177,7 @@ export default function DdjController({stems,mic,masterMeter}){
     </defs>
     <rect x="0" y="0" width={W} height={H} rx="9" fill="url(#body)" stroke="#2c3033" strokeWidth="1.4"/>
     <rect x="370" y="3" width="326" height={H-6} fill="#0b0c0d" stroke="#2a2d2f"/>
-    <Deck dx={0} n={1} real player={player} eq={eq}/><Deck dx={DECK2} n={2} player={player} eq={eq}/>
+    <Deck dx={0} n={1} real player={player} eq={eq} art={art}/><Deck dx={DECK2} n={2} player={player} eq={eq}/>
     {/* mic column */}
     <g className="mixer">
       <rect x="373" y="9" width="44" height="9" fill="#17191b" stroke="#2a2d2f"/><T x={395} y={16} s={5.2} f="#e8ecee">MIC</T>{mic?.active&&mic.latency&&<T x={395} y={6.5} s={3.4} f="#7fd6b0" aria-label="Browser audio latency">{(()=>{const total=mic.latency.base==null&&mic.latency.output==null?null:(mic.latency.base||0)+(mic.latency.output||0);return total==null?'LAT n/a':`LAT ${(total*1000).toFixed(1)} ms`;})()}</T>}
@@ -215,5 +231,7 @@ export default function DdjController({stems,mic,masterMeter}){
       <T x={656.5} y={473} s={3.6} f="#aab3b7">EQ FLAT</T>
     </g>
   </svg>
+  {jogArt&&<img ref={el=>{art.current.el=el;}} className="ddj-jog-art" src={jogArt} alt="" aria-hidden="true" draggable="false" style={{left:`${(JC.x-123)/W*100}%`,top:`${(JC.y-123)/TH*100}%`,width:`${246/W*100}%`,height:`${246/TH*100}%`}}/>}
+  </div></div>
   {footerStatus&&createPortal(status,footerStatus)}</div>;
 }

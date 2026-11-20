@@ -5,6 +5,7 @@ import { UserRound, Languages } from 'lucide-react';
 import AccountMenu from './AccountMenu';
 import './headerNav.css';
 import ClientAppBadge,{AndroidIconLink} from './ClientAppBadge';
+import HeaderMiniPlayer from './HeaderMiniPlayer';
 import SkipLoginOption from './SkipLoginOption';
 import LanguageOverlay from './LanguageOverlay';
 import {useBrowserChromeTheme} from './useBrowserChromeTheme';
@@ -120,6 +121,7 @@ export default function EchoShell({ lang, user, onLogout, children }) {
         <span className="echo-logo echo-logo--paired"><span className="echo-brand-pair"><img className="echo-brand-mark" src="/echo/dj-khalil-nahhat-logo.svg" alt="DJ Khalil Nahhat" width="240" height="90" /><img className="echo-event-brand-mark" src="/echo/echo-event-entertainment-white-original.png" alt="ECHO Event & Entertainment" width="1392" height="1130" /></span></span>
         {(current==='/'||current==='/login')&&<button type="button" className="echo-icon-button echo-lang echo-lang-start" onClick={()=>{if(current==='/')window.dispatchEvent(new Event('echo:hero-language-request'));else setLanguageOpen(true);}} aria-label={tr('Choose language','اختار اللغة')} title={tr('Choose language','اختار اللغة')}><Languages size={22} aria-hidden="true"/></button>}
         {pageTitle&&<h1 className="echo-page-title">{pageTitle}</h1>}
+        <HeaderMiniPlayer ar={ar} path={current}/>
         <div className="echo-header-actions">
           {current==='/'&&!(user&&!user.isAdmin)&&<AndroidIconLink tr={tr}/>}
           {(()=>{

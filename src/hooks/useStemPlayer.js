@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { apiRequest, apiBaseUrl } from '../lib/api';
-import { initialStemMix, STEM_CHANNELS, STEM_REQUIRED, stemGain, scheduleStemSources, stemDecodeBytes, STEM_DECODE_LIMIT } from '../lib/stemMix';
+import { initialStemMix, STEM_CHANNELS, STEM_REQUIRED, stemGain, scheduleStemSources, stemDecodeBytes, stemDecodeLimit } from '../lib/stemMix';
 
 export default function useStemPlayer({audio, track, audioGraph, unlock, master, active=false}) {
   const [status,setStatus] = useState({status:'idle',channels:[]});
@@ -116,7 +116,8 @@ export default function useStemPlayer({audio, track, audioGraph, unlock, master,
     setLoading(true);setNotice('Loading separated channels…');
     try {
       await graph.context.resume();
-      if(stemDecodeBytes(Number(status.duration||audio.current?.duration),graph.context.sampleRate,status.channels.length)>STEM_DECODE_LIMIT)throw new Error('This recording is too long to load separated channels within the mixer memory limit. Original audio remains available.');
+      const limit=stemDecodeLimit();
+      if(stemDecodeBytes(Number(status.duration||audio.current?.duration),graph.context.sampleRate,status.channels.length)>limit)throw new Error('This recording is too long to load separated channels within the mixer memory limit. Original audio remains available.');
       const buffers={};let decodedBytes=0;
       // Decode one channel at a time; canceled track/mixer requests cannot
       // continue downloading or retain a second set of full-length PCM buffers.
@@ -127,7 +128,7 @@ export default function useStemPlayer({audio, track, audioGraph, unlock, master,
         if(!response.ok)throw new Error('A channel could not be loaded.');
         const buffer=await graph.context.decodeAudioData(await response.arrayBuffer());
         decodedBytes+=buffer.length*buffer.numberOfChannels*Float32Array.BYTES_PER_ELEMENT;
-        if(decodedBytes>STEM_DECODE_LIMIT)throw new Error('Separated channels exceeded the mixer memory limit. Original audio remains available.');
+        if(decodedBytes>limit)throw new Error('Separated channels exceeded the mixer memory limit. Original audio remains available.');
         if(STEM_CHANNELS.includes(channel.name))buffers[channel.name]=buffer;
       }
       if(request!==generation.current || current.current!==id) return;

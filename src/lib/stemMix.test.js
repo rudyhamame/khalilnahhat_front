@@ -37,3 +37,10 @@ test('optional full-track channels have an explicit memory budget before decodin
  assert.equal(stemDecodeBytes(NaN,44100),Infinity);
  assert.equal(stemDecodeBytes(180,0),Infinity);
 });
+test('desktop gets a bigger decode limit than phones',async()=>{
+ const {stemDecodeBytes,STEM_DECODE_LIMIT,stemDecodeLimit}=await import('./stemMix.js');
+ assert.equal(stemDecodeLimit({userAgent:'iPhone',deviceMemory:8}),STEM_DECODE_LIMIT);
+ assert.ok(stemDecodeLimit({userAgent:'Mozilla/5.0 (X11; Linux x86_64)',deviceMemory:8})>stemDecodeBytes(283,48000,6));
+ assert.ok(stemDecodeLimit({userAgent:'Mozilla/5.0 (X11; Linux x86_64)'})>stemDecodeBytes(283,48000,6));
+ assert.equal(stemDecodeLimit({userAgent:'Mozilla/5.0 (X11; Linux x86_64)',deviceMemory:2}),STEM_DECODE_LIMIT);
+});

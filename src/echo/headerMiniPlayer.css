@@ -43,3 +43,24 @@ html body .echo[data-theme] .echo-header>.header-mini-player:not(#_){position:ab
 html body .echo[data-theme] .header-mini-player :is(.hmp-text,.hmp-play,.hmp-next,.hmp-close,.hmp-progress):not(#_){display:none!important}
 html body .echo[data-theme] .header-mini-player .hmp-open:not(#_){display:grid;place-items:center;flex:none;width:100%;height:100%}
 html body .echo[data-theme] .header-mini-player .hmp-art:not(#_){width:100%;height:100%;box-shadow:0 0 0 2px #ffffffb0,0 0 0 5px #0006,0 6px 18px #0008}
+
+/* The drop-down under the round record button. */
+html body .echo[data-theme] .header-mini-player .hmp-open:not(#_){display:grid;place-items:center;width:100%;height:100%;padding:0;border:0;background:none;cursor:pointer;border-radius:50%}
+.hmp-menu{position:absolute;inset-block-start:calc(100% + 10px);inset-inline-start:50%;translate:-50% 0;z-index:9000;display:flex;flex-direction:column;gap:4px;min-width:210px;padding:6px;border:1px solid #ffffff24;border-radius:14px;background:#0d1214f2;box-shadow:0 16px 40px #0008;backdrop-filter:blur(10px);animation:hmp-menu-in .18s ease both}
+[dir=rtl] .hmp-menu{translate:50% 0}
+.hmp-menu-title{margin:0;padding:6px 12px 8px;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#ffffffa6;font:600 12px/1.2 'Manrope','Noto Sans Arabic',sans-serif;border-bottom:1px solid #ffffff1c}
+html body .echo[data-theme] .header-mini-player .hmp-menu button:not(#_){display:flex;align-items:center;gap:10px;width:100%;height:auto;min-height:42px;padding:0 12px;border:0;border-radius:10px;background:none;color:#eef5f0;font:600 14px/1 'Manrope','Noto Sans Arabic',sans-serif;text-align:start;cursor:pointer}
+html body .echo[data-theme] .header-mini-player .hmp-menu button:not(#_):hover,html body .echo[data-theme] .header-mini-player .hmp-menu button:not(#_):focus-visible{background:#ffffff14;outline:none}
+@keyframes hmp-menu-in{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.hmp-menu{animation:none}}
+
+/* 3D vinyl record: grooved black disc with a light sheen, a rim, depth shadows, the recording's artwork as the centre label and a spindle hole. */
+html body .echo[data-theme] .header-mini-player .hmp-art:not(#_){position:relative;display:block;width:100%;height:100%;border-radius:50%;overflow:visible;
+ background:radial-gradient(circle at 50% 50%,#000 0 7%,transparent 7.5%),repeating-radial-gradient(circle at 50% 50%,#0a0a0b 0 1.1px,#1b1c1e 1.1px 2.2px),#0b0b0c;
+ box-shadow:0 0 0 1.5px #3a3c40,0 0 0 3px #08090a,0 8px 14px #000c,0 2px 4px #000,inset 0 0 0 2px #00000099,inset 0 -3px 6px #ffffff10;transform-style:preserve-3d}
+html body .echo[data-theme] .header-mini-player .hmp-art:not(#_)>img{position:absolute;inset:27%;width:46%;height:46%;border-radius:50%;object-fit:cover;box-shadow:0 0 0 1.5px #000,0 0 0 3px #ffffff22,inset 0 0 6px #0008}
+html body .echo[data-theme] .header-mini-player .hmp-art:not(#_)::before{content:'';position:absolute;inset:0;border-radius:50%;pointer-events:none;background:conic-gradient(from 20deg,transparent 0 10%,#ffffff2e 15%,transparent 22% 60%,#ffffff26 65%,transparent 72%);mix-blend-mode:screen}
+html body .echo[data-theme] .header-mini-player .hmp-art:not(#_)::after{content:'';position:absolute;inset:47%;border-radius:50%;background:#050506;box-shadow:inset 0 0 2px #fff6,0 0 0 1px #000;pointer-events:none}
+html body .echo[data-theme] .header-mini-player .hmp-open:not(#_){filter:drop-shadow(0 6px 8px #000a);transition:transform .25s cubic-bezier(.2,.8,.2,1)}
+html body .echo[data-theme] .header-mini-player .hmp-open:not(#_):hover{transform:translateY(-2px) scale(1.06)}
+html body .echo[data-theme] .header-mini-player .hmp-open:not(#_):active{transform:translateY(1px) scale(.97)}

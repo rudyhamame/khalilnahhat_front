@@ -79,3 +79,5 @@ html body .echo[data-page=home][data-theme] .dj-choice>.avail-kicker{display:blo
 /* The STEP.SEC.ATOM badge sits at the opposite (end) side of its label row. */
 html body .echo[data-page=home][data-theme] :is(.avail-kicker,.rentals-hero-kicker,.rw-kicker):has(>.ysf-order){display:flex;align-items:center;gap:8px}
 html body .echo[data-page=home][data-theme] :is(.avail-kicker,.rentals-hero-kicker,.rw-kicker)>.ysf-order{order:2;margin-inline:auto 0}
+/* DJ service label: the badge and the label swap places (badge at the start, label at the end). */
+html body .echo[data-page=home][data-theme] .dj-choice>.avail-kicker>.ysf-order{order:-1;margin-inline:0 auto}

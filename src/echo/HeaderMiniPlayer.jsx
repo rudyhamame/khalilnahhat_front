@@ -1,5 +1,5 @@
 import {useEffect,useRef,useState} from 'react';
-import {Pause,Play,SkipForward,X} from 'lucide-react';
+import {Disc3,X} from 'lucide-react';
 import {displayImageUrl} from '../lib/displayImage';
 import {useArchivePlayerState,useArchivePlaybackPosition} from '../hooks/useArchivePlayerState';
 import {archivePlayerCommand} from '../lib/archivePlayerBridge';
@@ -9,6 +9,14 @@ import './headerMiniPlayer.css';
 export default function HeaderMiniPlayer({ar=false,path}){
  const player=useArchivePlayerState(),track=player.track,position=useArchivePlaybackPosition(track?.id),arrived=useRef(null);
  const [dismissed,setDismissed]=useState(false);
+ const [menu,setMenu]=useState(false),root=useRef(null);
+ useEffect(()=>{
+  if(!menu)return undefined;
+  const outside=event=>{if(!root.current?.contains(event.target))setMenu(false);};
+  const key=event=>{if(event.key==='Escape')setMenu(false);};
+  document.addEventListener('pointerdown',outside);document.addEventListener('keydown',key);
+  return()=>{document.removeEventListener('pointerdown',outside);document.removeEventListener('keydown',key);};
+ },[menu]);
  useEffect(()=>{setDismissed(false);},[track?.id]);
  useEffect(()=>{if(player.playing)setDismissed(false);},[player.playing]);
  // Leaving the music player: the artwork badge flies from where it sat into this pill, then the pill's own artwork shows.
@@ -31,14 +39,17 @@ export default function HeaderMiniPlayer({ar=false,path}){
  const progress=player.duration>0?Math.max(0,Math.min(1,position/player.duration)):0;
  const art=displayImageUrl(track.coverImage);
  const next=()=>{const list=player.tracks||[];if(list.length<2)return;const at=list.findIndex(item=>item.id===track.id),target=list[(at+1)%list.length];window.dispatchEvent(new CustomEvent('echo:archive-play',{detail:{id:target.id,ids:list.map(item=>item.id),inline:true}}));};
- return <div className="header-mini-player" dir={ar?'rtl':'ltr'} role="group" aria-label={tr('Now playing','قيد التشغيل')}>
-  <a className="hmp-open" href={`/music?play=${encodeURIComponent(track.workType||'')}`} onClick={event=>{if(path==='/music'){event.preventDefault();window.dispatchEvent(new CustomEvent('echo:work-player-open',{detail:{type:track.workType}}));}}} title={tr('Open the music player','فتح مشغل الموسيقى')}>
+ const openPlayer=()=>{setMenu(false);if(path==='/music')window.dispatchEvent(new CustomEvent('echo:work-player-open',{detail:{type:track.workType}}));else window.location.assign(`/music?play=${encodeURIComponent(track.workType||'')}`);};
+ const closeRecording=()=>{setMenu(false);archivePlayerCommand('eject');setDismissed(true);};
+ // The round record button: tapping it drops a small menu (go to the player of this recording, or close the recording).
+ return <div ref={root} className="header-mini-player" dir={ar?'rtl':'ltr'} role="group" aria-label={tr('Now playing','قيد التشغيل')}>
+  <button type="button" className="hmp-open" aria-haspopup="menu" aria-expanded={menu} onClick={()=>setMenu(value=>!value)} title={`${track.title} · ${tr('Now playing','قيد التشغيل')}`} aria-label={`${tr('Now playing','قيد التشغيل')}: ${track.title}`}>
    <span ref={arrived} className={`hmp-art${playing?' is-spinning':''}`}>{art?<img src={art} alt=""/>:null}</span>
-   <span className="hmp-text"><strong dir="auto">{track.title}</strong><small dir="auto">{track.artist||'DJ Khalil'}</small></span>
-  </a>
-  <button type="button" className="hmp-play" onClick={()=>archivePlayerCommand('toggle')} aria-label={playing?tr('Pause','إيقاف مؤقت'):tr('Play','تشغيل')}>{busy&&!playing?<i className="hmp-spin" aria-hidden="true"/>:playing?<Pause size={15} fill="currentColor"/>:<Play size={15} fill="currentColor"/>}</button>
-  <button type="button" className="hmp-next" onClick={next} disabled={(player.tracks||[]).length<2} aria-label={tr('Next recording','التسجيل التالي')}><SkipForward size={15} fill="currentColor"/></button>
-  <button type="button" className="hmp-close" onClick={()=>{archivePlayerCommand('stop');setDismissed(true);}} aria-label={tr('Close mini player','إغلاق المشغل المصغر')} title={tr('Close mini player','إغلاق المشغل المصغر')}><X size={15}/></button>
-  <i className="hmp-progress" style={{width:`${progress*100}%`}} aria-hidden="true"/>
+  </button>
+  {menu&&<div className="hmp-menu" role="menu" aria-label={track.title}>
+   <p className="hmp-menu-title" dir="auto">{track.title}</p>
+   <button type="button" role="menuitem" onClick={openPlayer}><Disc3 size={16} aria-hidden="true"/><span>{tr('Go to music player','الذهاب إلى مشغل الموسيقى')}</span></button>
+   <button type="button" role="menuitem" onClick={closeRecording}><X size={16} aria-hidden="true"/><span>{tr('Close recording','إغلاق التسجيل')}</span></button>
+  </div>}
  </div>;
 }

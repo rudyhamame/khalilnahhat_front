@@ -184,7 +184,7 @@ html body .echo .glow-cards.work-overview-slots{height:auto;justify-content:star
 
 .work-overview-slots .glow-card-text{position:absolute;inset-inline:8.5%;top:50%;min-width:0;translate:0 -50%;text-align:center}
 html body .echo .work-type-journey .glow-card-text :is(h3,p){overflow-wrap:normal;word-break:normal;hyphens:none}
-html body .echo .work-type-journey .glow-card h3{box-sizing:border-box;width:100%;min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;font-size:clamp(12px,calc(var(--u)*14),48px);line-height:1.1;white-space:nowrap}
+html body .echo .work-type-journey .glow-card h3{box-sizing:border-box;width:100%;min-width:0;max-width:100%;overflow-x:clip;overflow-y:visible;text-overflow:ellipsis;font-size:clamp(12px,calc(var(--u)*14),48px);line-height:1.5;padding-block:.04em;white-space:nowrap}
 html body .echo [dir=rtl] .work-type-journey .glow-card-text{direction:rtl;text-align:right}
 .work-overview-slots .glow-card-open{inset-block-start:auto;inset-block-end:14%;translate:-50% 0}
 

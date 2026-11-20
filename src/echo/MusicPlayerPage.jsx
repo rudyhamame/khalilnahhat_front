@@ -109,7 +109,7 @@ export default function MusicPlayerPage({lang,type:typeProp,workType,onClose,pla
   const chosen=collections.find(item=>item.recordingIds?.includes(current?.id));
   const heading=djWorkTypeText(workType,ar).name||tr('Recordings','التسجيلات');
   const art=current?artwork(current):FALLBACK_ART;
-  const BackIcon=ar?ChevronRight:ChevronLeft;// the back arrow points the way the page reads
+  const BackIcon=ChevronLeft;// the back arrow always points left
   const back=onClose?<button type="button" className={`wp-icon${hint==='back'?' is-hinting':''}`} onClick={onClose} aria-label={tr('Back to DJ Khalil’s work','العودة إلى أعمال دي جي خليل')}><BackIcon size={22}/></button>:<a className="wp-icon" href="/music" aria-label={tr('Back to DJ Khalil’s work','العودة إلى أعمال دي جي خليل')}><BackIcon size={22}/></a>;
   if(status==='loading')return <section className={`wp wp-loading${onClose?' wp-inline':''}`} dir={ar?'rtl':'ltr'}>{onClose&&<div className="wp-back">{back}</div>}<MusicContentLoader ar={ar}/></section>;
   return <><section ref={root} className={`wp${onClose?' wp-inline':''}`} dir={ar?'rtl':'ltr'} aria-label={tr('Music player','مشغل الموسيقى')} onPointerDownCapture={event=>{if(hint==='back')setHint('browse');else if(hint==='browse'&&event.target.closest?.('.wp-badge'))setHint('');}}>
@@ -120,11 +120,11 @@ export default function MusicPlayerPage({lang,type:typeProp,workType,onClose,pla
     <div className={`wp-card${flipped?' is-flipped':''}${browse?' is-browsing':''}`}>
     <div className="wp-deck" aria-hidden={flipped||browse?true:undefined} inert={flipped||Boolean(browse)||undefined}>
       <header className="wp-top">
-        {onClose?back:<span className="wp-icon wp-spacer" aria-hidden="true"/>}
-        {onClose&&hint==='back'&&!browse&&!flipped&&<span className="wp-back-hint" aria-hidden="true">{tr('Finished listening? Tap the arrow to head back.','خلّصت استماع؟ اضغط على السهم للرجوع.')}</span>}
+        <button type="button" className="wp-icon wp-channels-btn" disabled={!current} onClick={()=>setChannels(true)} aria-label={tr('Channels: mix the vocals, drums, bass and music','القنوات: ميكس الغناء والطبول والباس والموسيقى')} title={tr('Channels','القنوات')}><SlidersHorizontal size={20}/></button>
         <button type="button" ref={badge} className={`wp-badge${hint==='browse'&&!browse?' is-hinting':''}`} title={tr('Browse collections and recordings','تصفّح المجموعات والتسجيلات')} aria-label={tr('Browse collections','تصفّح المجموعات')} aria-haspopup="true" aria-expanded={Boolean(browse)} onClick={()=>setBrowse('collections')}><img src={art} alt=""/></button>
         {hint==='browse'&&!browse&&!flipped&&<span className="wp-badge-hint" aria-hidden="true">{tr('Tap the round picture to browse collections, then pick a recording.','اضغط على الصورة الدائرية لتصفّح المجموعات ثم اختر تسجيلاً.')}</span>}
-        <button type="button" className="wp-icon wp-channels-btn" disabled={!current} onClick={()=>setChannels(true)} aria-label={tr('Channels: mix the vocals, drums, bass and music','القنوات: ميكس الغناء والطبول والباس والموسيقى')} title={tr('Channels','القنوات')}><SlidersHorizontal size={20}/></button>
+        {onClose&&hint==='back'&&!browse&&!flipped&&<span className="wp-back-hint" aria-hidden="true">{tr('Finished listening? Tap the arrow to head back.','خلّصت استماع؟ اضغط على السهم للرجوع.')}</span>}
+        {onClose?back:<span className="wp-icon wp-spacer" aria-hidden="true"/>}
       </header>
       {!current?<p className="wp-empty" role={status==='error'?'alert':'status'}>{status==='error'?tr('The archive could not load.','تعذر تحميل الأرشيف.'):tr('No recordings here yet.','لا توجد تسجيلات هنا بعد.')}</p>:<>
         <div className="wp-wheel" ref={wheel} dir="ltr" tabIndex={0} role="group" aria-roledescription="carousel" aria-label={tr('Artwork wheel — swipe to change recording','عجلة الأغلفة — اسحب لتغيير التسجيل')} onKeyDown={key}
