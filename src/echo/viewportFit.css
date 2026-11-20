@@ -56,6 +56,6 @@
 .echo-hero-static-artist{display:none;pointer-events:none}
 .echo-artist-sequence:has([data-archive-stage=true])>.echo-hero-static-artist{display:block}
 
-/* No shrinking: a chapter is at least one viewport tall and grows with its content instead of scaling it down or clipping it. */
-.echo[data-page="home"][data-theme] :is(#echo-main,.event-order-main)>.viewport-fit-section{height:auto!important;min-height:var(--echo-viewport-height,100svh)!important;max-height:none!important;overflow:visible!important}
+/* No shrinking: a chapter is as tall as its content; only the hero (image + text) is sized to the viewport. It grows with its content instead of scaling it down or clipping it. */
+.echo[data-page="home"][data-theme] :is(#echo-main,.event-order-main)>.viewport-fit-section{height:auto!important;min-height:0!important;max-height:none!important;overflow:visible!important}
 .echo[data-page="home"][data-theme] .viewport-fit-section>.viewport-fit-content{position:relative!important;width:100%!important;height:auto!important;left:auto!important;top:auto!important;transform:none!important}
