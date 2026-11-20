@@ -8,13 +8,13 @@
 .obs-session-toolbar { display:flex; align-items:center; flex-wrap:wrap; gap:10px 16px; min-width:0; }
 .obs-status { display:inline-flex; align-items:center; gap:7px; font-size:12px; font-weight:500; color:var(--aw-text,inherit); }
 .obs-status>i { width:7px; height:7px; border-radius:50%; background:#8c9690; flex:none; }
-.obs-status.is-live>i { background:#4fd18b; box-shadow:0 0 0 3px #4fd18b22; }
+.obs-status.is-live>i { background:#909090; box-shadow:0 0 0 3px #90909022; }
 .obs-status.is-waiting>i { background:#e6b95a; box-shadow:0 0 0 3px #e6b95a22; }
 .obs-recording-option { display:flex; align-items:center; gap:10px; margin-inline-start:auto; padding:0; }
 .obs-recording-option > div { min-width:0; }
 .obs-recording-option strong { display:block; font-size:12px; font-weight:500; margin:0 0 2px; }
 .obs-controls .obs-recording-switch { appearance:none; flex:none; position:relative; width:30px; min-width:30px; height:18px; min-height:18px; padding:2px; border:0; border-radius:20px; background:#72788166; cursor:pointer; box-shadow:none; }
-.obs-controls .obs-recording-switch[aria-checked="true"] { background:#278975; }
+.obs-controls .obs-recording-switch[aria-checked="true"] { background:#585858; }
 .obs-controls .obs-recording-switch > span { display:block; width:14px; height:14px; border-radius:50%; background:#fff; transform:translateX(0); }
 .obs-controls .obs-recording-switch[aria-checked="true"] > span { transform:translateX(12px); }
 .obs-controls .obs-recording-switch:disabled { opacity:.5; cursor:default; }
@@ -39,3 +39,36 @@
 .obs-quality-option{min-width:0;padding:10px 12px;border:1px solid var(--aw-line,#ffffff1f);border-radius:8px}
 .obs-quality-option h5{margin:0 0 6px;font-size:13px}
 .obs-quality-option ol{margin:0;padding-inline-start:18px;display:grid;gap:4px;font-size:12px;line-height:1.45}
+
+/* OBS stream: status, a clear Save recording switch row, then a full-width action. */
+#admin-live-stream#admin-live-stream .obs-session-toolbar{display:flex;flex-direction:column;align-items:stretch;gap:12px}
+#admin-live-stream#admin-live-stream .obs-recording-option{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0;padding:12px 14px;border:1px solid #303030;background:#0c0c0c}
+#admin-live-stream#admin-live-stream .obs-recording-option strong{margin:0 0 2px;font-size:13px;font-weight:600;color:#f3f3f3}
+#admin-live-stream#admin-live-stream .obs-recording-option .obs-help{color:#999999}
+#admin-live-stream#admin-live-stream .obs-controls .obs-recording-switch{appearance:none;-webkit-appearance:none;flex:none;position:relative;display:block;width:42px;min-width:42px;height:24px;min-height:24px;margin:0;padding:0;border:1px solid #4c4c4c;border-radius:12px;background:#080808;box-shadow:none;cursor:pointer;transition:background .15s,border-color .15s}
+#admin-live-stream#admin-live-stream .obs-controls .obs-recording-switch>span{position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#999999;transform:none;transition:transform .15s,background .15s}
+#admin-live-stream#admin-live-stream .obs-controls .obs-recording-switch[aria-checked="true"]{background:#3c3c3c;border-color:#8e8e8e}
+#admin-live-stream#admin-live-stream .obs-controls .obs-recording-switch[aria-checked="true"]>span{transform:translateX(18px);background:#8e8e8e}
+#admin-live-stream#admin-live-stream .obs-controls .obs-recording-switch:disabled{opacity:.45;cursor:not-allowed}
+#admin-live-stream#admin-live-stream .obs-controls .obs-recording-switch:focus-visible{outline:2px solid #8e8e8e;outline-offset:2px}
+#admin-live-stream#admin-live-stream .obs-session-toolbar>.admin-live-control{width:100%;min-height:42px;margin:0;border:0;border-radius:0;background:#8e8e8e;color:#0c0c0c;font:600 13px/1 'Manrope',system-ui,sans-serif}
+#admin-live-stream#admin-live-stream .obs-session-toolbar>.admin-live-control:disabled{opacity:.4;cursor:not-allowed}
+
+/* OBS Studio setup (720p and 1080p): breathing room. */
+#admin-live-stream#admin-live-stream .obs-disclosures{gap:14px}
+#admin-live-stream#admin-live-stream .obs-setup-guide>summary{margin-bottom:12px}
+#admin-live-stream#admin-live-stream .obs-quality-guide{gap:16px;padding:4px 0 8px}
+#admin-live-stream#admin-live-stream .obs-quality-options{gap:16px}
+#admin-live-stream#admin-live-stream .obs-quality-option{padding:16px;border-radius:0}
+#admin-live-stream#admin-live-stream .obs-quality-option h5{margin:0 0 12px}
+#admin-live-stream#admin-live-stream .obs-quality-option ol{gap:10px;padding-inline-start:20px}
+
+/* No line above the OBS controls. */
+#admin-live-stream#admin-live-stream .obs-controls{border-top:0!important;padding-top:0!important}
+
+/* OBS stream, flattened: no boxes inside the card, hairlines only. */
+#admin-live-stream#admin-live-stream .obs-recording-option{border:0;border-top:1px solid #ffffff12;border-bottom:1px solid #ffffff12;background:transparent;padding:12px 0}
+#admin-live-stream#admin-live-stream .obs-quality-option{border:0;border-top:1px solid #ffffff12;background:transparent;padding:14px 0 0}
+#admin-live-stream#admin-live-stream .obs-field{border:0;border-bottom:1px solid #ffffff2e;background:transparent}
+#admin-live-stream#admin-live-stream .obs-field input{padding-inline:0;background:transparent;border:0}
+#admin-live-stream#admin-live-stream .obs-controls :is(details,summary,button:not(.obs-recording-switch)){border-radius:0;box-shadow:none}

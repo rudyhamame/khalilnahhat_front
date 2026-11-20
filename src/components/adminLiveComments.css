@@ -6,8 +6,8 @@
 #admin-live-stream .alc-count{min-width:20px;padding:1px 7px;border-radius:999px;background:#ffffff14;font-size:11px;font-weight:600;letter-spacing:0;text-align:center}
 #admin-live-stream .alc-status{display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border:1px solid #ffffff1f;border-radius:999px;font-size:11px;font-weight:600;white-space:nowrap}
 #admin-live-stream .alc-status i{width:6px;height:6px;border-radius:50%;background:#8b8f94}
-#admin-live-stream .alc-status[data-state=on]{border-color:#52d59a55;color:#8fe5bd}
-#admin-live-stream .alc-status[data-state=on] i{background:#52d59a;box-shadow:0 0 6px #52d59a99}
+#admin-live-stream .alc-status[data-state=on]{border-color:#94949455;color:#bababa}
+#admin-live-stream .alc-status[data-state=on] i{background:#949494;box-shadow:0 0 6px #94949499}
 #admin-live-stream .alc-status[data-state=warn]{border-color:#f0b13c66;color:#ffd27a}
 #admin-live-stream .alc-status[data-state=warn] i{background:#f0b13c;animation:alc-blink 1s ease-in-out infinite}
 @keyframes alc-blink{50%{opacity:.35}}

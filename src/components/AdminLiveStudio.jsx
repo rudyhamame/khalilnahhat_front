@@ -1,7 +1,7 @@
 import LiveElapsedTimer from './LiveElapsedTimer';
 import {useStudioWorkspaceLayout} from '../hooks/useStudioWorkspaceLayout';
 import {useCallback,useEffect,useRef,useState} from 'react';
-import {Video,Radio,VideoOff,Minimize2,Maximize2,RefreshCw,Layers,Share2,Eye,EyeOff,LoaderCircle,Square,Info,X,PanelLeftClose,PanelLeftOpen,PanelRightClose,PanelRightOpen} from 'lucide-react';
+import {Video,Radio,VideoOff,Minimize2,Maximize2,RefreshCw,Layers,Share2,Eye,EyeOff,LoaderCircle,Square,Info,X,PanelLeftClose,PanelLeftOpen} from 'lucide-react';
 import {adminToast} from './adminToast';
 import {useLiveStatus,liveSessionIdentity} from '../hooks/useLiveStatus';
 import {useWebrtcBroadcast} from '../hooks/useWebrtcBroadcast';
@@ -9,18 +9,16 @@ import {apiRequest} from '../lib/api';
 import {startStudioBroadcast} from '../lib/studioRecordingFallback';
 import MicStrip,{OutputStrip} from './MicStrip';
 import {useAutoDuck} from '../hooks/useAutoDuck';
-import RatioCards from './RatioCards';
 import {useOutputFormat} from '../hooks/useOutputFormat';
 import ObsBroadcast from './ObsBroadcast';
-import ObsQualityGuide from './ObsQualityGuide';
 import WebrtcViewer from './WebrtcViewer';
 import StudioPreviewMirror from './StudioPreviewMirror';
 import LiveDestinations from './LiveDestinations';
 import LiveGoalPicker from './LiveGoalPicker';
 import LiveSetListPicker from './LiveSetListPicker';
 import AdminLiveAudience from './AdminLiveAudience';
+import AdminLiveComments from './AdminLiveComments';
 import StudioControlSection from './StudioControlSection';
-import {LIVE_QUALITY,getLiveQuality,setLiveQuality} from '../lib/liveQuality';
 import './adminLiveStudio.css';
 import './studioControls.css';
 
@@ -117,7 +115,6 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  const inputLocked=webrtc.isConnecting||webrtc.previewBusy||webrtc.isBroadcasting;
  // The live is on air but this browser is not sending it (page reloaded, connection lost, live paused with no input): the sources must stay selectable so "Reconnect live" has something to reacquire.
  const reconnectHere=isLiveOnAir&&liveStream?.broadcastSource==='browser'&&!webrtc.isBroadcasting,liveLocksInput=isLiveOnAir&&!reconnectHere,inputsHeld=(reserved&&!reconnectHere)||liveLocksInput;
- const [liveQuality,setQualityState]=useState(()=>getLiveQuality().id),[qualityBusy,setQualityBusy]=useState(false);
  // OBS is the only source: Open preview finds its Virtual Camera (and an OBS audio device, if one exists) by name. Nothing else is ever opened.
  const hasAudioInput=Boolean(webrtc.selectedAudioDeviceId);
  const [obsOpening,setObsOpening]=useState(false);
@@ -139,16 +136,6 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  const lastCamera=useRef(webrtc.selectedVideoDeviceId);
  useEffect(()=>{if(lastCamera.current===webrtc.selectedVideoDeviceId)return;lastCamera.current=webrtc.selectedVideoDeviceId;if(webrtc.isPreviewing&&webrtc.sourceKind==='camera'){if(webrtc.paused||webrtc.inputLost)void webrtc.setPausedInput({kind:'camera'});else if(!webrtc.isBroadcasting)void webrtc.preparePreview();}},[webrtc.selectedVideoDeviceId]);// eslint-disable-line react-hooks/exhaustive-deps
  const previewFormat=output.format;
- const changeLiveQuality=async id=>{
-  if(id===liveQuality)return;
-  const selected=setLiveQuality(id);setQualityState(selected.id);
-  if(!webrtc.isPreviewing||webrtc.isBroadcasting||webrtc.previewBusy)return;
-  setQualityBusy(true);
-  try{
-   const devices=null;
-   await webrtc.preparePreview({kind:webrtc.sourceKind,file:webrtc.sourceFile,audio:webrtc.audioMode,audioSourceFile:webrtc.audioFile,devices});
-  }finally{setQualityBusy(false);}
- };
  const goLiveClick=()=>{if(beforeGoLive())void webrtc.goLive(broadcastTitle);};
  const actionButtons=(()=>{const otherLive=legacyObs||((isLiveOnAir||reserved)&&!webrtc.isBroadcasting);return <>
                       <button type="button" className={`admin-live-fullscreen studio-preview-toggle${webrtc.previewBusy?' st-busy':webrtc.isPreviewing||webrtc.isBroadcasting?' st-ok':''}`} disabled={webrtc.isConnecting||webrtc.previewBusy||webrtc.isBroadcasting||otherLive} aria-label={webrtc.previewBusy?'Opening devices…':webrtc.isPreviewing?'Close private preview':'Open private preview'} title={webrtc.isBroadcasting?'Preview stays open while you are live':otherLive?'Preview is controlled by the current source':webrtc.previewBusy?'Opening devices…':webrtc.isPreviewing?'Close private preview':'Open private preview · not on air'} onClick={webrtc.isPreviewing?webrtc.closePreview:()=>{void openObs();}}>{webrtc.previewBusy?<LoaderCircle size={18} className="studio-opening-spinner" aria-hidden="true"/>:webrtc.isPreviewing||webrtc.isBroadcasting?<EyeOff size={18} aria-hidden="true"/>:<Eye size={18} aria-hidden="true"/>}<span>{webrtc.previewBusy?'Opening…':webrtc.isPreviewing?'Close preview':'Open preview'}</span></button>
@@ -159,7 +146,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
                           :<><button type="button" className={`admin-live-fullscreen studio-go-live${webrtc.isConnecting?' st-busy':webrtc.isPreviewing&&!otherLive&&!webrtc.previewBusy?' st-ready':''}`} disabled={!webrtc.isPreviewing||webrtc.isConnecting||webrtc.previewBusy||otherLive} aria-label="Go live on Echo" title="Go live on Echo" onClick={goLiveClick}>{webrtc.preflight?<LoaderCircle size={18} className="studio-opening-spinner" aria-hidden="true"/>:<Radio size={18} aria-hidden="true"/>}<span>{webrtc.preflight?'Go live preflight':'Go live'}</span></button></>}
                     </>;})();
  return (
-          <section id="admin-live-stream" className="admin-panel admin-live-stream-panel" aria-label="Live studio" data-hide-left={hidden.left?'1':undefined} data-hide-right={hidden.right?'1':undefined}>
+          <section id="admin-live-stream" className="admin-panel admin-live-stream-panel" aria-label="Live studio" data-hide-left={hidden.left?'1':undefined}>
             <div><div className="section-label admin-panel-head">
               <div className="admin-panel-head-copy">
                 <p className="section-number">
@@ -192,8 +179,9 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
               {controlHint&&controlHint!==dismissedHint&&<div className={`studio-control-hint${' is-info'}`} role="status" aria-live="polite"><Info size={17} aria-hidden="true"/><p>{controlHint}</p><button type="button" className="studio-hint-close" aria-label="Dismiss message" title="Dismiss" onClick={()=>setDismissedHint(controlHint)}><X size={14} aria-hidden="true"/></button></div>}
                 <AdminLiveAudience setListActions={setListActions} liveSessions={liveSessions} token={token} session={isLiveOnAir?session:null} enabled={enabled} onReview={onReviewLiveRequest}/>
                 </div>
+<div className="studio-comments-below"><AdminLiveComments token={token} session={isLiveOnAir?session:null} enabled={enabled}/></div>
 <section ref={settingsArea} className="studio-control-dock studio-controls-redesign" aria-labelledby="studio-controller-title">
- <header className="studio-controller-heading"><button type="button" className="studio-column-button" onClick={()=>toggleColumn('left')} title={hidden.left?'Open the controls column':'Close the controls column'} aria-label={hidden.left?'Open the controls column':'Close the controls column'} aria-expanded={!hidden.left}>{hidden.left?<PanelLeftOpen size={20}/>:<PanelLeftClose size={20}/>}</button><h3 id="studio-controller-title">Input control</h3><div className="studio-controller-tools"><div className="studio-control-status" data-state={studioState} role="status"><strong>{{preflight:'Go live preflight',live:'On air',opening:'Opening preview',connecting:'Connecting',preview:'Private preview',offline:'Offline'}[studioState]}</strong></div>{studioState==='live'&&<LiveElapsedTimer key={session||'local-live'} session={session}/>}{statusBadges.map(badge=><span key={badge.key} className="studio-badge" data-tone={badge.tone} title={badge.title}>{badge.text}</span>)}<button type="button" className="admin-live-fullscreen studio-heading-fullscreen" onClick={toggleLiveFullscreen} aria-label={liveFullscreen ? 'Exit full screen' : 'Full screen'} title={liveFullscreen ? 'Exit full screen' : 'Full screen'}>{liveFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}</button></div></header>
+ <header className="studio-controller-heading"><button type="button" className="studio-column-button" onClick={()=>toggleColumn('left')} title={hidden.left?'Open the controls column':'Close the controls column'} aria-label={hidden.left?'Open the controls column':'Close the controls column'} aria-expanded={!hidden.left}>{hidden.left?<PanelLeftOpen size={20}/>:<PanelLeftClose size={20}/>}</button><h3 id="studio-controller-title">Live control</h3><div className="studio-controller-tools"><div className="studio-control-status" data-state={studioState} role="status"><strong>{{preflight:'Go live preflight',live:'On air',opening:'Opening preview',connecting:'Connecting',preview:'Private preview',offline:'OBS disconnected'}[studioState]}</strong></div>{studioState==='live'&&<LiveElapsedTimer key={session||'local-live'} session={session}/>}{statusBadges.map(badge=><span key={badge.key} className="studio-badge" data-tone={badge.tone} title={badge.title}>{badge.text}</span>)}</div></header>
  <div className="studio-control-workspace">
  <div className="studio-settings-tabs" role="tablist" aria-orientation="horizontal" aria-label="Stream settings sections" onKeyDown={event=>{
    const tabs=SETTINGS_TABS.map(([id])=>id),index=tabs.indexOf(settingsTab);
@@ -217,6 +205,12 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
 
 
 
+ <StudioControlSection step="02" title="Audience" description="Who can see and watch this live."><div className="aud">
+<label className="aud-row"><span className="aud-copy"><strong>This live session is test-only</strong><small>Hidden from guests and clients: no live badge, no playback, no live emails.</small></span><input className="aud-switch" type="checkbox" role="switch" aria-label="This live session is test-only" checked={(isLiveOnAir?(liveStream?.audience||'all'):audience)==='admins'} disabled={webrtc.isConnecting||reserved||isLiveOnAir} onChange={event=>setAudience(event.target.checked?'admins':'all')}/></label>
+   <div className="aud-row aud-select"><span className="aud-copy"><strong>Live session domain</strong><small>Who can see and watch this live.</small></span>
+    <select className="aud-input" aria-label="Live session domain" value={isLiveOnAir?(liveStream?.audience||'all'):audience} disabled={webrtc.isConnecting||reserved||isLiveOnAir} onChange={event=>setAudience(event.target.value)}><option value="all">All (guests, clients, admins)</option><option value="admins">Admins only</option><option value="clients">Clients only (and admins)</option><option value="specific">Specific clients</option></select></div>
+   {audience==='specific'&&!isLiveOnAir&&<div className="aud-clients"><input className="aud-input" type="search" placeholder="Search clients" aria-label="Search clients" value={clientQuery} onChange={event=>setClientQuery(event.target.value)}/>{audienceIds.length===0&&<small>Pick at least one client, or only admins will see this live.</small>}<ul>{clientRows.map(client=><li key={client.id}><label><input type="checkbox" checked={audienceIds.includes(client.id)} onChange={event=>setAudienceIds(ids=>event.target.checked?[...ids,client.id]:ids.filter(id=>id!==client.id))}/> {client.name||client.username} <small>{client.email}</small></label></li>)}</ul></div>}
+ </div></StudioControlSection>
  <StudioControlSection step="03" title="OBS stream" description="Stream straight from OBS to the OVH relay. Prepare OBS, paste the server and token into OBS, then start streaming. No browser camera is used." className="studio-sources-card"><div className="studio-block"><ObsBroadcast token={token} title={title.trim()} item={liveStream} onUpdate={item=>{apply(item);}}/></div></StudioControlSection>
  <fieldset className="admin-live-settings studio-source-settings" disabled={loading||Boolean(error)}>
   <div ref={setPreviewAudioControlsTarget} className="admin-preview-sound-slot"/>
@@ -229,25 +223,6 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  </div>
 </section>
               </div>
-<div className="studio-audience-requests-slot studio-recording-slot">
- <section className="studio-recording-card rec-card" aria-label="Recording">
- <header className="rec-head"><button type="button" className="studio-column-button" onClick={()=>toggleColumn('right')} title={hidden.right?'Open the recording column':'Close the recording column'} aria-label={hidden.right?'Open the recording column':'Close the recording column'} aria-expanded={!hidden.right}>{hidden.right?<PanelRightOpen size={20}/>:<PanelRightClose size={20}/>}</button><div className="rec-title"><h3 id="studio-save-live-title">Output control</h3></div></header>
- <div className="rec-scroll">
- <div>
-<label className="rec-toggle-row"><span><strong>This live session is test-only</strong><small>Hidden from guests and clients: no live badge, no playback, no live emails.</small></span><input type="checkbox" role="switch" aria-label="This live session is test-only" checked={isLiveOnAir?(liveStream?.audience||'all'):audience==='admins'} disabled={webrtc.isConnecting||reserved||isLiveOnAir} onChange={event=>setAudience(event.target.checked?'admins':'all')}/></label>
-   <div className="rec-toggle-row studio-audience-row"><span><strong>Live session domain</strong><small>Who can see and watch this live.</small></span>
-    <select aria-label="Live session domain" value={isLiveOnAir?(liveStream?.audience||'all'):audience} disabled={webrtc.isConnecting||reserved||isLiveOnAir} onChange={event=>setAudience(event.target.value)}><option value="all">All (guests, clients, admins)</option><option value="admins">Admins only</option><option value="clients">Clients only (and admins)</option><option value="specific">Specific clients</option></select></div>
-   {audience==='specific'&&!isLiveOnAir&&<div className="studio-audience-clients"><input type="search" placeholder="Search clients" aria-label="Search clients" value={clientQuery} onChange={event=>setClientQuery(event.target.value)}/>{audienceIds.length===0&&<small>Pick at least one client, or only admins will see this live.</small>}<ul>{clientRows.map(client=><li key={client.id}><label><input type="checkbox" checked={audienceIds.includes(client.id)} onChange={event=>setAudienceIds(ids=>event.target.checked?[...ids,client.id]:ids.filter(id=>id!==client.id))}/> {client.name||client.username} <small>{client.email}</small></label></li>)}</ul></div>}
- <StudioControlSection step="02a" title="Live output ratio" description="Choose what the live sends. The picture is composed in OBS." className="studio-ratio-card"><div className="studio-block"><RatioCards format={output.format} locked={webrtc.isBroadcasting} onChange={output.setFormat}/></div></StudioControlSection>
- <StudioControlSection step="02b" title="Picture quality" description="Two options, 720p or 1080p. For OBS, set the matching values below."><div className="studio-block">
-  <div className="studio-source-grid ratio-grid" role="group" aria-label="Picture quality">{Object.values(LIVE_QUALITY).map(item=>{const [name,detail]=item.label.split(' · ');return <button key={item.id} type="button" aria-pressed={liveQuality===item.id} disabled={webrtc.isBroadcasting||webrtc.previewBusy||qualityBusy} title={webrtc.isBroadcasting?'Stop the live to change the quality.':item.label} onClick={()=>void changeLiveQuality(item.id)}><Video size={20} aria-hidden="true"/><span><strong>{name}{detail?` · ${detail}`:''}</strong><small>{item.detail}</small></span><i aria-hidden="true"/></button>;})}</div>
-  <p className="studio-hint">{qualityBusy?'Restarting the private preview at the new resolution…':LIVE_QUALITY[liveQuality].detail} {webrtc.isPreviewing?'The open private preview updates immediately.':'The selected resolution applies when you open the preview or go live.'} A higher setting needs a stronger upload connection at the venue.</p>
-  <ObsQualityGuide/>
- </div></StudioControlSection>
- </div>
- </div>
- </section>
-</div>
             </div>
               </div>
             </div>

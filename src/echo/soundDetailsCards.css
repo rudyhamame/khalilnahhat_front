@@ -20,3 +20,4 @@
 .admin-workspace .sound-card--key .key-picker{display:flex;flex-direction:column;flex:1}
 .admin-workspace .sound-card--key .key-picker-menu.is-inline{display:flex;flex-direction:column;flex:1;gap:14px}
 .admin-workspace .sound-card--key .key-picker-menu>footer{margin-top:auto;flex-wrap:wrap}
+.admin-workspace .sound-card--key{grid-column:1/-1}

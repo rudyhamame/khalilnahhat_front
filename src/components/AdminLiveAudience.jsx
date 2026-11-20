@@ -2,7 +2,6 @@ import {useEffect,useRef,useState} from 'react';
 import {apiRequest} from '../lib/api';
 import StudioSetList from './StudioSetList';
 import {useLiveSetList} from '../hooks/useLiveSetList';
-import AdminLiveComments from './AdminLiveComments';
 
 export default function AdminLiveAudience({token,session,enabled,onReview,liveSessions=[],setListActions={}}) {
  const sessionSongs=useLiveSetList({token,session,enabled,initial:liveSessions});
@@ -67,7 +66,6 @@ export default function AdminLiveAudience({token,session,enabled,onReview,liveSe
   </aside>;
  return <div className="admin-live-left-column">
   <StudioSetList key={session||'offline'} items={sessionSongs} token={token} actions={{...setListActions,onAdd:session?item=>setListActions.onAdd({...item,session}):undefined,onUpdate:session?(id,item)=>setListActions.onUpdate(id,{...item,session}):undefined,onDelete:session?setListActions.onDelete:undefined}}/>
-  <aside className="admin-live-comments-aside" aria-label="Audience comments"><AdminLiveComments token={token} session={session} enabled={enabled}/></aside>
   {requests}
  </div>;
 }

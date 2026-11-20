@@ -1,0 +1,95 @@
+/* Destinations, rebuilt: flat cards, real inputs. Two ids beat every legacy studio rule. */
+#admin-live-stream#admin-live-stream .sd{display:flex;flex-direction:column;gap:16px;padding:16px;box-sizing:border-box;color:#e3e3e3;font:400 13px/1.5 'Manrope',system-ui,sans-serif}
+#admin-live-stream#admin-live-stream .sd *{box-sizing:border-box;border-radius:0;box-shadow:none;background-image:none}
+#admin-live-stream#admin-live-stream .sd-source{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid #303030;background:#121212}
+#admin-live-stream#admin-live-stream .sd-source>i{flex:none;width:10px;height:10px;border-radius:50%!important;background:#6b7570}
+#admin-live-stream#admin-live-stream .sd-source[data-live=true]>i{background:#8e8e8e}
+#admin-live-stream#admin-live-stream .sd-source>div{flex:1;min-width:0}
+#admin-live-stream#admin-live-stream .sd-source strong{display:block;font-size:13px;color:#f3f3f3}
+#admin-live-stream#admin-live-stream .sd-source small{color:#999999;font-size:12px}
+#admin-live-stream#admin-live-stream .sd-icon-button{display:grid;place-items:center;width:32px;height:32px;padding:0;border:1px solid #303030;background:transparent;color:#b0b0b0;cursor:pointer}
+#admin-live-stream#admin-live-stream .sd-list{display:flex;flex-direction:column;gap:16px}
+#admin-live-stream#admin-live-stream .sd-card{display:flex;flex-direction:column;gap:14px;padding:18px;border:1px solid #303030;background:#121212}
+#admin-live-stream#admin-live-stream .sd-head{display:flex;align-items:center;gap:12px}
+#admin-live-stream#admin-live-stream .sd-icon{display:grid;place-items:center;flex:none;width:36px;height:36px;border:1px solid #303030;color:#f2f2f2}
+#admin-live-stream#admin-live-stream .sd-name{flex:1;min-width:0}
+#admin-live-stream#admin-live-stream .sd-name h4{margin:0;font-size:15px;font-weight:600;color:#f3f3f3;letter-spacing:0;text-transform:none}
+#admin-live-stream#admin-live-stream .sd-name small{color:#999999;font-size:12px}
+#admin-live-stream#admin-live-stream .sd-state{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#999999}
+#admin-live-stream#admin-live-stream .sd-state>i{width:8px;height:8px;border-radius:50%!important;background:#6b7570}
+#admin-live-stream#admin-live-stream .sd-card[data-state=live] .sd-state,#admin-live-stream#admin-live-stream .sd-card[data-state=starting] .sd-state{color:#8e8e8e}
+#admin-live-stream#admin-live-stream .sd-card[data-state=live] .sd-state>i,#admin-live-stream#admin-live-stream .sd-card[data-state=starting] .sd-state>i{background:#8e8e8e}
+#admin-live-stream#admin-live-stream .sd-card[data-state=failed] .sd-state,#admin-live-stream#admin-live-stream .sd-card[data-state=error] .sd-state{color:#ff8a80}
+#admin-live-stream#admin-live-stream .sd-link{display:grid;place-items:center;color:#999999}
+#admin-live-stream#admin-live-stream .sd-actions{display:grid;grid-template-columns:1fr auto;gap:10px}
+#admin-live-stream#admin-live-stream :is(.sd-primary,.sd-secondary,.sd-danger){display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px;padding:0 18px;border:1px solid transparent;font:600 13px/1 'Manrope',system-ui,sans-serif;letter-spacing:0;text-transform:none;cursor:pointer}
+#admin-live-stream#admin-live-stream .sd-primary{background:#8e8e8e;color:#0c0c0c}
+#admin-live-stream#admin-live-stream .sd-secondary{background:transparent;border-color:#404040;color:#e3e3e3}
+#admin-live-stream#admin-live-stream .sd-danger{background:transparent;border-color:#5a3a3a;color:#ff9a90}
+#admin-live-stream#admin-live-stream :is(.sd-primary,.sd-secondary,.sd-danger):disabled{opacity:.4;cursor:not-allowed}
+#admin-live-stream#admin-live-stream .sd-why{margin:0;color:#d2b97c;font-size:12px}
+#admin-live-stream#admin-live-stream .sd-alert{margin:0;padding:10px 12px;border:1px solid #5a3a3a;color:#ffb3aa;font-size:12px}
+#admin-live-stream#admin-live-stream .sd-connection{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:14px;border-top:1px solid #303030}
+#admin-live-stream#admin-live-stream .sd-saved{display:inline-flex;align-items:center;gap:8px;color:#999999;font-size:12px}
+#admin-live-stream#admin-live-stream .sd-saved[data-saved=true]{color:#8e8e8e}
+#admin-live-stream#admin-live-stream .sd-text{padding:0;border:0;background:transparent;color:#c0c0c0;font:600 12px/1 'Manrope',system-ui,sans-serif;cursor:pointer;text-decoration:underline}
+#admin-live-stream#admin-live-stream .sd-form{display:flex;flex-direction:column;gap:16px;padding:16px;border:1px solid #303030;background:#0c0c0c}
+#admin-live-stream#admin-live-stream .sd-help{margin:0;color:#999999;font-size:12px}
+#admin-live-stream#admin-live-stream .sd-field{display:flex;flex-direction:column;gap:6px}
+#admin-live-stream#admin-live-stream .sd-field>span{font-size:12px;font-weight:600;color:#cacaca}
+#admin-live-stream#admin-live-stream .sd-field input{display:block;width:100%;height:44px;min-height:44px;padding:0 14px;margin:0;border:1px solid #4c4c4c;background:#080808;color:#f3f3f3;font:400 14px/1 'Manrope',system-ui,sans-serif}
+#admin-live-stream#admin-live-stream .sd-field input::placeholder{color:#6f7b75}
+#admin-live-stream#admin-live-stream .sd-field input:focus{outline:0;border-color:#8e8e8e}
+#admin-live-stream#admin-live-stream .sd-field input:disabled{opacity:.5}
+#admin-live-stream#admin-live-stream .sd-check{display:flex;align-items:center;gap:10px;color:#cacaca;font-size:12px}
+#admin-live-stream#admin-live-stream .sd-check input{width:16px;height:16px;margin:0;accent-color:#8e8e8e}
+#admin-live-stream#admin-live-stream .sd-form-actions{display:flex;flex-wrap:wrap;gap:10px}
+#admin-live-stream#admin-live-stream .sd-fine{margin:0;color:#6f7b75;font-size:11px}
+
+/* Audience (left column): a real switch and a real select, one row each. */
+#admin-live-stream#admin-live-stream .aud{display:flex;flex-direction:column;gap:0;border:1px solid #303030;background:#121212}
+#admin-live-stream#admin-live-stream .aud>*+*{border-top:1px solid #303030}
+#admin-live-stream#admin-live-stream .aud-row{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0;padding:14px 16px;border-radius:0;background:transparent;box-sizing:border-box;cursor:pointer}
+#admin-live-stream#admin-live-stream .aud-select{flex-direction:column;align-items:stretch;gap:10px;cursor:default}
+#admin-live-stream#admin-live-stream .aud-copy{display:flex;flex-direction:column;gap:2px;min-width:0}
+#admin-live-stream#admin-live-stream .aud-copy strong{font-size:13px;font-weight:600;color:#f3f3f3}
+#admin-live-stream#admin-live-stream .aud-copy small{font-size:12px;line-height:1.4;color:#999999}
+#admin-live-stream#admin-live-stream .aud-switch{appearance:none;-webkit-appearance:none;flex:none;position:relative;width:42px;height:24px;margin:0;border:1px solid #4c4c4c;border-radius:12px;background:#080808;cursor:pointer;transition:background .15s,border-color .15s}
+#admin-live-stream#admin-live-stream .aud-switch::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#999999;transition:transform .15s,background .15s}
+#admin-live-stream#admin-live-stream .aud-switch:checked{background:#3c3c3c;border-color:#8e8e8e}
+#admin-live-stream#admin-live-stream .aud-switch:checked::after{transform:translateX(18px);background:#8e8e8e}
+#admin-live-stream#admin-live-stream .aud-switch:disabled{opacity:.45;cursor:not-allowed}
+#admin-live-stream#admin-live-stream .aud-switch:focus-visible{outline:2px solid #8e8e8e;outline-offset:2px}
+#admin-live-stream#admin-live-stream .aud-input{display:block;width:100%;height:42px;min-height:42px;padding:0 12px;margin:0;border:1px solid #4c4c4c;border-radius:0;background:#080808;color:#f3f3f3;font:400 13px/1 'Manrope',system-ui,sans-serif;box-sizing:border-box}
+#admin-live-stream#admin-live-stream .aud-input:focus{outline:0;border-color:#8e8e8e}
+#admin-live-stream#admin-live-stream .aud-input:disabled{opacity:.5}
+#admin-live-stream#admin-live-stream .aud-clients{display:flex;flex-direction:column;gap:10px;padding:14px 16px}
+#admin-live-stream#admin-live-stream .aud-clients ul{display:flex;flex-direction:column;max-height:220px;margin:0;padding:0;overflow:auto;list-style:none}
+#admin-live-stream#admin-live-stream .aud-clients li{border-top:1px solid #212121}
+#admin-live-stream#admin-live-stream .aud-clients label{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:13px;cursor:pointer}
+#admin-live-stream#admin-live-stream .aud-clients label small{color:#999999}
+
+/* Audience, flattened: no card around the rows, just hairline separators. */
+#admin-live-stream#admin-live-stream .aud{border:0;background:transparent}
+#admin-live-stream#admin-live-stream .aud>*+*{border-top:1px solid #ffffff12}
+#admin-live-stream#admin-live-stream .aud-row{padding:14px 0}
+#admin-live-stream#admin-live-stream .aud-clients{padding:14px 0}
+
+/* Select: same box as the inputs, with its own arrow and dark options. */
+#admin-live-stream#admin-live-stream select.aud-input{appearance:none;-webkit-appearance:none;width:100%;height:42px;padding:0 40px 0 12px;border:1px solid #4c4c4c;border-radius:0;background-color:#080808;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' fill='none' stroke='%238fa398' stroke-width='1.6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;color:#f3f3f3;font:400 13px/1 'Manrope',system-ui,sans-serif;text-overflow:ellipsis;cursor:pointer;color-scheme:dark}
+#admin-live-stream#admin-live-stream select.aud-input option{background:#121212;color:#f3f3f3}
+#admin-live-stream#admin-live-stream select.aud-input:disabled{opacity:.5;cursor:not-allowed}
+
+/* Live control header: wraps instead of cropping. */
+#admin-live-stream#admin-live-stream .studio-controller-heading{flex-wrap:wrap;row-gap:8px;min-width:0;overflow:visible}
+#admin-live-stream#admin-live-stream .studio-controller-heading h3{flex:none;white-space:nowrap}
+#admin-live-stream#admin-live-stream .studio-controller-tools{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px 12px;flex:1 1 auto;min-width:0}
+#admin-live-stream#admin-live-stream .studio-control-status{width:auto;max-width:100%}
+#admin-live-stream#admin-live-stream .studio-control-status strong{white-space:nowrap;overflow:visible}
+
+/* Live control header: toggle button on the opposite side, no LED dots, no top gap or border. */
+#admin-live-stream#admin-live-stream .studio-controller-heading>.studio-column-button{order:3;margin-inline-start:auto}
+#admin-live-stream#admin-live-stream .studio-controller-heading>.studio-controller-tools{order:2}
+#admin-live-stream#admin-live-stream .studio-control-status strong::before,#admin-live-stream#admin-live-stream .obs-status>i{display:none}
+#admin-live-stream#admin-live-stream .studio-control-dock{margin-top:0;border-top:0!important}
+#admin-live-stream#admin-live-stream .studio-controller-heading{padding-top:0;margin-top:0;border-top:0}

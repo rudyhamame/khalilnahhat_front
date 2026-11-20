@@ -31,7 +31,7 @@
 .admin-workspace[data-area="live-stream"] .admin-live-settings-dialog .admin-live-settings{border:0;border-radius:0;background:none;box-shadow:none;padding:18px}
 /* Settings popup details: pill-shaped switch, Save nudged up, a clearly visible close button. */
 .admin-workspace .admin-live-settings-dialog button.obs-recording-switch{display:flex!important;align-items:center;flex:none;width:40px!important;min-width:40px!important;height:22px!important;min-height:22px!important;padding:2px!important;border:0!important;border-radius:999px!important;background:#72788199;transition:background .2s}
-.admin-workspace .admin-live-settings-dialog button.obs-recording-switch[aria-checked="true"]{background:#278975}
+.admin-workspace .admin-live-settings-dialog button.obs-recording-switch[aria-checked="true"]{background:#585858}
 .admin-workspace .admin-live-settings-dialog button.obs-recording-switch>span{display:block;width:18px!important;height:18px!important;border-radius:50%!important;background:#fff;box-shadow:0 1px 3px #0006;transform:translateX(0);transition:transform .2s}
 .admin-workspace .admin-live-settings-dialog button.obs-recording-switch[aria-checked="true"]>span{transform:translateX(18px)}
 .admin-workspace .admin-live-settings-dialog .admin-live-title-form button{margin-bottom:6px}
@@ -102,7 +102,7 @@
 /* Beauty & lighting redesign */
 .admin-workspace #admin-live-stream .admin-live-preview-frame-shell>.studio-appearance{width:min(300px,calc(100% - 96px));padding:16px;border-radius:16px;background:#121314f2}
 .admin-workspace .studio-appearance header span{display:flex;align-items:center;gap:6px;letter-spacing:.04em;text-transform:none;font-size:12px}
-.studio-look-state{width:6px;height:6px;border-radius:50%;background:#666}.studio-look-state[data-on=true]{background:#7fdcb3;box-shadow:0 0 6px #7fdcb3aa}
+.studio-look-state{width:6px;height:6px;border-radius:50%;background:#666}.studio-look-state[data-on=true]{background:#aeaeae;box-shadow:0 0 6px #aeaeaeaa}
 .admin-workspace .studio-appearance-presets{display:flex;gap:2px;padding:3px;border-radius:999px;background:#ffffff0d}
 .admin-workspace .studio-appearance-presets button{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;min-height:28px;border:0;border-radius:999px;background:none;font-size:12px;color:#bbb}
 .admin-workspace .studio-appearance-presets button[aria-pressed=true]{background:#e3d3a8;color:#111;font-weight:600}
@@ -130,14 +130,14 @@
 /* Vertical realtime voice test, left edge of the preview */
 .studio-voice-test{position:absolute;inset:50% auto auto 12px;width:32px;box-sizing:border-box;transform:translateY(-50%);z-index:3;display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px 6px;border-radius:9px;background:#0006;color:#fff;pointer-events:auto}
 .studio-voice-track{position:relative;width:6px;height:min(160px,30dvh);border-radius:3px;background:#ffffff26;overflow:hidden}
-.studio-voice-fill{position:absolute;inset:0;transform-origin:bottom;border-radius:3px;background:linear-gradient(to top,#7fdcb3 0 60%,#e3d3a8 60% 85%,#e08a7d 85%);background-size:100% 160px;background-position:bottom;transition:transform 60ms linear}
+.studio-voice-fill{position:absolute;inset:0;transform-origin:bottom;border-radius:3px;background:linear-gradient(to top,#aeaeae 0 60%,#e3d3a8 60% 85%,#e08a7d 85%);background-size:100% 160px;background-position:bottom;transition:transform 60ms linear}
 .studio-voice-test[data-off=true]{color:#ffffff80}
 .admin-live-preview-frame-shell:fullscreen>.studio-voice-test{display:none}
 .admin-workspace #admin-live-stream .studio-voice-test>.studio-voice-toggle{display:grid;place-items:center;flex:none;width:24px;height:24px;min-width:24px;min-height:24px;margin:0;padding:0;border:0;border-radius:0;background:none;box-shadow:none;color:#fff;line-height:1;cursor:pointer}
 .admin-workspace #admin-live-stream .studio-voice-toggle>svg{display:block;width:18px;height:18px;flex:none;stroke:currentColor;stroke-width:2;fill:none;opacity:1}
-.admin-workspace #admin-live-stream .studio-voice-test>.studio-voice-toggle:hover:not(:disabled){background:none;color:#7fdcb3}
+.admin-workspace #admin-live-stream .studio-voice-test>.studio-voice-toggle:hover:not(:disabled){background:none;color:#aeaeae}
 .admin-workspace #admin-live-stream .studio-voice-test>.studio-voice-toggle:disabled{background:none;color:#b8bec6;opacity:1;cursor:default}
-.admin-workspace #admin-live-stream .studio-voice-test>.studio-voice-toggle:focus-visible{outline:2px solid #7fdcb3;outline-offset:2px}
+.admin-workspace #admin-live-stream .studio-voice-test>.studio-voice-toggle:focus-visible{outline:2px solid #aeaeae;outline-offset:2px}
 /* Background cut-out controls */
 .studio-look-background{margin-bottom:16px}
 .admin-workspace .studio-appearance .studio-look-background p{margin:0 0 2px}
@@ -181,7 +181,7 @@
 .studio-output-sources{display:flex;flex-wrap:wrap;align-items:flex-start;gap:6px}
 .studio-output-source{display:inline-flex;align-items:center;gap:6px;max-width:100%;box-sizing:border-box;padding:6px 8px;border:1px solid #ffffff24;border-radius:7px;background:#090b0de6;color:#f3f3f3;font-size:12px;line-height:1.3}
 .studio-output-source>i{flex:none;width:5px;height:5px;border-radius:50%;background:#e0b865}
-.studio-output-source[data-state="live"]>i{background:#70d5a0}
+.studio-output-source[data-state="live"]>i{background:#a2a2a2}
 .studio-output-source:is([data-state="failed"],[data-state="error"])>i{background:#f28d82}
 .studio-output-source[data-state="unknown"]>i{background:#aaa}
 .studio-output-source>svg{flex:none}
@@ -223,7 +223,7 @@
 .studio-control-dock .studio-voice-test{position:static;inset:auto;transform:none;width:auto;display:grid;grid-template-columns:1fr 24px;gap:5px 8px;padding:7px 8px;border:1px solid #ffffff12;border-radius:6px;background:#ffffff04}
 .studio-voice-label{font-size:12px;color:#bbb}
 .studio-control-dock .studio-voice-track{grid-column:1;grid-row:2;width:100%;height:4px}
-.studio-control-dock .studio-voice-fill{transform-origin:left;background:linear-gradient(to right,#7fdcb3 0 60%,#e3d3a8 60% 85%,#e08a7d 85%);background-size:100% 100%}
+.studio-control-dock .studio-voice-fill{transform-origin:left;background:linear-gradient(to right,#aeaeae 0 60%,#e3d3a8 60% 85%,#e08a7d 85%);background-size:100% 100%}
 .studio-control-dock .studio-voice-toggle{grid-column:2;grid-row:1/3;align-self:center}
 .admin-workspace #admin-live-stream .studio-control-dock .studio-audio-processing{padding:8px;margin:8px 0;border:1px solid #ffffff14;border-radius:7px}
 .studio-control-dock .studio-audio-switches{gap:8px}
@@ -390,8 +390,8 @@
 .studio-control-status strong::before{width:7px;height:7px;background:#a7a9ae}
 .studio-control-status[data-state=live] strong{border-color:#ed756266;background:#ed75621c;color:#ffb4a8}
 .studio-control-status[data-state=live] strong::before{background:#ff7764;box-shadow:0 0 8px #ff776480}
-.studio-control-status[data-state=preview] strong{border-color:#7bd4ab55;background:#7bd4ab12;color:#a4e7c8}
-.studio-control-status[data-state=preview] strong::before{background:#7bd4ab}
+.studio-control-status[data-state=preview] strong{border-color:#a8a8a855;background:#a8a8a812;color:#c6c6c6}
+.studio-control-status[data-state=preview] strong::before{background:#a8a8a8}
 .studio-control-status:is([data-state=opening],[data-state=connecting],[data-state=preflight]) strong{border-color:#dfbf7655;background:#dfbf7612;color:#efd69c}
 .studio-control-status:is([data-state=opening],[data-state=connecting],[data-state=preflight]) strong::before{background:#dfbf76}
 .admin-workspace #admin-live-stream .studio-control-workspace>.studio-settings-tabs{border:0;padding-block:12px;gap:8px;background:#ffffff02}
@@ -426,7 +426,7 @@
 .admin-workspace #admin-live-stream .studio-source-settings>p{margin:0;line-height:1.7}
 .studio-control-dock .studio-voice-test.has-microphone-monitor{grid-template-columns:minmax(0,1fr) 24px 24px}
 .studio-control-dock .studio-voice-test>.studio-microphone-monitor{grid-column:3;grid-row:1/3;align-self:center}
-.admin-workspace #admin-live-stream .studio-microphone-monitor[aria-pressed=true]{color:#7fdcb3}
+.admin-workspace #admin-live-stream .studio-microphone-monitor[aria-pressed=true]{color:#aeaeae}
 .studio-monitor-error{grid-column:1/-1;font-size:12px;line-height:1.5;color:var(--aw-muted,#aaa)}
 /* Keep signal meters, input faders, readouts and mute buttons together. */
 .studio-control-dock .studio-voice-test.has-input-level{grid-template-columns:minmax(44px,.8fr) minmax(45px,1fr) minmax(74px,1fr) 24px;align-items:center;gap:7px;padding:9px 8px}
@@ -444,10 +444,10 @@
 /* Live source setup: readable cards within the narrow Studio column. */
 #studio-settings-panel-studio .studio-console{container-type:inline-size}
 .admin-workspace #admin-live-stream .studio-control-dock .studio-source-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:16px 0 20px}
-.admin-workspace #admin-live-stream .studio-source-grid>button{position:relative;display:flex;align-items:center;justify-content:flex-start;gap:10px;min-width:0;min-height:70px;padding:12px;border:1px solid var(--aw-line,#383b3b);border-radius:10px;background:var(--aw-main,#161819);color:var(--aw-muted,#adb4b1);text-align:start;transition:border-color .15s,background .15s}
+.admin-workspace #admin-live-stream .studio-source-grid>button{position:relative;display:flex;align-items:center;justify-content:flex-start;gap:10px;min-width:0;min-height:70px;padding:12px;border:1px solid var(--aw-line,#383b3b);border-radius:10px;background:var(--aw-main,#181818);color:var(--aw-muted,#adb4b1);text-align:start;transition:border-color .15s,background .15s}
 .studio-source-grid>button>svg{flex:none}
 .admin-workspace #admin-live-stream .studio-source-grid>button>span{display:grid;gap:5px;min-width:0;letter-spacing:0;text-transform:none;white-space:normal}
-.studio-source-grid strong{font-size:12px;font-weight:600;line-height:1.3;color:var(--aw-text,#edf1ef)}
+.studio-source-grid strong{font-size:12px;font-weight:600;line-height:1.3;color:var(--aw-text,#efefef)}
 .studio-source-grid small{font-size:12px;line-height:1.4;color:var(--aw-muted,#a6aeaa)}
 .studio-source-grid i{position:absolute;inset:8px 8px auto auto;width:5px;height:5px;border-radius:50%;background:transparent}
 .admin-workspace #admin-live-stream .studio-source-grid>button[aria-pressed=true]{border-color:#b99a67;background:#b99a6710;color:#dfc18e}
@@ -456,25 +456,25 @@
 .studio-source-grid>button:disabled{opacity:.45;cursor:not-allowed}
 .studio-source-grid>button:focus-visible,.studio-recording-card button:focus-visible,.studio-recording-card summary:focus-visible{outline:2px solid #b99a67;outline-offset:3px}
 .studio-field-caption{font-size:12px;font-weight:600;letter-spacing:.08em;color:var(--aw-muted,#abb1ad)}
-.admin-workspace #admin-live-stream .studio-recording-card{display:block;box-sizing:border-box;width:100%;min-width:0;margin-top:20px;border:1px solid var(--aw-line,#383b3b);border-radius:12px;background:var(--aw-main,#161819);overflow:hidden}
+.admin-workspace #admin-live-stream .studio-recording-card{display:block;box-sizing:border-box;width:100%;min-width:0;margin-top:20px;border:1px solid var(--aw-line,#383b3b);border-radius:12px;background:var(--aw-main,#181818);overflow:hidden}
 .admin-workspace #admin-live-stream .studio-save-live{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:15px;margin:0;cursor:default}
 .studio-save-live>span{display:grid;gap:5px;min-width:0}
-.studio-save-live strong{font-size:13px;font-weight:600;color:var(--aw-text,#edf1ef)}
+.studio-save-live strong{font-size:13px;font-weight:600;color:var(--aw-text,#efefef)}
 .studio-save-live small{font-size:12px;line-height:1.5;color:var(--aw-muted,#a6aeaa)}
 .admin-workspace #admin-live-stream .studio-save-live>input[role=switch]{appearance:none;position:relative;flex:none;width:38px;height:22px;min-height:0;padding:0;margin:0;border:1px solid #ffffff30;border-radius:999px;background:#424745;cursor:pointer;transition:background .18s}
-.studio-save-live>input:before{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#f1f5f2;transition:transform .18s}
-.admin-workspace #admin-live-stream .studio-save-live>input:checked{background:#437957;border-color:#81b493}
+.studio-save-live>input:before{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#f3f3f3;transition:transform .18s}
+.admin-workspace #admin-live-stream .studio-save-live>input:checked{background:#5e5e5e;border-color:#9b9b9b}
 .studio-save-live>input:checked:before{transform:translateX(16px)}
 .studio-save-live>input:disabled{opacity:.45;cursor:default}
-.studio-save-live>input:focus-visible{outline:2px solid #b9ddc7;outline-offset:3px}
+.studio-save-live>input:focus-visible{outline:2px solid #cbcbcb;outline-offset:3px}
 .studio-recording-options{display:grid;gap:10px;padding:15px;margin:0;border-top:1px solid var(--aw-line,#383b3b);min-width:0}
 .studio-recording-destinations{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;min-width:0}
 .admin-workspace #admin-live-stream .studio-recording-destinations>button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:10px 3px;min-width:0;min-height:56px;border:1px solid transparent;border-radius:8px;background:#ffffff05;color:var(--aw-muted,#a6aeaa);font-size:12px;cursor:pointer}
-.admin-workspace #admin-live-stream .studio-recording-destinations>button[aria-pressed=true]{background:#b99a6714;border-color:#b99a6780;color:var(--aw-text,#edf1ef)}
+.admin-workspace #admin-live-stream .studio-recording-destinations>button[aria-pressed=true]{background:#b99a6714;border-color:#b99a6780;color:var(--aw-text,#efefef)}
 .admin-workspace #admin-live-stream .studio-recording-card button:disabled{opacity:.45;cursor:not-allowed}
 .admin-workspace #admin-live-stream .studio-recording-card p{margin:0;font-size:12px;line-height:1.6;overflow-wrap:anywhere}
 .studio-disk-settings{display:grid;gap:12px;min-width:0}
-.admin-workspace #admin-live-stream .studio-folder-button{display:flex;align-items:center;gap:10px;width:100%;min-width:0;padding:12px;border:1px dashed #b99a6760;border-radius:8px;background:transparent;color:var(--aw-text,#edf1ef);text-align:start;cursor:pointer}
+.admin-workspace #admin-live-stream .studio-folder-button{display:flex;align-items:center;gap:10px;width:100%;min-width:0;padding:12px;border:1px dashed #b99a6760;border-radius:8px;background:transparent;color:var(--aw-text,#efefef);text-align:start;cursor:pointer}
 .studio-folder-button>svg{flex:none;color:#b99a67}
 .admin-workspace #admin-live-stream .studio-folder-button.is-warning{border-color:#e9ad46;background:#e9ad4614;animation:studio-folder-warning 1.2s ease-in-out infinite}
 @keyframes studio-folder-warning{50%{background:#e9ad4638;box-shadow:0 0 0 3px #e9ad4630}}
@@ -489,7 +489,7 @@
 .studio-folder-hint{display:flex;align-items:center;gap:9px;margin:8px 12px;padding:10px 12px;border:1px solid #e9ad4666;border-inline-start:3px solid #e9ad46;border-radius:6px;background:#e9ad4614;color:#f5cc83}
 .studio-folder-hint>svg{flex:none}
 .admin-workspace #admin-live-stream .studio-control-dock .studio-folder-hint>p{margin:0;color:inherit}
-.studio-control-hint{display:flex;align-items:center;gap:9px;min-height:40px;margin:8px 12px;padding:8px 12px;box-sizing:border-box;border:1px solid #69a88b55;border-inline-start:3px solid #78b99a;border-radius:6px;background:#78b99a12;color:#aed8c4}
+.studio-control-hint{display:flex;align-items:center;gap:9px;min-height:40px;margin:8px 12px;padding:8px 12px;box-sizing:border-box;border:1px solid #88888855;border-inline-start:3px solid #989898;border-radius:6px;background:#98989812;color:#c3c3c3}
 .studio-control-hint.is-warning{border-color:#e9ad4666;border-inline-start-color:#e9ad46;background:#e9ad4614;color:#f5cc83}
 .studio-control-hint.is-empty{visibility:hidden}
 .studio-control-hint>svg{flex:none}.admin-workspace #admin-live-stream .studio-control-dock .studio-control-hint>p{margin:0;color:inherit;font-size:12px;line-height:1.45}
@@ -884,7 +884,7 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 /* Badges share the On air indicator's look: bordered pill, dot, small caps. */
 .studio-badge{display:inline-flex;align-items:center;gap:6px;max-width:220px;min-height:26px;padding:5px 9px;box-sizing:border-box;border:1px solid #ffffff2b;border-radius:7px;background:#ffffff09;color:#eee;font-size:12px;font-weight:500;letter-spacing:.04em;line-height:1.2;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .studio-badge::before{content:'';flex:none;width:7px;height:7px;border-radius:50%;background:#a7a9ae}
-.studio-badge[data-tone=ok]{border-color:#7bd4ab55;background:#7bd4ab12;color:#a4e7c8}.studio-badge[data-tone=ok]::before{background:#7bd4ab}
+.studio-badge[data-tone=ok]{border-color:#a8a8a855;background:#a8a8a812;color:#c6c6c6}.studio-badge[data-tone=ok]::before{background:#a8a8a8}
 .studio-badge[data-tone=warn]{border-color:#dfbf7655;background:#dfbf7612;color:#efd69c}.studio-badge[data-tone=warn]::before{background:#dfbf76}
 /* Elapsed timer matches the On air pill and the status badges. */
 .studio-controller-tools>.studio-live-elapsed{display:inline-flex;align-items:center;min-height:26px;padding:5px 9px;box-sizing:border-box;border:1px solid #ed756266;border-radius:7px;background:#ed75621c;color:#ffb4a8;font-size:12px;font-weight:500;letter-spacing:.04em;line-height:1.2}
@@ -902,15 +902,15 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 .studio-launcher-actions{display:grid;gap:12px;width:100%;margin-top:14px}
 .admin-workspace .studio-launcher-button{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;min-height:60px;padding:14px 24px;border:1px solid #ffffff2b;border-radius:14px;background:#ffffff0d;color:var(--aw-text,#eee);font-size:17px;font-weight:600;cursor:pointer;transition:transform .12s,background .15s,border-color .15s}
 .admin-workspace .studio-launcher-button:hover:not(:disabled){transform:translateY(-1px);background:#ffffff18}
-.admin-workspace .studio-launcher-button.is-primary{border-color:#7bd4ab88;background:#7bd4ab24;color:#b6efd3}.admin-workspace .studio-launcher-button.is-primary:hover:not(:disabled){background:#7bd4ab3a}
+.admin-workspace .studio-launcher-button.is-primary{border-color:#a8a8a888;background:#a8a8a824;color:#d2d2d2}.admin-workspace .studio-launcher-button.is-primary:hover:not(:disabled){background:#a8a8a83a}
 .admin-workspace .studio-launcher-button.is-end{border-color:#ed756288;background:#ed756224;color:#ffb4a8}.admin-workspace .studio-launcher-button.is-end:hover:not(:disabled){background:#ed75623a}
 .studio-launcher-button:disabled{opacity:.55;cursor:not-allowed}
 .admin-workspace .studio-launcher{grid-column:1/-1;justify-self:stretch;align-self:center;width:100%;min-height:calc(100dvh/.9 - 140px);margin:0 auto}
 .admin-workspace .studio-launcher-card{margin-inline:auto}
 
 /* Host replies to audience comments. */
-.admin-comment-reply{margin:6px 0 0;padding:6px 10px;border-inline-start:2px solid #7bd4ab88;border-radius:0 6px 6px 0;background:#7bd4ab12;color:#cfeedd;font-size:12px;line-height:1.5}
-.admin-comment-reply strong{margin-inline-end:6px;color:#9fdcc0;font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+.admin-comment-reply{margin:6px 0 0;padding:6px 10px;border-inline-start:2px solid #a8a8a888;border-radius:0 6px 6px 0;background:#a8a8a812;color:#dedede;font-size:12px;line-height:1.5}
+.admin-comment-reply strong{margin-inline-end:6px;color:#bebebe;font-size:12px;text-transform:uppercase;letter-spacing:.05em}
 .admin-comment-reply-button{margin-top:6px;padding:2px 0;border:0;background:none;color:var(--aw-muted,#a6a6ad);font-size:12px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}.admin-comment-reply-button:hover{color:var(--aw-text,#eee)}
 .admin-comment-reply-form{display:flex;gap:6px;align-items:center;margin-top:8px}
 .admin-workspace .admin-comment-reply-form input{flex:1;min-width:0;min-height:32px;padding:5px 10px;border-radius:999px;font-size:12px}
@@ -920,7 +920,7 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 
 /* Portrait crop: drag sideways to choose what the 9:16 output shows. */
 .studio-preview-portrait.is-pannable{cursor:grab;touch-action:none;user-select:none}.studio-preview-portrait.is-pannable:active{cursor:grabbing}
-.studio-preview-portrait.is-pannable:focus-visible{outline:2px solid #7bd4ab;outline-offset:2px}
+.studio-preview-portrait.is-pannable:focus-visible{outline:2px solid #a8a8a8;outline-offset:2px}
 .studio-preview-portrait>video{pointer-events:none}
 .studio-preview-window-head .studio-pan-reset{margin-inline-end:8px;padding:1px 8px;border:1px solid #ffffff2b;border-radius:999px;background:transparent;color:inherit;font-size:12px;cursor:pointer}
 /* Reply UI inside the live comment flow rows. */
@@ -930,7 +930,7 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 .studio-recording-steps{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:8px}
 .studio-recording-steps li{display:flex;gap:10px;align-items:flex-start;padding:9px 11px;border:1px solid var(--aw-line,#383b3b);border-radius:10px;opacity:.6}
 .studio-recording-steps li.is-active,.studio-recording-steps li.is-done,.studio-recording-steps li.is-error{opacity:1}
-.studio-recording-steps li.is-active{border-color:#b99a67}.studio-recording-steps li.is-done .studio-step-icon{color:#6fbf8b}.studio-recording-steps li.is-error{border-color:#d46a6a}.studio-recording-steps li.is-error .studio-step-icon{color:#d46a6a}
+.studio-recording-steps li.is-active{border-color:#b99a67}.studio-recording-steps li.is-done .studio-step-icon{color:#979797}.studio-recording-steps li.is-error{border-color:#d46a6a}.studio-recording-steps li.is-error .studio-step-icon{color:#d46a6a}
 .studio-step-icon{flex:0 0 18px;display:grid;place-items:center;height:18px;margin-top:1px}.studio-recording-steps strong{display:block;font-size:.85rem}.studio-recording-steps small{display:block;opacity:.75;font-size:.76rem;line-height:1.35}
 .studio-local-recordings .studio-local-delete{color:#e59a9a;border-color:#7a3a3a}
 /* Hints live in the page header, opposite the "Live / Echo Studio" title. */
@@ -971,9 +971,9 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 .studio-recording-steps-wrap .studio-recording-steps{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:0}
 .studio-recording-steps-wrap .studio-recording-steps li{position:relative;border:0;background:none;padding:0 2px;gap:6px;opacity:.55}
 .studio-recording-steps-wrap .studio-recording-steps li:not(:last-child)::after{content:"";position:absolute;top:13px;inset-inline-start:calc(50% + 16px);inset-inline-end:calc(-50% + 16px);height:2px;background:var(--aw-line,#383b3b)}
-.studio-recording-steps-wrap .studio-recording-steps li.is-done:not(:last-child)::after{background:#6fbf8b}
-.studio-recording-steps-wrap .studio-step-icon{width:26px;height:26px;margin:0;border-radius:50%;border:2px solid var(--aw-line,#383b3b);background:var(--aw-main,#161819);z-index:1}
-.studio-recording-steps-wrap li.is-active .studio-step-icon{border-color:#b99a67;color:#e0c18d}.studio-recording-steps-wrap li.is-done .studio-step-icon{border-color:#6fbf8b;background:#6fbf8b;color:#0f171a}.studio-recording-steps-wrap li.is-error .studio-step-icon{border-color:#d46a6a}
+.studio-recording-steps-wrap .studio-recording-steps li.is-done:not(:last-child)::after{background:#979797}
+.studio-recording-steps-wrap .studio-step-icon{width:26px;height:26px;margin:0;border-radius:50%;border:2px solid var(--aw-line,#383b3b);background:var(--aw-main,#181818);z-index:1}
+.studio-recording-steps-wrap li.is-active .studio-step-icon{border-color:#b99a67;color:#e0c18d}.studio-recording-steps-wrap li.is-done .studio-step-icon{border-color:#979797;background:#979797;color:#141414}.studio-recording-steps-wrap li.is-error .studio-step-icon{border-color:#d46a6a}
 .studio-recording-steps-wrap .studio-recording-steps li.is-active,.studio-recording-steps-wrap .studio-recording-steps li.is-done,.studio-recording-steps-wrap .studio-recording-steps li.is-error{opacity:1;border:0}
 .studio-recording-steps-wrap .studio-step-hint{padding:7px 10px;border-radius:8px;background:#ffffff08;font-size:12px}
 .studio-step-bar{height:4px;border-radius:99px;background:#ffffff14;overflow:hidden}.studio-step-bar i{display:block;height:100%;background:linear-gradient(90deg,#b99a67,#e0c18d);transition:width .4s}
@@ -986,7 +986,7 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 .studio-local-icon{display:grid;place-items:center;flex:none;width:30px;height:30px;border-radius:8px;background:#ffffff0d;color:#b99a67}
 .studio-local-info{flex:1;min-width:0;display:grid;gap:2px}.studio-local-info strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:600}
 .studio-local-info small{display:flex;align-items:center;gap:8px;color:#9aa0a6;font-size:12px}
-.studio-local-chip{padding:0 7px;border-radius:99px;font-weight:600}.studio-local-chip.is-sent{background:#6fbf8b22;color:#8fd6a8}.studio-local-chip.is-disk{background:#b99a6722;color:#e0c18d}.studio-local-chip.is-partial{background:#e9ad4622;color:#f5cc83}
+.studio-local-chip{padding:0 7px;border-radius:99px;font-weight:600}.studio-local-chip.is-sent{background:#97979722;color:#b2b2b2}.studio-local-chip.is-disk{background:#b99a6722;color:#e0c18d}.studio-local-chip.is-partial{background:#e9ad4622;color:#f5cc83}
 .studio-local-actions{display:flex;gap:4px;flex:none}
 .studio-local-actions button{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border:1px solid var(--aw-line,#383b3b);border-radius:8px;background:none;color:inherit;font-size:12px;cursor:pointer}
 .studio-local-actions button:hover:not(:disabled){border-color:#b99a67;background:#b99a6712}.studio-local-actions .studio-local-delete{color:#e59a9a}.studio-local-actions .studio-local-delete:hover:not(:disabled){border-color:#d46a6a;background:#d46a6a14}
@@ -997,8 +997,8 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 /* "Choose a folder for each live" uses the same toggle as Record this live. */
 .studio-recording-folder-choice{justify-content:space-between}
 .admin-workspace #admin-live-stream .studio-recording-folder-choice>input[role=switch]{appearance:none;position:relative;flex:none;width:38px;height:22px;min-height:0;padding:0;margin:0;border:1px solid #ffffff30;border-radius:999px;background:#424745;cursor:pointer;transition:background .18s}
-.studio-recording-folder-choice>input[role=switch]:before{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#f1f5f2;transition:transform .18s}
-.admin-workspace #admin-live-stream .studio-recording-folder-choice>input[role=switch]:checked{background:#437957;border-color:#81b493}
+.studio-recording-folder-choice>input[role=switch]:before{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#f3f3f3;transition:transform .18s}
+.admin-workspace #admin-live-stream .studio-recording-folder-choice>input[role=switch]:checked{background:#5e5e5e;border-color:#9b9b9b}
 .studio-recording-folder-choice>input[role=switch]:checked:before{transform:translateX(16px)}
 .studio-recording-folder-choice>input[role=switch]:disabled{opacity:.45;cursor:default}
 .studio-recording-folder-choice>input[role=switch]:focus-visible{outline:2px solid #b99a67;outline-offset:2px}
@@ -1029,7 +1029,7 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 .admin-workspace #admin-live-stream .studio-save-live,.admin-workspace #admin-live-stream .studio-save-live>strong{cursor:default;user-select:none}
 
 /* ═══ Record this live — right column ═══ one calm system: hairlines, small caps labels, one accent. */
-.admin-workspace #admin-live-stream .studio-recording-slot>.rec-card{display:flex;flex-direction:column;gap:0;padding:0;border:1px solid var(--aw-line,#34363a);border-radius:12px;background:var(--aw-sidebar,#1b1c1f);overflow:hidden;color:var(--aw-text,#e6e9e7)}
+.admin-workspace #admin-live-stream .studio-recording-slot>.rec-card{display:flex;flex-direction:column;gap:0;padding:0;border:1px solid var(--aw-line,#34363a);border-radius:12px;background:var(--aw-sidebar,#1b1c1f);overflow:hidden;color:var(--aw-text,#e8e8e8)}
 .rec-card .rec-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid var(--aw-line,#34363a)}
 .rec-card .rec-title{display:flex;align-items:center;gap:10px;min-width:0}
 .rec-card .rec-title h3{margin:0;font-size:14px;font-weight:600;letter-spacing:.01em;cursor:default;user-select:none}
@@ -1039,8 +1039,8 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 .rec-card .rec-off,.rec-card .rec-idle{margin:0;padding:12px 14px;border:1px dashed var(--aw-line,#34363a);border-radius:10px;color:var(--aw-muted,#9aa0a6);font-size:12px;line-height:1.5}
 /* switches share one look */
 .admin-workspace #admin-live-stream .rec-card input[role=switch]{appearance:none;position:relative;flex:none;width:38px;height:22px;min-height:0;padding:0;margin:0;border:1px solid #ffffff30;border-radius:999px;background:#424745;cursor:pointer;transition:background .18s}
-.rec-card input[role=switch]:before{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#f1f5f2;transition:transform .18s}
-.admin-workspace #admin-live-stream .rec-card input[role=switch]:checked{background:#437957;border-color:#81b493}
+.rec-card input[role=switch]:before{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#f3f3f3;transition:transform .18s}
+.admin-workspace #admin-live-stream .rec-card input[role=switch]:checked{background:#5e5e5e;border-color:#9b9b9b}
 .rec-card input[role=switch]:checked:before{transform:translateX(16px)}
 .rec-card input[role=switch]:disabled{opacity:.45;cursor:default}.rec-card input[role=switch]:focus-visible{outline:2px solid #b99a67;outline-offset:2px}
 /* summary tiles */
@@ -1061,7 +1061,7 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 .rec-card .rec-toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:2px 2px}
 .rec-card .rec-toggle-row strong{display:block;font-size:12px;font-weight:600}.rec-card .rec-toggle-row small{display:block;margin-top:1px;font-size:12px;color:var(--aw-muted,#9aa0a6);line-height:1.4}
 .rec-card .rec-flow{display:flex;align-items:center;gap:8px;margin:0;padding:8px 10px;border-radius:8px;background:#ffffff06;font-size:12px;color:var(--aw-muted,#9aa0a6)}
-.rec-card .rec-flow span{padding:1px 8px;border-radius:99px;background:#ffffff0d;color:var(--aw-text,#e6e9e7)}.rec-card .rec-flow i{font-style:normal;opacity:.6}
+.rec-card .rec-flow span{padding:1px 8px;border-radius:99px;background:#ffffff0d;color:var(--aw-text,#e8e8e8)}.rec-card .rec-flow i{font-style:normal;opacity:.6}
 /* history */
 .rec-card .studio-history{max-height:none;overflow:visible;gap:8px}
 .rec-card .studio-history>li:not(.studio-history-all){padding:10px 12px;border-radius:10px;border:1px solid var(--aw-line,#34363a);background:#ffffff05}
@@ -1077,19 +1077,19 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 
 /* ═══ Studio controls — same calm system as "Record this live" ═══
    Hairline borders, small-caps labels, one gold accent, rounded squares for chips, pills only for switches. */
-.admin-workspace[data-area="live-stream"] #admin-live-stream .studio-control-dock{--sc-line:var(--aw-line,#34363a);--sc-muted:var(--aw-muted,#8e9692);--sc-text:var(--aw-text,#e6e9e7);--sc-gold:#b99a67;--sc-gold-soft:#b99a6720;--sc-fill:#ffffff06;border:1px solid var(--sc-line)!important;border-radius:12px!important;background:var(--aw-sidebar,#1b1c1f)!important;color:var(--sc-text);overflow:hidden}
+.admin-workspace[data-area="live-stream"] #admin-live-stream .studio-control-dock{--sc-line:var(--aw-line,#34363a);--sc-muted:var(--aw-muted,#8e9692);--sc-text:var(--aw-text,#e8e8e8);--sc-gold:#b99a67;--sc-gold-soft:#b99a6720;--sc-fill:#ffffff06;border:1px solid var(--sc-line)!important;border-radius:12px!important;background:var(--aw-sidebar,#1b1c1f)!important;color:var(--sc-text);overflow:hidden}
 /* header */
 .studio-control-dock .studio-controller-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px!important;margin:0!important;border-bottom:1px solid var(--sc-line)!important;background:none!important}
 .studio-control-dock .studio-controller-heading h3{margin:0!important;font-size:14px!important;font-weight:600!important;letter-spacing:.01em}
 .studio-control-dock .studio-controller-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
 .studio-control-dock .studio-badge{display:inline-flex;align-items:center;gap:6px;padding:3px 9px!important;border-radius:6px!important;border:1px solid var(--sc-line)!important;background:var(--sc-fill)!important;color:var(--sc-muted)!important;font-size:12px!important;font-weight:600;letter-spacing:.1em;text-transform:uppercase}
-.studio-control-dock .studio-badge[data-tone=ok]{border-color:#6fbf8b55!important;background:#6fbf8b14!important;color:#8fd6a8!important}
+.studio-control-dock .studio-badge[data-tone=ok]{border-color:#97979755!important;background:#97979714!important;color:#b2b2b2!important}
 .studio-control-dock .studio-badge[data-tone=warn]{border-color:#e9ad4666!important;background:#e9ad4614!important;color:#f5cc83!important}
 /* On air: ONE chip. The wrapper is plain; the <strong> inside is the chip. */
 .studio-control-dock .studio-control-status{padding:0!important;border:0!important;background:none!important;box-shadow:none!important}
 .studio-control-dock .studio-control-status strong{border-radius:6px!important;font-weight:600;letter-spacing:.1em}
-.studio-control-dock .studio-control-status[data-state=preview] strong{border-color:#6fbf8b55;background:#6fbf8b14;color:#8fd6a8}
-.studio-control-dock .studio-control-status[data-state=preview] strong::before{background:#6fbf8b}
+.studio-control-dock .studio-control-status[data-state=preview] strong{border-color:#97979755;background:#97979714;color:#b2b2b2}
+.studio-control-dock .studio-control-status[data-state=preview] strong::before{background:#979797}
 .studio-control-dock .studio-control-status[data-state=connecting] strong,.studio-control-dock .studio-control-status[data-state=opening] strong{border-color:#b99a6766;color:#e0c18d}
 /* action bar */
 .studio-control-dock .studio-control-bar{padding:12px 16px!important;margin:0!important;border-bottom:1px solid var(--sc-line)!important;background:none!important}
@@ -1137,8 +1137,8 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 .studio-control-dock .studio-audio-meters{padding:12px;border:1px solid var(--sc-line);border-radius:10px;background:var(--sc-fill)}
 .studio-control-dock .studio-audio-applied,.studio-control-dock .studio-status{padding:8px 10px;border-radius:8px;background:var(--sc-fill);font-size:12px;color:var(--sc-muted)}
 .studio-control-dock input[type=checkbox][role=switch]{appearance:none;position:relative;flex:none;width:38px;height:22px;min-height:0;padding:0;margin:0;border:1px solid #ffffff30!important;border-radius:999px!important;background:#424745!important;cursor:pointer;transition:background .18s}
-.studio-control-dock input[type=checkbox][role=switch]::before{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#f1f5f2;transition:transform .18s}
-.studio-control-dock input[type=checkbox][role=switch]:checked{background:#437957!important;border-color:#81b493!important}
+.studio-control-dock input[type=checkbox][role=switch]::before{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#f3f3f3;transition:transform .18s}
+.studio-control-dock input[type=checkbox][role=switch]:checked{background:#5e5e5e!important;border-color:#9b9b9b!important}
 .studio-control-dock input[type=checkbox][role=switch]:checked::before{transform:translateX(16px)}
 .studio-control-dock input[type=checkbox][role=switch]:disabled{opacity:.45;cursor:default}
 @media(prefers-reduced-motion:reduce){.studio-control-dock *{transition:none!important}}
@@ -1153,7 +1153,7 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 .studio-control-dock .studio-fx-head{padding-block:8px;border-bottom:1px solid var(--sc-line,#34363a);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--sc-muted,#8e9692)}
 .studio-control-dock .studio-fx-head b{font-weight:600;text-align:center}
 .studio-control-dock .studio-fx-row+.studio-fx-row{border-top:1px solid var(--sc-line,#34363a)}
-.studio-control-dock .studio-fx-row strong{display:block;font-size:12px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--sc-text,#e6e9e7)}
+.studio-control-dock .studio-fx-row strong{display:block;font-size:12px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--sc-text,#e8e8e8)}
 .studio-control-dock .studio-fx-row small{display:block;margin-top:2px;font-size:12px;line-height:1.4;color:var(--sc-muted,#8e9692);letter-spacing:0;text-transform:none;font-weight:400}
 .studio-control-dock .studio-fx-row input[role=switch]{justify-self:center}
 .studio-control-dock .studio-fx-actions{display:flex;gap:8px}
@@ -1167,14 +1167,14 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 .rec-card .rh-item{display:grid;gap:8px;padding:12px;border:1px solid var(--aw-line,#34363a);border-radius:10px;background:#ffffff05;transition:border-color .15s}
 .rec-card .rh-item:hover{border-color:#b99a6755}
 .rec-card .rh-item>header{display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:0}
-.rec-card .rh-item>header strong{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:600;color:var(--aw-text,#e6e9e7)}
+.rec-card .rh-item>header strong{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:600;color:var(--aw-text,#e8e8e8)}
 .rec-card .rh-item>header .studio-local-chip{flex:none;font-size:12px;padding:1px 8px}
 .rec-card .rh-meta{display:flex;flex-wrap:wrap;gap:4px 14px;margin:0;font-size:12px;color:var(--aw-muted,#9aa0a6)}
 .rec-card .rh-meta span{display:inline-flex;align-items:center;gap:5px;font-variant-numeric:tabular-nums}
 .rec-card .rh-item>footer{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding-top:8px;border-top:1px solid var(--aw-line,#34363a)}
 .rec-card .rh-where{display:flex;gap:6px;flex-wrap:wrap}
 .rec-card .rh-where>span{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:6px;border:1px solid var(--aw-line,#34363a);font-size:12px;color:#6f7672;opacity:.65}
-.rec-card .rh-where>span.is-on{border-color:#6fbf8b55;background:#6fbf8b14;color:#8fd6a8;opacity:1}
+.rec-card .rh-where>span.is-on{border-color:#97979755;background:#97979714;color:#b2b2b2;opacity:1}
 .rec-card .rh .studio-history-all{display:inline-flex;align-items:center;gap:6px;color:#e0c18d;font-size:12px;padding:2px}
 /* Collab tab */
 .collab .collab-kinds{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -1200,7 +1200,7 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 /* ═══ Sources: one calm system with the rest of the Studio controls ═══ */
 .studio-control-dock .seg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;padding:4px;border:1px solid var(--sc-line,#34363a);border-radius:12px;background:var(--sc-fill,#ffffff06)}
 .studio-control-dock .seg>button{display:flex;align-items:center;gap:10px;min-height:46px;padding:6px 12px;border:0!important;border-radius:9px!important;background:none!important;color:var(--sc-muted,#8e9692)!important;text-align:start;cursor:pointer;transition:background .15s,color .15s}
-.studio-control-dock .seg>button:hover:not(:disabled):not([aria-pressed=true]){background:#ffffff08!important;color:var(--sc-text,#e6e9e7)!important}
+.studio-control-dock .seg>button:hover:not(:disabled):not([aria-pressed=true]){background:#ffffff08!important;color:var(--sc-text,#e8e8e8)!important}
 .studio-control-dock .seg>button[aria-pressed=true]{background:var(--sc-gold-soft,#b99a6720)!important;color:#f0d9ad!important;box-shadow:inset 0 0 0 1px #b99a6770}
 .studio-control-dock .seg>button:disabled{opacity:.5;cursor:not-allowed}
 .studio-control-dock .seg>button:focus-visible{outline:2px solid var(--sc-gold,#b99a67);outline-offset:2px}
@@ -1258,7 +1258,7 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 .studio-control-dock .collab{display:grid;gap:14px;padding:0;border:0}
 .studio-control-dock .source-card{display:grid;gap:12px;padding:12px;border:1px solid var(--sc-line,#34363a);border-radius:12px;background:#ffffff04}
 .studio-control-dock .source-card>header{display:flex;align-items:center;gap:10px;min-width:0}
-.studio-control-dock .source-card>header h4{margin:0;font-size:12px;font-weight:600;letter-spacing:.02em;color:var(--sc-text,#e6e9e7)}
+.studio-control-dock .source-card>header h4{margin:0;font-size:12px;font-weight:600;letter-spacing:.02em;color:var(--sc-text,#e8e8e8)}
 .studio-control-dock .source-state{margin-inline-start:auto;max-width:55%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:1px 8px;border-radius:6px;background:#ffffff0d;color:var(--sc-muted,#8e9692);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
 .studio-control-dock .src-badge.is-portrait{background:#8d9893}
 .studio-control-dock .source-card .studio-source-grid{margin:0}
@@ -1304,7 +1304,7 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 /* Session title and Live stream goal: identical labels and identical fields. */
 .admin-workspace #admin-live-stream .studio-control-dock .studio-session-row :is(.studio-field-caption,.live-goal-picker>span){display:block;font-size:12px!important;font-weight:600;letter-spacing:.12em!important;line-height:1.5;text-transform:uppercase;color:var(--sc-muted,#8e9692)!important}
 .admin-workspace #admin-live-stream .studio-control-dock .studio-session-row :is(.studio-title,.live-goal-picker){display:grid;gap:6px;align-content:start}
-.admin-workspace #admin-live-stream .studio-control-dock .studio-session-row :is(input,select){box-sizing:border-box;width:100%;height:38px;min-height:38px;padding:0 12px!important;border:1px solid var(--sc-line,#34363a)!important;border-radius:8px!important;background-color:var(--sc-fill,#ffffff06)!important;color:var(--sc-text,#e6e9e7)!important;font-size:13px!important;font-weight:400;letter-spacing:0;text-transform:none;line-height:1.2}
+.admin-workspace #admin-live-stream .studio-control-dock .studio-session-row :is(input,select){box-sizing:border-box;width:100%;height:38px;min-height:38px;padding:0 12px!important;border:1px solid var(--sc-line,#34363a)!important;border-radius:8px!important;background-color:var(--sc-fill,#ffffff06)!important;color:var(--sc-text,#e8e8e8)!important;font-size:13px!important;font-weight:400;letter-spacing:0;text-transform:none;line-height:1.2}
 .admin-workspace #admin-live-stream .studio-control-dock .studio-session-row select{cursor:pointer}
 .admin-workspace #admin-live-stream .studio-control-dock .studio-session-row :is(input,select):focus-visible{outline:none;border-color:var(--sc-gold,#b99a67)!important;box-shadow:0 0 0 3px #b99a6728}
 /* The goal select must always fill its column: a <fieldset> shrinks to its content by default, and old rules sized the select to its text. */
@@ -1327,7 +1327,7 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 /* Preview windows stay black, as before (the blended overlay had lost its background). */
 .admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-pair .studio-preview-window[aria-label="Portrait preview"],.admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-pair .studio-preview-window[aria-label="Portrait preview"] .studio-preview-portrait,.admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-pair .studio-preview-window[aria-label="Landscape preview"] .studio-preview-landscape{background:#000!important}
 /* The window title row has its own dark surface and a hairline, so it reads apart from the black picture below it. */
-.admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-window>.studio-preview-window-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 10px;margin:0;background:var(--aw-sidebar,#1b1c1f);border-bottom:1px solid var(--aw-line,#34363a);color:var(--aw-text,#e6e9e7)}
+.admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-window>.studio-preview-window-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 10px;margin:0;background:var(--aw-sidebar,#1b1c1f);border-bottom:1px solid var(--aw-line,#34363a);color:var(--aw-text,#e8e8e8)}
 .admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-window>.studio-preview-window-head h4{margin:0;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
 /* The portrait caption over the blended overlay keeps its transparent gradient. */
 .studio-preview-pair.is-collab:not(.is-collab-mini-br):not(.is-collab-mini-bl)>.studio-preview-window[aria-label="Portrait preview"]>.studio-preview-window-head,.studio-preview-pair.is-collab:is(.is-collab-mini-br,.is-collab-mini-bl)>.studio-preview-window[aria-label="Portrait preview"]>.studio-preview-window-head,.studio-preview-pair.is-collab>.studio-preview-window[aria-label="Portrait preview"]>.studio-preview-window-head{background:linear-gradient(transparent,#000d)!important;border-bottom:0!important;padding:14px 6px 5px!important}
@@ -1347,7 +1347,7 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 .pause-banner{position:absolute;inset:0;z-index:7;pointer-events:none;display:flex;flex-direction:column;justify-content:space-between;padding:8px}
 .pause-banner>*{pointer-events:auto}
 .pause-badge{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;padding:4px 10px;border:1px solid #e9ad4699;border-radius:6px;background:#000c;color:#f5cc83;font-size:12px;letter-spacing:.08em}
-.pause-badge span{color:#e6e9e7;letter-spacing:0;font-weight:400}
+.pause-badge span{color:#e8e8e8;letter-spacing:0;font-weight:400}
 .pause-next{align-self:flex-end;display:grid;gap:3px;width:34%;max-width:260px;margin:0}
 .pause-next video{display:block;width:100%;aspect-ratio:16/9;object-fit:contain;background:#000;border:1px solid #ffffff66}
 .pause-next figcaption{padding:1px 6px;background:#000c;color:#fff;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
@@ -1361,7 +1361,7 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 .pause-photo-empty{display:grid;place-items:center;border-style:dashed;color:var(--sc-muted,#8e9692);font-size:12px}
 .pause-photo-copy{flex:1;min-width:0;display:grid;gap:2px}.pause-photo-copy strong{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pause-photo-copy small{font-size:12px;color:var(--sc-muted,#8e9692)}
 .pause-picker{position:fixed;inset:0;z-index:2000;display:grid;place-items:center;padding:20px;background:#000b}
-.pause-picker-card{width:min(900px,100%);max-height:min(86dvh,760px);display:flex;flex-direction:column;gap:12px;padding:16px;border:1px solid var(--aw-line,#34363a);border-radius:12px;background:var(--aw-sidebar,#1b1c1f);color:var(--aw-text,#e6e9e7)}
+.pause-picker-card{width:min(900px,100%);max-height:min(86dvh,760px);display:flex;flex-direction:column;gap:12px;padding:16px;border:1px solid var(--aw-line,#34363a);border-radius:12px;background:var(--aw-sidebar,#1b1c1f);color:var(--aw-text,#e8e8e8)}
 .pause-picker-card header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.pause-picker-card h3{margin:0;font-size:15px}.pause-picker-card p{margin:2px 0 0;font-size:12px;color:var(--aw-muted,#9aa0a6)}
 .pause-picker-card header button{display:grid;place-items:center;width:28px;height:28px;border:1px solid var(--aw-line,#34363a);border-radius:8px;background:none;color:inherit;cursor:pointer}
 .pause-picker-grid{list-style:none;margin:0;padding:0;overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
@@ -1390,7 +1390,7 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 .mic-strip{position:absolute;inset-block:0;inset-inline-start:0;width:82px;display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px 6px;border:1px solid #2b2d31;border-radius:10px;background:linear-gradient(180deg,#17181b,#0e0f11);color:#9aa0a6;z-index:4;font-variant-numeric:tabular-nums}
 .mic-strip .ms-buttons{display:flex;gap:6px}
 .mic-strip .ms-buttons button{display:grid;place-items:center;width:32px;height:30px;padding:0;border:1px solid #33363b;border-radius:8px;background:#17181b;color:#8e9692;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
-.mic-strip.is-on .ms-toggle{border-color:#3fcf7a99;background:#3fcf7a1c;color:#6fe3a0}
+.mic-strip.is-on .ms-toggle{border-color:#87878799;background:#8787871c;color:#a9a9a9}
 .mic-strip .ms-auto.is-on{border-color:#b99a67;background:#b99a6724;color:#e0c18d}
 .mic-strip .ms-auto.is-ducking{border-color:#f0b13c;background:#f0b13c2e;color:#ffd27a;animation:ms-duck 1s ease-in-out infinite}
 @keyframes ms-duck{50%{box-shadow:0 0 10px #f0b13c66}}@media(prefers-reduced-motion:reduce){.mic-strip .ms-auto.is-ducking{animation:none}}
@@ -1400,10 +1400,10 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 .mic-strip .ms-channel.is-ducking .ms-fader{accent-color:#f0b13c}
 .mic-strip .ms-body{flex:1;min-height:0;width:100%;display:flex;gap:5px;justify-content:center;align-items:stretch}
 .mic-strip .ms-meter{position:relative;width:5px;border-radius:3px;background:#050506;box-shadow:inset 0 0 0 1px #1d1f23;overflow:hidden}
-.mic-strip .ms-meter i{position:absolute;inset-inline:0;bottom:0;display:block;background:linear-gradient(0deg,#3fcf7a 0%,#3fcf7a 60%,#f0b13c 82%,#ff4d4d 100%);transition:height .06s linear}
+.mic-strip .ms-meter i{position:absolute;inset-inline:0;bottom:0;display:block;background:linear-gradient(0deg,#878787 0%,#878787 60%,#f0b13c 82%,#ff4d4d 100%);transition:height .06s linear}
 .mic-strip .ms-fader{appearance:slider-vertical;writing-mode:vertical-lr;direction:rtl;width:16px;height:100%;padding:0;margin:0;accent-color:#b99a67;cursor:pointer}
 .mic-strip .ms-fader:disabled{opacity:.35;cursor:not-allowed}
-.mic-strip .ms-value{font:600 12px/1 ui-monospace,Menlo,monospace;color:#e6e9e7}.mic-strip .ms-value small{font-size:12px;color:#6f7672}
+.mic-strip .ms-value{font:600 12px/1 ui-monospace,Menlo,monospace;color:#e8e8e8}.mic-strip .ms-value small{font-size:12px;color:#6f7672}
 .mic-strip .ms-label{font-size:12px;font-weight:700;letter-spacing:.16em;color:#6f7672}
 .studio-preview-pair:fullscreen .mic-strip{display:none}
 .admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-pair:fullscreen{padding-inline-start:0}
@@ -1438,7 +1438,7 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 /* Two sources: drag the landscape picture to pan it. Covers the landscape area only; the portrait window sits above its own third. */
 .collab-landscape-pan{position:absolute;inset:0;z-index:2;cursor:grab;touch-action:none;user-select:none}
 .collab-landscape-pan:active{cursor:grabbing}
-.collab-landscape-pan:focus-visible{outline:2px solid #7bd4ab;outline-offset:-2px}
+.collab-landscape-pan:focus-visible{outline:2px solid #a8a8a8;outline-offset:-2px}
 
 /* Pro channel strip: clip lamp, segmented LED meter with peak marker and dB scale, fader in dB with a unity mark. */
 .mic-strip{width:100px}
@@ -1451,9 +1451,9 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 .mic-strip .ms-body{gap:3px;align-items:stretch;justify-content:flex-start}
 .mic-strip .ms-meter{position:relative;flex:none;width:8px;border-radius:2px;background:#050506;box-shadow:inset 0 0 0 1px #1d1f23;overflow:hidden}
 /* Fill coloured by level (green to -18 dB, amber to -6 dB, red above), cut into LED segments by a dark grid. */
-.mic-strip .ms-meter .ms-led{position:absolute;inset-inline:0;bottom:0;display:block;transition:none;background:linear-gradient(0deg,#3fcf7a 0%,#3fcf7a 69%,#f0b13c 71%,#f0b13c 89%,#ff4d4d 91%,#ff4d4d 100%);background-size:100% var(--ms-full,170px);background-position:bottom}
+.mic-strip .ms-meter .ms-led{position:absolute;inset-inline:0;bottom:0;display:block;transition:none;background:linear-gradient(0deg,#878787 0%,#878787 69%,#f0b13c 71%,#f0b13c 89%,#ff4d4d 91%,#ff4d4d 100%);background-size:100% var(--ms-full,170px);background-position:bottom}
 .mic-strip .ms-meter::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 2px,#050506 2px 3px);pointer-events:none}
-.mic-strip .ms-peak{position:absolute;inset-inline:0;height:2px;background:#e6e9e7;box-shadow:0 0 4px #ffffff88;pointer-events:none;z-index:1}
+.mic-strip .ms-peak{position:absolute;inset-inline:0;height:2px;background:#e8e8e8;box-shadow:0 0 4px #ffffff88;pointer-events:none;z-index:1}
 .mic-strip .ms-tick{position:absolute;inset-inline:0;height:1px;background:#ffffff26;z-index:1;pointer-events:none}
 .mic-strip .ms-scale{position:relative;flex:none;width:14px;font:600 12px/1 ui-monospace,Menlo,monospace;color:#6f7672}
 .mic-strip .ms-scale span{position:absolute;inset-inline:0;transform:translateY(50%);text-align:start}
@@ -1479,7 +1479,7 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 .mic-strip .ms-scale{font-size:12px}
 .mic-strip .ms-label{display:grid;place-items:center;color:#9aa0a6}
 .mic-strip .ms-channel.is-mic .ms-label{color:#8e9692}
-.mic-strip.is-on .ms-channel.is-mic .ms-label{color:#6fe3a0}
+.mic-strip.is-on .ms-channel.is-mic .ms-label{color:#a9a9a9}
 /* A very thin line between the voice microphone and the audio input channels. */
 .mic-strip .ms-channels{gap:0}
 .mic-strip .ms-channel.is-mic{padding-inline-end:6px;margin-inline-end:6px;border-inline-end:1px solid #ffffff1f}
@@ -1492,7 +1492,7 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 .mic-strip .ms-top button{display:grid;place-items:center;width:34px;height:32px;padding:0;border:1px solid #4a4e54;border-radius:8px;background:#17181b;color:#c3c8c5;cursor:pointer}
 .mic-strip .ms-top button:disabled{opacity:.7;cursor:not-allowed}
 .mic-strip .ms-top svg{width:19px;height:19px;stroke-width:2.2}
-.mic-strip.is-on .ms-toggle{border-color:#3fcf7a99;background:#3fcf7a1c;color:#6fe3a0}
+.mic-strip.is-on .ms-toggle{border-color:#87878799;background:#8787871c;color:#a9a9a9}
 .mic-strip .ms-auto.is-on{border-color:#b99a67;background:#b99a6724;color:#e0c18d}
 .mic-strip .ms-auto.is-ducking{border-color:#f0b13c;background:#f0b13c2e;color:#ffd27a}
 /* The dividing line runs the full height of the strip, edge to edge: the strip has no padding of its own, each channel pads itself. */
@@ -1507,21 +1507,21 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 .mic-strip .ms-icon-button{box-sizing:border-box;display:grid;place-items:center;width:34px;height:32px;padding:0;border:1px solid #4a4e54;border-radius:8px;background:#17181b;color:#c3c8c5;cursor:pointer;flex:none}
 .mic-strip .ms-icon-button:not(:disabled):hover{border-color:#b99a67}
 .mic-strip .ms-icon-button:disabled{opacity:.7;cursor:not-allowed}
-.mic-strip.is-on .ms-channel.is-mic .ms-icon-button{border-color:#3fcf7a99;background:#3fcf7a1c;color:#6fe3a0}
+.mic-strip.is-on .ms-channel.is-mic .ms-icon-button{border-color:#87878799;background:#8787871c;color:#a9a9a9}
 .mic-strip .ms-icon-button.ms-auto.is-on{border-color:#b99a67;background:#b99a6724;color:#e0c18d}
 .mic-strip .ms-icon-button.ms-auto.is-ducking{border-color:#f0b13c;background:#f0b13c2e;color:#ffd27a}
 /* Icon only: no button frame, the colour shows the state. */
 .mic-strip .ms-icon-button,.mic-strip .ms-icon-button:not(:disabled):hover{width:28px;height:28px;border:0;border-radius:6px;background:none;box-shadow:none;color:#8e9692}
-.mic-strip .ms-icon-button:not(:disabled):hover{color:#e6e9e7}
+.mic-strip .ms-icon-button:not(:disabled):hover{color:#e8e8e8}
 .mic-strip .ms-icon-button:disabled{opacity:.55}
-.mic-strip.is-on .ms-channel.is-mic .ms-icon-button{border:0;background:none;color:#6fe3a0}
+.mic-strip.is-on .ms-channel.is-mic .ms-icon-button{border:0;background:none;color:#a9a9a9}
 .mic-strip .ms-icon-button.ms-auto.is-on{border:0;background:none;color:#e0c18d}
 .mic-strip .ms-icon-button.ms-auto.is-ducking{border:0;background:none;color:#ffd27a}
-.mic-strip .ms-icon-button:focus-visible{outline:2px solid #7bd4ab;outline-offset:1px}
+.mic-strip .ms-icon-button:focus-visible{outline:2px solid #a8a8a8;outline-offset:1px}
 /* Bare, big icons: no background, no border, whatever the generic button styles say. */
 #admin-live-stream#admin-live-stream .mic-strip .ms-channel .ms-icon-button{width:40px!important;height:40px!important;min-width:0!important;min-height:0!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;outline:0}
 #admin-live-stream#admin-live-stream .mic-strip .ms-channel .ms-icon-button svg{width:30px!important;height:30px!important;stroke-width:2}
-#admin-live-stream#admin-live-stream .mic-strip .ms-channel .ms-icon-button:focus-visible{outline:2px solid #7bd4ab!important;outline-offset:1px}
+#admin-live-stream#admin-live-stream .mic-strip .ms-channel .ms-icon-button:focus-visible{outline:2px solid #a8a8a8!important;outline-offset:1px}
 #admin-live-stream#admin-live-stream .mic-strip .ms-channel .ms-icon-button{width:32px!important;height:32px!important}
 #admin-live-stream#admin-live-stream .mic-strip .ms-channel .ms-icon-button svg{width:24px!important;height:24px!important}
 /* Space under the clip lamp at the top of each channel. */
@@ -1543,12 +1543,12 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 
 /* Status-sensitive action icons: colour says what state it is in, blinking says it needs attention or is live. */
 @keyframes st-blink{0%,100%{opacity:1}50%{opacity:.25}}
-@keyframes st-pulse{0%,100%{box-shadow:0 0 0 0 var(--st,#3fcf7a00)}50%{box-shadow:0 0 10px 1px var(--st,#3fcf7a88)}}
-#admin-live-stream#admin-live-stream .mic-strip .ms-actions button{--st:#3fcf7a88;transition:color .15s,border-color .15s,background .15s}
+@keyframes st-pulse{0%,100%{box-shadow:0 0 0 0 var(--st,#87878700)}50%{box-shadow:0 0 10px 1px var(--st,#87878788)}}
+#admin-live-stream#admin-live-stream .mic-strip .ms-actions button{--st:#87878788;transition:color .15s,border-color .15s,background .15s}
 /* ok: preview open (green, steady) */
-#admin-live-stream#admin-live-stream .mic-strip .ms-actions button.st-ok{color:#6fe3a0!important;border-color:#3fcf7a99!important;background:#3fcf7a1c!important}
+#admin-live-stream#admin-live-stream .mic-strip .ms-actions button.st-ok{color:#a9a9a9!important;border-color:#87878799!important;background:#8787871c!important}
 /* ready: can go live (green, slow glow) */
-#admin-live-stream#admin-live-stream .mic-strip .ms-actions button.st-ready{color:#6fe3a0!important;border-color:#3fcf7acc!important;background:#3fcf7a24!important;animation:st-pulse 1.8s ease-in-out infinite}
+#admin-live-stream#admin-live-stream .mic-strip .ms-actions button.st-ready{color:#a9a9a9!important;border-color:#878787cc!important;background:#87878724!important;animation:st-pulse 1.8s ease-in-out infinite}
 /* busy: opening or connecting (amber, blinking) */
 #admin-live-stream#admin-live-stream .mic-strip .ms-actions button.st-busy{color:#ffd27a!important;border-color:#f0b13c!important;background:#f0b13c2e!important;animation:st-blink .9s ease-in-out infinite}
 /* warn: pause is available (amber, steady) */
@@ -1576,20 +1576,20 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 .studio-control-dock .studio-source-heading{margin-bottom:0!important}
 
 /* The microphone list shown when the voice microphone is turned on. */
-.ms-device-menu{position:fixed;z-index:3000;margin:0;padding:6px;list-style:none;min-width:220px;max-width:min(320px,calc(100vw - 24px));max-height:min(60vh,320px);overflow-y:auto;border:1px solid #3a3d42;border-radius:10px;background:#17181b;box-shadow:0 12px 36px #000a;color:#e6e9e7;font:13px/1.3 system-ui,sans-serif}
+.ms-device-menu{position:fixed;z-index:3000;margin:0;padding:6px;list-style:none;min-width:220px;max-width:min(320px,calc(100vw - 24px));max-height:min(60vh,320px);overflow-y:auto;border:1px solid #3a3d42;border-radius:10px;background:#17181b;box-shadow:0 12px 36px #000a;color:#e8e8e8;font:13px/1.3 system-ui,sans-serif}
 .ms-device-title{padding:4px 8px 6px;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#8e9692}
 .ms-device-menu button{display:flex;align-items:center;gap:8px;width:100%;padding:8px;border:0;border-radius:7px;background:none;color:inherit;text-align:start;cursor:pointer}
 .ms-device-menu button span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ms-device-menu button:hover,.ms-device-menu button:focus-visible{background:#ffffff14;outline:0}
-.ms-device-menu button.is-current{color:#6fe3a0}
+.ms-device-menu button.is-current{color:#a9a9a9}
 
 /* The microphone list shown when the voice microphone is turned on. */
-.ms-device-menu{position:fixed;z-index:3000;margin:0;padding:6px;list-style:none;min-width:220px;max-width:min(320px,calc(100vw - 24px));max-height:min(60vh,320px);overflow-y:auto;border:1px solid #3a3d42;border-radius:10px;background:#17181b;box-shadow:0 12px 36px #000a;color:#e6e9e7;font:13px/1.3 system-ui,sans-serif}
+.ms-device-menu{position:fixed;z-index:3000;margin:0;padding:6px;list-style:none;min-width:220px;max-width:min(320px,calc(100vw - 24px));max-height:min(60vh,320px);overflow-y:auto;border:1px solid #3a3d42;border-radius:10px;background:#17181b;box-shadow:0 12px 36px #000a;color:#e8e8e8;font:13px/1.3 system-ui,sans-serif}
 .ms-device-title{padding:4px 8px 6px;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#8e9692}
 .ms-device-menu button{display:flex;align-items:center;gap:8px;width:100%;padding:8px;border:0;border-radius:7px;background:none;color:inherit;text-align:start;cursor:pointer}
 .ms-device-menu button span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ms-device-menu button:hover,.ms-device-menu button:focus-visible{background:#ffffff14;outline:0}
-.ms-device-menu button.is-current{color:#6fe3a0}
+.ms-device-menu button.is-current{color:#a9a9a9}
 
 /* Session title and Live stream goal stack in one column. */
 #admin-live-stream#admin-live-stream .studio-control-dock .studio-session-row{grid-template-columns:minmax(0,1fr)!important;gap:14px}
@@ -1603,8 +1603,8 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 /* Look on/off switch: a real toggle, whatever the generic button styles say. */
 #admin-live-stream#admin-live-stream .look-panel .look-switch{position:relative;display:block!important;flex:none;box-sizing:border-box;width:46px!important;height:26px!important;min-width:46px!important;min-height:26px!important;padding:0!important;border:1px solid #4a4e54!important;border-radius:999px!important;background:#17181b!important;box-shadow:none!important;cursor:pointer;transition:background .15s,border-color .15s}
 #admin-live-stream#admin-live-stream .look-panel .look-switch i{position:absolute!important;top:3px;inset-inline-start:3px;display:block;width:18px!important;height:18px!important;border-radius:50%!important;background:#8e9692!important;transition:transform .15s,background .15s}
-#admin-live-stream#admin-live-stream .look-panel .look-switch[aria-checked=true]{border-color:#3fcf7acc!important;background:#3fcf7a2e!important}
-#admin-live-stream#admin-live-stream .look-panel .look-switch[aria-checked=true] i{background:#6fe3a0!important;transform:translateX(20px)}
+#admin-live-stream#admin-live-stream .look-panel .look-switch[aria-checked=true]{border-color:#878787cc!important;background:#8787872e!important}
+#admin-live-stream#admin-live-stream .look-panel .look-switch[aria-checked=true] i{background:#a9a9a9!important;transform:translateX(20px)}
 [dir=rtl] #admin-live-stream#admin-live-stream .look-panel .look-switch[aria-checked=true] i{transform:translateX(-20px)}
 #admin-live-stream#admin-live-stream .look-panel .look-master{display:flex!important;align-items:center;justify-content:space-between;gap:12px;width:100%}
 
@@ -1624,9 +1624,9 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 .mic-strip .ms-lamp small{font:700 12px/1 system-ui,sans-serif;letter-spacing:.12em;color:#6f7672}
 .mic-strip .ms-lamp[data-state=busy]{color:#ffd27a;animation:st-blink .9s ease-in-out infinite}
 .mic-strip .ms-lamp[data-state=paused]{color:#ffd27a;animation:st-blink 1s ease-in-out infinite;filter:drop-shadow(0 0 5px #f0b13caa)}
-.mic-strip .ms-lamp:nth-child(1)[data-state=on]{color:#6fe3a0;filter:drop-shadow(0 0 6px #3fcf7acc)}
+.mic-strip .ms-lamp:nth-child(1)[data-state=on]{color:#a9a9a9;filter:drop-shadow(0 0 6px #878787cc)}
 .mic-strip .ms-lamp:nth-child(2)[data-state=on]{color:#ff6b70;filter:drop-shadow(0 0 7px #e5484dcc);animation:st-blink 1.4s ease-in-out infinite}
-.mic-strip .ms-lamp[data-state=on] small{color:#e6e9e7}
+.mic-strip .ms-lamp[data-state=on] small{color:#e8e8e8}
 .mic-strip .ms-lamp svg{display:block;flex:none;stroke:currentColor;fill:none}
 .mic-strip .ms-lamp[data-state=on] svg,.mic-strip .ms-lamp[data-state=paused] svg{fill:currentColor;fill-opacity:.25}
 @media(prefers-reduced-motion:reduce){.mic-strip .ms-lamp{animation:none!important}}
@@ -1677,7 +1677,7 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 /* Readability: larger, brighter numbers and icons. */
 #admin-live-stream#admin-live-stream .mic-strip .ms-scale{width:21px;font:700 12px/1 ui-monospace,Menlo,monospace;color:#d5d9d6}
 #admin-live-stream#admin-live-stream .mic-strip .ms-scale span{text-shadow:0 0 3px #000}
-#admin-live-stream#admin-live-stream .mic-strip .ms-value{font-size:13px;font-weight:700;color:#f2f4f2}
+#admin-live-stream#admin-live-stream .mic-strip .ms-value{font-size:13px;font-weight:700;color:#f3f3f3}
 #admin-live-stream#admin-live-stream .mic-strip .ms-value small{font-size:12px;color:#aeb4b0}
 #admin-live-stream#admin-live-stream .mic-strip .ms-lamp small{font-size:12px;color:#c3c8c5}
 #admin-live-stream#admin-live-stream .mic-strip .ms-lamp svg{width:22px;height:22px;stroke-width:2.2}
@@ -1685,7 +1685,7 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 #admin-live-stream#admin-live-stream .mic-strip .ms-actions button svg{width:20px!important;height:20px!important;stroke-width:2.2}
 #admin-live-stream#admin-live-stream .mic-strip .ms-channel .ms-icon-button{color:#c3c8c5}
 #admin-live-stream#admin-live-stream .mic-strip .ms-channel .ms-icon-button svg{stroke-width:2.2}
-#admin-live-stream#admin-live-stream .mic-strip.is-on .ms-channel.is-mic .ms-icon-button{color:#6fe3a0}
+#admin-live-stream#admin-live-stream .mic-strip.is-on .ms-channel.is-mic .ms-icon-button{color:#a9a9a9}
 
 /* The level towers are centred in their channels; the dB numbers sit beside them without pushing them off-centre. */
 #admin-live-stream#admin-live-stream .mic-strip .ms-channel .ms-body{position:relative;display:flex;justify-content:center!important}
@@ -1861,9 +1861,9 @@ html.echo-studio-window .admin-workspace .admin-grid>:has(>#admin-live-stream)>#
 html.echo-studio-window .admin-workspace #admin-live-stream{max-height:none}
 
 /* Meter level bars: the unlit track shows the green/amber/red zones, the lit part is brighter, thinner gaps. */
-#admin-live-stream#admin-live-stream .mic-strip .ms-meter{background:linear-gradient(0deg,#3fcf7a2e 0 69%,#f0b13c33 71% 89%,#ff4d4d3d 91% 100%),#0c0e0d;box-shadow:inset 0 0 0 1px #3a3f3c}
+#admin-live-stream#admin-live-stream .mic-strip .ms-meter{background:linear-gradient(0deg,#8787872e 0 69%,#f0b13c33 71% 89%,#ff4d4d3d 91% 100%),#0d0d0d;box-shadow:inset 0 0 0 1px #3a3f3c}
 #admin-live-stream#admin-live-stream .mic-strip .ms-meter .ms-led{filter:brightness(1.25) saturate(1.2)}
-#admin-live-stream#admin-live-stream .mic-strip .ms-meter::after{background:repeating-linear-gradient(0deg,transparent 0 3px,#0c0e0d99 3px 4px)}
+#admin-live-stream#admin-live-stream .mic-strip .ms-meter::after{background:repeating-linear-gradient(0deg,transparent 0 3px,#0d0d0d99 3px 4px)}
 /* Pause photo editor: the landscape frame is a true 16:9 (it was stretched taller by flex:1). */
 .pause-editor-stage .pause-picker-stage:not(.is-portrait){flex:none;height:auto;margin-block:auto}
 /* Message colours: many swatches, wrapping. */
@@ -1925,7 +1925,7 @@ html.echo-studio-window .admin-workspace #admin-live-stream{max-height:none}
 #admin-live-stream#admin-live-stream .svp-head{display:flex;align-items:center;gap:10px}
 #admin-live-stream#admin-live-stream .svp-head strong{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#fff}
 #admin-live-stream#admin-live-stream .svp-status{padding:3px 7px;border:1px solid #3a3d41;font:700 12px/1 'Noto Sans',system-ui,sans-serif;letter-spacing:.12em;color:#9aa0a6}
-#admin-live-stream#admin-live-stream .svp-status.is-playing{color:#7bd4ab;border-color:#7bd4ab77;background:#7bd4ab14}
+#admin-live-stream#admin-live-stream .svp-status.is-playing{color:#a8a8a8;border-color:#a8a8a877;background:#a8a8a814}
 #admin-live-stream#admin-live-stream .svp-status.is-paused{color:#efd69c;border-color:#dfbf7677;background:#dfbf7614}
 #admin-live-stream#admin-live-stream .svp-status.is-ended{color:#ff8a8f;border-color:#e5484d77;background:#e5484d14}
 #admin-live-stream#admin-live-stream .svp-head-actions{display:flex;align-items:center;gap:6px;margin-inline-start:auto}
@@ -1993,8 +1993,8 @@ html.echo-studio-window .admin-workspace #admin-live-stream{max-height:none}
 .studio-scenario-grid ul{display:flex;flex-direction:column;gap:2px;margin:0;padding:0;list-style:none;font-size:12px;color:var(--aw-muted,#9aa0a6)}
 .studio-scenario-grid li::before{content:"· "}
 .studio-scenario-grid li.is-optional{opacity:.7;font-style:italic}
-.studio-scenario-grid button[aria-checked=true]{background:#7bd4ab1f;border-color:#7bd4ab}
-.studio-scenario-grid button[aria-checked=true] strong{color:#bff0d9}
+.studio-scenario-grid button[aria-checked=true]{background:#a8a8a81f;border-color:#a8a8a8}
+.studio-scenario-grid button[aria-checked=true] strong{color:#d8d8d8}
 .studio-scenario-inputs{display:flex;flex-direction:column;gap:10px;margin-top:10px}
 .ss-block h5{display:flex;align-items:center;gap:6px;margin:0 0 6px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--aw-muted,#9aa0a6)}
 .ss-file{display:inline-flex;align-items:center;min-height:32px;padding:4px 12px;border:1px solid #c5aa7e;color:#e0c18d;font-size:12px;font-weight:600;cursor:pointer}
@@ -2011,20 +2011,20 @@ html.echo-studio-window .admin-workspace #admin-live-stream{max-height:none}
 .ss-device-text{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
 .ss-device-text strong{overflow:hidden;font-size:13px;font-weight:600;text-overflow:ellipsis;white-space:nowrap}
 .ss-device-text small{font:500 12px/1.2 ui-monospace,Menlo,monospace;letter-spacing:.04em;color:var(--aw-muted,#9aa0a6)}
-.ss-device-state{display:inline-flex;align-items:center;gap:6px;flex:none;color:#7bd4ab}
+.ss-device-state{display:inline-flex;align-items:center;gap:6px;flex:none;color:#a8a8a8}
 .ss-device-state b{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
 .ss-device-state i{width:14px;height:14px;border:1px solid #ffffff40;border-radius:50%}
-.ss-devices button[aria-checked=true]{border-color:#7bd4ab;background:#7bd4ab1a}
-.ss-devices button[aria-checked=true] .ss-device-icon{background:#7bd4ab26;color:#7bd4ab}
-.ss-devices button[aria-checked=true] .ss-device-text strong{color:#d6f6e7}
+.ss-devices button[aria-checked=true]{border-color:#a8a8a8;background:#a8a8a81a}
+.ss-devices button[aria-checked=true] .ss-device-icon{background:#a8a8a826;color:#a8a8a8}
+.ss-devices button[aria-checked=true] .ss-device-text strong{color:#e6e6e6}
 /* Selected scenario: mint frame with an accent bar, a "Selected" tag, a lit icon and a soft glow. */
 .studio-scenario-grid button{position:relative;transition:background .15s,border-color .15s,box-shadow .15s}
-.studio-scenario-grid button[aria-checked=true]{border-color:#7bd4ab;background:linear-gradient(180deg,#7bd4ab2e,#7bd4ab12);box-shadow:0 0 0 1px #7bd4ab,0 6px 22px #7bd4ab22}
-.studio-scenario-grid button[aria-checked=true]::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:#7bd4ab}
-.studio-scenario-grid button[aria-checked=true] strong{color:#e4fbf0}
-.studio-scenario-grid button[aria-checked=true] .ss-icon{color:#7bd4ab}
-.studio-scenario-grid button[aria-checked=true] ul{color:#a9dcc4}
-.studio-scenario-grid .ss-picked{position:absolute;top:9px;inset-inline-end:9px;display:inline-flex;align-items:center;gap:4px;padding:2px 6px;background:#7bd4ab;color:#131e23;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+.studio-scenario-grid button[aria-checked=true]{border-color:#a8a8a8;background:linear-gradient(180deg,#a8a8a82e,#a8a8a812);box-shadow:0 0 0 1px #a8a8a8,0 6px 22px #a8a8a822}
+.studio-scenario-grid button[aria-checked=true]::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:#a8a8a8}
+.studio-scenario-grid button[aria-checked=true] strong{color:#f0f0f0}
+.studio-scenario-grid button[aria-checked=true] .ss-icon{color:#a8a8a8}
+.studio-scenario-grid button[aria-checked=true] ul{color:#c2c2c2}
+.studio-scenario-grid .ss-picked{position:absolute;top:9px;inset-inline-end:9px;display:inline-flex;align-items:center;gap:4px;padding:2px 6px;background:#a8a8a8;color:#1b1b1b;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
 /* Photo viewer: two ways to choose the photo. */
 .ss-photo-sources{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
 .ss-photo-sources button,.ss-photo-sources label{display:flex;align-items:center;gap:10px;min-height:48px;padding:8px 12px;border:1px solid var(--aw-line,#34363a);border-radius:0;background:#ffffff05;color:var(--aw-text,#eee);text-align:start;cursor:pointer}
@@ -2044,7 +2044,7 @@ html.echo-studio-window .admin-workspace #admin-live-stream{max-height:none}
 .admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-pair:fullscreen{padding-inline-end:0}
 
 #admin-live-stream#admin-live-stream .mic-strip .ms-auto-control{flex:none;display:flex;align-items:center;justify-content:center;gap:4px;width:100%;height:30px;padding:0 4px;border:0;border-bottom:1px solid #ffffff1f;border-radius:0;background:none;color:#aeb4b0;font:600 12px/1 system-ui,sans-serif;cursor:pointer}
-#admin-live-stream#admin-live-stream .mic-strip .ms-auto-control.is-on{color:#6fe3a0;background:#3fcf7a14}
+#admin-live-stream#admin-live-stream .mic-strip .ms-auto-control.is-on{color:#a9a9a9;background:#87878714}
 #admin-live-stream#admin-live-stream .mic-strip .ms-auto-control.is-ducking{color:#ffd27a;background:#f0b13c24}
 #admin-live-stream#admin-live-stream .mic-strip .ms-auto-control:disabled{opacity:.5;cursor:not-allowed}
 
@@ -2061,16 +2061,16 @@ html.echo-studio-window .admin-workspace #admin-live-stream{max-height:none}
 }
 
 #admin-live-stream#admin-live-stream .output-strip .ms-listen{display:flex;align-items:center;justify-content:center;gap:4px;padding:0;border:0;border-bottom:1px solid #ffffff1f;border-radius:0;background:none;cursor:pointer}
-#admin-live-stream#admin-live-stream .output-strip .ms-listen.is-listening{color:#6fe3a0;background:#3fcf7a14}
+#admin-live-stream#admin-live-stream .output-strip .ms-listen.is-listening{color:#a9a9a9;background:#87878714}
 #admin-live-stream#admin-live-stream .output-strip .ms-listen:disabled{opacity:.5;cursor:not-allowed}
 
 
 #admin-live-stream#admin-live-stream .mic-strip:not(.output-strip) .ms-label-row .ms-icon-button{width:20px!important}
 #admin-live-stream#admin-live-stream .mic-strip .ms-label-row .ms-local-mute.is-muted{color:#ff8a8f!important}
-.recording-fallback-dialog{box-sizing:border-box;width:min(480px,calc(100% - 32px));padding:24px;border:1px solid #ffffff29;border-radius:12px;background:#181d1b;color:#e6e9e7;box-shadow:0 24px 80px #0008}
+.recording-fallback-dialog{box-sizing:border-box;width:min(480px,calc(100% - 32px));padding:24px;border:1px solid #ffffff29;border-radius:12px;background:#1a1a1a;color:#e8e8e8;box-shadow:0 24px 80px #0008}
 .recording-fallback-dialog::backdrop{background:#0009;backdrop-filter:blur(3px)}
-.recording-fallback-dialog h3{margin:0 0 14px;font-size:19px}.recording-fallback-dialog p{font-size:14px;line-height:1.6;color:#bec8c2}
-.recording-fallback-dialog>div{display:flex;justify-content:flex-end;gap:10px;margin-top:22px;flex-wrap:wrap}.recording-fallback-dialog button{padding:10px 14px;border:1px solid #ffffff33;border-radius:7px;background:transparent;color:inherit;font:inherit;cursor:pointer}.recording-fallback-dialog .is-primary{background:#9bc9b0;color:#102219;border-color:#9bc9b0;font-weight:600}
+.recording-fallback-dialog h3{margin:0 0 14px;font-size:19px}.recording-fallback-dialog p{font-size:14px;line-height:1.6;color:#c3c3c3}
+.recording-fallback-dialog>div{display:flex;justify-content:flex-end;gap:10px;margin-top:22px;flex-wrap:wrap}.recording-fallback-dialog button{padding:10px 14px;border:1px solid #ffffff33;border-radius:7px;background:transparent;color:inherit;font:inherit;cursor:pointer}.recording-fallback-dialog .is-primary{background:#b2b2b2;color:#191919;border-color:#b2b2b2;font-weight:600}
 
 /* The running set precedes the comments and requests in the audience row. */
 .admin-workspace[data-area="live-stream"] #admin-live-stream .studio-audience-stack>.admin-live-left-column{grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -2239,3 +2239,25 @@ html.echo-builder-window .admin-workspace .djb-main .djb-tools .djb-lib{flex:1 1
 /* Output control keeps one width whichever tab, mode or content is showing. */
 #admin-live-stream#admin-live-stream .studio-recording-slot,#admin-live-stream#admin-live-stream .studio-recording-slot>.rec-card{min-width:0;max-width:100%}
 .rec-card .studio-output-quantity{margin-top:10px}.rec-card .studio-output-quantity .studio-label{display:block!important;margin:0 0 6px;font-size:11.5px;color:#9aa0a6}.rec-card .studio-output-quantity .ratio-grid>button:disabled{opacity:1;cursor:default}.rec-card .studio-output-quantity .ratio-grid>button:not([aria-pressed=true]){opacity:.55}
+/* The right (recording) column is gone: the studio is one column. */
+#admin-live-stream#admin-live-stream#admin-live-stream .admin-live-single.has-requests-aside{grid-template-columns:minmax(0,1fr)!important}
+
+/* Stage: controls | set list | preview | audience requests. Comments overlay the preview. */
+html body .admin-workspace[data-area="live-stream"] #admin-live-stream#admin-live-stream .admin-live-single.has-requests-aside>.admin-live-preview{display:grid!important;grid-template-columns:minmax(310px,28%) minmax(180px,1fr) minmax(0,2fr) minmax(180px,1fr)!important;grid-template-rows:auto minmax(0,1fr) auto!important;gap:0!important;align-items:stretch}
+html body .admin-workspace[data-area="live-stream"] #admin-live-stream#admin-live-stream[data-hide-left] .admin-live-single.has-requests-aside>.admin-live-preview{grid-template-columns:44px minmax(180px,1fr) minmax(0,2fr) minmax(180px,1fr)!important}
+html body #admin-live-stream#admin-live-stream .admin-live-preview>.studio-control-dock{grid-column:1!important;grid-row:1/-1!important}
+html body #admin-live-stream#admin-live-stream .admin-live-preview>.studio-audience-stack,html body #admin-live-stream#admin-live-stream .admin-live-preview .admin-live-left-column{display:contents!important}
+html body #admin-live-stream#admin-live-stream .admin-live-preview .admin-live-setlist-aside{grid-column:2!important;grid-row:1/3!important}
+html body #admin-live-stream#admin-live-stream .admin-live-preview>.studio-preview-pair{grid-column:3!important;grid-row:1!important;min-width:0;align-self:start}
+html body #admin-live-stream#admin-live-stream .admin-live-preview .admin-live-requests-aside{grid-column:4!important;grid-row:1/3!important}
+html body #admin-live-stream#admin-live-stream .admin-live-preview :is(.admin-live-setlist-aside,.admin-live-requests-aside){width:100%!important;max-width:none!important;min-width:0;height:100%!important;max-height:none!important;min-height:0!important;overflow:auto;box-sizing:border-box}
+html body #admin-live-stream#admin-live-stream .admin-live-preview .studio-control-hint{grid-column:2/-1!important;grid-row:3!important}
+/* Comments sit below the preview. */
+html body #admin-live-stream#admin-live-stream .admin-live-preview>.studio-comments-below{grid-column:3!important;grid-row:2!important;min-width:0;min-height:0;overflow:hidden;background:#121212}
+/* Flat set list and audience requests: no borders, radius, shadow or gradients. */
+html body #admin-live-stream#admin-live-stream#admin-live-stream .admin-live-preview :is(.admin-live-setlist-aside,.admin-live-requests-aside){border:0!important;border-radius:0!important;box-shadow:none!important;background:#121212!important;background-image:none!important;padding:12px}
+html body #admin-live-stream#admin-live-stream#admin-live-stream .admin-live-preview :is(.admin-live-setlist-aside,.admin-live-requests-aside) :is(article,li,.admin-request-card,.studio-setlist-row,header,section,input,select,button){border-radius:0!important;box-shadow:none!important;background-image:none!important}
+html body #admin-live-stream#admin-live-stream#admin-live-stream .admin-live-preview :is(.admin-live-setlist-aside,.admin-live-requests-aside) :is(article,li,.admin-request-card){border:0!important;border-bottom:1px solid #ffffff12!important;background:transparent!important;padding-inline:0!important}
+/* Divider lines between set list | preview | audience requests. */
+html body #admin-live-stream#admin-live-stream#admin-live-stream .admin-live-single.has-requests-aside>.admin-live-preview .admin-live-setlist-aside{border-inline-end:1px solid #303030!important}
+html body #admin-live-stream#admin-live-stream#admin-live-stream .admin-live-single.has-requests-aside>.admin-live-preview .admin-live-requests-aside{border-inline-start:1px solid #303030!important}

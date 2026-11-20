@@ -120,7 +120,7 @@
 .admin-workspace .echo-playlist-admin>p{max-width:75ch;font-size:13px;color:var(--aw-muted)}
 .admin-workspace :is(.echo-playlist-library,.echo-playlist-order li,.echo-playlist-library label){background:var(--aw-main);border-color:var(--aw-line);border-radius:6px}
 .admin-workspace :is(.echo-error,.form-error,.admin-error){color:#ef9999}
-.admin-workspace .admin-live-stream-state.is-live{color:#9bd4b0}
+.admin-workspace .admin-live-stream-state.is-live{color:#b8b8b8}
 @media(max-width:900px){
  .admin-workspace{grid-template-columns:190px minmax(0,1fr)}
  .admin-workspace .admin-panel{padding:16px}
@@ -230,7 +230,7 @@ html.echo-admin-visible body::-webkit-scrollbar,
 .admin-workspace .admin-live-settings .admin-mic-meter-debug{display:none}
 .admin-workspace .admin-live-settings .admin-mic-meter-label{font-size:12px;color:var(--aw-muted)}
 .admin-workspace .admin-live-settings .admin-mic-meter-track{height:3px;background:var(--aw-raised);border:0;border-radius:2px;margin-top:8px}
-.admin-workspace .admin-live-settings .admin-mic-meter-fill{background:#8ca795}
+.admin-workspace .admin-live-settings .admin-mic-meter-fill{background:#9a9a9a}
 .admin-workspace .admin-live-settings .admin-live-controls{margin:0;padding:0;border:0;display:flex;gap:8px;flex-wrap:wrap}
 .admin-workspace .admin-live-settings .admin-live-control{min-height:36px;display:flex;align-items:center;gap:8px}
 @media(max-width:680px){
@@ -542,7 +542,7 @@ html.echo-admin-visible body::-webkit-scrollbar,
 /* The Preview line sits inside the live window, over the top of the video. */
 .admin-workspace .admin-live-preview-frame-shell{position:relative}
 .admin-workspace .admin-live-preview-frame-shell>.admin-live-preview-head{position:absolute;inset:0 0 auto 0;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0;padding:10px 14px;background:linear-gradient(180deg,#000a,transparent);pointer-events:none}
-.admin-workspace .admin-live-preview-frame-shell>.admin-live-preview-head :is(p,span){margin:0;color:#f1f3f2;font-size:12px;letter-spacing:.12em;text-transform:uppercase}
+.admin-workspace .admin-live-preview-frame-shell>.admin-live-preview-head :is(p,span){margin:0;color:#f2f2f2;font-size:12px;letter-spacing:.12em;text-transform:uppercase}
 
 /* Live stream tab: every level fills the height; the aside and the preview stretch to the bottom. */
 .admin-workspace[data-area="live-stream"] .admin-live-single.has-requests-aside{height:100%;min-height:0;grid-template-rows:minmax(0,1fr);align-items:stretch}
@@ -608,7 +608,7 @@ html.echo-admin-visible body::-webkit-scrollbar,
 .admin-workspace[data-area="live-stream"] .admin-live-monitor[data-orientation="portrait"]{--preview-ratio:9 / 16}
 .admin-workspace[data-area="live-stream"] .admin-live-monitor>.admin-live-preview-frame-shell{width:min(100%,calc(100cqh * var(--preview-ratio)));height:auto;aspect-ratio:var(--preview-ratio);max-height:100%;background:#000}
 .admin-workspace .admin-live-preview-frame-shell>.admin-live-preview-head{flex-wrap:wrap;gap:8px}
-.admin-workspace .admin-live-preview-head .admin-preview-orientation{pointer-events:auto;min-height:28px;width:105px;max-width:100%;padding:3px 6px;border:1px solid #ffffff3d;border-radius:6px;background:#17181ae6;color:#f1f3f2;font-size:12px}
+.admin-workspace .admin-live-preview-head .admin-preview-orientation{pointer-events:auto;min-height:28px;width:105px;max-width:100%;padding:3px 6px;border:1px solid #ffffff3d;border-radius:6px;background:#17181ae6;color:#f2f2f2;font-size:12px}
 .admin-workspace[data-area="live-stream"] .admin-live-monitor>.admin-live-preview-frame-shell:fullscreen{width:calc(100vw/.9);height:calc(100vh/.9);max-height:none;aspect-ratio:auto}
 
 /* Audience comments under the requests, same pane language. */
@@ -681,7 +681,7 @@ html.echo-admin-visible body::-webkit-scrollbar,
 .admin-workspace .admin-comment-line p{line-height:1.45}
 /* The video frame stays in the top-left of its monitor, and the preview panel hugs the left of its column. */
 .admin-workspace[data-area="live-stream"] .admin-live-monitor{place-items:start}
-.admin-workspace .admin-live-preview-frame-shell>.admin-live-preview-head>.admin-live-settings-open{pointer-events:auto;display:inline-flex;align-items:center;gap:6px;min-height:28px;padding:3px 10px;border:1px solid #ffffff3d;border-radius:6px;background:#17181ae6;color:#f1f3f2;font-size:12px;letter-spacing:0;text-transform:none;cursor:pointer}
+.admin-workspace .admin-live-preview-frame-shell>.admin-live-preview-head>.admin-live-settings-open{pointer-events:auto;display:inline-flex;align-items:center;gap:6px;min-height:28px;padding:3px 10px;border:1px solid #ffffff3d;border-radius:6px;background:#17181ae6;color:#f2f2f2;font-size:12px;letter-spacing:0;text-transform:none;cursor:pointer}
 .admin-workspace .admin-live-preview-frame-shell>.admin-live-preview-head>.admin-live-settings-open:hover{background:#000c;border-color:#ffffff80}
 /* Preview controls over the video are bare icons: no fill, no border. */
 .admin-workspace .admin-live-preview-frame-shell>.admin-live-preview-head>:is(.admin-live-fullscreen,.admin-live-settings-open){display:grid;place-items:center;width:32px;height:32px;min-height:32px;padding:0;border:0;border-radius:0;background:none;box-shadow:none;color:#fff;filter:drop-shadow(0 1px 3px #000c);cursor:pointer}
