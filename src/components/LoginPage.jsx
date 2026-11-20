@@ -112,7 +112,7 @@ export default function LoginPage({ lang, isAuthenticated, username, loginError,
   useEffect(() => { // the character's fade-out follows the visible form's height
     const root = accessRoot.current, wraps = root ? [...root.querySelectorAll('.access-content .access-form-wrap')] : [];
     if (!wraps.length || typeof ResizeObserver === 'undefined') return undefined;
-    const sync = () => root.style.setProperty('--form-h', `${Math.max(...wraps.map(w => w.offsetHeight)) + 20 + (window.matchMedia('(max-width:1000px), (orientation:portrait)').matches ? 64 : 0)}px`); // hidden forms measure 0, so this is the tallest visible one
+    const sync = () => root.style.setProperty('--form-h', `${Math.max(...wraps.map(w => w.offsetHeight)) + 20 + (window.matchMedia('(max-width:1000px), (orientation:portrait)').matches ? 0 : 0)}px`); // hidden forms measure 0, so this is the tallest visible one
     const observer = new ResizeObserver(sync); wraps.forEach(w => observer.observe(w)); sync(); window.addEventListener('resize', sync);
     return () => { observer.disconnect(); window.removeEventListener('resize', sync); };
   }, [mode, isAuthenticated]);
@@ -207,7 +207,7 @@ export default function LoginPage({ lang, isAuthenticated, username, loginError,
         </div> : formBody(m, false)}
       </div></div>)}
     </div>{!embedded&&<a className="access-guest" href="/" onClick={()=>{try{window.sessionStorage.setItem('echo-guest','1');}catch{/* private mode: the guest flag is skipped */}}}>{tr('Continue as guest','المتابعة كضيف')}<ArrowUpRight size={16} aria-hidden="true" /></a>}
-    {!embedded&&!isAuthenticated&&<div className="access-app-badge"><ClientAppBadge tr={tr} className="client-app-badge--access"/></div>}</>}
+    {!embedded&&!isAuthenticated&&<div className="access-app-badge"><ClientAppBadge tr={tr} className="client-app-badge--access"/></div>}{!embedded&&!isAuthenticated&&<div className="access-rotate" role="note"><p>{tr("Please use your phone in portrait mode.","يرجى استخدام الهاتف بشكل عمودي.")}</p><p>{tr("Or download the app instead:","أو حمّل التطبيق بدلاً من ذلك:")}</p><ClientAppBadge tr={tr} className="client-app-badge--access"/></div>}</>}
   </section>;
   return embedded ? content : <EchoShell lang={lang}>{content}</EchoShell>;
 }

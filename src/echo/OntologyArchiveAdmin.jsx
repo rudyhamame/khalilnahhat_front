@@ -283,8 +283,6 @@ function OntologyArchiveWorkspace({token}){
   finally{setBusy(false);}
  };
  deleteLatest.current=deleteOpenRecording;
- // "Open" in the details column opens the recording in its own browser page (a clean window without the dashboard around it).
- const openInNewPage=row=>{if(row?.id)window.open(`/admin/echo?tab=music-archive&recording=${encodeURIComponent(row.id)}&window=1`,'_blank');};
  // In that window, closing the editor closes the page.
  const windowMode=useRef(new URLSearchParams(window.location.search).get('window')==='1'),wasOpen=useRef(false);
  useEffect(()=>{if(!windowMode.current)return undefined;document.documentElement.classList.add('echo-recording-window');return()=>document.documentElement.classList.remove('echo-recording-window');},[]);
@@ -299,7 +297,7 @@ function OntologyArchiveWorkspace({token}){
   try{validateRecordingItems(value.atoms||[]);}catch{complete=false;}
   if(!editor.id&&!complete){
    setBusy(true);
-   try{await saveRecordingDraft(draftKey.current,{editor,step,serverBaseline:baseline.current},audioDraft.current);setHasDraft(true);setFilters({status:'DRAFT',...(value.workType?{workType:value.workType}:{})});setCollectionId('');setSelected(null);setEditor(null);setNotice('Draft saved in this browser.');}
+   try{await saveRecordingDraft(draftKey.current,{editor,step,serverBaseline:baseline.current},audioDraft.current);setHasDraft(true);setCollectionId('');setSelected(null);setEditor(null);setNotice('Draft saved in this browser.');}
    catch(problem){setDraftError(`Could not save the draft: ${problem.message}`);}
    finally{setBusy(false);}
    return;
@@ -328,7 +326,7 @@ function OntologyArchiveWorkspace({token}){
 
  const uploaded=await uploadAudioDraft(draft);body.audioUrl=uploaded.url;body.audioMetadata=uploaded.audioMetadata;}const {item}=await apiRequest(`${ontologyPath}/recordings${editor.id?`/${encodeURIComponent(editor.id)}`:''}`,{token,method:editor.id?'PUT':'POST',body});if(!item?.id)throw Error('The API did not confirm the saved recording. Your browser draft has been kept.');
  let collectionProblem='';try{await syncCollections(item,editor.collectionId);}catch(problem){collectionProblem=problem.message||'The collection could not be updated.';}
- if(!automatic)setFilters(current=>closeAfterSave?{status:item.status||'DRAFT',...(item.workType?{workType:item.workType}:{})}:{...current,status:item.status,...(typeId&&item.workType!==typeId?{workType:item.workType||''}:{})});
+ if(!automatic&&!closeAfterSave)setFilters(current=>({...current,status:item.status,...(typeId&&item.workType!==typeId?{workType:item.workType||''}:{})}));
  if(closeAfterSave)setCollectionId('');
  setItems(current=>[item,...current.filter(row=>row.id!==item.id)]);setAllItems(current=>[item,...current.filter(row=>row.id!==item.id)]);
  if(!automatic){if(stashed)deleteStems(stashed).catch(()=>{});setSelected(item.id);}
@@ -446,7 +444,7 @@ function OntologyArchiveWorkspace({token}){
  <div className="recording-editor-subheader archive-hint-row">{error&&<SelfDestructHint kind="error" onDone={()=>setError('')}>{error+(unavailable?' The ontology API must be deployed before using the new editor.':'')}</SelfDestructHint>}{notice&&<SelfDestructHint kind="ok" onDone={()=>setNotice('')}>{notice}</SelfDestructHint>}<span id="recording-archive-loading-hints" className="recording-loading-hints"/></div>
  <div className="ontology-recording-columns"><aside id="recording-filter-column" className="ontology-filter-column" aria-label="Recording filters"><header><h2>Filters</h2>{activeFilters>0&&<button type="button" className="ontology-filter-clear" onClick={()=>setFilters({})}>Clear all</button>}</header><RecordingFilters durationMax={durationMax} bpmBounds={bpmBounds} value={filters} onChange={setFilters} vocabulary={vocabulary} workTypes={workTypes} collectionSelect={collectionSelect} collectionTools={collectionTools}/></aside>
  <div className="ontology-recording-content">
- <div className={`ontology-recording-main${loading?' is-loading':''}`}>{loading?<RecordingLoadingHint target="recording-archive-loading-hints" message="Loading archive…"/>:<RecordingsListTable vocabulary={vocabulary} collections={collections} recordings={typeRecordings} selectedId={selected} loading={loading} onSelect={id=>{if(id==='browser-recording-draft'){void openRecording();return;}setSelected(id);setContentSelection(null);}}/>}</div>
+ <div className={`ontology-recording-main${loading?' is-loading':''}`}>{loading?<RecordingLoadingHint target="recording-archive-loading-hints" message="Loading archive…"/>:<RecordingsListTable vocabulary={vocabulary} collections={collections} recordings={typeRecordings} selectedId={selected} loading={loading} onSelect={id=>{if(id==='browser-recording-draft'){void openRecording();return;}setSelected(id);setContentSelection(null);void openRecording(typeRecordings.find(item=>item.id===id));}}/>}</div>
  </div></div>
  </section>
  

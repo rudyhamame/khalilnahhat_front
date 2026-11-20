@@ -63,7 +63,7 @@ export default function GoogleSignIn({ar,onSignIn,disabled=false,challenge,compa
         const width=Math.max(200,Math.min(400,available));
         if(width===renderedWidth)return;
         renderedWidth=width;container.current.replaceChildren();
-        google.renderButton(container.current,{type:'standard',theme:'filled_black',size:'large',text:'continue_with',shape:'pill',locale:ar?'ar':'en',width});
+        google.renderButton(container.current,{type:'standard',theme:'filled_black',size:compact?'large':'medium',text:'continue_with',shape:'pill',locale:ar?'ar':'en',width});
       };
       resize=new ResizeObserver(render);resize.observe(container.current);render();
       setStatus('ready');
