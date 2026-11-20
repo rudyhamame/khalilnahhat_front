@@ -23,11 +23,11 @@ html body .echo[data-page=home][data-theme] #live>.viewport-fit-content:has(.is-
 html body body .echo:not(.echo-public-page)[data-page=home][data-theme] :is(#echo-main,.event-order-main)>section#live.echo-home-live.echo-section.viewport-fit-section{padding:0!important;padding-block:0!important;padding-inline:0!important;padding-block-end:0!important}
 }
 /* Top inset: the Live content starts below the header. */
-@media(orientation:portrait){
+@media (orientation:portrait) and (max-width:760px),(pointer:coarse) and (max-width:1366px){
 html body .echo[data-page=home][data-theme] #live>.viewport-fit-content{padding-top:var(--echo-header-height,0px)!important;box-sizing:border-box}
 }
 /* Public /live page: same as the music page, the section has no padding (publicSectionPage.css gives every section a gutter). */
-@media(orientation:portrait){
+@media (orientation:portrait) and (max-width:760px),(pointer:coarse) and (max-width:1366px){
 html body .echo.echo-public-page[data-page=home][data-theme] #echo-main>section#live{padding:0!important}
 }
 /* Live page: header one layer higher. */

@@ -15,6 +15,8 @@ import './homeLiveConsole.css';
 import './livePanelLayout.css';
 import './livePhonePortrait.css';
 
+// Phones in portrait, plus touch tablets (iPad) in either orientation.
+const PHONE_QUERY='(orientation:portrait) and (max-width:760px), (pointer:coarse) and (max-width:1366px)';
 export default function HomeLiveConsole({lang,user,token,liveStream,liveSessions=[],isSessionReady}) {
   const ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en;
   useLayoutEffect(()=>{
@@ -27,9 +29,9 @@ export default function HomeLiveConsole({lang,user,token,liveStream,liveSessions
   const [active,setActive]=useState(false),[error,setError]=useState('');
   const [muted,setMuted]=useState(true);
   // Phone portrait: the picture fills the console; set list / requests open as sheets, comments float over the bottom.
-  const [phone,setPhone]=useState(()=>matchMedia('(orientation:portrait) and (max-width:760px)').matches);
+  const [phone,setPhone]=useState(()=>matchMedia(PHONE_QUERY).matches);
   const [panel,setPanel]=useState('');
-  useEffect(()=>{const q=matchMedia('(orientation:portrait) and (max-width:760px)'),on=()=>setPhone(q.matches);q.addEventListener('change',on);return()=>q.removeEventListener('change',on);},[]);
+  useEffect(()=>{const q=matchMedia(PHONE_QUERY),on=()=>setPhone(q.matches);q.addEventListener('change',on);return()=>q.removeEventListener('change',on);},[]);
   const toggleSound=()=>setMuted(value=>!value);
   const {item:stream}=useLiveStatus({token,initial:liveStream,enabled:active});
   const signedIn=Boolean(user&&token);
