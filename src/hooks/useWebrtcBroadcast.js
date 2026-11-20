@@ -7,10 +7,7 @@ import {captureAudioSource} from '../lib/audioSource';
 import {createProgramOutput} from '../lib/programOutput';
 import {audioInputLevel,createStudioAudioMixer} from '../lib/studioAudioMixer';
 import {liveAudioProcessing,liveAudioConstraints,supportedLiveAudioProcessing,readLiveAudioProcessing,applyLiveAudioProcessing} from '../lib/liveAudioProcessing';
-import { CAMERA_APPEARANCE_DEFAULTS, normalizeCameraAppearance } from '../lib/cameraAppearance';
 import { CameraMirrorProcessor } from '../lib/CameraMirrorProcessor';
-import { isVirtualCamera } from '../lib/virtualCamera';
-import { peopleBlur } from '../lib/peopleBlur';
 import {WhipRoom} from '../lib/whipPublisher';
 import {getLiveQuality} from '../lib/liveQuality';
 import { publishVocalMicrophone } from '../lib/publishVocalMicrophone';
@@ -39,10 +36,6 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   const presentation=useRef(null);
   // The brand logo is burned into the picture by the camera processor; in Two sources the compositor draws it instead (never both).
   const watermarkOn=useRef(true);
-  // In Two sources the look is applied to the final collab picture, so the source's own processor keeps only mirror and logo.
-  const lookInOutput=useRef(false);
-  const virtualCamera=useRef(false);
-  const effectiveLook=value=>lookInOutput.current||virtualCamera.current?{...value,strength:0,sideLight:0}:value;
   const setWatermark=on=>{watermarkOn.current=on;const processor=previewTracks.current.find(track=>track.kind==='video')?.getProcessor?.();if(processor)processor.watermark=on;};
   const pendingDisplay=useRef(null),pendingPromise=useRef(null),latestKind=useRef('');
   const separateAudio=useRef(null),programRef=useRef(null),voiceTrack=useRef(null),voiceLevelRef=useRef(1),inputLostRef=useRef(false),masterRef=useRef(1);
@@ -58,7 +51,6 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   const [micMuted,setMicMuted]=useState(false),[cameraOff,setCameraOff]=useState(false);
   const [cameraMirrored,setCameraMirrored]=useState(false),[mirrorBusy,setMirrorBusy]=useState(false);
   const mirrorLock=useRef(false);
-  const [cameraAppearance,setCameraAppearance]=useState(CAMERA_APPEARANCE_DEFAULTS);
   // Effects are opt-in for this studio session; legacy saved presets cannot enable them.
   const [processingOverrides,setProcessingOverrides]=useState({});
   const [processingApplied,setProcessingApplied]=useState(null);
@@ -107,8 +99,6 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   const [videoInputs, setVideoInputs] = useState([]);
   const [selectedAudioDeviceId, setSelectedAudioDeviceId] = useState('');
   const [selectedVideoDeviceId, setSelectedVideoDeviceId] = useState('');
-  const onVirtualCamera=isVirtualCamera(videoInputs.find(device=>device.deviceId===selectedVideoDeviceId)?.label);
-  virtualCamera.current=onVirtualCamera;peopleBlur.suspended=onVirtualCamera;
   // Scenario "2 cameras": the second (overlay) camera.
   const [overlayVideoDeviceId, setOverlayVideoDeviceId] = useState('');
   const [micMediaStreamTrack, setMicMediaStreamTrack] = useState(null);
@@ -278,7 +268,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
       }
       const camera=tracks.find(track=>track.kind==='video');
       if(camera){
-        const effect=new CameraMirrorProcessor({mirrored:false,appearance:effectiveLook(cameraAppearance),watermark:true});effect.watermark=watermarkOn.current;
+        const effect=new CameraMirrorProcessor({mirrored:false,watermark:true});effect.watermark=watermarkOn.current;
         try{await camera.setProcessor(effect,true);}catch(error){await effect.destroy();throw error;}
         if(request!==generation.current){tracks.forEach(track=>track.stop());return;}
       }
@@ -309,7 +299,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
       const {width,height}=captureVideo().resolution,program=createProgramOutput({width,height});
       program.setHold(photo);
       const video=new LocalVideoTrack(program.track,undefined,true);
-      const effect=new CameraMirrorProcessor({mirrored:false,appearance:effectiveLook(cameraAppearance),watermark:true});effect.watermark=watermarkOn.current;
+      const effect=new CameraMirrorProcessor({mirrored:false,watermark:true});effect.watermark=watermarkOn.current;
       try{await video.setProcessor(effect,true);}catch(error){await effect.destroy();program.stop();throw error;}
       const mixer=newMixer();presentationMixer.current=mixer;await mixer.ready;
       if(request!==generation.current){mixer.stop();video.stop();program.stop();return false;}
@@ -543,31 +533,26 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   const closePreview=()=>{if(roomRef.current)return;generation.current++;releasePreview();setStatusMessage('Preview closed.');};
   // Deselecting the scenario: the preview (and with it the camera) is turned off and no input stays chosen.
   const deselectSource=()=>{if(mediaBusy.current)return;const holder=programRef.current;if(holder&&(holder.program.holding||inputLostRef.current)){holder.program.setInput(null);holder.input?.stop?.();holder.input=null;holder.pendingInput=true;presentation.current?.cleanup();presentation.current=null;presentationMixer.current?.disconnectMicrophone();presentationMixer.current?.connectSource(null);micInput.current?.stop();micInput.current=null;separateAudio.current?.cleanup?.();separateAudio.current=null;sourceAudioInput.current=null;setSourceAudioTrack(null);setMicMediaStreamTrack(null);sourceChosenRef.current=false;setSourceFile(null);setStatusMessage('Choose a scenario before resuming the live.');return;}if(roomRef.current)return;pendingDisplay.current?.cleanup();pendingDisplay.current=null;pendingPromise.current=null;generation.current++;releasePreview();sourceChosenRef.current=false;setSourceFile(null);setAudioModeState('auto');setAudioFile(null);setStatusMessage('Input deselected.');};
-  const updateCameraEffects=async({mirrored=cameraMirrored,appearance=cameraAppearance}={})=>{
+  const updateCameraEffects=async({mirrored=cameraMirrored}={})=>{
     if(mirrorLock.current||mediaBusy.current||startBusy.current)return;
-    const next=normalizeCameraAppearance(appearance);
     const track=previewTracks.current.find(t=>t.kind==='video')||[...roomRef.current?.localParticipant.trackPublications?.values()||[]].find(p=>p.kind==='video')?.track;
-    if(!track){setCameraAppearance(next);return;}
+    if(!track){setCameraMirrored(mirrored);return;}
     const request=generation.current;
     mirrorLock.current=true;setMirrorBusy(true);
     let processor;
     try{
       const existing=track.getProcessor?.();
-      if(mirrored||effectiveLook(next).strength>0||effectiveLook(next).sideLight||existing?.watermark){
-        if(existing instanceof CameraMirrorProcessor)existing.configure({mirrored,appearance:effectiveLook(next)});
-        else{processor=new CameraMirrorProcessor({mirrored,appearance:effectiveLook(next),watermark:true});processor.watermark=watermarkOn.current;await track.setProcessor(processor,true);}
+      if(mirrored||existing?.watermark){
+        if(existing instanceof CameraMirrorProcessor)existing.configure({mirrored});
+        else{processor=new CameraMirrorProcessor({mirrored,watermark:true});processor.watermark=watermarkOn.current;await track.setProcessor(processor,true);}
       }else if(existing)await track.stopProcessor();
       if(request!==generation.current){await processor?.destroy();return;}
-      setCameraMirrored(mirrored);setCameraAppearance(next);
-      setStatusMessage(`Camera effects applied to preview and outgoing video. Mirror ${mirrored?'on':'off'} · beauty / lighting ${next.strength?'on':'off'}.`);
+      setCameraMirrored(mirrored);
+      setStatusMessage(`Camera effects applied to preview and outgoing video. Mirror ${mirrored?'on':'off'}.`);
     }catch(error){await processor?.destroy();if(request===generation.current)setStatusMessage(error.message||'Could not change camera effects.');}
     finally{mirrorLock.current=false;setMirrorBusy(false);}
   };
-  const setLookInOutput=on=>{lookInOutput.current=on;const processor=previewTracks.current.find(track=>track.kind==='video')?.getProcessor?.();if(processor?.configure)try{processor.configure({appearance:effectiveLook(cameraAppearance)});}catch{/* Unsupported filters */}};
-  // Picking or leaving a virtual camera (OBS) switches the Studio's own look off or back on for the open preview.
-  useEffect(()=>{setLookInOutput(lookInOutput.current);},[onVirtualCamera]);// eslint-disable-line react-hooks/exhaustive-deps
   const toggleCameraMirror=()=>updateCameraEffects({mirrored:!cameraMirrored});
-  const updateCameraAppearance=appearance=>updateCameraEffects({appearance});
   const toggleInput=async(kind)=>{
     if(kind==='audio'&&!micInput.current&&presentationMixer.current)return updateIncludeMicrophone(true);
     if(mediaBusy.current||mirrorLock.current)return;mediaBusy.current=true;
@@ -793,10 +778,10 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     getSourceElement:()=>separateAudio.current?.element||presentation.current?.element||null,
     loadSourceVideo:file=>(separateAudio.current?.element?separateAudio.current:presentation.current?.element?presentation.current:separateAudio.current)?.load?.(file)||Promise.resolve(false),
     sourceKind,sourceChosen:sourceChosenRef.current,setSourceKind,sourceFile,setSourceFile,selectSource,audioMode,audioFile,selectAudio,includeMicrophone,setIncludeMicrophone:updateIncludeMicrophone,pauseSource:()=>presentation.current?.pause?.(),playSource:()=>presentation.current?.play?.(),restartSource:()=>presentation.current?.restart?.(),
-    cameraMirrored,mirrorBusy,toggleCameraMirror,cameraAppearance,updateCameraAppearance,
+    cameraMirrored,mirrorBusy,toggleCameraMirror,
     processing,processingApplied,processingMessage,processingBusy,updateAudioProcessing,
     sourceProcessing,sourceProcessingApplied,sourceProcessingMessage,sourceProcessingBusy,sourceProcessingSupported,updateSourceAudioProcessing,
-    isPreviewing,previewBusy,preparePreview,preparePausedPreview,setWatermark,setLookInOutput,setPortraitTrack,setPausedAudio,setPortraitAudio,getInputMeterStream,getVoiceMeterStream,getOutputMeterStream,getMonitorStream,localMonitor,setLocalMonitorMuted,setVoiceClarity,outputLevel,updateOutputLevel,outputMuted,setOutputMuted,setInputMuted,closePreview,micMuted,cameraOff,toggleMicrophone:()=>toggleInput('audio'),toggleCamera:()=>toggleInput('video'),
+    isPreviewing,previewBusy,preparePreview,preparePausedPreview,setWatermark,setPortraitTrack,setPausedAudio,setPortraitAudio,getInputMeterStream,getVoiceMeterStream,getOutputMeterStream,getMonitorStream,localMonitor,setLocalMonitorMuted,setVoiceClarity,outputLevel,updateOutputLevel,outputMuted,setOutputMuted,setInputMuted,closePreview,micMuted,cameraOff,toggleMicrophone:()=>toggleInput('audio'),toggleCamera:()=>toggleInput('video'),
     isConnecting,
     preflight,isPreflightActive:()=>preflightRef.current,
     isBroadcasting,

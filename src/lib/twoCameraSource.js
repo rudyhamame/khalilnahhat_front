@@ -1,6 +1,5 @@
 import {startLiveFrameClock} from './liveFrameClock.js';
 import {fitRect} from './collabCompositor.js';
-import {createBlurPass,portraitBlur} from './peopleBlur.js';
 // Studio scenario "2 cameras": Camera 1 fills the 16:9 frame; Camera 2 is a cut-out window laid over it.
 // The overlay is described in normalised units so it is independent of the output size:
 //   crop  = the part of Camera 2 that is shown (any shape of rectangle: "cut as I like")
@@ -102,11 +101,11 @@ export async function captureTwoCameras({cameraId='',overlayId='',windows=false,
     const canvas=doc.createElement('canvas');canvas.width=width;canvas.height=height;
     const ctx=canvas.getContext('2d',{alpha:false}),state={overlay:{...DEFAULT_OVERLAY},pan:.5};
     // 2 windows: the landscape camera fills the 16:9 picture on its own, and the portrait camera fills its own 9:16 picture (no overlay).
-    let pctx=null,pcanvas=null,portraitPass=null;const PW=720,PH=1280;
-    if(windows){const pc=doc.createElement('canvas');pc.width=PW;pc.height=PH;pctx=pc.getContext('2d',{alpha:false});pcanvas=pc;portraitTrack=pc.captureStream(30).getVideoTracks()[0];if(portraitTrack)portraitTrack.contentHint='motion';}
+    let pctx=null;const PW=720,PH=1280;
+    if(windows){const pc=doc.createElement('canvas');pc.width=PW;pc.height=PH;pctx=pc.getContext('2d',{alpha:false});portraitTrack=pc.captureStream(30).getVideoTracks()[0];if(portraitTrack)portraitTrack.contentHint='motion';}
     const draw=()=>{
       if(!windows){drawTwoCameras(ctx,va,vb,state.overlay,width,height);return;}
-      drawCover(ctx,va,width,height);if(pctx){drawCover(pctx,vb,PW,PH,state.pan);(portraitPass||=createBlurPass(portraitBlur))(pctx,pcanvas,PW,PH);}// the portrait camera blurs other faces around its own DJ pick
+      drawCover(ctx,va,width,height);if(pctx){drawCover(pctx,vb,PW,PH,state.pan);}
     };
     track=canvas.captureStream(30).getVideoTracks()[0];if(!track)throw new Error('This browser cannot make the combined picture.');
     track.contentHint='motion';

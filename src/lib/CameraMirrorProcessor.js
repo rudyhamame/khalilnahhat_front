@@ -1,17 +1,10 @@
 import {startLiveFrameClock} from './liveFrameClock.js';
-import { normalizeCameraAppearance } from './cameraAppearance.js';
-import { paintLook } from './lookPaint.js';
-import { createBlurPass } from './peopleBlur.js';
 // LiveKit publishes this canvas track, so mirroring reaches every viewer/output.
 // A single render loop handles mirroring, appearance and embedded branding.
 export class CameraMirrorProcessor {
   name = 'echo-camera-mirror';
-  constructor({ mirrored = true, appearance = {}, watermark = false } = {}) { this.watermark = watermark; this.hasLogo = watermark; this.configure({ mirrored, appearance }); }
-  configure({ mirrored = this.mirrored, appearance = this.appearance } = {}) {
-    const next = normalizeCameraAppearance(appearance);
-    if(this.context && next.strength > 0 && !('filter' in this.context)) throw new Error('Beauty and lighting filters are unavailable in this browser.');
-    this.mirrored = mirrored; this.appearance = next;
-  }
+  constructor({ mirrored = true, watermark = false } = {}) { this.watermark = watermark; this.hasLogo = watermark; this.configure({ mirrored }); }
+  configure({ mirrored = this.mirrored } = {}) { this.mirrored = mirrored; }
   async init({ track }) {
     this.disposed = false;
     const video = this.video = document.createElement('video');
@@ -42,8 +35,6 @@ export class CameraMirrorProcessor {
         if (!width || !height) return;
         if (canvas.width !== width || canvas.height !== height) { canvas.width = width; canvas.height = height; }
         this.paintVideo(context, width, height);
-        // Other people are blurred on the composed frame, before branding is drawn.
-        (this.blurPass ||= createBlurPass())(context, canvas, width, height);
         // Branding is composed after the camera transform and filters, never mirrored.
         if(this.logo&&this.watermark){
           context.setTransform(1,0,0,1,0,0);
@@ -90,7 +81,7 @@ export class CameraMirrorProcessor {
     } catch (error) { await this.destroy(); throw error; }
   }
   // The existing appearance pipeline, drawn into any context.
-  paintVideo(context, width, height) { paintLook(context, this.frameSource||this.video, width, height, this.appearance, this.mirrored); }
+  paintVideo(context, width, height) { context.setTransform(this.mirrored ? -1 : 1, 0, 0, 1, this.mirrored ? width : 0, 0); context.drawImage(this.frameSource||this.video, 0, 0, width, height); }
 
   async restart(options) { await this.destroy(); await this.init(options); }
   async destroy() {

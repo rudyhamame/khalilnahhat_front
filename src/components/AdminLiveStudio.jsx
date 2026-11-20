@@ -1,7 +1,6 @@
 import LiveElapsedTimer from './LiveElapsedTimer';
 import {useStudioRecordingMonitor} from '../hooks/useStudioRecordingMonitor';
 import {useStudioWorkspaceLayout} from '../hooks/useStudioWorkspaceLayout';
-import PeopleBlurControl,{PeopleBlurToggle} from './PeopleBlurControl';
 import {startRecordingOutputs} from '../lib/recordingOutputs';
 import {useCallback,useEffect,useRef,useState} from 'react';
 import {SlidersHorizontal,Disc3,Video,Radio,VideoOff,Minimize2,Maximize2,RefreshCw,Layers,Share2,Eye,EyeOff,LoaderCircle,Square,FolderOpen,TriangleAlert,Info,X,Pause,Play,PanelLeftClose,PanelLeftOpen,PanelRightClose,PanelRightOpen} from 'lucide-react';
@@ -60,7 +59,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  const [deviceOnly,setDeviceOnly]=useState(false),[cropSlot,setCropSlot]=useState(null);
  const chooseRecordingFallback=choice=>{fallbackDecision.current?.(choice);fallbackDecision.current=null;setRecordingFallback(false);};
  useEffect(()=>()=>{fallbackDecision.current?.(false);},[]);
- const [saveLive,setSaveLive]=useState(()=>{try{return localStorage.getItem('echo-save-live-recording')!=='false';}catch{return true;}});
+ const [saveLive,setSaveLive]=useState(()=>{try{return localStorage.getItem('echo-save-live-recording')==='true';}catch{return false;}});
  const [outTab,setOutTab]=useState('output');
  const [audience,setAudience]=useState('all'),[audienceIds,setAudienceIds]=useState([]),[clientQuery,setClientQuery]=useState(''),[clientRows,setClientRows]=useState([]);
  useEffect(()=>{if(audience!=='specific')return undefined;const controller=new AbortController(),timer=setTimeout(()=>{apiRequest('/admin/clients?'+new URLSearchParams(clientQuery.trim()?{q:clientQuery.trim()}:{}),{token,signal:controller.signal}).then(data=>setClientRows((data.items||[]).filter(client=>!client.isAdmin))).catch(()=>{});},180);return()=>{clearTimeout(timer);controller.abort();};},[audience,clientQuery,token]);
@@ -166,7 +165,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  };
  const windowsRef=useRef(false),portraitStreamRef=useRef(null);
  const webrtc=useWebrtcBroadcast({onGoLive:start,onEndLive:end,onReady:ready,onStartRecording:startRecording,getOutputs:()=>windowsRef.current?{landscape:null,portrait:portraitStreamRef.current?.()?.getVideoTracks()[0]||null}:collabRef.current?.getOutputs()||{},getPortraitAudio:()=>collabRef.current?.getPortraitAudio()||null,isNativePortrait:()=>Boolean(collabRef.current?.nativePortrait),requireRecording:saveServer,recordingEnabled:saveServer,expectedRoom:liveStream?.webrtcRoomName});
- const collab=useCollabOutputs({getPrimaryVideo,second:secondSource,primaryReady:webrtc.isPreviewing||webrtc.isBroadcasting,tabActive:settingsTab==='studio',pan:webrtc.portraitPan,look:webrtc.cameraAppearance});collabRef.current=collab;
+ const collab=useCollabOutputs({getPrimaryVideo,second:secondSource,primaryReady:webrtc.isPreviewing||webrtc.isBroadcasting,tabActive:settingsTab==='studio',pan:webrtc.portraitPan});collabRef.current=collab;
  // An ended live must never be "restored after a refresh": End live clears the tab's live marker and blocks the auto-restore.
  const stopLive=()=>{autoResumed.current=true;try{sessionStorage.removeItem('echo-live-tab');}catch{/* storage unavailable */}return webrtc.endLive();};
  const [resumeBusy,setResumeBusy]=useState(false);
@@ -228,7 +227,6 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  const [inputMeter,setInputMeter]=useState(null),[voiceMeter,setVoiceMeter]=useState(null),[outputMeter,setOutputMeter]=useState(null),[listenStream,setListenStream]=useState(null),[inputMuted,setInputMuted]=useState(false);
  useEffect(()=>{webrtc.setInputMuted(inputMuted);},[inputMuted,webrtc.isPreviewing,webrtc.isBroadcasting,webrtc.previewBusy,webrtc.paused]);// eslint-disable-line react-hooks/exhaustive-deps
  useEffect(()=>{setInputMeter(webrtc.getInputMeterStream());setVoiceMeter(webrtc.getVoiceMeterStream());setOutputMeter(webrtc.getOutputMeterStream());setListenStream(webrtc.getMonitorStream());},[webrtc.isPreviewing,webrtc.isBroadcasting,webrtc.previewBusy,webrtc.paused,webrtc.voiceOn,webrtc.voiceStream]);// eslint-disable-line react-hooks/exhaustive-deps
- useEffect(()=>{webrtc.setLookInOutput(collab.count===2);},[collab.count,webrtc.isPreviewing,webrtc.isBroadcasting]);// eslint-disable-line react-hooks/exhaustive-deps
  const autoResumed=useRef(false);
  useEffect(()=>{try{if(webrtc.isBroadcasting)sessionStorage.setItem('echo-live-tab',liveStream?.webrtcRoomName||'1');else if(!loading&&!isLiveOnAir)sessionStorage.removeItem('echo-live-tab');}catch{/* storage unavailable */}},[webrtc.isBroadcasting,loading,isLiveOnAir,liveStream?.webrtcRoomName]);
  useEffect(()=>{if(autoResumed.current||loading||!pauseLoaded||!isLiveOnAir||liveStream?.broadcastSource!=='browser'||webrtc.isBroadcasting||!pausePhoto||(!ovhRecording&&saveLive&&!folderName))return;let mine=false;try{mine=Boolean(sessionStorage.getItem('echo-live-tab'));}catch{/* ignore */}if(!mine)return;autoResumed.current=true;void restorePaused(pauseFrame);},[pausePhoto,pauseLoaded,loading,isLiveOnAir,liveStream?.broadcastSource,webrtc.isBroadcasting,webrtc.sourceKind,folderName,ovhRecording]);// eslint-disable-line react-hooks/exhaustive-deps
@@ -334,7 +332,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
               <div className="admin-live-tab-panel admin-live-sessions-page-panel" role="tabpanel">
               <div className="admin-live-single has-requests-aside">
               <div className={`admin-live-preview${previewFormat==='portrait'?' is-portrait-only':''}`}>
-                {(webrtc.isPreviewing||webrtc.isBroadcasting)&&<div className="studio-preview-toolbar" role="toolbar" aria-label="Preview tools"><PeopleBlurToggle/>{previewFormat!=='landscape'&&<span ref={setCropSlot} className="studio-preview-toolbar-crop"/>}</div>}
+                {(webrtc.isPreviewing||webrtc.isBroadcasting)&&<div className="studio-preview-toolbar" role="toolbar" aria-label="Preview tools">{previewFormat!=='landscape'&&<span ref={setCropSlot} className="studio-preview-toolbar-crop"/>}</div>}
                 <div className={`admin-live-monitor studio-preview-pair${previewFormat==='landscape'?' is-landscape-only':previewFormat==='portrait'?' is-portrait-only':''}${collab.count===2?` is-collab is-collab-${collab.side}`:''}`} ref={liveFrame} aria-label="Landscape and portrait previews">
                 <MicStrip localMonitor={webrtc.localMonitor} onLocalMute={webrtc.setLocalMonitorMuted} showInput={collab.count===2||hasAudioInput} muted={inputMuted} onMute={setInputMuted} voiceMeter={voiceMeter} devices={webrtc.audioInputs} deviceId={webrtc.voiceDeviceId} onPickDevice={async id=>{if(id&&id===webrtc.selectedAudioDeviceId)webrtc.setSelectedAudioDeviceId(webrtc.audioInputs.find(entry=>entry.deviceId&&entry.deviceId!==id)?.deviceId||'');await webrtc.selectVoiceDevice(id);await webrtc.setVoice(true);}} actions={actionButtons} inputStream={inputMeter} on={webrtc.voiceOn} level={webrtc.voiceLevel} stream={webrtc.voiceStream} disabled={!webrtc.isPreviewing&&!webrtc.isBroadcasting} onToggle={()=>void webrtc.setVoice(!webrtc.voiceOn)} onLevel={webrtc.updateVoiceLevel} master={webrtc.masterLevel} onMaster={webrtc.updateMasterLevel} auto={autoLevel} ducking={ducking} onAuto={on=>{setAutoLevel(on);try{localStorage.setItem('echo-auto-level',on?'1':'0');}catch{/* Session choice still works. */}}}/>
                 <section className="studio-preview-window" aria-label="Landscape preview" hidden={previewFormat==='portrait'}>
@@ -342,7 +340,6 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
                  <div className="admin-live-preview-frame-shell studio-preview-landscape" ref={primaryFrame}>
 
                   <div className="studio-output-source-target" ref={setLandscapeIndicators}/>
-                  {(webrtc.isPreviewing||webrtc.isBroadcasting)&&<PeopleBlurControl/>}
                   {webrtc.isPreviewing||webrtc.previewBusy||webrtc.isBroadcasting||webrtc.isConnecting ? <><video ref={webrtc.videoRef} className="admin-live-preview-frame" autoPlay playsInline muted/>{collab.landscapePreview&&<CollabLandscapeOverlay stream={collab.landscapePreview} pan={collab.panA} onPan={collab.side.startsWith('mini')||webrtc.paused?undefined:collab.setPanA} getAspect={()=>{const video=getPrimaryVideo();return video?.videoWidth&&video?.videoHeight?video.videoWidth/video.videoHeight:16/9;}}/>}{webrtc.preflight&&<div className="pause-banner" role="status"><div className="pause-badge"><LoaderCircle size={13} className="studio-opening-spinner" aria-hidden="true"/><strong>GO LIVE PREFLIGHT</strong></div></div>}{webrtc.paused&&<PauseBanner stream={webrtc.pausedPreview} onResume={webrtc.resumeLive}/>}</> : isLiveOnAir ? (pausePhoto&&liveStream?.broadcastSource==='browser'?<div className="studio-halt-photo" role="img" aria-label="Pause screen"><img src={pausePhoto.url} alt=""/><span>Live halted · pause screen</span></div>:<WebrtcViewer key={session} token={token} sessionIdentity={session} muted showAudioControls audioControlsTarget={previewAudioControlsTarget}/>) : liveStream?.posterImage ? <img className="admin-live-preview-image" src={liveStream.posterImage} alt="" aria-hidden="true"/> : <div className="admin-live-preview-empty"><VideoOff size={18}/><span>{reserved?'Connecting source…':'No live source'}</span></div>}
                  </div>
                 </section>

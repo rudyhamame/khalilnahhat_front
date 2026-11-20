@@ -1,5 +1,4 @@
 import {startLiveFrameClock} from './liveFrameClock.js';
-import {paintLook,lookActive} from './lookPaint.js';
 // The collab picture: ONE landscape 16:9 frame. The landscape source fills it; the portrait source is overlaid as a 9:16 window.
 export const OVERLAY_SIDES=[['right','Right edge'],['left','Left edge'],['mini-br','Mini · bottom right'],['mini-bl','Mini · bottom left']];
 export const MINI_HEIGHT=.42,MINI_MARGIN=.025;
@@ -56,21 +55,13 @@ export function drawCollab(ctx,videos,rects,W,H,pan=.5,logo=null,hold=null,panA=
  */
 export function createCollabStream({a,b,side='right',pan=.5,width=1280,height=720,fps=30,doc=globalThis.document,clock=startLiveFrameClock,logoSrc='/echo/dj-khalil-nahhat-logo.svg',ImageClass=globalThis.Image}={}){
   const canvas=doc.createElement('canvas');canvas.width=width;canvas.height=height;
-  const ctx=canvas.getContext('2d'),state={videos:{a,b},side,pan,panA:.5,hold:null,look:null};
+  const ctx=canvas.getContext('2d'),state={videos:{a,b},side,pan,panA:.5,hold:null};
   let logo=null;if(ImageClass&&logoSrc){logo=new ImageClass();logo.src=logoSrc;}
-  // Beauty & lighting for the WHOLE collab picture: the sources are composed on a scratch canvas, then painted once through the look; the logo goes on top, untouched.
-  let scratch=null;
-  const draw=()=>{
-    const rects=collabRects(width,height,state);
-    if(!lookActive(state.look)||!doc.createElement)return drawCollab(ctx,state.videos,rects,width,height,state.pan,logo,state.hold,state.panA);
-    if(!scratch){scratch=doc.createElement('canvas');scratch.width=width;scratch.height=height;}
-    const sctx=scratch.getContext('2d');drawCollab(sctx,state.videos,rects,width,height,state.pan,null,state.hold,state.panA);
-    paintLook(ctx,scratch,width,height,state.look);ctx.setTransform(1,0,0,1,0,0);drawLogo(ctx,rects,logo,width,height);
-  };
+  const draw=()=>drawCollab(ctx,state.videos,collabRects(width,height,state),width,height,state.pan,logo,state.hold,state.panA);
   draw();const stopClock=clock(draw,fps),stream=canvas.captureStream(fps);
   return {
     stream,canvas,
-    set(next={}){for(const key of ['side','videos','pan','panA','hold','look'])if(next[key]!==undefined)state[key]=next[key];},
+    set(next={}){for(const key of ['side','videos','pan','panA','hold'])if(next[key]!==undefined)state[key]=next[key];},
     stop(){stopClock();for(const track of stream.getTracks())track.stop();},
   };
 }

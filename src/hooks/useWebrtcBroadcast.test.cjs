@@ -13,7 +13,7 @@ function harness({audioMode,audioCapture,getOutputs,beforePreview,start,portrait
   disconnect(){this.disconnected=true;this.events.disconnected?.();}
  }
  const source=fs.readFileSync(__dirname+'/useWebrtcBroadcast.js','utf8').replace(/^import .*;\n/gm,'').replace('export function useWebrtcBroadcast','function useWebrtcBroadcast').replace('[includeMicrophone,setIncludeMicrophone]=useState(false)',`[includeMicrophone,setIncludeMicrophone]=useState(${includeMic})`);
- const context={setTimeout,clearTimeout,...require('../lib/recordingOutputs.js'),getLiveQuality:()=>({long:1280,short:720,videoBitrate:1700000}),isVirtualCamera:()=>false,peopleBlur:{},sessionStorage:{getItem:()=>sourceKind,setItem(){},removeItem(){}},localStorage:{getItem:()=>JSON.stringify({echoCancellation:true,noiseSuppression:true,autoGainControl:true}),setItem(){}},...require('../lib/liveAudioProcessing.js'),...require('../lib/cameraAppearance.js'),CameraMirrorProcessor:class{constructor(options){Object.assign(this,options);}configure(options){Object.assign(this,options);}async destroy(){}},console:{warn(){}},navigator:{mediaDevices:{enumerateDevices:async()=>[]}},
+ const context={setTimeout,clearTimeout,...require('../lib/recordingOutputs.js'),getLiveQuality:()=>({long:1280,short:720,videoBitrate:1700000}),sessionStorage:{getItem:()=>sourceKind,setItem(){},removeItem(){}},localStorage:{getItem:()=>JSON.stringify({echoCancellation:true,noiseSuppression:true,autoGainControl:true}),setItem(){}},...require('../lib/liveAudioProcessing.js'),...require('../lib/cameraAppearance.js'),CameraMirrorProcessor:class{constructor(options){Object.assign(this,options);}configure(options){Object.assign(this,options);}async destroy(){}},console:{warn(){}},navigator:{mediaDevices:{enumerateDevices:async()=>[]}},
   useRef:value=>({current:value}),useState:value=>[value==='auto'&&audioMode?(stateIndex++,audioMode):value==='camera'?sourceKind:typeof value==='function'?value():value,next=>stateWrites.push(next)],useEffect:callback=>effects.push(callback),
   window:{AudioContext:class{async resume(){}close(){}createMediaStreamDestination(){return {stream:{getAudioTracks:()=>[{kind:'audio',enabled:true,stop(){}}]}};}createMediaStreamSource(){return {connect(){},disconnect(){}};}},addEventListener(){},removeEventListener(){}},
   MediaStream:class{constructor(tracks){this.tracks=tracks;}},
@@ -88,19 +88,6 @@ test('mirroring processes the program picture that is published on go-live',asyn
  assert.ok(program.processor);assert.equal(program.showLocally,true);assert.equal(h.programs[0].input.id,'raw');
  await h.hook.goLive('Mirror test');
  assert.equal(h.published[0],program);assert.equal(h.ready,1);h.unmount();
-});
-test('beauty and lighting update the existing branded camera processor without reopening capture',async()=>{
- const camera={kind:'video',mediaStreamTrack:{id:'raw'},attach(){},detach(){},stop(){}};
- const h=harness({capture:options=>options.video?[camera]:[{kind:'audio',stop(){}}]});
- await h.hook.preparePreview();
- const program=h.videoTracks.find(track=>track.mediaStreamTrack===h.programs[0].track),processor=program.processor;
- assert.equal(processor.watermark,true);
- await h.hook.updateCameraAppearance({strength:75,brightness:20,smoothing:30});
- assert.equal(program.processor,processor);assert.equal(program.installs,1);
- assert.equal(processor.appearance.brightness,20);assert.equal(processor.appearance.strength,75);
- await h.hook.updateCameraAppearance({strength:0});
- assert.equal(program.processor,processor);assert.equal(processor.watermark,true);assert.equal(program.installs,1);
- assert.equal(h.captures.length,2);h.unmount();
 });
 
 test('fixed 720p capture publishes at 30 fps without extra video layers',async()=>{
