@@ -26,9 +26,16 @@ html[dir=rtl] .echo[data-page=home] .hero-introduction>.hero-equipment-showcase{
 
 /* Music boxes scene: a 3x2 grid of the Music page's boxes, each lighting up as it is named. */
 .hero-music-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;width:100%;margin:auto 0}
-.hero-music-box{--g1:#ff5f7e;--g2:#ffa24c;display:grid;justify-items:center;align-content:center;gap:8px;aspect-ratio:1;border-radius:22px;border:1px solid #ffffff2e;background:linear-gradient(150deg,color-mix(in srgb,var(--g1) 30%,#111),color-mix(in srgb,var(--g2) 18%,#0c0d0e));color:#fff;opacity:.18;transform:scale(.9);transition:opacity .45s,transform .5s cubic-bezier(.2,.8,.2,1),box-shadow .45s}
+.hero-music-box{--g1:#ff5f7e;--g2:#ffa24c;display:grid;justify-items:center;align-content:center;gap:8px;aspect-ratio:1;border-radius:22px;border:1px solid #ffffff2e;background:linear-gradient(150deg,color-mix(in srgb,var(--g1) 30%,#111),color-mix(in srgb,var(--g2) 18%,#0c0d0e));color:#fff;opacity:0;transform:translateY(14px) scale(.6);transition:opacity .45s,transform .5s cubic-bezier(.2,.8,.2,1),box-shadow .45s}
 .hero-music-box b{font-size:clamp(12px,1.1vw,15px);letter-spacing:.04em}
 .hero-music-box.is-shown{opacity:.85;transform:scale(1)}
+/* Each box flies in from outside the screen (alternating left / right edges) when the greeting says its name. */
+.hero-music-box.is-shown{animation:hero-music-box-fly 1s cubic-bezier(.16,.84,.3,1) backwards}
+.hero-music-box[data-tone="0"]{--fx:-120vw;--fy:-12vh;--fr:-22deg}.hero-music-box[data-tone="1"]{--fx:120vw;--fy:-16vh;--fr:24deg}
+.hero-music-box[data-tone="2"]{--fx:-120vw;--fy:10vh;--fr:-16deg}.hero-music-box[data-tone="3"]{--fx:120vw;--fy:14vh;--fr:18deg}
+.hero-music-box[data-tone="4"]{--fx:-120vw;--fy:0vh;--fr:-26deg}.hero-music-box[data-tone="5"]{--fx:120vw;--fy:2vh;--fr:26deg}
+@keyframes hero-music-box-fly{0%{opacity:1;transform:translate(var(--fx),var(--fy)) rotate(var(--fr)) scale(.7)}70%{opacity:1;transform:translate(0,0) rotate(0) scale(1.06)}100%{opacity:.85;transform:none}}
+@media(prefers-reduced-motion:reduce){.hero-music-box.is-shown{animation:none}}
 .hero-music-box.is-now{opacity:1;transform:scale(1.08);box-shadow:0 0 0 2px var(--g1),0 0 34px color-mix(in srgb,var(--g1) 60%,transparent)}
 .hero-music-box[data-tone="0"]{--g1:#d9d9df;--g2:#2f6dff}.hero-music-box[data-tone="1"]{--g1:#ff5f7e;--g2:#ffa24c}.hero-music-box[data-tone="2"]{--g1:#8a4dff;--g2:#ffa5d6}
 .hero-music-box[data-tone="3"]{--g1:#2ef2b0;--g2:#2e9bff}.hero-music-box[data-tone="4"]{--g1:#ffe07a;--g2:#ff7a3d}.hero-music-box[data-tone="5"]{--g1:#ff4d8d;--g2:#6a4dff}
