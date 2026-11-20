@@ -203,7 +203,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  </div>
  <div className="studio-settings-panel" role="tabpanel" id="studio-settings-panel-studio" aria-labelledby="studio-settings-tab-studio" hidden={settingsTab!=='studio'} tabIndex={0}>
  <section className="studio-console" aria-label="Session and source">
- {legacyObs&&<header className="studio-source-heading"><span className="studio-status">Legacy OBS connection</span></header>}
+ 
  <StudioControlSection step="01" title="Session details" description="Give your live set a name and a purpose."><div className="studio-session-row">
  <label className="studio-title"><span className="studio-field-caption">SESSION TITLE <b className="studio-required" aria-hidden="true">*</b></span><input required aria-required="true" aria-invalid={detailsTried&&!title.trim()} className={detailsTried&&!title.trim()?'is-invalid':''} value={title} placeholder="Name your live set" maxLength={180} disabled={webrtc.isConnecting} onChange={event=>setTitle(event.target.value)}/></label>
  <fieldset className="admin-live-settings studio-goal-fieldset" disabled={loading||Boolean(error)}>
@@ -216,8 +216,8 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
 
 
 
+ <StudioControlSection step="03" title="OBS stream" description="Stream straight from OBS to the OVH relay. Prepare OBS, paste the server and token into OBS, then start streaming. No browser camera is used." className="studio-sources-card"><div className="studio-block"><ObsBroadcast token={token} title={title.trim()} item={liveStream} onUpdate={item=>{apply(item);}}/></div></StudioControlSection>
  <fieldset className="admin-live-settings studio-source-settings" disabled={loading||Boolean(error)}>
-  {legacyObs&&<ObsBroadcast token={token} item={liveStream} onUpdate={item=>{apply(item);setTitle('');}}/>}
   <div ref={setPreviewAudioControlsTarget} className="admin-preview-sound-slot"/>
  </fieldset>
  </section>
