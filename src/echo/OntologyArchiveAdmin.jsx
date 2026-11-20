@@ -19,7 +19,7 @@ import RecordingEditorBar from './RecordingEditorBar';
 import {recordingStage,recordingSaveState} from '../lib/recordingWorkflow';
 import RecordingItemsEditor from './RecordingItemsEditor';
 import {editableRecordingItems,validateRecordingItems,clearItemTiming,blankItemLyrics} from '../lib/recordingItems';
-import RecordingsListTable,{RecordingDetails} from './RecordingsListTable';
+import RecordingsListTable from './RecordingsListTable';
 import SelfDestructHint from './SelfDestructHint';
 import RecordingFilters from './RecordingFilters';
 import WorkFields from './WorkFields';
@@ -449,7 +449,6 @@ function OntologyArchiveWorkspace({token}){
  <div className={`ontology-recording-main${loading?' is-loading':''}`}>{loading?<RecordingLoadingHint target="recording-archive-loading-hints" message="Loading archive…"/>:<RecordingsListTable vocabulary={vocabulary} collections={collections} recordings={typeRecordings} selectedId={selected} loading={loading} onSelect={id=>{if(id==='browser-recording-draft'){void openRecording();return;}setSelected(id);setContentSelection(null);}}/>}</div>
  </div></div>
  </section>
- <RecordingDetails recording={typeRecordings.find(item=>item.id===selected)} collections={collections} onEdit={openInNewPage}/>
  
  </div>
  </div>

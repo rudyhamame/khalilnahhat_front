@@ -23,7 +23,7 @@
 .recording-details-atoms small{margin-inline-start:8px;color:var(--mo-muted,#9aa4b2)}
 .recording-details-edit{position:absolute;top:14px;inset-inline-end:14px;z-index:1;display:inline-flex;align-items:center;gap:6px;padding:6px 12px;font-size:12.5px;border-radius:999px;border:1px solid var(--mo-line,#ffffff33);background:transparent;color:inherit;cursor:pointer}
 @media(min-width:1001px){
- .admin-workspace .ontology-view-recordings>.ontology-admin-main{grid-template-columns:clamp(220px,20%,290px) minmax(0,1fr) clamp(300px,28%,400px);grid-template-rows:minmax(0,1fr)}
+ .admin-workspace .ontology-view-recordings>.ontology-admin-main{grid-template-columns:clamp(220px,20%,290px) minmax(0,1fr);grid-template-rows:minmax(0,1fr)}
  .admin-workspace .ontology-view-recordings .ontology-recording-sidebar{grid-column:1;grid-row:1}
  .admin-workspace .ontology-view-recordings .ontology-archive-panel{grid-column:2;grid-row:1}
  .admin-workspace .ontology-view-recordings .recording-details-aside{grid-column:3;grid-row:1}
