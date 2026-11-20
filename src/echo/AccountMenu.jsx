@@ -1,18 +1,18 @@
 import {useEffect,useRef,useState} from 'react';
-import {Menu,LogOut,UserRound,Home,TreePine,Radio,CalendarDays,Disc3,Boxes,Box,Mail,Info} from 'lucide-react';
+import {Menu,LogOut,UserRound,Home,TreePine,Radio,CalendarDays,Disc3,Box,Mail,Info} from 'lucide-react';
 import {PUBLIC_PAGE_PATHS,publicPageSection} from '../lib/publicPages';
 import {SEASONAL_TREE_ENABLED} from '../config/features';
 import './accountMenu.css';
 
 const destinations=[
- ['home',Home,'Home','الرئيسية'],['work',Disc3,'Music','الموسيقى'],['availability',CalendarDays,'Event','فعالية'],['setup',Boxes,'Services','الخدمات'],
+ ['home',Home,'Home','الرئيسية'],['work',Disc3,'Music','الموسيقى'],['availability',CalendarDays,'Booking','الحجز'],
  ['room',Box,'3D Room','الغرفة ثلاثية الأبعاد'],['live',Radio,'Live','البث المباشر'],['about',Info,'About','نبذة عنا'],['contact',Mail,'Contact','تواصل معنا'],
  ...(SEASONAL_TREE_ENABLED?[['tree',TreePine,'Tree','الشجرة']]:[]),
 ];
 // The header button is the Menu icon; the menu lists Dashboard (with the account's initials badge), the pages and Log out.
 export default function AccountMenu({user=null,ar=false,badge,onLogout,path='/'}){
  const [open,setOpen]=useState(false),root=useRef(null),first=useRef(null);
- const active=publicPageSection(path)||'home',dashboard=user?.isAdmin?'/admin/live-stream':'/dashboard',tr=(en,arabic)=>ar?arabic:en;
+ const section=publicPageSection(path)||'home',active=section==='setup'?'availability':section,dashboard=user?.isAdmin?'/admin/live-stream':'/dashboard',tr=(en,arabic)=>ar?arabic:en;
  useEffect(()=>{
   if(!open)return undefined;
   const outside=event=>{if(!root.current?.contains(event.target))setOpen(false);};

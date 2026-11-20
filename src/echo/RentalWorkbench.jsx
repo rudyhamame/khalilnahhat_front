@@ -1,3 +1,4 @@
+import {FieldCode} from './BookingPhases';
 import DjWorkFeature from './DjWorkFeature';
 import {serviceIcon} from '../lib/serviceIcons';
 import {displayImageUrl} from '../lib/displayImage';
@@ -65,7 +66,7 @@ export default function RentalWorkbench({services,service,items,selectedItem:ite
   </div>;
   return <div className="rw" dir={ar?'rtl':'ltr'} ref={vp}>
     {view==="services"?<section className="rw-vp rw-services" aria-label={tr('Services','الخدمات')}>
-      <header className="rw-head rw-head-row"><div><span className="rw-kicker">{tr('Services & equipment','الخدمات والمعدات')}</span><h2>{tr('What does your event need?','ماذا تحتاج فعاليتك؟')}</h2><p>{tr('Choose a service to see its equipment. Pick what you like and it joins your booking.','اختر خدمة لترى معداتها. اختر ما يعجبك وسينضم إلى حجزك.')}</p></div>{modeTabs(mode)}</header>
+      <header className="rw-head rw-head-row"><div><span className="rw-kicker"><FieldCode code="04.01"/>{tr('Services & equipment','الخدمات والمعدات')}</span><h2>{tr('What does your event need?','ماذا تحتاج فعاليتك؟')}</h2><p>{tr('Choose a service to see its equipment. Pick what you like and it joins your booking.','اختر خدمة لترى معداتها. اختر ما يعجبك وسينضم إلى حجزك.')}</p></div>{modeTabs(mode)}</header>
       {mode==='packages'?<div id="rental-packages" className="rw-eq-grid" role="region" aria-label={tr('Packages','باكجات')}>
         {setItems.map((row,index)=>{const picked=cart[row.id]?.quantity||0;return <button type="button" key={row.id} className={`rw-card${row.id===item?.id&&showDetails?' is-open':''}${picked>0?' is-picked':''}`} aria-pressed={row.id===item?.id&&showDetails} onClick={()=>openEquipment(row)}>
           <span className="rw-card-img"><EquipmentThumbnail key={`${row.id}:${row.imageUrl||''}`} item={row}/></span>

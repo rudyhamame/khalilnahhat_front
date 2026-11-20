@@ -1,0 +1,77 @@
+.booking-phase{box-sizing:border-box;width:100%;max-width:calc(1280px + 2 * var(--echo-viewport-gutter,16px));margin:0 auto;padding:clamp(40px,6vw,80px) var(--echo-viewport-gutter,16px) 0;scroll-margin-top:calc(var(--echo-header-overlay-height,96px) + 56px)}
+.booking-phase span{display:block;color:#d9b46e;font-size:12px;font-weight:700;letter-spacing:.18em}
+.booking-phase h2{margin:6px 0 0;color:#f4f7f3;font:700 clamp(30px,4.4vw,56px)/1.1 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:.04em}
+.phase-bar{position:fixed;z-index:30;inset-inline:0;top:calc(var(--echo-header-overlay-height,96px) + 6px);display:flex;justify-content:center;gap:6px;padding:0 12px;pointer-events:none;opacity:0;transform:translateY(-8px);transition:opacity .25s,transform .25s}
+.phase-bar.is-shown{opacity:1;transform:none}
+.phase-bar button{pointer-events:auto;display:inline-flex;align-items:center;gap:7px;min-height:34px;padding:0 12px;border:1px solid #ffffff2e;border-radius:999px;background:#0c1417d9;color:#c9d3cd;font:600 13px/1 'Manrope','Noto Sans Arabic',sans-serif;cursor:pointer;backdrop-filter:blur(6px)}
+.phase-bar button b{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#ffffff1f;font-size:12px}
+.phase-bar button.is-active{border-color:#d9b46e;color:#fff;background:#d9b46e26}
+.phase-bar button.is-active b{background:#d9b46e;color:#1b1f21}
+@media(max-width:560px){.phase-bar button{padding:0 9px;font-size:12px}.phase-bar button:not(.is-active) span{display:none}}
+
+/* Inside the booking form the container already adds its own side space. */
+.home-availability .booking-phase{max-width:1280px;padding-inline:0}
+
+/* A card with no title (Personal info: the step heading names it) keeps only the room the Update button needs. */
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-card-title[aria-hidden=true]{min-height:34px;margin:0 0 6px;padding:0;border:0}
+
+/* STEP.SEC.ATOM number in front of each summary row ("01.01.01"). */
+.booking-journey-summary .ysf-order{display:inline-block;min-width:5.4em;margin-inline-end:8px;color:#d9b46e;font-style:normal;font-weight:700;font-size:12px;letter-spacing:.04em;font-variant-numeric:tabular-nums}
+
+/* Summary UI: step.sec pill on each group title; each row = number + label | value | Edit. */
+.ysf-group h4 b,html body .echo .ysf-group h4 b{width:auto;height:auto;min-width:0;padding:5px 9px;border-radius:999px;font-size:11px;letter-spacing:.06em;font-variant-numeric:tabular-nums}
+html body .echo[data-page=home][data-theme] #availability .ysf-group .booking-journey-summary>div{grid-template-columns:minmax(170px,.9fr) minmax(0,1.5fr) auto;gap:14px}
+.ysf-group .booking-journey-summary dt{display:flex;align-items:baseline;gap:6px;min-width:0}
+.ysf-group .ysf-order{flex:none;min-width:0;margin:0;padding:2px 6px;border-radius:6px;background:#e3d3a31a}
+@media(max-width:560px){
+ html body .echo[data-page=home][data-theme] #availability .ysf-group .booking-journey-summary>div{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"label edit" "value edit";row-gap:2px;align-items:center}
+ .ysf-group .booking-journey-summary dt{grid-area:label}
+ .ysf-group .booking-journey-summary dd{grid-area:value}
+ .ysf-group .booking-journey-summary .booking-journey-edit{grid-area:edit}
+}
+
+/* The number in front of a field label (EVENT TYPE *, GUESTS * ...). */
+.avail-kicker>.ysf-order,.rentals-hero-kicker>.ysf-order,.rw-kicker>.ysf-order{display:inline-block;margin-inline-end:8px;padding:2px 6px;border-radius:6px;background:#e3d3a31a;color:#e3d3a3;font-style:normal;font-weight:700;font-size:11px;letter-spacing:.04em;font-variant-numeric:tabular-nums}
+
+/* The Services group sits in the page like the steps before it: same side gutter, same centred max width. */
+html body .echo[data-page=home][data-theme] #echo-main>.booking-services{box-sizing:border-box;padding-inline:var(--echo-viewport-gutter,16px)!important}
+.booking-services>.booking-step{max-width:1280px;margin-inline:auto}
+
+/* Step 03.02: the equipment picker needs the full width, under the step copy, and brings no heading of its own. */
+html body .echo[data-page=home][data-theme] .booking-services .workbench-step{grid-template-columns:minmax(0,1fr)}
+html body .echo[data-page=home][data-theme] .booking-services .workbench-step>.booking-step-copy,html body .echo[data-page=home][data-theme] .booking-services .workbench-step>.booking-step-card{grid-column:1;justify-self:stretch;max-width:none}
+html body .echo[data-page=home][data-theme] .booking-services .workbench-step>.booking-step-copy{grid-row:1}
+html body .echo[data-page=home][data-theme] .booking-services .workbench-step>.booking-step-card{grid-row:2}
+html body .echo[data-page=home][data-theme] .booking-services .workbench-step .rw-head>div:first-child{display:none}
+html body .echo[data-page=home][data-theme] .booking-services .workbench-step :is(.rw-vp,#services){min-height:0!important;height:auto!important;padding:0!important}
+
+/* No divider lines between the sections of any step. */
+html body .echo[data-page=home][data-theme] .booking-step{border-top:0}
+
+/* Event type: unselected choices stay quiet (idle); the selected one is clearly marked. */
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .event-type-column [data-event-choice]:not([aria-pressed=true]){opacity:.6;border-color:#ffffff14;background:transparent;color:#9fb0a8;box-shadow:none}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .event-type-column [data-event-choice]:not([aria-pressed=true]):hover:not(:disabled){opacity:1;border-color:#ffffff40;color:#dbe6df}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .event-type-column [data-event-choice][aria-pressed=true]{opacity:1;border-color:#a6e3ce;background:#a6e3ce26;color:#eafcf3;font-weight:700;box-shadow:0 0 0 1px #a6e3ce,0 8px 22px #a6e3ce24}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .event-type-column [data-event-choice][aria-pressed=true]::after{content:"✓";margin-inline-start:auto;color:#a6e3ce;font-weight:700}
+
+/* The first step under a step heading starts right below it (no extra gap). */
+html body .echo[data-page=home][data-theme] :is(.booking-phase+.booking-step,.booking-phase+.booking-services>.booking-step:first-child){padding-top:16px}
+html body .echo.echo-public-page[data-page=home][data-theme] #echo-main#echo-main>.booking-phase+.booking-services{padding-top:0!important}
+
+/* A line above Setup notes separates it from the services picker. */
+html body .echo[data-page=home][data-theme] #setup-notes{border-top:1px solid #c2ddcd1c}
+
+/* DJ service step with the music preferences open: full width, under the step copy (like the services picker). */
+html body .echo[data-page=home][data-theme] .booking-services .dj-service-step.is-prefs-open{grid-template-columns:minmax(0,1fr)}
+html body .echo[data-page=home][data-theme] .booking-services .dj-service-step.is-prefs-open>.booking-step-copy,html body .echo[data-page=home][data-theme] .booking-services .dj-service-step.is-prefs-open>.booking-step-card{grid-column:1;justify-self:stretch;max-width:none}
+html body .echo[data-page=home][data-theme] .booking-services .dj-service-step.is-prefs-open>.booking-step-copy{grid-row:1}
+html body .echo[data-page=home][data-theme] .booking-services .dj-service-step.is-prefs-open>.booking-step-card{grid-row:2}
+
+/* Additional info: no lines inside it (between the attachment blocks, or under the card titles). */
+html body .echo[data-page=home][data-theme] :is(#references,#additional-notes) .ref-block{border-top:0;padding-top:0}
+html body .echo[data-page=home][data-theme] :is(#references,#additional-notes) .booking-card-title{border-bottom:0;padding-bottom:0}
+/* Room under the service / equipment grid in Services & equipment. */
+html body .echo[data-page=home][data-theme] .workbench-step :is(.rw-service-grid,.rw-eq-grid){margin-bottom:clamp(28px,3vw,44px)}
+html body .echo[data-page=home][data-theme] :is(#references,#additional-notes) .booking-step-card>.booking-card-title{border-bottom:0!important;padding-bottom:0!important;margin-bottom:16px!important}
+/* Room under the "03.01 DJ SERVICE *" label, above the Yes / Skip choices. */
+html body .echo[data-page=home][data-theme] .dj-choice>.avail-kicker{display:block;margin-bottom:14px}

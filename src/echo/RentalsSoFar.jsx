@@ -13,7 +13,8 @@ import './rentalsSoFar.css';
 // listing what has been chosen (or "Not set yet"), what is still missing, and a Continue button that opens the booking review.
 export default function RentalsSoFar({ar=false}){
   const tr=(en,arabic)=>ar?arabic:en,cart=useCart(),order=useEventOrder(),{catalog,equipment:items}=useRentalCatalog();
-  const lines=useMemo(()=>Object.values(cart||{}).filter(line=>line?.quantity>0).map(line=>({...items.find(item=>item.id===line.id),...line})).filter(line=>line.name),[cart,items]);
+  const locked=!order?.draftEditable,pendingLines=order?.pendingRequest?order.order?.equipment:null;
+  const lines=useMemo(()=>(pendingLines||Object.values(cart||{})).filter(line=>line?.quantity>0).map(line=>({...items.find(item=>item.id===line.id),...line})).filter(line=>line.name),[cart,items,pendingLines]);
   // The selected equipment, grouped under the service it belongs to (sets belong to none and get their own group).
   const groups=useMemo(()=>{
     const taken=new Set(),out=[];
@@ -45,14 +46,14 @@ export default function RentalsSoFar({ar=false}){
           <ul className="rsf-lines" aria-label={group.title}>{group.rows.map(line=><li key={line.id}>
           <span className="rsf-art" aria-hidden="true">{displayImageUrl(line.imageUrl)?<img src={displayImageUrl(line.imageUrl)} alt="" loading="lazy" onError={event=>{event.currentTarget.style.display='none';}}/>:<Box size={22} strokeWidth={1.3}/>}</span>
           <span className="rsf-line-name">{tr(line.name,line.nameAr||line.name)}{line.brandModel&&<small>{line.brandModel}</small>}</span>
-          <span className="rsf-qty"><button type="button" aria-label={`${tr('Decrease','تقليل')} ${line.name}`} onClick={()=>order?.setEquipment(line,line.quantity<=(line.minQuantity||1)?0:line.quantity-1)}><Minus size={14}/></button><b>{line.quantity}</b><button type="button" aria-label={`${tr('Increase','زيادة')} ${line.name}`} onClick={()=>order?.setEquipment(line,line.quantity+1)}><Plus size={14}/></button></span>
-          <button type="button" className="rsf-x" aria-label={`${tr('Remove','إزالة')} ${line.name}`} onClick={()=>order?.setEquipment(line,0)}><X size={15}/></button>
+          <span className="rsf-qty"><button type="button" disabled={locked} aria-label={`${tr('Decrease','تقليل')} ${line.name}`} onClick={()=>order?.setEquipment(line,line.quantity<=(line.minQuantity||1)?0:line.quantity-1)}><Minus size={14}/></button><b>{line.quantity}</b><button type="button" disabled={locked} aria-label={`${tr('Increase','زيادة')} ${line.name}`} onClick={()=>order?.setEquipment(line,line.quantity+1)}><Plus size={14}/></button></span>
+          <button type="button" className="rsf-x" disabled={locked} aria-label={`${tr('Remove','إزالة')} ${line.name}`} onClick={()=>order?.setEquipment(line,0)}><X size={15}/></button>
         </li>)}</ul></section>)}
       </div>
       {!!missing.length&&<div className="rsf-hint" role="status"><strong>{tr('Still to add:','ما زال مطلوباً:')}</strong><ul>{missing.map(item=><li key={item}>{item}</li>)}</ul></div>}
       <div className="rsf-actions">
-        <button type="button" className="rsf-continue" disabled={empty||!order} onClick={()=>order?.reviewDraft()}>{tr('Continue planning','تابع التخطيط')}<ArrowUpRight size={18} aria-hidden="true"/></button>
-        <button type="button" className="rsf-more" onClick={()=>goTo('services')}>{tr('Add more','أضف المزيد')}</button>
+        <button type="button" className="rsf-continue" disabled={empty||!order||locked} onClick={()=>order?.reviewDraft()}>{tr('Continue planning','تابع التخطيط')}<ArrowUpRight size={18} aria-hidden="true"/></button>
+        <button type="button" className="rsf-more" disabled={locked} onClick={()=>goTo('services')}>{tr('Add more','أضف المزيد')}</button>
       </div>
       <p className="rsf-note">{tr('This step does not send a request or reserve your date.','هذه الخطوة لا ترسل طلباً ولا تحجز موعدك.')}</p>
     </div>

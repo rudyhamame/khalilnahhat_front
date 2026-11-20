@@ -1,3 +1,4 @@
+import {FieldCode} from './BookingPhases';
 import {useEffect,useRef} from 'react';
 import {useRentalCatalog} from '../lib/useRentalCatalog';
 import {Heart,Gem,Cake,Briefcase,PartyPopper,GraduationCap,CalendarHeart} from 'lucide-react';
@@ -38,7 +39,7 @@ export default function EventTypeColumn({ar=false}){
   },[eventIds]);
   const work=events.find(event=>event.bookingType===current)?.galleryImages||[];
   return <aside className="event-type-column" aria-label={tr('Events','الفعاليات')}>
-    <span className="avail-kicker event-type-required-label">{tr('EVENT TYPE *','نوع الفعالية *')}</span>
+    <span className="avail-kicker event-type-required-label"><FieldCode k="event.type"/>{tr('EVENT TYPE *','نوع الفعالية *')}</span>
     <div ref={choices} data-booking-field="event.type" role="group" aria-label={tr('Event type','نوع الفعالية')}>{events.map(event=>{const Icon=EVENT_ICONS[event.bookingType]||CalendarHeart,on=current===event.bookingType;
       return <button key={event.id} data-event-choice type="button" disabled={!order?.draftEditable} aria-pressed={on} aria-label={tr(event.name,event.nameAr||event.name)} onClick={()=>{cancelHint.current();order?.setField('event.type',on?null:event.bookingType);}}><Icon size={17} strokeWidth={1.6} aria-hidden="true"/><span>{tr(event.name,event.nameAr||event.name)}</span></button>;})}</div>
     {work.length>0&&<div className="event-type-work" aria-label={tr('Our work','أعمالنا')}>{work.map(url=><img key={url} src={url} alt="" loading="lazy"/>)}</div>}

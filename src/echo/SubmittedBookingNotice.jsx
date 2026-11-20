@@ -2,10 +2,10 @@ import {useEventOrder} from './eventOrderContext';
 import {contactEmail} from '../lib/publicContact';
 import './submittedBookingNotice.css';
 
-// The server refuses edits (409) once a booking is submitted: say why the form is locked and what the client can do.
+// While a submitted booking is still being handled the form shows its values, locked: say why and what the client can do.
 export default function SubmittedBookingNotice({ar=false}){
  const ctx=useEventOrder();
- if(ctx?.saveState!=='conflict')return null;
+ if(!ctx?.pendingRequest)return null;
  const tr=(en,arabic)=>ar?arabic:en;
  return <aside className="submitted-notice" role="status" dir={ar?'rtl':'ltr'}>
   <strong>{tr('Your booking has been submitted','تم إرسال حجزك')}</strong>

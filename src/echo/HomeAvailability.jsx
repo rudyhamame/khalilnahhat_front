@@ -1,6 +1,6 @@
-import {EVENT_PAGE_STEPS,VENUE_LOCATION_PATHS,VENUE_RESET_PATHS,eventPageField,eventPageSummary,eventScheduleChanges} from '../lib/eventPageModel';
+import {EVENT_PAGE_STEPS,VENUE_LOCATION_PATHS,VENUE_RESET_PATHS,eventPageField,eventScheduleChanges} from '../lib/eventPageModel';
 import CanadianPhoneInput from '../components/CanadianPhoneInput';
-import {missingViewportFields,stepLabel,venueSelectionChanges} from '../lib/bookingFlow.mjs';
+import {stepLabel,venueSelectionChanges} from '../lib/bookingFlow.mjs';
 import {fieldName,optionName} from '../lib/eventOrderCore.mjs';
 import EventTypeColumn from './EventTypeColumn';
 import {lazy,Suspense,useEffect,useRef,useState} from 'react';
@@ -9,11 +9,13 @@ import {venueAddressParts} from '../lib/venueAddressParts';
 const VenueMapCanvas=lazy(()=>import('./VenueMapCanvas'));
 import './venueMap.css';
 import {rankVenues} from '../lib/venueLexical';
-import {ArrowUpRight,CalendarDays,ChevronLeft,ChevronRight,RefreshCw,Check,Users,RotateCcw,Pencil,X} from 'lucide-react';
+import {CalendarDays,ChevronLeft,ChevronRight,RefreshCw,Check,Users,X} from 'lucide-react';
 import {apiRequest} from '../lib/api';
 import {calendarDays,dateKey,torontoToday,draftTimeRange} from '../lib/bookingCalendar';
 import {useEventOrder} from './eventOrderContext';
 import SubmittedBookingNotice from './SubmittedBookingNotice';
+import {PhaseHeading,FieldCode} from './BookingPhases';
+import BookingStep from './BookingStep';
 import {PHONE_CONTACTS,contactChoices} from '../lib/contactChoices.mjs';
 import './homeAvailability.css';
 import './availabilityMinimal.css';
@@ -26,12 +28,6 @@ const clock=(minutes,ar)=>`${Math.floor(minutes/60)%24%12||12}:${String(minutes%
 // The booking stores HH:MM; an end of 24:00 is stored as 00:00 (midnight), which the order treats as ending after midnight.
 const stored=minutes=>time(minutes%1440);
 const SLOTS=Array.from({length:49},(_,i)=>i*30);
-function BookingStep({number,title,copy,cardTitle,children,onReset,resetLabel,ResetIcon=RotateCcw}){
- return <section className={`booking-step ${number%2?'is-card-left':'is-card-right'}`} aria-labelledby={`booking-step-${number}`}>
-  <div className={`booking-step-copy${typeof copy==='string'?'':' is-live'}`}><span className="booking-step-number">{String(number).padStart(2,'0')}</span><h2 id={`booking-step-${number}`}>{title}</h2><div key={typeof copy==='string'?'text':'live'} className="booking-copy-swap">{typeof copy==='string'?<p>{copy}</p>:copy}</div></div>
-  <div className="booking-step-card"><h3 className="booking-card-title">{cardTitle}</h3>{onReset&&<button type="button" className="booking-reset" onClick={onReset.run} disabled={onReset.disabled} aria-label={`${resetLabel} · ${cardTitle}`}><ResetIcon size={14} aria-hidden="true"/>{resetLabel}</button>}{children}</div>
- </section>;
-}
 // Wraps a text input with a clear (x) button that shows only while it has text.
 function Clearable({clear,show,label,children}){
  if(!clear)return children;
@@ -108,8 +104,7 @@ export default function HomeAvailability({lang}){
  const chooseVenue=item=>{setMapShown(true);setManualAddress(false);const parts=venueAddressParts(item);venueSelectionChanges(item).forEach(({path,value})=>ctx.setField(path,path==='event.venue.address'&&parts.street?parts.street:path==='event.venue.postalCode'&&!value&&parts.postalCode?parts.postalCode:path==='event.venue.city'&&!value&&parts.city?parts.city:value));setVenueSearch({open:false,busy:false,error:'',items:[],notFound:false});};
  // Guest and account drafts share the same loading/conflict guard.
  const canEdit=Boolean(ctx?.draftEditable),signedIn=Boolean(ctx?.signedIn),choices=contactChoices({email:ctx?.order.customer?.email,phone:ctx?.order.customer?.phone});
- const editNote=!ctx?.cloudReady?tr('Loading your saved draft…','جارٍ تحميل مسودتك…'):!canEdit?tr('This draft changed elsewhere. Reload it from the Booking summary.','تغيّرت المسودة في مكان آخر. أعد تحميلها من ملخص الحجز.'):'';
- const missing=ctx?missingViewportFields(ctx.order).map(field=>ar?field.ar:field.label):[];
+ const editNote=ctx?.pendingRequest?'':!ctx?.cloudReady?tr('Loading your saved draft…','جارٍ تحميل مسودتك…'):!canEdit?tr('This draft changed elsewhere. Reload it from the Booking summary.','تغيّرت المسودة في مكان آخر. أعد تحميلها من ملخص الحجز.'):'';
  const clearDay=()=>{setListOpen(false);setTimeOpen(false);setTimes({start:null,end:null});setEditingTime('start');if(ctx?.draftEditable){ctx.editDraft(eventScheduleChanges({date:null,startTime:null,endTime:null}));}};
  const chooseDate=(key,confirmed)=>{
   if(key===sharedDate)return;
@@ -175,7 +170,7 @@ export default function HomeAvailability({lang}){
      {!ready?<div className="avail-message" role="status"><CalendarDays size={28}/><p>{state.status==='error'?tr('Could not load availability. Free times cannot be confirmed.','تعذر تحميل المواعيد. لا يمكن تأكيد الأوقات المتاحة.'):tr('Loading the calendar…','جارٍ تحميل التقويم…')}</p>{state.status==='error'&&<button type="button" onClick={()=>setRefresh(value=>value+1)}>{tr('Retry','إعادة المحاولة')}</button>}</div>:monthGrid(month)}
     </div>);
  const timeFields=(<div className="avail-times" role="group" aria-label={tr('Booking time','وقت الحجز')}>
-     <div className="avail-time-heading"><span className="avail-kicker">{tr('EVENT TIME *','وقت الفعالية *')} {times.start!==null&&<a href="#clear-time" className="avail-times-clear" onClick={event=>{event.preventDefault();setPending({title:tr('Clear event time?','مسح وقت الفعالية؟'),apply:()=>{setTimes({start:null,end:null});setEditingTime('start');if(ctx?.draftEditable){ctx.setField('event.startTime','');ctx.setField('event.endTime','');}},text:tr('This removes your selected time.','سيؤدي هذا إلى إزالة الوقت الذي اخترته.')})}}>({tr('clear','مسح')})</a>}</span><span aria-live="polite">{times.start!==null&&times.end!==null&&`${Math.floor((times.end-times.start)/60)} ${tr('h','س')}${(times.end-times.start)%60?` ${(times.end-times.start)%60}${tr(' min',' د')}`:''}`}</span></div>
+     <div className="avail-time-heading"><span className="avail-kicker"><FieldCode k="event.startTime"/>{tr('EVENT TIME *','وقت الفعالية *')} {times.start!==null&&<a href="#clear-time" className="avail-times-clear" onClick={event=>{event.preventDefault();if(!canEdit)return;setPending({title:tr('Clear event time?','مسح وقت الفعالية؟'),apply:()=>{setTimes({start:null,end:null});setEditingTime('start');if(ctx?.draftEditable){ctx.setField('event.startTime','');ctx.setField('event.endTime','');}},text:tr('This removes your selected time.','سيؤدي هذا إلى إزالة الوقت الذي اخترته.')})}}>({tr('clear','مسح')})</a>}</span><span aria-live="polite">{times.start!==null&&times.end!==null&&`${Math.floor((times.end-times.start)/60)} ${tr('h','س')}${(times.end-times.start)%60?` ${(times.end-times.start)%60}${tr(' min',' د')}`:''}`}</span></div>
      
      <div className="avail-time-endpoints">{!listOpen&&['start','end'].map(endpoint=><button type="button" key={endpoint} data-booking-field={endpoint==='start'?'event.startTime':'event.endTime'} className={`avail-time-endpoint${editingTime===endpoint?' is-editing':''}${editingTime===endpoint&&times[endpoint]===null?' is-blinking':''}`} aria-pressed={editingTime===endpoint} disabled={endpoint==='end'&&times.start===null} onClick={()=>{setEditingTime(endpoint);setListOpen(true);}}><span>{endpoint==='start'?tr('Start *','البدء *'):tr('End *','النهاية *')}</span><strong>{times[endpoint]===null?tr('Select time','اختر الوقت'):clock(times[endpoint],ar)}{times[endpoint]>=1440?<small> {tr('next day','اليوم التالي')}</small>:null}</strong></button>)}</div>
      {listOpen&&<div className="avail-times-top"><button type="button" className="avail-times-back" onClick={()=>setListOpen(false)}><ChevronLeft size={16} aria-hidden="true"/>{tr('Back','رجوع')}</button><p className="avail-times-summary" aria-live="polite">{editingTime==='start'?tr('When does it start?','متى تبدأ الفعالية؟'):tr('When does it end?','متى تنتهي الفعالية؟')}</p></div>}
@@ -191,7 +186,7 @@ export default function HomeAvailability({lang}){
  useEffect(()=>{setNameParts(current=>{if(`${current.first.trim()} ${current.last.trim()}`.trim()===fullName.trim())return current;const [first='',...rest]=fullName.split(' ');return {first,last:rest.join(' ')};});},[fullName]);
  const editName=(first,last)=>{setNameParts({first,last});ctx?.setField('customer.fullName',`${first.trim()} ${last.trim()}`.trim()||null);};
  const personalFields=(<div className="avail-venue-fields" role="group" aria-label={tr(...stepLabel('customer'))}>
-  <span className="avail-kicker">{tr('CONTACT','التواصل')}</span>
+  <span className="avail-kicker"><FieldCode code="01.01"/>{tr('CONTACT','التواصل')}</span>
   {signedIn?<p className="booking-field-hint personal-info-note">{tr('Your name, email, phone and company must be edited in your dashboard under Personal info.','يجب تعديل الاسم والبريد الإلكتروني والهاتف والشركة في قسم المعلومات الشخصية بلوحة حسابك.')} <a className="echo-link" href="/dashboard/profile">{tr('Edit Personal info','تعديل المعلومات الشخصية')}</a></p>
    :<p className="booking-field-hint personal-info-note">{tr('Before your booking is sent you create your account and confirm your email with a code. Your details here are saved to it.','قبل إرسال حجزك تنشئ حسابك وتؤكد بريدك برمز. تُحفظ تفاصيلك هنا فيه.')}</p>}
   <div className="avail-venue-pair">
@@ -226,9 +221,9 @@ export default function HomeAvailability({lang}){
  const resetVenue=stepReset(tr('venue','المكان'),VENUE_RESET_PATHS,()=>{setMapShown(false);setManualAddress(false);setVenueSearch({open:false,busy:false,error:'',items:[],notFound:false});});
  const resetDate={disabled:!canEdit||!(sharedDate||sharedStart||sharedEnd),run:()=>setPending({title:tr('Reset date & time?','إعادة تعيين التاريخ والوقت؟'),text:tr('You can choose another day afterwards.','يمكنك اختيار يوم آخر بعد ذلك.'),apply:clearDay})};
  // Signed-out visitors see the page blurred behind a sign in / create account prompt.
- const guestFields=(<div id="booking-guests" className="avail-guests-row"><span className="avail-kicker">{tr('GUESTS *','الضيوف *')}</span><label className="event-type-guests"><Users size={17} strokeWidth={1.6} aria-hidden="true"/><input data-booking-field="event.guestCount" type="number" inputMode="numeric" min="1" max="100000" required aria-required="true" disabled={!canEdit} placeholder={tr('Number of guests *','عدد الضيوف *')} aria-label={tr('Number of guests (required)','عدد الضيوف (مطلوب)')} value={ctx?.order.event?.guestCount??''} onChange={event=>{const raw=event.target.value;ctx?.setField('event.guestCount',raw===''?null:Math.min(100000,Math.max(1,Math.floor(Number(raw)))));}}/></label></div>);
+ const guestFields=(<div id="booking-guests" className="avail-guests-row"><span className="avail-kicker"><FieldCode k="event.guestCount"/>{tr('GUESTS *','الضيوف *')}</span><label className="event-type-guests"><Users size={17} strokeWidth={1.6} aria-hidden="true"/><input data-booking-field="event.guestCount" type="number" inputMode="numeric" min="1" max="100000" required aria-required="true" disabled={!canEdit} placeholder={tr('Number of guests *','عدد الضيوف *')} aria-label={tr('Number of guests (required)','عدد الضيوف (مطلوب)')} value={ctx?.order.event?.guestCount??''} onChange={event=>{const raw=event.target.value;ctx?.setField('event.guestCount',raw===''?null:Math.min(100000,Math.max(1,Math.floor(Number(raw)))));}}/></label></div>);
  const venueFields=(<div className="avail-venue-fields" role="group" aria-label={fieldName('event.venue.name',ar)}>
-      <span className="avail-kicker">{tr('VENUE','المكان')}</span>
+      <span className="avail-kicker"><FieldCode code="02.04"/>{tr('VENUE','المكان')}</span>
       {[['name',tr('Venue name *','اسم المكان *'),'organization'],['address',tr('Street address *','العنوان *'),'street-address']].map(([key,label,auto])=><Clearable key={key} clear={key==='name'&&canEdit?()=>{ctx?.editDraft([{path:'event.venue.name',value:null},...(pinNow?PLACE_PATHS.map(path=>({path,value:null})):[])]);setMapShown(false);setVenueSearch({open:false,busy:false,error:'',items:[],notFound:false});}:null} show={Boolean(ctx?.order.event?.venue?.name)} label={tr('Clear venue name','مسح اسم المكان')}><input data-booking-field={'event.venue.'+key} type="text" autoComplete={auto} maxLength={key==='address'?240:160} disabled={!canEdit} placeholder={label} aria-label={label} value={ctx?.order.event?.venue?.[key]??''} onChange={event=>{if(key==='name'){/* A typed address is never wiped; only an address that came from a picked result goes when the name changes. */ctx?.editDraft([{path:'event.venue.name',value:event.target.value||null},...(pinNow?PLACE_PATHS.map(path=>({path,value:null})):[])]);searchVenue('name',event.target.value,addrManual);}else ctx?.setField('event.venue.'+key,event.target.value||null);}}/></Clearable>)}
       <div className="avail-venue-pair">{[['city',tr('City *','المدينة *'),80],['postalCode',tr('Postal code *','الرمز البريدي *'),12]].map(([key,label,max])=><input key={key} data-booking-field={'event.venue.'+key} type="text" autoComplete={key==='city'?'address-level2':'postal-code'} maxLength={max} disabled={!canEdit} placeholder={label} aria-label={label} value={ctx?.order.event?.venue?.[key]??''} onChange={event=>ctx?.setField('event.venue.'+key,event.target.value||null)}/>)}</div>
       <input data-booking-field="event.venue.addressDetails" type="text" maxLength={eventPageField('event.venue.addressDetails').maxLength} autoComplete="off" disabled={!canEdit} placeholder={tr('Unit # or any extra info','رقم الوحدة أو أي معلومات إضافية')} aria-label={tr('Unit number or any extra info (optional)','رقم الوحدة أو أي معلومات إضافية (اختياري)')} value={ctx?.order.event?.venue?.addressDetails??''} onChange={event=>ctx?.setField('event.venue.addressDetails',event.target.value||null)}/>
@@ -247,29 +242,31 @@ export default function HomeAvailability({lang}){
   <div className="booking-venue-pincard" role="status"><strong>{chosen?.name}</strong><span>{[chosen?.address,chosen?.city,chosen?.postalCode].filter(Boolean).join(', ')}</span></div></div>);
  const order=ctx?.order||{},event=order.event||{};
 // Edit: scroll to the step that owns the field and focus its first control.
- const editStep=number=>{const step=document.getElementById(`booking-step-${number}`)?.closest('section');if(!step)return;step.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'});step.querySelector('input:not([disabled]),select:not([disabled]),textarea:not([disabled]),button:not([disabled]):not(.booking-reset)')?.focus({preventScroll:true});};
- const summary=eventPageSummary(order,ar);
  return <section id="availability" ref={shell} className="echo-section home-availability booking-journey" aria-label={tr('Plan your event','خطط لفعاليتك')} dir={ar?'rtl':'ltr'}>
   <div className="booking-journey-inner">
    <SubmittedBookingNotice ar={ar}/>
    {editNote&&<p className="avail-edit-note" role="status">{editNote}</p>}
 
-   <BookingStep number={1} onReset={updatePersonal} resetLabel={refreshing?tr('Updating…','جارٍ التحديث…'):tr('Update','تحديث')} ResetIcon={RefreshCw} title={tr('Who are we planning with?','مع من نخطط؟')} cardTitle={tr('Personal info','المعلومات الشخصية')} copy={signedIn?tr('These contact details come from your account. To update them, visit Personal info in your dashboard. Choose how we should reach you below.','معلومات التواصل مأخوذة من حسابك. لتعديلها، افتح المعلومات الشخصية في لوحة حسابك. اختر أدناه طريقة التواصل المفضلة.'):tr('Tell us who to reach and how. Before your booking is sent you create your account and confirm your email with a code.','أخبرنا بمن نتواصل معه وكيف. قبل إرسال حجزك تنشئ حسابك وتؤكد بريدك الإلكتروني برمز.')}>
+   <PhaseHeading n={1} ar={ar}/>
+   <BookingStep number={1} onReset={updatePersonal} resetLabel={refreshing?tr('Updating…','جارٍ التحديث…'):tr('Update','تحديث')} ResetIcon={RefreshCw} title={tr('Who are we planning with?','مع من نخطط؟')} cardTitle="" copy={signedIn?tr('These contact details come from your account. To update them, visit Personal info in your dashboard. Choose how we should reach you below.','معلومات التواصل مأخوذة من حسابك. لتعديلها، افتح المعلومات الشخصية في لوحة حسابك. اختر أدناه طريقة التواصل المفضلة.'):tr('Tell us who to reach and how. Before your booking is sent you create your account and confirm your email with a code.','أخبرنا بمن نتواصل معه وكيف. قبل إرسال حجزك تنشئ حسابك وتؤكد بريدك الإلكتروني برمز.')}>
     {personalFields}
    </BookingStep>
+   <PhaseHeading n={2} ar={ar}/>
    <BookingStep number={2} onReset={resetEvent} resetLabel={resetLabel} title={tr('What are we celebrating?','بماذا نحتفل؟')} cardTitle={tr('Choose your event','اختر نوع فعاليتك')} copy={tr('A wedding, a milestone, or a night with your team—each occasion has its own rhythm. Choose the closest match so Echo can shape the music, sound, lighting, and key moments around your celebration. Choose Other if your plans don’t fit a category.','لكل مناسبة إيقاعها، من الزفاف إلى الإنجازات واللقاءات مع فريقك. اختر النوع الأقرب لخططك كي ننسّق الموسيقى والصوت والإضاءة ولحظات الحفل بما يناسب احتفالك. اختر «أخرى» إن لم تجد النوع المناسب.')}>
     <EventTypeColumn ar={ar}/>
     {(event?.type==='other'||event?.title)&&<label className="booking-field"><span>{tr('What type of event is it? *','ما نوع فعاليتك؟ *')}</span><input data-booking-field="event.title" required={event?.type==='other'} aria-required={event?.type==='other'||undefined} maxLength={120} disabled={!canEdit} value={event?.title||''} onChange={e=>ctx?.setField('event.title',e.target.value||null)} placeholder={tr('Describe your event type','صف نوع فعاليتك')}/></label>}
    </BookingStep>
    <BookingStep number={3} onReset={resetDate} resetLabel={resetLabel} title={tr('Find your moment.','اختر الموعد المناسب.')} cardTitle={tr('Date & time','التاريخ والوقت')} copy={tr('Pick an available day, then tell us when your event starts and ends. Include the moments you want us there for, from the first welcome to the last song. Times are shown in Toronto time, and your event can end after midnight. Availability is confirmed when Echo accepts your booking.','اختر يوماً متاحاً، ثم حدّد وقت بداية الفعالية ونهايتها. أخبرنا بالمدة التي تحتاجنا خلالها، من الترحيب الأول إلى الأغنية الأخيرة. جميع الأوقات بتوقيت تورونتو، ويمكن أن تنتهي الفعالية بعد منتصف الليل. يُؤكّد التوفر عند قبول Echo لحجزك.')}>
+   <fieldset className="booking-lock" disabled={!canEdit}>
     <div id="booking-date">
-     <span className="avail-kicker booking-date-required-label">{tr('EVENT DATE *','تاريخ الفعالية *')}</span>
+     <span className="avail-kicker booking-date-required-label"><FieldCode k="event.date"/>{tr('EVENT DATE *','تاريخ الفعالية *')}</span>
      <div className="avail-navigation"><div className="avail-period"><button type="button" aria-label={tr('Previous month','الشهر السابق')} onClick={()=>move(-1)}><ChevronLeft size={17}/><span>{adjacentMonth(-1)}</span></button><h3>{title}</h3><button type="button" aria-label={tr('Next month','الشهر التالي')} onClick={()=>move(1)}><span>{adjacentMonth(1)}</span><ChevronRight size={17}/></button></div><div><button type="button" onClick={()=>setFocus(today)}>{tr('Today','اليوم')}</button><select aria-label={tr('Choose year','اختر السنة')} value={year} onChange={event=>{const next=parse(focus);next.setDate(1);next.setFullYear(Number(event.target.value));setFocus(dateKey(next));}}>{Array.from({length:maxYear-minYear+1},(_,i)=><option key={i} value={minYear+i}>{minYear+i}</option>)}</select><button type="button" aria-label={tr('Refresh availability','تحديث المواعيد')} onClick={()=>setRefresh(value=>value+1)}><RefreshCw size={14}/></button></div></div>
      {calendar}
      <div className="booking-calendar-note"><span>{tr('Available','متاح')}</span><small>{tr('Your date is reserved only after confirmation.','لا يُحجز موعدك إلا بعد التأكيد.')}</small></div>
      <div className="booking-time-fields">{timeOpen?timeFields:<p className="booking-field-hint">{tr('Choose a day above to select your start and end times.','اختر يوماً أعلاه لتحديد وقت البداية والنهاية.')}</p>}</div>
      {sharedDate&&<button type="button" className="booking-clear-date" onClick={()=>setPending({title:tr('Clear your date and time?','مسح الموعد والوقت؟'),text:tr('You can choose another day afterwards.','يمكنك اختيار يوم آخر بعد ذلك.'),apply:clearDay})}>{tr('Clear date & time','مسح التاريخ والوقت')}</button>}
     </div>
+   </fieldset>
    </BookingStep>
    <BookingStep number={4} onReset={resetGuests} resetLabel={resetLabel} title={tr('Make room for everyone.','مساحة لكل ضيوفك.')} cardTitle={tr('Your guest list','عدد الضيوف')} copy={tr('An estimated guest count is a great place to start. It helps us recommend a sound system that reaches the whole room and a setup that suits your crowd. You can update the number as your guest list comes together.','يكفينا عدد تقريبي في البداية. يساعدنا ذلك على اقتراح نظام صوت يغطي المكان وتجهيزات تناسب الحضور. يمكنك تعديل العدد كلما اكتملت قائمة ضيوفك.')}>
     {guestFields}
@@ -280,20 +277,6 @@ export default function HomeAvailability({lang}){
     </div>
    </BookingStep>
 
-   <BookingStep number={6} title={tr('Looking good? Let’s keep going.','هل كل شيء جاهز؟ لنتابع.')} cardTitle={tr('Your event so far','تفاصيل فعاليتك حتى الآن')} copy={tr('Take a moment to check the details. Next, we’ll bring together your contact information, DJ preferences, and rental choices for a quote request. You can still make changes before sending anything.','راجع التفاصيل للحظة. بعد ذلك، نجمع معلومات التواصل وتفضيلات الدي جي واختيارات التأجير لطلب عرض سعر. يمكنك تعديل كل شيء قبل إرسال الطلب.')}>
-    {(()=>{
-     // "Your event so far": a progress bar, then the details grouped by the step they come from, each with its Edit button.
-     const groupTitles=[['About you','عنك'],['The occasion','المناسبة'],['Date & time','التاريخ والوقت'],['Your guests','ضيوفك'],['The venue','مكان الفعالية']],answered=summary.filter(row=>!row.empty).length,percent=summary.length?Math.round(answered/summary.length*100):0;
-     return <>
-      <div className="ysf-progress" role="progressbar" aria-valuemin="0" aria-valuemax={summary.length} aria-valuenow={answered} aria-label={tr('Details added','التفاصيل المضافة')}><span style={{width:`${percent}%`}}/><small>{tr(`${answered} of ${summary.length} details added`,`${answered} من ${summary.length} تفصيلاً مضافاً`)}</small></div>
-      {groupTitles.map(([en,arabic],index)=>{const rows=summary.filter(row=>row.step===index+1);return rows.length?<section className="ysf-group" key={en}><h4><b aria-hidden="true">{index+1}</b>{tr(en,arabic)}</h4>
-       <dl className="booking-journey-summary">{rows.map(({key,label,value,step,empty})=><div key={key} data-field={key} data-empty={empty?'':undefined}><dt>{label}</dt><dd>{value}</dd><button type="button" className="booking-journey-edit" aria-label={`${tr('Edit','تعديل')} ${label}`} onClick={()=>editStep(step)}><Pencil size={13} aria-hidden="true"/>{tr('Edit','تعديل')}</button></div>)}</dl></section>:null;})}
-     </>;
-    })()}
-    {!!missing.length&&<div className="booking-field-hint" role="status"><strong>{tr('Still to add:','ما زال مطلوباً:')}</strong><ul>{missing.map((item,index)=><li key={`${item}-${index}`}>{item}</li>)}</ul></div>}
-    <button type="button" className="booking-journey-continue" disabled={!canChoose||!!missing.length||!canEdit} onClick={()=>ctx?.reviewDraft()}>{tr('Continue planning','تابع التخطيط')}<ArrowUpRight size={18} aria-hidden="true"/></button>
-    <p className="booking-field-hint">{tr('This step does not send a request or reserve your date.','هذه الخطوة لا ترسل طلباً ولا تحجز موعدك.')}</p>
-   </BookingStep>
   </div>
  {pending&&<div className="avail-confirm-backdrop" role="presentation" onKeyDown={event=>{if(event.key==='Escape')setPending(null);}}><div className="avail-confirm" role="alertdialog" aria-modal="true" aria-labelledby="avail-confirm-title" aria-describedby="avail-confirm-text"><h3 id="avail-confirm-title">{pending.title||tr('Change your date or time?','تغيير الموعد؟')}</h3><p id="avail-confirm-text">{pending.text}</p><div className="avail-confirm-actions"><button type="button" autoFocus onClick={()=>setPending(null)}>{tr('Keep current','إبقاء الحالي')}</button><button type="button" className="is-danger" onClick={()=>{const apply=pending.apply;setPending(null);apply();}}>{tr('Yes, change','نعم، غيّر')}</button></div></div></div>}
  </section>;

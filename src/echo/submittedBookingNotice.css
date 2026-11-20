@@ -2,3 +2,7 @@
 .submitted-notice strong{display:block;margin-bottom:4px;color:#e9c98a;font-size:15px}
 .submitted-notice p{margin:4px 0}
 .submitted-notice a{color:#e9c98a;text-decoration:underline}
+
+/* A locked step: native disabled fieldset, without the default box. */
+.booking-lock{min-width:0;margin:0;padding:0;border:0}
+.booking-lock:disabled{opacity:.85}

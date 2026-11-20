@@ -9,7 +9,7 @@ import {equipmentBookingServiceId,equipmentBelongsToService} from '../lib/rental
 import {equipmentQuantity} from './simulationLayout';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useCart,restoreOrderCart,readCart } from './cart';
-import {apiRequest,apiBaseUrl} from '../lib/api';
+import {apiRequest,apiBaseUrl,fetchMyServiceRequests} from '../lib/api';
 import {accountEventDraft} from '../lib/accountEventDraft';
 import {mergeGuestDraft} from '../lib/mergeGuestDraft.mjs';
 import {aiTaskHistoryKey} from '../lib/aiTaskHistory';
@@ -59,6 +59,9 @@ export function EventOrderProvider({user,token,lang,auth,children,isSessionReady
   const [aiVenueSearch,setAiVenueSearch]=useState(null),aiVenueChoice=useRef(null);
   const assistantSession=useRef({draftId:null,started:false,allowDraftChoice:false});
   const [cloudReady,setCloudReady]=useState(false);
+  // A submitted booking that is still being handled: its values are shown on every page and locked.
+  const [pending,setPending]=useState(null);
+  useEffect(()=>{setPending(null);if(!user||!token||user.isAdmin)return undefined;let alive=true;fetchMyServiceRequests(token).then(({items=[]})=>{if(alive)setPending(items.find(item=>item?.order&&item.journey?.holdsStock&&!item.journey.isBooked)||null);}).catch(()=>{});return()=>{alive=false;};},[user?.id,user?._id,token]);// eslint-disable-line react-hooks/exhaustive-deps
   const [recentEdits,setRecentEdits]=useState([]);
   const [draftId,setDraftId]=useState(()=>initialDraftId(user));
   const [loadRetry,setLoadRetry]=useState(0);
@@ -75,7 +78,7 @@ export function EventOrderProvider({user,token,lang,auth,children,isSessionReady
   const cart=useCart();
   const {catalog,equipment}=useRentalCatalog();
   useLayoutEffect(()=>{restoreOrderCart(initial.order.equipment||[]);},[initial]);
-  const order=useMemo(()=>({...stored,equipment:Object.values(cart).map(item=>({id:item.id,name:item.name,quantity:item.quantity}))}),[stored,cart]);
+  const order=useMemo(()=>pending?applyAccountProfile(normalizeEventOrder(pending.order),user):({...stored,equipment:Object.values(cart).map(item=>({id:item.id,name:item.name,quantity:item.quantity}))}),[stored,cart,pending,user]);
   // The header's Book an event button shows how many booking drafts still need completing (the account has one draft).
   const draftsToComplete=user&&token&&active&&hasEventDraftContent(order)&&missingOrderFields(order).length>0?1:0;
   // Funnel events: the event details complete, the personal details complete, and where a visitor stopped if they leave.
@@ -138,14 +141,14 @@ export function EventOrderProvider({user,token,lang,auth,children,isSessionReady
     }
   },[]);
   useEffect(()=>{
-    if(!active||deleting.current)return;
+    if(!active||deleting.current||pending)return;
     const timer=setTimeout(()=>{
       const guest=!user||!token;
       try{localStorage.setItem(ownerKey(user),JSON.stringify(order));if(guest)setSaveState('local-saved');}catch{if(guest)setSaveState('failed');}
       if(!guest&&cloudReady&&!deleting.current)cloud.current?.save(order,draftId);
     },400);
     return()=>clearTimeout(timer);
-  },[order,active,user,token,cloudReady,draftId]);
+  },[order,active,user,token,cloudReady,draftId,pending]);
   useEffect(()=>{try{localStorage.setItem(draftIdKey(user),draftId);}catch{/* Cloud draft remains authoritative when storage is unavailable. */}},[user,draftId]);
   const begin=(source='manual',legacy)=>{
     if(deleting.current)return;
@@ -294,7 +297,7 @@ export function EventOrderProvider({user,token,lang,auth,children,isSessionReady
     return apiRequest(path,{method:'POST',token,body});
   };
   const value={
-    user,lang,auth,isSessionReady,onCreateServiceRequest,token,signedIn:Boolean(user&&token),draftEditable:!deleting.current&&cloudReady&&!['conflict','delete-conflict'].includes(saveState),
+    user,lang,auth,isSessionReady,onCreateServiceRequest,token,signedIn:Boolean(user&&token),draftEditable:!pending&&!deleting.current&&cloudReady&&!['conflict','delete-conflict'].includes(saveState),pendingRequest:pending,
     order,getOrder,active,cloudReady,clearing,draftId,revision,resetVersion,recentEdits,
     setField,setEquipment,removeService,editDraft,patchAi,commitAi,applyLegacy,
     save,saveState,clear,finish,retrySync:()=>setLoadRetry(value=>value+1),

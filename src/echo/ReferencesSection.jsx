@@ -4,6 +4,7 @@ import {uploadEventFile} from '../lib/api';
 import {EVENT_FILE_LIMITS,checkEventFile} from '../lib/eventFileLimits';
 import {duplicateAttachmentHash,hashFile} from '../lib/photoHash';
 import {useEventOrder} from './eventOrderContext';
+import BookingStep from './BookingStep';
 import './referencesSection.css';
 
 // Services-page "References & voucher" section of the Booking summary: inspiration photos (upload) and links, and event documents (upload).
@@ -29,7 +30,7 @@ function Attachments({kind,field,title,hint,icon:Icon,ctx,ar,tr}){
   return <div className="ref-block"><h4><Icon size={17} aria-hidden="true"/>{title}</h4><p>{hint}</p>
     <label className={`ref-upload${busy||!canEdit||items.length>=EVENT_FILE_LIMITS[kind].max?' is-disabled':''}`}><Upload size={16} aria-hidden="true"/>{busy?tr('Uploading…','جارٍ الرفع…'):tr('Choose file','اختر ملفاً')}<input type="file" accept={EVENT_FILE_LIMITS[kind].accept} disabled={busy||!canEdit||items.length>=EVENT_FILE_LIMITS[kind].max} onChange={add}/></label>
     {error&&<p role="alert" className="ref-error">{error}</p>}
-    <ul className="ref-items">{items.map((item,index)=><li key={item.url}>
+    <ul className={`ref-items${kind==='photo'?' is-grid':''}`}>{items.map((item,index)=><li key={item.url}>
       {kind==='photo'?<img src={item.url} alt="" loading="lazy"/>:<span className="ref-doc"><FileText size={22} aria-hidden="true"/></span>}
       <div><strong dir="auto">{item.name}</strong>
         <textarea rows={2} maxLength={500} dir="auto" disabled={!canEdit} value={item.comment||''} placeholder={kind==='photo'?tr('Add a comment about this photo','أضف تعليقاً على هذه الصورة'):tr('Add a note about this document','أضف ملاحظة عن هذا المستند')} aria-label={`${tr('Comment for','تعليق على')} ${item.name}`} onChange={e=>set(items.map((row,i)=>i===index?{...row,comment:e.target.value}:row))}/></div>
@@ -51,14 +52,13 @@ export default function ReferencesSection({ar=false}){
   // Arriving from the Booking summary on another page: scroll here once the page has rendered (#special-requests is the old name of this link).
   useEffect(()=>{if(['#references','#special-requests'].includes(window.location.hash))document.getElementById('references')?.scrollIntoView({block:'start'});},[]);
   const common={ctx,ar,tr};
-  return <section id="references" className="rsf ref svc-section is-card-left" aria-labelledby="ref-title" dir={ar?'rtl':'ltr'}>
-    <div className="rsf-copy">
-      <h2 id="ref-title">{tr('Anything to show us?','هل لديك ما تريد أن تُرينا إياه؟')}</h2>
-      <p>{tr('Share inspiration photos or links, and documents with your own notes. Everything here appears under References in your Booking summary.','شاركنا صوراً ملهمة أو روابطها، ومستندات بملاحظاتك. كل ما تضيفه هنا يظهر ضمن «المراجع والقسيمة» في ملخص حجزك.')}</p></div>
-    <div className="rsf-card ref-card">
+  return <div id="references" className="booking-services" dir={ar?'rtl':'ltr'}>
+    <BookingStep number={8} title={tr('Anything to show us?','هل لديك ما تريد أن تُرينا إياه؟')} cardTitle={tr('Inspiration & documents','الإلهام والمستندات')} copy={tr('Share inspiration photos or links, and documents with your own notes. Everything here appears under References in your Booking summary.','شاركنا صوراً ملهمة أو روابطها، ومستندات بملاحظاتك. كل ما هنا يظهر ضمن المراجع في ملخص حجزك.')}>
+      <div className="ref-stack">
       <Attachments {...common} kind="photo" field="photos" icon={ImageIcon} title={tr('Inspiration photos','صور ملهمة')} hint={tr('JPG, PNG or WebP, up to 10 MB each.','JPG أو PNG أو WebP، حتى 10 ميجابايت للملف.')}/>
       <PhotoLinks ctx={ctx} tr={tr}/>
       <Attachments {...common} kind="file" field="files" icon={FileText} title={tr('Event documents','مستندات الفعالية')} hint={tr('PDF, Word or text files with your own notes about the event.','ملفات PDF أو Word أو نصية تحوي ملاحظاتك عن الفعالية.')}/>
-    </div>
-  </section>;
+      </div>
+    </BookingStep>
+  </div>;
 }

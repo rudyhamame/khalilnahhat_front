@@ -1,10 +1,10 @@
 /* Book is a document of alternating steps, rather than a fitted viewport or flip card. */
-html body .echo.echo-public-page[data-page=home][data-theme] #echo-main:has(>#availability.booking-journey){display:block;height:auto;min-height:var(--echo-page-height);overflow:visible}
-html body .echo.echo-public-page[data-page=home][data-theme] #echo-main>#availability.booking-journey{display:block;height:auto!important;max-height:none!important;min-height:0!important;overflow:visible!important;padding-block:clamp(32px,5vw,72px)!important;color:#eef3ef;font-family:'Manrope','Noto Sans Arabic',sans-serif}
+html body .echo.echo-public-page[data-page=home][data-theme] #echo-main:has(>:is(#availability.booking-journey,.booking-services)){display:block;height:auto;min-height:var(--echo-page-height);overflow:visible}
+html body .echo.echo-public-page[data-page=home][data-theme] #echo-main>:is(#availability.booking-journey,.booking-services){display:block;height:auto!important;max-height:none!important;min-height:0!important;overflow:visible!important;padding-block:clamp(32px,5vw,72px)!important;color:#eef3ef;font-family:'Manrope','Noto Sans Arabic',sans-serif}
 .booking-journey-inner{max-width:1280px;margin-inline:auto;min-width:0}
 .booking-journey-intro{max-width:680px;margin-bottom:clamp(24px,2vw,32px)}
 .booking-journey-intro>span{color:#a6e3ce;font-size:12px;font-weight:650;letter-spacing:.14em}
-html body .echo[data-page=home][data-theme] #availability.booking-journey h1{margin:16px 0 20px;color:#f1f5f2;font:700 clamp(36px,4vw,60px)/1.12 'Manrope','Noto Sans Arabic',sans-serif!important;letter-spacing:-.04em!important;text-transform:none!important;text-wrap:balance}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) h1{margin:16px 0 20px;color:#f1f5f2;font:700 clamp(36px,4vw,60px)/1.12 'Manrope','Noto Sans Arabic',sans-serif!important;letter-spacing:-.04em!important;text-transform:none!important;text-wrap:balance}
 .booking-journey-intro p{margin:0;color:#bac9c1;font-size:17px;line-height:1.85}
 .booking-step{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(40px,6vw,100px);align-items:center;min-width:0;padding-block:clamp(40px,6vw,80px);border-top:1px solid #c2ddcd1c;scroll-margin-top:32px}
 .booking-step-copy{grid-column:1;grid-row:1;max-width:43ch;justify-self:start;align-self:start;min-width:0}
@@ -14,61 +14,61 @@ html body .echo[data-page=home][data-theme] #availability.booking-journey h1{mar
 .booking-journey .booking-date-required-label,.booking-journey .event-type-required-label{display:block;margin:0 0 8px}
 .booking-step-number{display:inline-flex;align-items:center;gap:12px;color:#a6e3ce;font-size:13px;letter-spacing:.1em;font-variant-numeric:tabular-nums}
 .booking-step-number::after{content:'';width:44px;height:1px;background:#a6e3ce66}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-step-copy h2{margin:20px 0;color:#f0f4f1;font:650 clamp(28px,2.7vw,42px)/1.18 'Manrope','Noto Sans Arabic',sans-serif!important;letter-spacing:-.03em!important;text-transform:none!important;text-wrap:balance}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-step-copy h2{margin:20px 0;color:#f0f4f1;font:650 clamp(28px,2.7vw,42px)/1.18 'Manrope','Noto Sans Arabic',sans-serif!important;letter-spacing:-.03em!important;text-transform:none!important;text-wrap:balance}
 .booking-step-copy p{margin:0;color:#bac9c1;font-size:16px;line-height:1.9}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-card-title{margin:0 0 24px;padding-bottom:18px;border-bottom:1px solid #ffffff12;color:#e9f1ec;font:600 20px/1.4 'Manrope','Noto Sans Arabic',sans-serif!important;letter-spacing:0!important;text-transform:none!important}
-html body .echo[data-page=home][data-theme] #availability.booking-journey :is(.booking-step-card,.booking-step-copy) p{white-space:normal}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-field-hint{margin:16px 0 0;font:400 13px/1.7 'Manrope','Noto Sans Arabic',sans-serif;color:#a7bbb0}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-field-hint ul{margin:6px 0 0;padding-inline-start:22px;list-style:disc}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .event-type-column{display:block;width:100%;max-width:none;min-height:0;margin:0;padding:0;border:0;background:transparent}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .event-type-column>div[role=group]{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:0;overflow:visible}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .event-type-column [data-event-choice]{display:flex;align-items:center;justify-content:flex-start;gap:12px;min-width:0;min-height:64px;padding:16px;border-radius:14px;font:500 15px/1.4 'Manrope','Noto Sans Arabic',sans-serif;white-space:normal;text-align:start}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .event-type-column [data-event-choice] svg{flex:none;width:21px;height:21px}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .event-type-column [data-event-choice][aria-pressed=true]{border-color:#a6e3ce80;background:#a6e3ce14;color:#c0efdc}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .event-type-work{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:20px;max-height:200px;overflow:auto}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-card-title{margin:0 0 24px;padding-bottom:18px;border-bottom:1px solid #ffffff12;color:#e9f1ec;font:600 20px/1.4 'Manrope','Noto Sans Arabic',sans-serif!important;letter-spacing:0!important;text-transform:none!important}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) :is(.booking-step-card,.booking-step-copy) p{white-space:normal}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-field-hint{margin:16px 0 0;font:400 13px/1.7 'Manrope','Noto Sans Arabic',sans-serif;color:#a7bbb0}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-field-hint ul{margin:6px 0 0;padding-inline-start:22px;list-style:disc}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .event-type-column{display:block;width:100%;max-width:none;min-height:0;margin:0;padding:0;border:0;background:transparent}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .event-type-column>div[role=group]{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:0;overflow:visible}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .event-type-column [data-event-choice]{display:flex;align-items:center;justify-content:flex-start;gap:12px;min-width:0;min-height:64px;padding:16px;border-radius:14px;font:500 15px/1.4 'Manrope','Noto Sans Arabic',sans-serif;white-space:normal;text-align:start}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .event-type-column [data-event-choice] svg{flex:none;width:21px;height:21px}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .event-type-column [data-event-choice][aria-pressed=true]{border-color:#a6e3ce80;background:#a6e3ce14;color:#c0efdc}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .event-type-work{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:20px;max-height:200px;overflow:auto}
 .booking-journey .event-type-work img{display:block;width:100%;height:140px;object-fit:cover;border-radius:10px}
 .booking-field{display:grid;gap:10px;margin-top:20px;font-size:14px;color:#becdc4}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-field input{box-sizing:border-box;width:100%;min-height:50px;padding:12px 14px;border:1px solid #c3dfcd30;border-radius:12px;background:#ffffff05;color:#f1f6f2;font:400 16px/1.4 'Manrope','Noto Sans Arabic',sans-serif}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-navigation{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;padding:0 0 24px;margin:0;border:0}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-period{display:flex;align-items:center;justify-content:space-between;gap:4px;min-width:0;width:100%}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-period h3{min-width:0;margin:0;font:600 clamp(20px,2vw,26px)/1.3 'Manrope','Noto Sans Arabic',sans-serif!important;letter-spacing:-.02em!important;text-transform:none!important}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-period button{width:42px;min-width:42px;height:42px;padding:8px}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-period button span{display:none}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-navigation>div:last-child{width:100%;justify-content:flex-end}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-calendar{display:block;min-width:0;min-height:300px;padding:0;overflow:visible}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-month{display:grid;width:100%;height:auto;grid-template-columns:repeat(7,minmax(0,1fr));grid-template-rows:28px repeat(var(--calendar-weeks),minmax(58px,auto));gap:2px}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-month .avail-date{display:flex;align-items:center;justify-content:center;gap:4px;min-width:0;min-height:58px;padding:8px 2px;font-size:14px}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-weekday{padding:0;text-align:center;letter-spacing:0;font-size:12px}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-date small{font-size:12px;letter-spacing:0}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-date>svg{position:static;width:12px;height:12px}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-field input{box-sizing:border-box;width:100%;min-height:50px;padding:12px 14px;border:1px solid #c3dfcd30;border-radius:12px;background:#ffffff05;color:#f1f6f2;font:400 16px/1.4 'Manrope','Noto Sans Arabic',sans-serif}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-navigation{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;padding:0 0 24px;margin:0;border:0}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-period{display:flex;align-items:center;justify-content:space-between;gap:4px;min-width:0;width:100%}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-period h3{min-width:0;margin:0;font:600 clamp(20px,2vw,26px)/1.3 'Manrope','Noto Sans Arabic',sans-serif!important;letter-spacing:-.02em!important;text-transform:none!important}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-period button{width:42px;min-width:42px;height:42px;padding:8px}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-period button span{display:none}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-navigation>div:last-child{width:100%;justify-content:flex-end}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-calendar{display:block;min-width:0;min-height:300px;padding:0;overflow:visible}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-month{display:grid;width:100%;height:auto;grid-template-columns:repeat(7,minmax(0,1fr));grid-template-rows:28px repeat(var(--calendar-weeks),minmax(58px,auto));gap:2px}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-month .avail-date{display:flex;align-items:center;justify-content:center;gap:4px;min-width:0;min-height:58px;padding:8px 2px;font-size:14px}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-weekday{padding:0;text-align:center;letter-spacing:0;font-size:12px}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-date small{font-size:12px;letter-spacing:0}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-date>svg{position:static;width:12px;height:12px}
 .booking-calendar-note{display:flex;flex-wrap:wrap;align-items:center;gap:10px 20px;margin-top:18px;color:#a6e3ce;font-size:12px}
 .booking-calendar-note>span::before{content:'';display:inline-block;width:6px;height:6px;margin-inline-end:7px;border-radius:50%;background:#a6e3ce}
 .booking-calendar-note small{color:#a5b9ad;font-size:12px;line-height:1.6}
 .booking-time-fields{margin-top:24px;padding-top:24px;border-top:1px solid #ffffff12}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-times{display:flex;flex-direction:column;gap:16px;max-height:none;min-height:0;height:auto;padding:0;border:0;overflow:visible}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-time-endpoints{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-time-endpoint{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:8px;min-width:0;min-height:84px;padding:16px}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-time-endpoint strong{font:600 18px/1.4 'Manrope','Noto Sans Arabic',sans-serif;color:#eef4ef}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-times-list{position:relative;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));height:240px;max-height:240px;min-height:0;flex:none;overflow:auto;scrollbar-width:thin}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-time-option{min-height:44px;padding:10px;font-size:13px}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-clear-date{margin-top:16px;padding:8px 0;min-height:40px;border:0;background:transparent;color:#adbdaf;font-size:12px;text-decoration:underline;text-underline-offset:4px;cursor:pointer}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-guests-row{display:grid;gap:14px;padding:0;border:0}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .event-type-guests{position:relative;display:flex;align-items:center;gap:12px;width:100%;margin:0;padding:0;border:0;background:none}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .event-type-guests svg{position:absolute;inset-inline-start:16px;top:50%;translate:0 -50%;pointer-events:none}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .event-type-guests input{box-sizing:border-box;width:100%;height:40px;min-height:40px;padding:8px 12px;padding-inline-start:40px;border:1px solid #c3dfcd30;border-radius:12px;background:#ffffff05;color:#f1f6f2;font:400 13px/1.4 'Manrope','Noto Sans Arabic',sans-serif}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-venue-fields{position:relative;display:flex;flex-direction:column;gap:14px;overflow:visible}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-venue-fields :is(input:not([type=radio],[type=checkbox]),select){width:100%;height:40px;min-height:40px;font:400 13px/1.4 'Manrope','Noto Sans Arabic',sans-serif;padding:8px 12px}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-venue-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-map-toggle{width:100%;min-height:48px}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-times{display:flex;flex-direction:column;gap:16px;max-height:none;min-height:0;height:auto;padding:0;border:0;overflow:visible}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-time-endpoints{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-time-endpoint{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:8px;min-width:0;min-height:84px;padding:16px}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-time-endpoint strong{font:600 18px/1.4 'Manrope','Noto Sans Arabic',sans-serif;color:#eef4ef}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-times-list{position:relative;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));height:240px;max-height:240px;min-height:0;flex:none;overflow:auto;scrollbar-width:thin}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-time-option{min-height:44px;padding:10px;font-size:13px}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-clear-date{margin-top:16px;padding:8px 0;min-height:40px;border:0;background:transparent;color:#adbdaf;font-size:12px;text-decoration:underline;text-underline-offset:4px;cursor:pointer}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-guests-row{display:grid;gap:14px;padding:0;border:0}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .event-type-guests{position:relative;display:flex;align-items:center;gap:12px;width:100%;margin:0;padding:0;border:0;background:none}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .event-type-guests svg{position:absolute;inset-inline-start:16px;top:50%;translate:0 -50%;pointer-events:none}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .event-type-guests input{box-sizing:border-box;width:100%;height:40px;min-height:40px;padding:8px 12px;padding-inline-start:40px;border:1px solid #c3dfcd30;border-radius:12px;background:#ffffff05;color:#f1f6f2;font:400 13px/1.4 'Manrope','Noto Sans Arabic',sans-serif}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-venue-fields{position:relative;display:flex;flex-direction:column;gap:14px;overflow:visible}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-venue-fields :is(input:not([type=radio],[type=checkbox]),select){width:100%;height:40px;min-height:40px;font:400 13px/1.4 'Manrope','Noto Sans Arabic',sans-serif;padding:8px 12px}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-venue-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-map-toggle{width:100%;min-height:48px}
 .booking-venue-map{height:420px;min-width:0;margin-top:20px;overflow:hidden;border:1px solid #ffffff20;border-radius:16px}
 .booking-venue-map>.venue-map{height:100%}
 .booking-journey-summary{display:grid;gap:0;margin:0}
 .booking-journey-summary>div{display:grid;grid-template-columns:minmax(90px,.7fr) minmax(0,1.3fr) auto;align-items:start;gap:20px;padding:16px 0;border-bottom:1px solid #ffffff12;font-size:14px;line-height:1.6}
 .booking-journey-summary dt{color:#9fb5a8}
 .booking-journey-summary dd{margin:0;color:#eef4ef;overflow-wrap:anywhere}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-journey-continue{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;min-height:52px;margin-top:24px;padding:14px 20px;border:1px solid #a6e3ce;border-radius:12px;background:#a6e3ce;color:#10251e;font:700 15px/1.4 'Manrope','Noto Sans Arabic',sans-serif;cursor:pointer}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-journey-continue:disabled{background:#a6e3ce12;border-color:#a6e3ce20;color:#96b5a6;opacity:.6;cursor:not-allowed}
-html body .echo[data-page=home][data-theme] #availability.booking-journey :is(input,select,button):focus-visible{outline:2px solid #a6e3ce;outline-offset:3px}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-journey-continue{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;min-height:52px;margin-top:24px;padding:14px 20px;border:1px solid #a6e3ce;border-radius:12px;background:#a6e3ce;color:#10251e;font:700 15px/1.4 'Manrope','Noto Sans Arabic',sans-serif;cursor:pointer}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-journey-continue:disabled{background:#a6e3ce12;border-color:#a6e3ce20;color:#96b5a6;opacity:.6;cursor:not-allowed}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) :is(input,select,button):focus-visible{outline:2px solid #a6e3ce;outline-offset:3px}
 .booking-journey[dir=rtl] :is(h1,h2,.booking-journey-intro>span){letter-spacing:0!important}
 @media(max-width:900px){
  .booking-journey-intro{margin-bottom:24px}
@@ -77,17 +77,17 @@ html body .echo[data-page=home][data-theme] #availability.booking-journey :is(in
  .booking-step-card,.booking-step.is-card-left .booking-step-card{grid-column:1;grid-row:2;width:100%}
 }
 @media(max-width:520px){
- html body .echo.echo-public-page[data-page=home][data-theme] #echo-main>#availability.booking-journey{padding-block:32px!important}
+ html body .echo.echo-public-page[data-page=home][data-theme] #echo-main>:is(#availability.booking-journey,.booking-services){padding-block:32px!important}
  .booking-journey-intro p,.booking-step-copy p{font-size:15px;line-height:1.8}
  .booking-step-card{padding:20px;border-radius:20px}
- html body .echo[data-page=home][data-theme] #availability.booking-journey .event-type-column [data-event-choice]{min-height:58px;padding:12px;font-size:13px;gap:8px}
- html body .echo[data-page=home][data-theme] #availability.booking-journey .event-type-column>div[role=group]{gap:10px}
- html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-month .avail-date{min-height:46px;padding:4px 0}
- html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-month{grid-template-rows:24px repeat(var(--calendar-weeks),minmax(46px,auto))}
- html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-date small{display:none}
- html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-time-endpoint{padding:12px}
- html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-time-endpoint strong{font-size:16px}
- html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-venue-pair{grid-template-columns:minmax(0,1fr)}
+ html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .event-type-column [data-event-choice]{min-height:58px;padding:12px;font-size:13px;gap:8px}
+ html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .event-type-column>div[role=group]{gap:10px}
+ html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-month .avail-date{min-height:46px;padding:4px 0}
+ html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-month{grid-template-rows:24px repeat(var(--calendar-weeks),minmax(46px,auto))}
+ html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-date small{display:none}
+ html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-time-endpoint{padding:12px}
+ html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-time-endpoint strong{font-size:16px}
+ html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-venue-pair{grid-template-columns:minmax(0,1fr)}
  .booking-step-number{font-size:12px}
 }
 
@@ -108,30 +108,30 @@ html body .echo .booking-gate-actions .booking-gate-primary{background:#d9b46e;c
 html body .echo .booking-gate-actions .booking-gate-secondary{color:#a6e3ce}
 
 /* Clearer type on the Book page: larger sizes and brighter muted text (the app also renders at 90%). */
-html body .echo[data-page=home][data-theme] #availability.booking-journey{--a-mute:#c5d3c9;--a-ink:#f3f7f4;--a-free:#a9e0bf;font-size:16px}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-step-copy p{font-size:18px;line-height:1.85;color:#d3dfd8}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-journey-intro p{font-size:18px;line-height:1.8;color:#d3dfd8}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-journey-intro>span,html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-step-number{font-size:14px}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-card-title{font-size:22px;color:#fff}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-period h3{font-size:clamp(24px,2.1vw,30px);font-weight:500;color:#fff}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-navigation :is(button,select){font-size:14px;color:#e4ede7;min-height:36px}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-weekday{font-size:13px;font-weight:600;color:#c5d3c9}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-date>span{font-size:18px;font-weight:500;color:#f3f7f4}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-date small{font-size:12px;font-weight:600;color:#a9e0bf;opacity:1}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-date:disabled>span{color:#6f7f76}
-html body .echo[data-page=home][data-theme] #availability.booking-journey :is(.avail-kicker,.avail-times .avail-kicker){font-size:13px;color:#d3bd96}
-html body .echo[data-page=home][data-theme] #availability.booking-journey :is(.booking-calendar-note,.booking-calendar-note small,.booking-field-hint,.booking-clear-date){font-size:14px;color:#c5d3c9}
-html body .echo[data-page=home][data-theme] #availability.booking-journey :is(input,select,textarea){font-size:16px;color:#f3f7f4}
-html body .echo[data-page=home][data-theme] #availability.booking-journey :is(input,textarea)::placeholder{color:#a9bbb0;opacity:1}
-html body .echo[data-page=home][data-theme] #availability.booking-journey :is(label,.booking-field>span,.avail-time-duration,dt,dd){font-size:15px}
-html body .echo[data-page=home][data-theme] #availability.booking-journey :is(dt){color:#c5d3c9}
-html body .echo[data-page=home][data-theme] #availability.booking-journey :is(dd){color:#f3f7f4}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-date:disabled small{opacity:.35}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services){--a-mute:#c5d3c9;--a-ink:#f3f7f4;--a-free:#a9e0bf;font-size:16px}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-step-copy p{font-size:18px;line-height:1.85;color:#d3dfd8}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-journey-intro p{font-size:18px;line-height:1.8;color:#d3dfd8}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-journey-intro>span,html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-step-number{font-size:14px}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-card-title{font-size:22px;color:#fff}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-period h3{font-size:clamp(24px,2.1vw,30px);font-weight:500;color:#fff}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-navigation :is(button,select){font-size:14px;color:#e4ede7;min-height:36px}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-weekday{font-size:13px;font-weight:600;color:#c5d3c9}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-date>span{font-size:18px;font-weight:500;color:#f3f7f4}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-date small{font-size:12px;font-weight:600;color:#a9e0bf;opacity:1}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-date:disabled>span{color:#6f7f76}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) :is(.avail-kicker,.avail-times .avail-kicker){font-size:13px;color:#d3bd96}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) :is(.booking-calendar-note,.booking-calendar-note small,.booking-field-hint,.booking-clear-date){font-size:14px;color:#c5d3c9}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) :is(input,select,textarea){font-size:16px;color:#f3f7f4}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) :is(input,textarea)::placeholder{color:#a9bbb0;opacity:1}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) :is(label,.booking-field>span,.avail-time-duration,dt,dd){font-size:15px}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) :is(dt){color:#c5d3c9}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) :is(dd){color:#f3f7f4}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-date:disabled small{opacity:.35}
 /* Selected day: same short label as the others (the gold highlight, aria-pressed and a corner check show the selection). */
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-month .avail-date small{white-space:nowrap}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-month .avail-date.is-selected{position:relative;padding:10px 4px}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-month .avail-date.is-selected>svg{position:absolute;top:5px;inset-inline-end:5px;color:#e3d3a3!important;stroke:#e3d3a3!important}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-navigation>div:last-child{flex:1 1 100%;justify-content:center}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-month .avail-date small{white-space:nowrap}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-month .avail-date.is-selected{position:relative;padding:10px 4px}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-month .avail-date.is-selected>svg{position:absolute;top:5px;inset-inline-end:5px;color:#e3d3a3!important;stroke:#e3d3a3!important}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-navigation>div:last-child{flex:1 1 100%;justify-content:center}
 
 /* Venue suggestions replace the step paragraph, with a soft swap and staggered rows. */
 .booking-copy-swap{animation:booking-copy-in .35s cubic-bezier(.2,.8,.2,1) both}
@@ -146,14 +146,14 @@ html[dir=rtl] body .echo .booking-copy-swap .avail-venue-grid button:hover{trans
 .booking-copy-swap .avail-venue-lines{display:flex;flex-direction:column;font-size:14px;color:#c5d3c9}
 .booking-copy-swap .avail-venue-note{margin:0;font-size:15px;color:#c5d3c9}
 @media(prefers-reduced-motion:reduce){.booking-copy-swap,.booking-copy-swap .avail-venue-grid li{animation:none}}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-step-copy.is-live :is(.booking-step-number,h2){display:none}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-step-copy.is-live :is(.booking-step-number,h2){display:none}
 
 /* Reset button in the top corner of each form card. */
 .booking-step-card{position:relative}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-reset{position:absolute;top:22px;inset-inline-end:26px;display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:0 12px;border:1px solid #ffffff22;border-radius:999px;background:transparent;color:#c5d3c9;font:600 13px/1 'Manrope','Noto Sans Arabic',sans-serif;cursor:pointer;transition:color .15s,border-color .15s,background .15s}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-reset:hover:not(:disabled){color:#fff;border-color:#d9b46e;background:#d9b46e1a}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-reset:disabled{opacity:.35;cursor:default}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-reset:focus-visible{outline:2px solid #a6e3ce;outline-offset:3px}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-reset{position:absolute;top:22px;inset-inline-end:26px;display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:0 12px;border:1px solid #ffffff22;border-radius:999px;background:transparent;color:#c5d3c9;font:600 13px/1 'Manrope','Noto Sans Arabic',sans-serif;cursor:pointer;transition:color .15s,border-color .15s,background .15s}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-reset:hover:not(:disabled){color:#fff;border-color:#d9b46e;background:#d9b46e1a}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-reset:disabled{opacity:.35;cursor:default}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-reset:focus-visible{outline:2px solid #a6e3ce;outline-offset:3px}
 
 /* Clear-text (x) inside the venue name input. */
 .avail-clearable{position:relative;display:block}
@@ -163,8 +163,8 @@ html body .echo .avail-clearable .avail-clear-text:hover{background:#ffffff1c;co
 html body .echo .avail-clearable .avail-clear-text:focus-visible{outline:2px solid #a6e3ce;outline-offset:2px}
 
 /* Venue results fill the whole copy column (full width and height) as a card grid. */
-html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-step-copy.is-live{max-width:none;width:100%;justify-self:stretch;align-self:stretch;display:flex;flex-direction:column;min-height:0}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-step-copy.is-live>.booking-copy-swap{flex:1;min-height:0;display:flex}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-step-copy.is-live{max-width:none;width:100%;justify-self:stretch;align-self:stretch;display:flex;flex-direction:column;min-height:0}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-step-copy.is-live>.booking-copy-swap{flex:1;min-height:0;display:flex}
 html body .echo .booking-copy-swap .avail-venue-dropdown.is-inline{flex:1;width:100%;height:100%;max-height:none;min-height:0;display:flex;flex-direction:column;overflow:auto}
 html body .echo .booking-copy-swap .avail-venue-dropdown .avail-venue-grid{flex:1;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));grid-auto-rows:minmax(96px,1fr);gap:12px;align-content:stretch}
 html body .echo .booking-copy-swap .avail-venue-grid li{display:flex;min-width:0}
@@ -185,7 +185,7 @@ html body .echo .booking-copy-swap .avail-venue-dropdown .avail-venue-grid{justi
 html body .echo .booking-copy-swap .avail-venue-dropdown .avail-venue-grid{grid-template-columns:repeat(2,minmax(0,240px))}
 
 /* Chosen venue: the map replaces the results, with the address card over it. */
-html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-step-copy.is-live>.booking-copy-swap:has(.booking-venue-mapview){display:flex}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-step-copy.is-live>.booking-copy-swap:has(.booking-venue-mapview){display:flex}
 .booking-venue-mapview{position:relative;flex:1;width:100%;min-height:min(520px,60svh);border:1.5px dashed #a6e3ce66;border-radius:18px;overflow:hidden;background:#0d1418}
 .booking-venue-mapview .vm-map{position:absolute;inset:0;height:100%;min-height:0}
 .booking-venue-mapview .vm-canvas{position:absolute;inset:0;width:100%;height:100%}
@@ -202,19 +202,19 @@ html body .echo .booking-journey .booking-step:first-of-type{border-top:0!import
 
 /* iPad landscape: placeholders fit the paired fields and Guests fills its card. */
 @media(orientation:landscape){
- html.echo-ipad body .echo[data-page=home][data-theme] #availability.booking-journey :is(input,select,textarea){min-width:0}
- html.echo-ipad body .echo[data-page=home][data-theme] #availability.booking-journey :is(input,textarea){box-sizing:border-box}
- html.echo-ipad body .echo[data-page=home][data-theme] #availability.booking-journey :is(input,textarea)::placeholder{font-size:13px;font-weight:400;line-height:1.4;letter-spacing:normal}
- html.echo-ipad body .echo[data-page=home][data-theme] #availability.booking-journey .avail-guests-row{grid-template-columns:minmax(0,1fr);justify-content:stretch;width:100%;min-width:0}
- html.echo-ipad body .echo[data-page=home][data-theme] #availability.booking-journey .event-type-guests{width:100%;max-width:none;min-width:0}
- html.echo-ipad body .echo[data-page=home][data-theme] #availability.booking-journey .event-type-guests input{flex:1 1 auto;width:100%;height:40px;min-height:40px;padding:8px 12px;padding-inline-start:40px;font-size:13px}
- html.echo-ipad body .echo[data-page=home][data-theme] #availability.booking-journey .event-type-guests svg{inset-inline-start:14px}
+ html.echo-ipad body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) :is(input,select,textarea){min-width:0}
+ html.echo-ipad body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) :is(input,textarea){box-sizing:border-box}
+ html.echo-ipad body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) :is(input,textarea)::placeholder{font-size:13px;font-weight:400;line-height:1.4;letter-spacing:normal}
+ html.echo-ipad body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-guests-row{grid-template-columns:minmax(0,1fr);justify-content:stretch;width:100%;min-width:0}
+ html.echo-ipad body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .event-type-guests{width:100%;max-width:none;min-width:0}
+ html.echo-ipad body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .event-type-guests input{flex:1 1 auto;width:100%;height:40px;min-height:40px;padding:8px 12px;padding-inline-start:40px;font-size:13px}
+ html.echo-ipad body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .event-type-guests svg{inset-inline-start:14px}
 }
 
 /* Guest count: the field gets a real width (it was shrink-wrapped to ~160px, leaving ~80px of text space), and a long placeholder ellipsizes instead of being cut. */
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-guests-row{grid-template-columns:minmax(0,1fr)}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-guests-row .event-type-guests{width:100%;max-width:100%;justify-self:start;min-width:0}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-guests-row .event-type-guests input{width:100%;min-width:0;text-overflow:ellipsis}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-guests-row{grid-template-columns:minmax(0,1fr)}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-guests-row .event-type-guests{width:100%;max-width:100%;justify-self:start;min-width:0}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .avail-guests-row .event-type-guests input{width:100%;min-width:0;text-overflow:ellipsis}
 
 /* The results box keeps a fixed height however many venues come back: it scrolls inside instead of growing the step.
    The "can't find the venue" footer stays pinned to its bottom edge while the cards scroll. */
@@ -236,11 +236,11 @@ html body .echo .booking-copy-swap .avail-venue-footer{margin-top:20px}
 .booking-journey-edit{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border:1px solid #ffffff24;border-radius:999px;background:transparent;color:#cfe9df;font:600 12px/1 inherit;cursor:pointer}
 .booking-journey-edit:hover{background:#ffffff14}
 .booking-journey-edit:focus-visible{outline:2px solid #a6e3ce;outline-offset:2px}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-field-hint.personal-info-note{margin-top:0}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-field-hint.personal-info-note{margin-top:0}
 /* Personal info that comes from the account cannot be edited here: it is greyed out. */
-html body .echo[data-page=home][data-theme] #availability.booking-journey input[data-booking-field^="customer."][readonly]{opacity:.55;color:#aab8b0;background:#ffffff08;border-color:#ffffff14;cursor:not-allowed;-webkit-text-fill-color:#aab8b0}
-html body .echo[data-page=home][data-theme] #availability.booking-journey input[data-booking-field^="customer."][readonly]::placeholder{color:#8d9a93}
-html body .echo[data-page=home][data-theme] #availability.booking-journey select[data-booking-field="customer.contactMethod"]:disabled{opacity:.55;color:#aab8b0;background-color:#ffffff08;border-color:#ffffff14;cursor:not-allowed;-webkit-text-fill-color:#aab8b0}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) input[data-booking-field^="customer."][readonly]{opacity:.55;color:#aab8b0;background:#ffffff08;border-color:#ffffff14;cursor:not-allowed;-webkit-text-fill-color:#aab8b0}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) input[data-booking-field^="customer."][readonly]::placeholder{color:#8d9a93}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) select[data-booking-field="customer.contactMethod"]:disabled{opacity:.55;color:#aab8b0;background-color:#ffffff08;border-color:#ffffff14;cursor:not-allowed;-webkit-text-fill-color:#aab8b0}
 
 /* The Reset button sits in the card's top corner: keep the title clear of it. */
-html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-step-card:has(>.booking-reset)>.booking-card-title{padding-inline-end:124px}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-step-card:has(>.booking-reset)>.booking-card-title{padding-inline-end:124px}
