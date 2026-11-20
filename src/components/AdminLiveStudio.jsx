@@ -61,6 +61,8 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  const chooseRecordingFallback=choice=>{fallbackDecision.current?.(choice);fallbackDecision.current=null;setRecordingFallback(false);};
  useEffect(()=>()=>{fallbackDecision.current?.(false);},[]);
  const [saveLive,setSaveLive]=useState(()=>{try{return localStorage.getItem('echo-save-live-recording')!=='false';}catch{return true;}});
+ const [saveCloud,setSaveCloud]=useState(()=>{try{return localStorage.getItem('echo-save-live-cloud')!=='false';}catch{return true;}});
+ const toggleCloud=on=>{setSaveCloud(on);try{localStorage.setItem('echo-save-live-cloud',String(on));}catch{/* The choice still applies this session. */}};
  const diskStore=useRef(null),folderChosenForNextLive=useRef(false);
  const [askRecordingFolder,setAskRecordingFolder]=useState(true);
  const [localFiles,setLocalFiles]=useState(()=>{try{const saved=JSON.parse(localStorage.getItem('echo-saved-recordings')||'[]');return Array.isArray(saved)?saved:[];}catch{return [];}}),[localMessage,setLocalMessage]=useState(''),[localBusy,setLocalBusy]=useState(false),[folderName,setFolderName]=useState('');
@@ -117,7 +119,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  const broadcastTitle=title.trim();
  const apply=item=>{if(!alive.current)return;update(item);onLiveStreamChange?.(item);};
  const start=async (title,outputs)=>{if(localBusy)throw new Error('Wait for local saving or recovery to finish.');if(folderRequired)throw new Error('Choose a recording folder before going live.');setDeviceOnly(false);
-  const result=await startStudioBroadcast({title,outputs,setListId,saveRecording:saveServer,transport:ovhRecording?'ovh':'livekit',request:body=>apiRequest('/live-stream/webrtc/go-live',{method:'POST',token,body}),hasFolder:()=>Boolean(diskStore.current),askLocalOnly:()=>new Promise(resolve=>{fallbackDecision.current=resolve;setRecordingFallback(true);})});
+  const result=await startStudioBroadcast({title,outputs,setListId,saveRecording:saveServer,localOnly:!saveCloud,transport:ovhRecording?'ovh':'livekit',request:body=>apiRequest('/live-stream/webrtc/go-live',{method:'POST',token,body}),hasFolder:()=>Boolean(diskStore.current),askLocalOnly:()=>new Promise(resolve=>{fallbackDecision.current=resolve;setRecordingFallback(true);})});
   setDeviceOnly(result.recording?.mode==='local');
   apply(result.item);setTitle('');return result;};
  const end=async roomName=>{try{const result=await apiRequest('/live-stream/webrtc/end',{method:'POST',token,body:{roomName}});apply(result.item);setTitle('');setGoalChoice('');setSetListId('none');setDetailsTried(false);}finally{if(askRecordingFolder)folderChosenForNextLive.current=false;}};
@@ -423,7 +425,8 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
   <section className="rec-block"><h4 className="rec-label">Destination</h4>
    <button className={`studio-folder-button${folderRequired&&folderHint?' is-warning':''}`} type="button" disabled={webrtc.isConnecting||webrtc.previewBusy||webrtc.isBroadcasting||localBusy} onClick={()=>void chooseFolder(Boolean(folderName))}><span className="studio-folder-icon" aria-hidden="true"><FolderOpen size={18}/></span><span><strong>{localBusy?'Working…':folderName||(rememberedName?'Use “'+rememberedName+'” again':'Choose a folder')}</strong><small>{folderRequired?(rememberedName&&!folderName?'One click to allow it again':'Required before going live'):folderName?'Click to pick another folder':'Computer or connected USB drive'}</small></span></button>
    <label className="rec-toggle-row"><span><strong>Ask for the folder every live</strong><small>Turn off to keep using the same folder.</small></span><input type="checkbox" role="switch" aria-label="Ask for the folder every live" checked={askRecordingFolder} disabled={captureLocked||reserved||isLiveOnAir||localBusy} onChange={event=>setAskRecordingFolder(event.target.checked)}/></label>
-   <p className="rec-flow" aria-label="Recording route"><span>Your folder</span>{!deviceOnly&&<><i aria-hidden="true">→</i><span>OVH</span><i aria-hidden="true">→</i><span>Cloudinary</span></>}</p>
+   <label className="rec-toggle-row"><span><strong>Save on Cloudinary</strong><small>{ovhRecording?'The OVH server always archives to Cloudinary.':'Turn off to keep this live only in your folder.'}</small></span><input type="checkbox" role="switch" aria-label="Save on Cloudinary" checked={saveCloud||ovhRecording} disabled={ovhRecording||captureLocked||reserved||isLiveOnAir||localBusy} onChange={event=>toggleCloud(event.target.checked)}/></label>
+   <p className="rec-flow" aria-label="Recording route"><span>Your folder</span>{!deviceOnly&&(saveCloud||ovhRecording)&&<><i aria-hidden="true">→</i><span>OVH</span><i aria-hidden="true">→</i><span>Cloudinary</span></>}</p>
   </section>
   <section className="rec-block"><h4 className="rec-label">Progress</h4><RecordingProgress local={pipelineLocal} deviceOnly={deviceOnly||pipelineLocal?.localOnly} paused={webrtc.paused||webrtc.inputLost||(isLiveOnAir&&!webrtc.isBroadcasting)} noInput={(webrtc.inputLost||(isLiveOnAir&&!webrtc.isBroadcasting))&&!webrtc.paused} folder={folderName} live={isLiveOnAir||webrtc.isBroadcasting} recorded={recordedBytes} saved={savedBytes} message={recordingMessage} serverStatus={serverRec?.status||rec?.status} serverError={serverRec?.error||''} cloudParts={serverRec?.parts||0}/></section>
  </>):<p className="rec-off">Recording is off. This live will not be saved.</p>}
