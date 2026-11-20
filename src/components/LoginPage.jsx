@@ -23,12 +23,32 @@ const TEAR = (() => {
   };
   const [a, b, c] = [shape(), shape(), shape()];
   // drawn lines hugging the tear: same points, pushed down by a few px each, morphing in step with the clip-path.
-  const lines = [0, 7, 15].map(dy => shapes.map(pts => 'M' + pts.map(([x, y]) => `${x.toFixed(1)} ${(y + dy).toFixed(1)}`).join('L')));
+  // the drawn lines are song waveforms: three stacked "tracks" whose loudness follows a slow envelope (quiet verses, loud choruses) under a smooth multi-harmonic carrier. Each variant has its own phases so the waveforms dance in step with the tear's breathing.
+  const wave = (v, k, f) => {
+    const ph = [v * 2.1 + 1, v * 1.3 + .4, v * 3.7 + k * 1.9, v * .9 + k * 2.6], amp = [10, 7, 4.5][k], base = [0, 11, 21][k];
+    let d = '';
+    for (let x = -60, i = 0; x <= 1060; x += 1.7, i++) {
+      const env = .22 + .78 * Math.pow(Math.abs(Math.sin(x / 105 + ph[0]) * (.62 + .38 * Math.sin(x / 43 + ph[1]))), .85);
+      const car = .6 * Math.sin(x * 1.15 + ph[2]) + .3 * Math.sin(x * 2.35 + ph[3]) + .1 * Math.sin(x * .5 + ph[0]);
+      const [px, py] = f(x, base + amp * env * car);
+      d += (i ? 'L' : 'M') + px.toFixed(1) + ' ' + py.toFixed(1);
+    }
+    return d;
+  };
+  const lines = [0, 1, 2].map(k => [0, 1, 2].map(v => wave(v, k, (x, y) => [x, y])));
   // landscape: the same jagged edge turned upright (runs top to bottom; the character page is to its right, 100% - --cw from the left).
   const vshape = pts => [...pts.map(([x, y]) => `calc(100% - var(--cw,45vw) + ${y.toFixed(1)}px) ${(x / 10).toFixed(2)}%`), '100% 106%', '100% -6%'].join(',');
   const [va, vb, vc] = shapes.map(vshape);
-  const vlines = [0, 7, 15].map(dx => shapes.map(pts => 'M' + pts.map(([x, y]) => `${(y - dx).toFixed(1)} ${x.toFixed(1)}`).join('L')));
-  return { lines, vlines, style: { '--tear': a, '--tear-a': a, '--tear-b': b, '--tear-c': c, '--vtear': va, '--vtear-a': va, '--vtear-b': vb, '--vtear-c': vc } };
+  const vlines = [0, 1, 2].map(k => [0, 1, 2].map(v => wave(v, k, (x, y) => [-y, x])));
+  // the other side of each edge (the left column / the form area), used by the exit scene so that column can slide away as a whole panel.
+  const hpt = ([x, y]) => `calc(50% + ${((x - 500) / 10).toFixed(2)}vw) calc(100% - var(--form-h,350px) - 30px + ${y.toFixed(1)}px)`;
+  const hcomp = pts => [...pts.map(hpt), 'calc(50% + 56vw) 100%', 'calc(50% - 56vw) 100%'].join(',');
+  const vcomp = pts => [...pts.map(([x, y]) => `calc(100% - var(--cw,45vw) + ${y.toFixed(1)}px) ${(x / 10).toFixed(2)}%`), '0 106%', '0 -6%'].join(',');
+  const [ha, hb, hc] = shapes.map(hcomp), [wa, wb, wc] = shapes.map(vcomp);
+  // Arabic (right-to-left): everything mirrored, the character page on the left and the forms on the right.
+  const rvedge = pts => pts.map(([x, y]) => `calc(var(--cw,45vw) + ${y.toFixed(1)}px) ${(x / 10).toFixed(2)}%`);
+  const [rva, rvb, rvc] = shapes.map(pts => [...rvedge(pts), '0 106%', '0 -6%'].join(',')), [rwa, rwb, rwc] = shapes.map(pts => [...rvedge(pts), '100% 106%', '100% -6%'].join(','));
+  return { lines, vlines, style: { '--rvtear-a': rva, '--rvtear-b': rvb, '--rvtear-c': rvc, '--rvtl-a': rwa, '--rvtl-b': rwb, '--rvtl-c': rwc, '--tear': a, '--tear-a': a, '--tear-b': b, '--tear-c': c, '--vtear': va, '--vtear-a': va, '--vtear-b': vb, '--vtear-c': vc, '--tl-a': ha, '--tl-b': hb, '--tl-c': hc, '--vtl-a': wa, '--vtl-b': wb, '--vtl-c': wc } };
 })();
 export default function LoginPage({ lang, isAuthenticated, username, loginError, signupError, onLogin, onSignup, onLogout, onGoogleLogin, embedded=false }) {
   useAccessViewport(!embedded);
@@ -61,6 +81,7 @@ export default function LoginPage({ lang, isAuthenticated, username, loginError,
   }, [embedded]);
   useEffect(() => {
     document.documentElement.classList.toggle('echo-login-leaving', leaving);
+    if (leaving) document.querySelectorAll('.access-tear-lines, .access-tear-vlines').forEach(svg => svg.pauseAnimations?.()); // freeze the waveform morph while the page glides away
     return () => document.documentElement.classList.remove('echo-login-leaving');
   }, [leaving]);
   // Hold the page behind a loader until the character, logos and sketch pattern are fully downloaded and decoded; failed loads retry.
@@ -91,9 +112,9 @@ export default function LoginPage({ lang, isAuthenticated, username, loginError,
   useEffect(() => { // the character's fade-out follows the visible form's height
     const root = accessRoot.current, wraps = root ? [...root.querySelectorAll('.access-content .access-form-wrap')] : [];
     if (!wraps.length || typeof ResizeObserver === 'undefined') return undefined;
-    const sync = () => root.style.setProperty('--form-h', `${Math.max(...wraps.map(w => w.offsetHeight)) + 20}px`); // hidden forms measure 0, so this is the tallest visible one
-    const observer = new ResizeObserver(sync); wraps.forEach(w => observer.observe(w)); sync();
-    return () => observer.disconnect();
+    const sync = () => root.style.setProperty('--form-h', `${Math.max(...wraps.map(w => w.offsetHeight)) + 20 + (window.matchMedia('(max-width:1000px), (orientation:portrait)').matches ? 64 : 0)}px`); // hidden forms measure 0, so this is the tallest visible one
+    const observer = new ResizeObserver(sync); wraps.forEach(w => observer.observe(w)); sync(); window.addEventListener('resize', sync);
+    return () => { observer.disconnect(); window.removeEventListener('resize', sync); };
   }, [mode, isAuthenticated]);
   const [signup, setSignup] = useState({ firstName: '', lastName: '', password: '', email: '', phoneNumber: '' });
   const errorFor = m => waitFor(m) ? retryText(waitFor(m)) : (submitMode === m ? submitError : '') || (m === 'signin' ? loginError : signupError);
@@ -162,7 +183,7 @@ export default function LoginPage({ lang, isAuthenticated, username, loginError,
       </>; };
   const content = <section ref={accessRoot} className={embedded ? "echo-access echo-order-access" : `echo-access${leaving ? ' is-leaving' : ''}`} data-access-mode={mode} dir={ar ? 'rtl' : 'ltr'} aria-labelledby={embedded ? undefined : "access-title"} aria-label={embedded ? tr("Account access", "الدخول إلى الحساب") : undefined}>
     {!embedded && !ready && <div className="access-loader" role="status" aria-label={tr('Loading', 'جارٍ التحميل')}><i/></div>}
-    {!embedded && <><div className="access-backdrop" aria-hidden="true"/><div className="access-blend" aria-hidden="true"/><div className="access-sketches" aria-hidden="true" style={TEAR.style}/>{ready&&<><div className="access-hero-vignette" aria-hidden="true" style={TEAR.style}/><img className="access-hero-photo" style={TEAR.style} src="/echo/login-hero-khalil.webp" width="1016" height="1536" alt={tr('DJ Khalil in sunglasses and a black denim jacket','دي جي خليل بنظارة شمسية وجاكيت جينز أسود')} fetchPriority="high"/><div className="access-hero-inset" aria-hidden="true" style={TEAR.style}/><svg className="access-tear-lines" viewBox="-60 -110 1120 140" preserveAspectRatio="none" aria-hidden="true">{TEAR.lines.map((d, i) => <path key={i} d={d[0]} style={{ opacity: [.9, .6, .35][i], strokeWidth: [2.2, 1.6, 1.1][i] }}><animate attributeName="d" dur="3.4s" repeatCount="indefinite" values={[d[0], d[1], d[2], d[0]].join(';')} keyTimes="0;.33;.66;1" calcMode="spline" keySplines=".42 0 .58 1;.42 0 .58 1;.42 0 .58 1"/></path>)}</svg><svg className="access-tear-vlines" viewBox="-110 -60 140 1120" preserveAspectRatio="none" aria-hidden="true">{TEAR.vlines.map((d, i) => <path key={i} d={d[0]} style={{ opacity: [.9, .6, .35][i], strokeWidth: [2.2, 1.6, 1.1][i] }}><animate attributeName="d" dur="3.4s" repeatCount="indefinite" values={[d[0], d[1], d[2], d[0]].join(';')} keyTimes="0;.33;.66;1" calcMode="spline" keySplines=".42 0 .58 1;.42 0 .58 1;.42 0 .58 1"/></path>)}</svg></>}</>}
+    {!embedded && <><div className="access-backdrop" aria-hidden="true"/><div className="access-panel access-panel-l" aria-hidden="true" style={TEAR.style}/><div className="access-panel access-panel-r" aria-hidden="true" style={TEAR.style}/><div className="access-sketches" aria-hidden="true" style={TEAR.style}/>{ready&&<><div className="access-hero-vignette" aria-hidden="true" style={TEAR.style}/><img className="access-hero-photo" style={TEAR.style} src="/echo/login-hero-khalil.webp" width="1016" height="1536" alt={tr('DJ Khalil in sunglasses and a black denim jacket','دي جي خليل بنظارة شمسية وجاكيت جينز أسود')} fetchPriority="high"/><div className="access-hero-inset" aria-hidden="true" style={TEAR.style}/><svg className="access-tear-lines" viewBox="-60 -110 1120 140" preserveAspectRatio="none" aria-hidden="true">{TEAR.lines.map((d, i) => <path key={i} d={d[0]} style={{ opacity: [.95, .7, .5][i], strokeWidth: [1.8, 1.4, 1.1][i] }}><animate attributeName="d" dur="3.4s" repeatCount="indefinite" values={[d[0], d[1], d[2], d[0]].join(';')} keyTimes="0;.33;.66;1" calcMode="spline" keySplines=".42 0 .58 1;.42 0 .58 1;.42 0 .58 1"/></path>)}</svg><svg className="access-tear-vlines" viewBox="-110 -60 140 1120" preserveAspectRatio="none" aria-hidden="true">{TEAR.vlines.map((d, i) => <path key={i} d={d[0]} style={{ opacity: [.95, .7, .5][i], strokeWidth: [1.8, 1.4, 1.1][i] }}><animate attributeName="d" dur="3.4s" repeatCount="indefinite" values={[d[0], d[1], d[2], d[0]].join(';')} keyTimes="0;.33;.66;1" calcMode="spline" keySplines=".42 0 .58 1;.42 0 .58 1;.42 0 .58 1"/></path>)}</svg></>}</>}
 
     {embedded || isAuthenticated ? <div className="access-content"><div className="access-form-wrap">
       {embedded && <header className="access-embedded-heading"><h2>{mode === 'signin' ? tr('Your next great event starts here.', 'فعاليتك القادمة تبدأ هنا.') : tr('Let’s make it yours.', 'لنصنع فعاليتك معاً.')}</h2><p>{mode === 'signin' ? tr('Sign in to plan with Echo AI.', 'سجّل الدخول للتخطيط مع إيكو AI.') : tr('Create an account to plan and keep your event details together.', 'أنشئ حساباً للتخطيط وحفظ تفاصيل فعاليتك في مكان واحد.')}</p></header>}
@@ -171,7 +192,7 @@ export default function LoginPage({ lang, isAuthenticated, username, loginError,
         <p className="access-intro">{tr('Everything you need for your next event is waiting for you.', 'كل ما تحتاجه لفعاليتك القادمة بانتظارك.')}</p>
       </>}
       {isAuthenticated ? <div className="access-signed-in"><span>{tr('SIGNED IN AS', 'تم تسجيل الدخول باسم')}</span><strong>{username}</strong><a className="access-submit" href="/dashboard">{lang.t.nav.dashboard}<ArrowUpRight size={18} /></a><button className="access-text-link" type="button" onClick={onLogout}>{tr('Sign out', 'تسجيل الخروج')}</button></div> : formBody(mode, true)}
-    </div></div> : <><div className="access-pair">
+    </div></div> : <><div className="access-pair"><h2 className="access-landscape-title">{tr('Your Backstage Pass', 'تذكرتك إلى الكواليس')}</h2>
       {['signin', 'signup'].map(m => <div className="access-content" data-mode={m} key={m}><div className="access-form-wrap" data-mode={m}>
         <div className="access-switch access-responsive-switch" aria-label={tr('Account access', 'الدخول إلى الحساب')}>
       {['signin','signup'].map(value=><button key={value} type="button" aria-pressed={mode===value} onClick={()=>changeMode(value)}>{value==='signin'?tr('Sign in','تسجيل الدخول'):tr('Create account','إنشاء حساب')}</button>)}
@@ -185,7 +206,8 @@ export default function LoginPage({ lang, isAuthenticated, username, loginError,
           <button type="button" className="access-text-link" onClick={resend} disabled={resent}>{resent ? tr('Link sent again', 'أُعيد إرسال الرابط') : tr('Send the link again', 'أعد إرسال الرابط')}</button>
         </div> : formBody(m, false)}
       </div></div>)}
-    </div>{!embedded&&<a className="access-guest" href="/" onClick={()=>{try{window.sessionStorage.setItem('echo-guest','1');}catch{/* private mode: the guest flag is skipped */}}}>{tr('Continue as guest','المتابعة كضيف')}<ArrowUpRight size={16} aria-hidden="true" /></a>}</>}
+    </div>{!embedded&&<a className="access-guest" href="/" onClick={()=>{try{window.sessionStorage.setItem('echo-guest','1');}catch{/* private mode: the guest flag is skipped */}}}>{tr('Continue as guest','المتابعة كضيف')}<ArrowUpRight size={16} aria-hidden="true" /></a>}
+    {!embedded&&!isAuthenticated&&<div className="access-app-badge"><ClientAppBadge tr={tr} className="client-app-badge--access"/></div>}</>}
   </section>;
   return embedded ? content : <EchoShell lang={lang}>{content}</EchoShell>;
 }

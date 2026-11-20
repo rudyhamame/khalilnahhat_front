@@ -24,6 +24,9 @@ import { apiBaseUrl } from './lib/api';
 document.documentElement.classList.toggle('echo-ipad',
   /iPad/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
 
+// Right after a sign-in the page fades in (the login page faded out to the same dark colour).
+try{if(sessionStorage.getItem('echo-fade-in')){sessionStorage.removeItem('echo-fade-in');const root=document.documentElement;root.classList.add('echo-fade-in');setTimeout(()=>root.classList.remove('echo-fade-in'),1200);}}catch{/* storage unavailable */}
+
 installSmoothResize();
 installNoAutofill();
 
@@ -32,7 +35,7 @@ try{if(!sessionStorage.getItem('echo-visit')){sessionStorage.setItem('echo-visit
 fetch(`${apiBaseUrl}/visit`,{method:'POST',keepalive:true,headers:{'Content-Type':'application/json',...(token?{Authorization:`Bearer ${token}`}:{})},body:JSON.stringify({path:location.pathname.slice(0,200),referrer:document.referrer.slice(0,300),lang:(navigator.language||'').slice(0,20)})}).catch(()=>{});}}catch{}
 
 // A visitor with no saved sign-in (a guest) goes straight to the login page, before anything of the home page is built.
-try{if(window.location.pathname==='/'&&!sessionStorage.getItem('echo-guest')&&!JSON.parse(localStorage.getItem('khalil-auth-token')||'null'))window.history.replaceState({},'','/login'+window.location.search+window.location.hash);}catch{}
+try{if(window.location.pathname==='/'&&!sessionStorage.getItem('echo-guest')&&!localStorage.getItem('echo-skip-login')&&!JSON.parse(localStorage.getItem('khalil-auth-token')||'null'))window.history.replaceState({},'','/login'+window.location.search+window.location.hash);}catch{}
 
 // Start the complete intro sequence before mounting the homepage UI.
 if(window.location.pathname==='/')void prepareHeroHeadphoneFrames();

@@ -95,7 +95,7 @@ function sortLiveSessions(items) {
 // Plays the login page's exit scene (see LoginPage) and waits for it before leaving; skipped for reduced motion or off the login page.
 const leaveLoginScene = () => (typeof document === 'undefined' || !document.documentElement.classList.contains('echo-access-open') || window.matchMedia('(prefers-reduced-motion: reduce)').matches)
   ? Promise.resolve()
-  : (window.dispatchEvent(new Event('echo:login-success')), new Promise(resolve => setTimeout(resolve, 2400)));
+  : (window.dispatchEvent(new Event('echo:login-success')), (() => { try { sessionStorage.setItem('echo-fade-in', '1'); } catch { /* private mode: the next page just appears */ } })(), new Promise(resolve => setTimeout(resolve, 1700)));
 
 function App() {
   const [routePath, setRoutePath] = useState(() =>
@@ -312,7 +312,7 @@ function App() {
   const isAuthenticated = Boolean(authUser?.isAdmin);
   // A visitor who is not signed in (a guest) starts on the login page; the rest of the site stays reachable.
   useEffect(() => {
-    if (!isSessionReady || authUser || routePath !== '/' || window.sessionStorage.getItem('echo-guest')) return;
+    if (!isSessionReady || authUser || routePath !== '/' || window.sessionStorage.getItem('echo-guest') || window.localStorage.getItem('echo-skip-login')) return;
     window.history.replaceState({}, '', '/login');
     window.dispatchEvent(new PopStateEvent('popstate'));
   }, [isSessionReady, authUser, routePath]);

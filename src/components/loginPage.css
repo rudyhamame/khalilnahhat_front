@@ -166,9 +166,9 @@ html.echo-access-open body .echo.echo-public-page>.echo-header .echo-brand-pair{
 html.echo-access-open .access-input input {font-size:max(16px,calc(16px / var(--echo-css-zoom,1)));}
 
 /* Sign in / sign up: one form card, centred on the page, over the same midnight-indigo / wine / copper blend with grain as the Contact page. */
-.access-backdrop{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;
+.access-backdrop,.echo-access.is-leaving .access-panel{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;
  background:radial-gradient(ellipse 40% 50% at 50% 48%,#b0642e44,transparent 72%),radial-gradient(ellipse 46% 52% at 6% 100%,#5b1f3dcc,transparent 74%),radial-gradient(ellipse 46% 52% at 96% 6%,#1f3a7acc,transparent 74%),radial-gradient(ellipse 50% 60% at 100% 100%,#6b3a1fa6,transparent 76%),linear-gradient(180deg,#15183a 0%,#1a1030 52%,#241018 100%)}
-.access-backdrop::after{content:"";position:absolute;inset:0;opacity:.24;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Cpath fill='%23fff' filter='url(%23grain)' d='M0 0h180v180H0z'/%3E%3C/svg%3E")}
+.access-backdrop::after,.echo-access.is-leaving .access-panel::after{content:"";position:absolute;inset:0;opacity:.24;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Cpath fill='%23fff' filter='url(%23grain)' d='M0 0h180v180H0z'/%3E%3C/svg%3E")}
 html body .echo-access:not(.echo-order-access){--access-text:#f3efe6;--access-muted:#c4bccb;--access-field:#ffffff0f;--access-field-hover:#ffffff17;--access-pill:#ffffff10;--access-active:#e3d3a3;--access-accent:#f0b25e;display:block;padding-block:clamp(12px,2.5svh,28px)}
 /* Sign in on the left, Create account on the right, the character standing between them; the cards have no box, only a soft glass wash that melts into the backdrop. */
 .access-pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:min(36vw,520px);align-items:center;width:100%;min-height:calc(100svh - var(--echo-header-height,80px) - 40px)}
@@ -325,7 +325,7 @@ html.echo-access-open,html.echo-access-open body{overflow:clip}
 @media(prefers-reduced-motion:reduce){.access-google-skeleton,.access-google-button:not([hidden]){animation:none}}
 
 /* Phone + tablet portrait: the character stands above the forms (head clear, body behind the card); the page scrolls instead of clipping. */
-.access-hero-inset,.access-sketches,.access-tear-lines,.access-tear-vlines,.access-hero-vignette,.access-blend{display:none}
+.access-hero-inset,.access-sketches,.access-tear-lines,.access-tear-vlines,.access-hero-vignette,.access-landscape-title,.access-app-badge{display:none}
 @media(max-width:1000px) and (orientation:portrait),(min-width:1001px) and (orientation:landscape){
  html.echo-access-open body .echo-access:not(.echo-order-access){--hero-h:clamp(500px,94svh,1020px);display:flex;flex-direction:column;align-items:center;overflow-x:clip!important;overflow-y:auto!important;overscroll-behavior:contain;padding-top:12px!important;padding-bottom:20px}
  html.echo-access-open body .echo-access .access-pair :is(.access-intro,.access-google-heading,.access-reassurance,.access-app-login,.client-app-badge--card){display:none!important}
@@ -370,7 +370,7 @@ html.echo-access-open,html.echo-access-open body{overflow:clip}
  html body .echo-access:not(.echo-order-access) .access-pair .access-form-wrap{background:none;border:0;box-shadow:none;border-radius:0;padding:0;-webkit-backdrop-filter:none;backdrop-filter:none}
  /* Tiny white pen sketches of DJ Khalil tiled behind the form; two layers drift in opposite directions and pulse. */
  .access-tear-lines{display:block;position:fixed;left:50%;width:112vw;height:140px;transform:translateX(-50%);top:calc(100% - var(--form-h,350px) - 140px);z-index:3;pointer-events:none;overflow:visible}
- .access-tear-lines path{fill:none;stroke:#f3e9d2;vector-effect:non-scaling-stroke;stroke-linejoin:round}
+ .access-tear-lines path{fill:none;stroke:#f3e9d2;vector-effect:non-scaling-stroke;stroke-linejoin:round;stroke-linecap:round;filter:drop-shadow(0 0 3px #f0b25e99)}
  .access-sketches{display:block;position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.22;
   background:url(/echo/khalil-sketch-pattern.png) 0 0/260px 260px repeat,url(/echo/khalil-sketch-pattern.png) 110px 80px/360px 360px repeat;
   clip-path:polygon(var(--tear));animation:access-sketch-drift 38s linear infinite,access-sketch-pulse 5s ease-in-out infinite,access-tear-breathe 3.4s ease-in-out infinite}
@@ -413,11 +413,19 @@ html.echo-access-open,html.echo-access-open body{overflow:clip}
 @keyframes access-spin{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.access-loader i{animation-duration:2s}}
 
-/* Exit scene after a successful sign-in, in choppy cartoon frames: front elements leave, then the backdrop blends into the home page colours. */
-html.echo-login-leaving .echo-header,.echo-access.is-leaving :is(.access-pair,.access-guest,.access-tear-lines,.access-tear-vlines){animation:access-leave-out .7s steps(6,end) forwards!important}
-.echo-access.is-leaving .access-blend{display:block;position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0;background:radial-gradient(ellipse 70% 55% at 50% 38%,#17332d,transparent 80%),#0d1418;animation:access-blend-in 1.5s steps(6,end) .7s forwards}
-@keyframes access-leave-out{to{opacity:0;translate:0 48px}}
-@keyframes access-blend-in{to{opacity:1}}
+/* Exit scene after a successful sign-in: the whole left column (its background panel, forms, guest link, app badge) glides off to the left while the right side (its background panel, character, sketches, tear lines) glides off to the right; then the whole page fades to the home page's dark colour, and the next page fades in from it (see main.jsx).
+   Smoothness: only GPU-friendly `translate` is animated; every repaint-heavy animation (the breathing clip-path, the pattern drift, the waveform morph and its glow) is frozen for the exit. */
+.echo-access.is-leaving :is(.access-pair,.access-guest,.access-app-badge){animation:access-slide-left .9s cubic-bezier(.65,0,.35,1) forwards!important;will-change:translate}
+html.echo-login-leaving .echo-access.is-leaving :is(.access-hero-photo,.access-hero-inset,.access-hero-vignette,.access-sketches,.access-tear-lines,.access-tear-vlines){clip-path:polygon(var(--tear-a));animation:access-slide-right .9s cubic-bezier(.65,0,.35,1) forwards!important;will-change:translate}
+html.echo-login-leaving .echo-access.is-leaving :is(.access-tear-lines,.access-tear-vlines) path{filter:none}
+html.echo-login-leaving::after{content:'';position:fixed;inset:0;z-index:99999;pointer-events:none;background:#0d1418;opacity:0;animation:access-fade-cover .6s ease .9s forwards}
+@keyframes access-slide-left{to{translate:-115vw 0}}
+@keyframes access-slide-right{to{translate:115vw 0}}
+@keyframes access-fade-cover{to{opacity:1}}
+@media(min-width:1001px) and (orientation:landscape){
+ html.echo-login-leaving .echo-access.is-leaving :is(.access-hero-photo,.access-hero-inset,.access-hero-vignette,.access-sketches){clip-path:polygon(var(--vtear-a))}
+}
+
 
 /* Tablet landscape: both phone-style forms side by side under the tear (no tabs). */
 @media(min-width:1001px) and (orientation:landscape){
@@ -440,7 +448,63 @@ html.echo-access-open body .echo-access:not(.echo-order-access) .access-pair{pos
  html.echo-access-open body .echo-access:not(.echo-order-access) .access-hero-vignette{background:none;clip-path:polygon(var(--vtear));animation:access-vtear-breathe 3.4s ease-in-out infinite}
  html.echo-access-open body .echo-access:not(.echo-order-access) .access-hero-inset,.echo-access:not(.echo-order-access) .access-tear-lines{display:none}
  .echo-access:not(.echo-order-access) .access-tear-vlines{display:block;position:fixed;top:-6vh;height:112vh;width:140px;left:calc(100% - var(--cw) - 110px);z-index:3;pointer-events:none;overflow:visible}
- .access-tear-vlines path{fill:none;stroke:#f3e9d2;vector-effect:non-scaling-stroke;stroke-linejoin:round}
+ .access-tear-vlines path{fill:none;stroke:#f3e9d2;vector-effect:non-scaling-stroke;stroke-linejoin:round;stroke-linecap:round;filter:drop-shadow(0 0 3px #f0b25e99)}
  html.echo-access-open body .echo-access:not(.echo-order-access) .access-pair{align-self:flex-start;margin:auto 0;width:min(760px,calc(100vw - var(--cw) - 96px));max-width:none;margin-inline-start:calc((100vw - var(--cw) - min(760px,100vw - var(--cw) - 96px)) / 2 - 48px)}
 }
 @media(min-width:1001px) and (orientation:landscape) and (prefers-reduced-motion:reduce){.access-hero-photo,.access-sketches,.access-hero-vignette{animation:none!important}}
+
+/* The Android client-app badge at the bottom centre of the login page, styled like the rest of the inked UI (portrait: centred on the screen; landscape: centred in the left column, see below). */
+.echo-access:not(.echo-order-access) .access-app-badge{display:block;position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:8;width:max-content;max-width:calc(100vw - 32px)}
+html body .echo-access:not(.echo-order-access) .access-app-badge .client-app-badge{display:flex;align-items:center;gap:10px;width:auto;min-height:0;padding:7px 18px 7px 14px;border:1.5px solid #f0b25e88;border-radius:22px 10px 20px 12px/12px 20px 10px 22px;background:#0d0919;color:#f3e9d2!important;box-shadow:4px 4px 0 #38c7b055;transform:rotate(-1.2deg);font-family:'Permanent Marker','Cairo',cursive;text-decoration:none}
+html body .echo-access:not(.echo-order-access) .access-app-badge .client-app-badge svg{width:22px;height:22px;color:#38c7b0}
+html body .echo-access:not(.echo-order-access) .access-app-badge .client-app-badge small{display:block;font:400 9px/1.2 'Permanent Marker','Cairo',cursive;letter-spacing:.14em;text-transform:uppercase;color:#f0b25e!important;opacity:1!important}
+html body .echo-access:not(.echo-order-access) .access-app-badge .client-app-badge b{font:400 13px/1.2 'Permanent Marker','Cairo',cursive;letter-spacing:.04em;color:#f3e9d2!important;opacity:1!important}
+html body .echo-access:not(.echo-order-access) .access-app-badge .client-app-badge:hover{border-color:#e0408f;box-shadow:4px 4px 0 #e0408f66}
+@media(max-width:1000px),(orientation:portrait){
+ html.echo-access-open body .echo-access:not(.echo-order-access) .access-pair{margin-bottom:64px!important}
+}
+
+/* Landscape only: a title centred above the two forms. */
+@media(min-width:1001px) and (orientation:landscape){
+ .echo-access:not(.echo-order-access) .access-app-badge{left:calc((100vw - var(--cw)) / 2)}
+ html.echo-access-open body .echo-access:not(.echo-order-access) .access-landscape-title{display:block;grid-column:1/-1;margin:0 0 22px;text-align:center;font:400 clamp(26px,2.6vw,40px)/1.1 'Permanent Marker','Cairo',cursive;letter-spacing:.04em;color:#f3e9d2}
+}
+
+@media(min-width:1001px) and (orientation:landscape){html.echo-access-open body .echo-access:not(.echo-order-access) .access-pair{margin-bottom:auto!important}}
+
+/* After a sign-in the next page fades in from the dark the login page faded to. */
+html.echo-fade-in{background:#0d1418}
+html.echo-fade-in body{animation:echo-fade-in .8s ease both}
+@keyframes echo-fade-in{from{opacity:0}}
+@media(prefers-reduced-motion:reduce){html.echo-fade-in body{animation:none}}
+
+/* Exit scene panels: during the exit the page background is replaced by two clipped copies, one per side of the tear, so each side leaves as a whole. */
+html.echo-login-leaving .echo-access.is-leaving .access-backdrop{display:none}
+@keyframes access-tear-breathe-l{0%,100%{clip-path:polygon(var(--tl-a))}33%{clip-path:polygon(var(--tl-b))}66%{clip-path:polygon(var(--tl-c))}}
+@keyframes access-vtear-breathe-l{0%,100%{clip-path:polygon(var(--vtl-a))}33%{clip-path:polygon(var(--vtl-b))}66%{clip-path:polygon(var(--vtl-c))}}
+html.echo-login-leaving .echo-access.is-leaving .access-panel-l{clip-path:polygon(var(--tl-a));animation:access-slide-left .9s cubic-bezier(.65,0,.35,1) forwards;will-change:translate}
+html.echo-login-leaving .echo-access.is-leaving .access-panel-r{clip-path:polygon(var(--tear-a));animation:access-slide-right .9s cubic-bezier(.65,0,.35,1) forwards;will-change:translate}
+@media(min-width:1001px) and (orientation:landscape){
+ html.echo-login-leaving .echo-access.is-leaving .access-panel-l{clip-path:polygon(var(--vtl-a))}
+ html.echo-login-leaving .echo-access.is-leaving .access-panel-r{clip-path:polygon(var(--vtear-a))}
+}
+
+/* ===== Arabic (right-to-left): the login page mirrored. ===== */
+@keyframes access-rvtear-breathe{0%,100%{clip-path:polygon(var(--rvtear-a))}33%{clip-path:polygon(var(--rvtear-b))}66%{clip-path:polygon(var(--rvtear-c))}}
+/* header: the Echo logo takes the left edge and the DJ Khalil logo the right edge (the logo pair is always laid out left-to-right, so reverse it) */
+html[dir=rtl].echo-access-open body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-brand-pair{flex-direction:row-reverse!important}
+html[dir=rtl].echo-access-open body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-event-brand-mark{object-position:left center!important}
+html[dir=rtl].echo-access-open body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-brand-pair>img:not(#_){margin-inline-start:0!important}
+@media(min-width:1001px) and (orientation:landscape){
+ html[dir=rtl].echo-access-open body .echo-access:not(.echo-order-access) .access-hero-photo{left:0;right:auto;clip-path:polygon(var(--rvtear-a));animation:access-photo-in 1s cubic-bezier(.2,.8,.2,1) both,access-rvtear-breathe 3.4s ease-in-out infinite}
+ html[dir=rtl].echo-access-open body .echo-access:not(.echo-order-access) .access-sketches{clip-path:polygon(var(--rvtear-a));animation:access-sketch-drift 38s linear infinite,access-sketch-pulse 5s ease-in-out infinite,access-rvtear-breathe 3.4s ease-in-out infinite}
+ html[dir=rtl].echo-access-open body .echo-access:not(.echo-order-access) .access-hero-vignette{clip-path:polygon(var(--rvtear-a));animation:access-rvtear-breathe 3.4s ease-in-out infinite}
+ html[dir=rtl] .echo-access:not(.echo-order-access) .access-tear-vlines{left:calc(var(--cw) - 30px);transform:scaleX(-1)}
+ html[dir=rtl] .echo-access:not(.echo-order-access) .access-app-badge{left:calc(var(--cw) + (100vw - var(--cw)) / 2)}
+ html[dir=rtl].echo-login-leaving .echo-access.is-leaving :is(.access-hero-photo,.access-hero-inset,.access-hero-vignette,.access-sketches){clip-path:polygon(var(--rvtear-a))}
+ html[dir=rtl].echo-login-leaving .echo-access.is-leaving .access-panel-l{clip-path:polygon(var(--rvtl-a))}
+ html[dir=rtl].echo-login-leaving .echo-access.is-leaving .access-panel-r{clip-path:polygon(var(--rvtear-a))}
+}
+/* exit scene mirrored: the forms side leaves to the right, the character side to the left */
+html[dir=rtl].echo-login-leaving .echo-access.is-leaving :is(.access-pair,.access-guest,.access-app-badge,.access-panel-l){animation:access-slide-right .9s cubic-bezier(.65,0,.35,1) forwards!important}
+html[dir=rtl].echo-login-leaving .echo-access.is-leaving :is(.access-hero-photo,.access-hero-inset,.access-hero-vignette,.access-sketches,.access-tear-lines,.access-tear-vlines,.access-panel-r){animation:access-slide-left .9s cubic-bezier(.65,0,.35,1) forwards!important}

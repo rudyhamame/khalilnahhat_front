@@ -175,10 +175,24 @@ export default function HeroIntroductionAudio({lang,onSkip,onBegin,animationComp
   return()=>{window.removeEventListener('echo:hero-language-request',enter);};
  },[]);
  const seek=value=>{if(audio.current&&Number.isFinite(value)){audio.current.currentTime=(narration.playbackOffset||0)+Math.max(0,Math.min(duration,value));sync();}};
+ // The progress line is a rounded square drawn around the transcript: its length fills clockwise as the greeting plays, and dragging or tapping along it seeks.
+ const frame=useRef(null),[box,setBox]=useState({w:0,h:0});
+ useEffect(()=>{const element=frame.current;if(!element||typeof ResizeObserver==='undefined')return undefined;const observer=new ResizeObserver(()=>setBox({w:element.offsetWidth,h:element.offsetHeight}));observer.observe(element);setBox({w:element.offsetWidth,h:element.offsetHeight});return()=>observer.disconnect();},[languageChosen]);
+ const seekFromFrame=event=>{
+  if(staging||phase!=='started'||!duration||!box.w)return;
+  const rect=frame.current.getBoundingClientRect(),w=rect.width,h=rect.height;
+  let x=event.clientX-rect.left;const y=event.clientY-rect.top;if(ar)x=w-x;
+  const dx=x-w/2,dy=y-h/2,k=Math.min((w/2)/(Math.abs(dx)||1e-6),(h/2)/(Math.abs(dy)||1e-6)),px=w/2+dx*k,py=h/2+dy*k,eps=.5;
+  let along;if(py<=eps)along=px;else if(px>=w-eps)along=w+py;else if(py>=h-eps)along=w+h+(w-px);else along=2*w+h+(h-py);
+  seek(Math.max(0,Math.min(1,along/(2*(w+h))))*duration);
+ };
+ const dragFrame=event=>{if(event.buttons===1||event.pointerType==='touch')seekFromFrame(event);};
  return <div ref={root} className="hero-audio-introduction" data-room-entered={roomEntered?'true':'false'} data-welcome-pending={phase==='idle'?'true':undefined} data-started={position>0||playing?true:undefined}>
   {/* The curved lyrics over the record are removed; the sentence now shows as a subtitle above the player. */}
   {!languageChosen&&<FullscreenLanguageChooser onChoose={language=>{rememberLanguage(language);setChosenLanguage(language);lang.setLanguage(language);setLanguageChosen(true);onLanguageSelect?.(language);}}/>}
   <div className="hero-intro-player" aria-label={tr('Echo introduction — English','مقدّمة إيكو — بالعربي')}>
+   <div className="hero-intro-frame" ref={frame} onPointerDown={event=>{event.currentTarget.setPointerCapture?.(event.pointerId);seekFromFrame(event);}} onPointerMove={dragFrame} data-ready={phase==='started'&&!staging?'true':undefined}>
+    <svg className="hero-intro-frame-line" width={box.w} height={box.h} viewBox={`0 0 ${box.w||1} ${box.h||1}`} aria-hidden="true"><rect className="is-track" x="2" y="2" width={Math.max(0,box.w-4)} height={Math.max(0,box.h-4)} rx="20"/><rect className="is-fill" x="2" y="2" width={Math.max(0,box.w-4)} height={Math.max(0,box.h-4)} rx="20" pathLength="100" strokeDasharray={`${duration?Math.min(100,position/duration*100):0} 100`}/></svg>
    <div className="hero-intro-meta"><span>{tr('ECHO GREETING','ترحيب إيكو')}</span><time dir="ltr">{introClock(position)} / {introClock(duration)}</time></div>
    <p className={`hero-intro-subtitle${phase==='started'&&!staging&&(playing||position>0)&&cue?'':' is-idle'}`} dir={ar?'rtl':'ltr'} lang={ar?'ar':'en'} aria-hidden="true">{phase==='started'&&!staging&&(playing||position>0)&&cue?narration.words.slice(cue.from,cue.to).map((word,offset)=>{const index=cue.from+offset;return <span key={index} className={index===activeWord?'is-active':index<activeWord?'is-said':undefined}>{word.text} </span>;}):''}</p>
    <input type="range" className="hero-intro-seek" aria-label={tr('Greeting position','موضع الترحيب')} min="0" max={duration||1} step="0.1" value={Math.min(position,duration||1)} disabled={staging||phase!=='started'} style={{'--seek':`${duration?Math.min(100,position/duration*100):0}%`}} onChange={event=>seek(Number(event.target.value))}/>
@@ -195,6 +209,7 @@ export default function HeroIntroductionAudio({lang,onSkip,onBegin,animationComp
     <button type="button" className="hero-intro-launch hero-intro-transport-button" disabled={staging||phase!=='started'} onClick={()=>{pendingGreeting.current=null;pausePlayback();seek(0);phaseRef.current='idle';setPhase('idle');onStop?.();}} aria-label={tr('Stop introduction','إيقاف المقدّمة')} title={tr('Stop','إيقاف')}><span className="hero-intro-launch-face" aria-hidden="true"><span className="hero-intro-control-symbol"><Square size={21} fill="currentColor"/></span></span></button>
     <button type="button" className="hero-intro-launch hero-intro-transport-button" disabled={staging||phase!=='started'} onClick={()=>seek((audio.current?.currentTime||0)-(narration.playbackOffset||0)+10)} aria-label={tr('Forward 10 seconds','تقديم ١٠ ثواني')} title={tr('Forward 10 seconds','تقديم ١٠ ثواني')}><span className="hero-intro-launch-face" aria-hidden="true"><span className="hero-intro-control-symbol"><RotateCw size={25}/><span className="hero-intro-skip-seconds">10</span></span></span></button>
     <button type="button" className="hero-intro-launch hero-intro-transport-button hero-intro-skip-down" onClick={()=>{pendingGreeting.current=null;request.current++;audio.current?.pause();onSkip?.();}} aria-label={tr('Skip the introduction and continue to Music','تخطّي المقدّمة والمتابعة إلى الموسيقى')} title={tr('Continue to Music','المتابعة إلى الموسيقى')}><span className="hero-intro-launch-face" aria-hidden="true"><span className="hero-intro-control-symbol"><ChevronsDown size={27}/></span></span></button>
+   </div>
    </div>
    {/* No "Preparing animation…" line while it loads; only a real failure is shown, with a retry. */}{!animationReady&&animationFailed&&<p className="hero-intro-preparing" role="status">{tr('Animation could not load.','تعذّر تحميل الحركة.')} <button type="button" onClick={onAnimationRetry}>{tr('Retry','إعادة المحاولة')}</button></p>}
    {error&&<p role="alert" className="hero-intro-error">{error}</p>}
