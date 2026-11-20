@@ -1,4 +1,4 @@
-.people-blur-bar{position:absolute;z-index:6;left:8px;top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.people-blur-bar{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .people-blur-bar button{display:inline-flex;align-items:center;gap:6px;min-height:28px;padding:0 10px;border:1px solid #ffffff40;border-radius:999px;background:#000a;color:#fff;font-size:12px;font-weight:600;cursor:pointer}
 .people-blur-bar button[aria-pressed=true]{border-color:#b99a67;color:#e0c18d}
 .people-blur-bar small{padding:2px 8px;border-radius:999px;background:#000a;color:#f0a0a0}

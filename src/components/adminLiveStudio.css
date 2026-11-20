@@ -2183,3 +2183,4 @@ html.echo-builder-window .admin-workspace .djb-main .djb-tools .djb-lib{flex:1 1
 #admin-live-stream .studio-set-list-picker{display:grid;gap:6px;min-width:0}
 #admin-live-stream .studio-set-list-picker>small{color:var(--sc-muted,#8e9692);font-size:12px;line-height:1.5}
 #admin-live-stream .studio-set-list-picker>p{margin:0;font-size:12px}
+.studio-preview-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;min-height:30px;padding:0 4px 6px}.studio-preview-toolbar-crop{display:inline-flex}
