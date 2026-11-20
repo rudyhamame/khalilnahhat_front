@@ -54,8 +54,9 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  };
  const broadcastTitle=title.trim();
  const apply=item=>{if(!alive.current)return;update(item);onLiveStreamChange?.(item);};
+ // The browser never records: on the OVH transport the relay records on the server, otherwise nothing is recorded.
  const start=async (title,outputs)=>{
-  const result=await startStudioBroadcast({title,outputs,setListId,saveRecording:false,audience,audienceUserIds:audienceIds,transport:ovhRecording?'ovh':'livekit',request:body=>apiRequest('/live-stream/webrtc/go-live',{method:'POST',token,body}),hasFolder:()=>false,askLocalOnly:async()=>false});
+  const result=await startStudioBroadcast({title,outputs,setListId,saveRecording:ovhRecording,audience,audienceUserIds:audienceIds,transport:ovhRecording?'ovh':'livekit',request:body=>apiRequest('/live-stream/webrtc/go-live',{method:'POST',token,body}),hasFolder:()=>false,askLocalOnly:async()=>false});
   apply(result.item);setTitle('');return result;};
  const end=async roomName=>{const result=await apiRequest('/live-stream/webrtc/end',{method:'POST',token,body:{roomName}});apply(result.item);setTitle('');setGoalChoice('');setSetListId('none');setDetailsTried(false);};
  const ready=async roomName=>{const result=await apiRequest('/live-stream/webrtc/ready',{method:'POST',token,body:{roomName}});apply(result.item);};
@@ -68,7 +69,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
   }
   return true;
  };
- const webrtc=useWebrtcBroadcast({onGoLive:start,onEndLive:end,onReady:ready,getOutputs:()=>({}),getPortraitAudio:()=>null,isNativePortrait:()=>output.nativePortrait,requireRecording:false,recordingEnabled:false,expectedRoom:liveStream?.webrtcRoomName});
+ const webrtc=useWebrtcBroadcast({onGoLive:start,onEndLive:end,onReady:ready,getOutputs:()=>({}),getPortraitAudio:()=>null,isNativePortrait:()=>output.nativePortrait,requireRecording:ovhRecording,recordingEnabled:ovhRecording,expectedRoom:liveStream?.webrtcRoomName});
  const output=useOutputFormat();
  // An ended live must never be "restored after a refresh": End live clears the tab's live marker and blocks the auto-restore.
  const stopLive=()=>webrtc.endLive();

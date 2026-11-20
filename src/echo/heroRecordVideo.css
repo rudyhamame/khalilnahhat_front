@@ -456,5 +456,5 @@ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-
 /* Phones portrait: the opened square has ONE size, whether or not playback has started yet (no grow-then-shrink). */
 @media(orientation:portrait) and (max-width:760px){
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-audio-introduction .hero-intro-player .hero-intro-frame[data-open=true],
- html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-audio-introduction .hero-intro-player .hero-intro-frame[data-open=true]:has(.hero-intro-stage[data-active=true]){width:var(--sq)!important;height:var(--sq)!important;aspect-ratio:auto!important;margin-inline:auto}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-audio-introduction .hero-intro-player .hero-intro-frame[data-open=true]:has(.hero-intro-stage[data-active=true]){width:var(--sq)!important;height:var(--player-h,140px)!important;aspect-ratio:auto!important;margin-inline:auto}
 }

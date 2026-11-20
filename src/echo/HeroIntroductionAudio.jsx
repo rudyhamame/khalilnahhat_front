@@ -185,9 +185,9 @@ export default function HeroIntroductionAudio({lang,onSkip,onBegin,animationComp
  const linesBox=useRef(null),linesList=useRef(null);
  useLayoutEffect(()=>{
   const box=linesBox.current,list=linesList.current;if(!box||!list)return;
-  const line=list.children[Math.max(0,cueIndex)];if(!line)return;
+  const line=list.children[0];if(!line)return;
   list.style.transform=`translateY(${Math.round(box.clientHeight/2-(line.offsetTop+line.offsetHeight/2))}px)`;
- },[cueIndex,box.w,box.h,languageChosen,narration]);
+ },[cueIndex,activeWord,box.w,box.h,languageChosen,narration]);
  const seekFromFrame=event=>{
   if(staging||phase!=='started'||!duration||!box.w)return;
   const rect=frame.current.getBoundingClientRect(),w=rect.width,h=rect.height;
@@ -212,7 +212,7 @@ export default function HeroIntroductionAudio({lang,onSkip,onBegin,animationComp
    <div className="hero-intro-meta" role="button" tabIndex={0} aria-expanded={frameShown} onClick={toggleFrame} onKeyDown={e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();toggleFrame();}}}><span>{tr('ECHO GREETING','ترحيب إيكو')}</span><time dir="ltr">{introClock(position)} / {introClock(duration)}</time></div>
     <div className="hero-intro-stage" data-active="false"/>
    <div className={`hero-intro-subtitle hero-intro-lines${phase==='started'&&!staging&&(playing||position>0)&&cue?'':' is-idle'}`} dir={ar?'rtl':'ltr'} lang={ar?'ar':'en'} aria-hidden="true" ref={linesBox}>
-    <div className="hero-intro-list" ref={linesList}>{narration.cues.map((line,lineIndex)=><p key={lineIndex} className={lineIndex===cueIndex?'is-current':lineIndex<cueIndex?'is-past':'is-next'}>{narration.words.slice(line.from,line.to).map((word,offset)=>{const index=line.from+offset;return <span key={index} className={index===activeWord?'is-active':index<activeWord?'is-said':undefined}>{word.text} </span>;})}</p>)}</div>
+    <div className="hero-intro-list" ref={linesList}>{/* Only the words already spoken (and the one being spoken) of the current line are mounted. */}{(cueIndex<0?[]:[narration.cues[cueIndex]]).map(line=><p key={cueIndex} className="is-current">{narration.words.slice(line.from,Math.min(line.to,activeWord+1)).map((word,offset)=>{const index=line.from+offset;return <span key={index} className={index===activeWord?'is-active':'is-said'}>{word.text} </span>;})}</p>)}</div>
    </div>
    <input type="range" className="hero-intro-seek" aria-label={tr('Greeting position','موضع الترحيب')} min="0" max={duration||1} step="0.1" value={Math.min(position,duration||1)} disabled={staging||phase!=='started'} style={{'--seek':`${duration?Math.min(100,position/duration*100):0}%`}} onChange={event=>seek(Number(event.target.value))}/>
    <div className="hero-intro-controls hero-intro-controls-inline" role="group" aria-label={tr('Introduction playback','التحكم بالمقدّمة')} aria-busy={staging||waiting} dir="ltr">
