@@ -3,8 +3,10 @@ import './stemChannels.css';
 const labels={vocals:'Vocals',drums:'Drums',bass:'Bass',piano:'Piano',guitar:'Guitar',other:'Other music'};
 export function StemChannelControls({stems}) {
   const processing=stems.status.status==='processing';
-  const message=stems.notice||(stems.loading?'Loading channels…':processing?`${stems.status.stage||'Preparing separated channels…'} This can take several minutes.`:stems.status.stage||(stems.status.canSeparate?(stems.active?'Preparing mixer channels…':'Open Mixer to prepare separated channels.'):'Separated channels are not available for this recording yet.'));
-  return <div className="echo-stem-controls">{!stems.mode&&<p role="status">{message}</p>}</div>;
+  const message=stems.notice||(stems.loading?'Loading channels…':processing?`${stems.status.stage||'Preparing separated channels…'} This can take several minutes.`:stems.status.stage||(stems.status.canSeparate?(stems.active?'Preparing mixer channels…':'Open Mixer to prepare separated channels.'):''));
+  // No message at all when the recording simply has no separated channels (nothing to explain, nothing to wait for).
+  const quiet=!stems.notice&&!stems.loading&&!processing&&!stems.status.canSeparate;
+  return <div className="echo-stem-controls">{!stems.mode&&message&&!quiet&&<p role="status">{message}</p>}</div>;
 
 }
 

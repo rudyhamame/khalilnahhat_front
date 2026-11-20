@@ -37,3 +37,9 @@ html body .echo .header-mini-player .hmp-close:hover{background:#ffffff22!import
 @media(max-width:900px){html body .echo .header-mini-player{width:84px}}
 
 html body .echo .header-mini-player{left:50%;right:auto;translate:-50% -50%}
+
+/* Header mini player = just the round record button, in the middle of the header. Tapping it reopens this recording in its player on the Music page. */
+html body .echo[data-theme] .echo-header>.header-mini-player:not(#_){position:absolute!important;inset:50% auto auto 50%!important;grid-column:auto!important;grid-row:auto!important;translate:-50% -50%!important;transform:none;width:var(--hmp-size)!important;height:var(--hmp-size)!important;margin:0!important;padding:0!important;border:0!important;background:none!important;box-shadow:none!important;--hmp-size:clamp(44px,4.4vw,60px);z-index:5}
+html body .echo[data-theme] .header-mini-player :is(.hmp-text,.hmp-play,.hmp-next,.hmp-close,.hmp-progress):not(#_){display:none!important}
+html body .echo[data-theme] .header-mini-player .hmp-open:not(#_){display:grid;place-items:center;flex:none;width:100%;height:100%}
+html body .echo[data-theme] .header-mini-player .hmp-art:not(#_){width:100%;height:100%;box-shadow:0 0 0 2px #ffffffb0,0 0 0 5px #0006,0 6px 18px #0008}

@@ -26,11 +26,12 @@ function ArchiveMusicPlayer() {
   const [mixerOpen,setMixerOpen]=useState(readArchiveMixerState);
   const [channelsTarget,setChannelsTarget]=useState(null);
   useEffect(()=>{
-    const sync=()=>{const open=readArchiveMixerState();setMixerOpen(open);setChannelsTarget(open?document.getElementById('home-archive-channels'):null);};
+    const sync=()=>{const open=readArchiveMixerState();setMixerOpen(open);setChannelsTarget(open?(document.getElementById('echo-channels-overlay-controller')||document.getElementById('home-archive-channels')):null);};
     sync();window.addEventListener(ARCHIVE_MIXER_STATE,sync);
     return()=>window.removeEventListener(ARCHIVE_MIXER_STATE,sync);
   },[]);
   const audio = useRef(null);
+  const scratch = useRef({active:false,was:false,timer:0});
   const [equalizer, setEqualizer] = useState(flatEqualizer);
   const [tracks, setTracks] = useState([]);
   const archiveQueue = useRef(null);
@@ -176,6 +177,22 @@ function ArchiveMusicPlayer() {
       if(EQUALIZER_BANDS.some(band=>band.key===value?.band)&&Number.isFinite(value.gain))changeEqualizer(value.band,equalizerGain(value.gain));
     }else if(type==='equalizer-reset'){
       for(const band of EQUALIZER_BANDS)changeEqualizer(band.key,0);
+    }else if(type==='scratch'){
+      // Jog-wheel scratching: while the record is held the music follows the hand (forward at the hand's speed, backward as short grains), and normal playback resumes on release.
+      const element=audio.current,state=scratch.current;
+      if(!element||!Number.isFinite(duration)||duration<=0)return;
+      const stopGrain=()=>{clearTimeout(state.timer);if(state.active)element.pause();};
+      if(value?.phase==='start'){state.active=true;state.was=playing;element.pause();}
+      else if(value?.phase==='move'&&state.active){
+        const target=Math.max(0,Math.min(duration,Number(value.pos)||0));element.currentTime=target;setPosition(target);
+        const velocity=Number(value.vel)||0,forward=velocity>=0;
+        element.playbackRate=forward?Math.max(.25,Math.min(4,velocity||1)):1;
+        element.play().catch(()=>{});
+        clearTimeout(state.timer);state.timer=setTimeout(()=>{if(state.active)element.pause();},forward?110:45);
+      }else if(value?.phase==='end'&&state.active){
+        stopGrain();state.active=false;element.playbackRate=playbackRate;
+        if(state.was)element.play().catch(()=>{});
+      }
     }else if(type==='seek'){
       const next=Number(value);
       if(audio.current&&Number.isFinite(next)&&Number.isFinite(duration)&&duration>0){

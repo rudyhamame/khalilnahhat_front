@@ -264,3 +264,15 @@ html body .echo.echo-public-page[data-page=home][data-theme] #echo-main>section.
 .wp-top{position:relative;z-index:30}
 .wp-back-hint,.wp-badge-hint{z-index:31}
 .wp-meta-atom h3{margin:6px 0 0;font:700 13px/1.2 'Manrope','Cairo',sans-serif;letter-spacing:.06em;color:var(--ink)}
+
+/* Channels: the mixer fills the entire viewport (a full-screen layer above the page and its header). */
+.wp-channels{position:fixed;inset:0;z-index:9500;box-sizing:border-box;display:flex;flex-direction:column;gap:10px;padding:clamp(6px,1vw,14px);background:radial-gradient(120% 70% at 50% 0,#1d2125 0,transparent 60%),linear-gradient(180deg,#0e1114,#050607);color:#f4f5f2;overflow:auto}
+.wp-channels .wp-top{display:flex;align-items:center;justify-content:space-between;flex:none}
+.wp-channels .wp-meta-title{font:700 13px/1 'Manrope',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#b7bdbb}
+.wp-channels .home-archive-controller{flex:1;min-height:0;display:grid;align-items:center;width:100%;max-width:none;margin-inline:auto}
+.wp-channels .home-archive-mixer-status{flex:none;color:#b7bdbb;font-size:12.5px;line-height:1.5;text-align:center}
+.wp-channels-btn{margin-inline-start:auto}
+
+/* Bigger mixer: the controller uses the full width and height of the layover. */
+.wp-channels .home-archive-controller{grid-template-rows:minmax(0,1fr);overflow:hidden}
+.wp-channels .ddj-host{height:100%;min-height:0}

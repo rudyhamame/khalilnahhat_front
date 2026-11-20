@@ -207,3 +207,8 @@ html body .echo-room-3d .simulation-icon-dock{top:50%!important;bottom:auto!impo
 /* Reserve the dock's 66px width plus breathing room in the top toolbar.
    inset-inline-start mirrors automatically: left in English, right in Arabic. */
 html body .echo-room-3d .simulation-topbar{inset-inline-start:96px}
+
+/* The 3D Room is a true overlay over the whole app: above the header, footer player, side navigation, cart/chat launchers and every page layer. */
+html body .echo.echo-public-page.echo-ai-overlay-page[data-page=home][data-theme]:has(#room-3d){z-index:9990!important;isolation:isolate;background:#0b0f10}
+body:has(.echo-ai-overlay-page #room-3d) :is(.echo-header,.home-section-nav,.echo-footer,.header-mini-player,.echo-cart-launch,.echo-chat-launch,.echo-rotate){display:none!important}
+html body .echo.echo-ai-overlay-page:has(#room-3d)>.echo-header{display:none!important}

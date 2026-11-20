@@ -1,12 +1,13 @@
 import {djWorkTypeText} from '../lib/djWorkTypeText';
 import {useEffect,useMemo,useRef,useState} from 'react';
-import {ChevronLeft,ChevronRight,Disc3,Pause,Play,Repeat,SkipBack,SkipForward,Shuffle,Square} from 'lucide-react';
+import {createPortal} from 'react-dom';
+import {ChevronLeft,ChevronRight,Disc3,Pause,Play,Repeat,SkipBack,SkipForward,Shuffle,SlidersHorizontal,Square} from 'lucide-react';
 import {displayImageUrl} from '../lib/displayImage';
 import {useArchivePlayerState,useArchivePlaybackPosition} from '../hooks/useArchivePlayerState';
 import {fetchMusicArchiveCatalog} from '../lib/musicArchiveCatalog';
 import {asArchiveSong,atomFacts,fetchOntologyRecordings} from '../lib/musicOntology';
 import {apiRequest} from '../lib/api';
-import {archivePlayerCommand} from '../lib/archivePlayerBridge';
+import {archivePlayerCommand,publishArchiveMixerState} from '../lib/archivePlayerBridge';
 import {archiveResults} from '../lib/archiveSearch';
 import {archiveLibrary} from '../lib/archiveLibrary';
 import ArtworkGlow from './ArtworkGlow';
@@ -33,7 +34,7 @@ function Time({trackId,children}){return children(useArchivePlaybackPosition(tra
 export default function MusicPlayerPage({lang,type:typeProp,workType,onClose,playbackReady=true}){
   const ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en;
   const type=useMemo(()=>typeProp??new URLSearchParams(window.location.search).get('type')??'',[typeProp]);
-  const [collections,setCollections]=useState([]),[songs,setSongs]=useState([]),[flipped,setFlipped]=useState(false),[browse,setBrowse]=useState(''),[hint,setHint]=useState(onClose?'back':'browse'),[scope,setScope]=useState(''),[viewId,setViewId]=useState(''),[status,setStatus]=useState('loading'),[vocabulary,setVocabulary]=useState([]);
+  const [collections,setCollections]=useState([]),[songs,setSongs]=useState([]),[flipped,setFlipped]=useState(false),[channels,setChannels]=useState(false),[browse,setBrowse]=useState(''),[hint,setHint]=useState(onClose?'back':'browse'),[scope,setScope]=useState(''),[viewId,setViewId]=useState(''),[status,setStatus]=useState('loading'),[vocabulary,setVocabulary]=useState([]);
   const [selectedId,setSelectedId]=useState(()=>new URLSearchParams(window.location.search).get('recording')||''),[shuffle,setShuffle]=useState(false),[repeat,setRepeat]=useState(false);
   const linkedRecording=useRef(new URLSearchParams(window.location.search).get('autoplay')==='1'?new URLSearchParams(window.location.search).get('recording')||'':'');
   const linkStarted=useRef(false);
@@ -94,6 +95,8 @@ export default function MusicPlayerPage({lang,type:typeProp,workType,onClose,pla
   },[]);
 
   // Swipe the wheel: drag follows the finger, release past a third of a cover changes the song.
+  // The mixer itself (the saved channels of the recording: vocals, drums, bass, music) is drawn by the shared archive player into the Channels face.
+  useEffect(()=>{publishArchiveMixerState(channels);if(!channels)return undefined;const key=event=>{if(event.key==='Escape')setChannels(false);};window.addEventListener('keydown',key);return()=>{window.removeEventListener('keydown',key);publishArchiveMixerState(false);};},[channels]);
   const drag=useRef(null);
   const down=event=>{drag.current={x:event.clientX,moved:0};wheel.current?.setPointerCapture?.(event.pointerId);wheel.current?.classList.add('is-dragging');};
   const move=event=>{const d=drag.current;if(!d)return;d.moved=event.clientX-d.x;wheel.current?.style.setProperty('--drag',`${d.moved}px`);};
@@ -106,9 +109,10 @@ export default function MusicPlayerPage({lang,type:typeProp,workType,onClose,pla
   const chosen=collections.find(item=>item.recordingIds?.includes(current?.id));
   const heading=djWorkTypeText(workType,ar).name||tr('Recordings','التسجيلات');
   const art=current?artwork(current):FALLBACK_ART;
-  const back=onClose?<button type="button" className={`wp-icon${hint==='back'?' is-hinting':''}`} onClick={onClose} aria-label={tr('Back to DJ Khalil’s work','العودة إلى أعمال دي جي خليل')}><ChevronLeft size={22}/></button>:<a className="wp-icon" href="/music" aria-label={tr('Back to DJ Khalil’s work','العودة إلى أعمال دي جي خليل')}><ChevronLeft size={22}/></a>;
+  const BackIcon=ar?ChevronRight:ChevronLeft;// the back arrow points the way the page reads
+  const back=onClose?<button type="button" className={`wp-icon${hint==='back'?' is-hinting':''}`} onClick={onClose} aria-label={tr('Back to DJ Khalil’s work','العودة إلى أعمال دي جي خليل')}><BackIcon size={22}/></button>:<a className="wp-icon" href="/music" aria-label={tr('Back to DJ Khalil’s work','العودة إلى أعمال دي جي خليل')}><BackIcon size={22}/></a>;
   if(status==='loading')return <section className={`wp wp-loading${onClose?' wp-inline':''}`} dir={ar?'rtl':'ltr'}>{onClose&&<div className="wp-back">{back}</div>}<MusicContentLoader ar={ar}/></section>;
-  return <section ref={root} className={`wp${onClose?' wp-inline':''}`} dir={ar?'rtl':'ltr'} aria-label={tr('Music player','مشغل الموسيقى')} onPointerDownCapture={event=>{if(hint==='back')setHint('browse');else if(hint==='browse'&&event.target.closest?.('.wp-badge'))setHint('');}}>
+  return <><section ref={root} className={`wp${onClose?' wp-inline':''}`} dir={ar?'rtl':'ltr'} aria-label={tr('Music player','مشغل الموسيقى')} onPointerDownCapture={event=>{if(hint==='back')setHint('browse');else if(hint==='browse'&&event.target.closest?.('.wp-badge'))setHint('');}}>
     {!onClose&&<ArtworkGlow url={current?art:''}/>}
     {!onClose&&<div className="wp-grain" aria-hidden="true"/>}
     {!onClose&&<div className="wp-back">{back}</div>}
@@ -120,6 +124,7 @@ export default function MusicPlayerPage({lang,type:typeProp,workType,onClose,pla
         {onClose&&hint==='back'&&!browse&&!flipped&&<span className="wp-back-hint" aria-hidden="true">{tr('Finished listening? Tap the arrow to head back.','خلّصت استماع؟ اضغط على السهم للرجوع.')}</span>}
         <button type="button" ref={badge} className={`wp-badge${hint==='browse'&&!browse?' is-hinting':''}`} title={tr('Browse collections and recordings','تصفّح المجموعات والتسجيلات')} aria-label={tr('Browse collections','تصفّح المجموعات')} aria-haspopup="true" aria-expanded={Boolean(browse)} onClick={()=>setBrowse('collections')}><img src={art} alt=""/></button>
         {hint==='browse'&&!browse&&!flipped&&<span className="wp-badge-hint" aria-hidden="true">{tr('Tap the round picture to browse collections, then pick a recording.','اضغط على الصورة الدائرية لتصفّح المجموعات ثم اختر تسجيلاً.')}</span>}
+        <button type="button" className="wp-icon wp-channels-btn" disabled={!current} onClick={()=>setChannels(true)} aria-label={tr('Channels: mix the vocals, drums, bass and music','القنوات: ميكس الغناء والطبول والباس والموسيقى')} title={tr('Channels','القنوات')}><SlidersHorizontal size={20}/></button>
       </header>
       {!current?<p className="wp-empty" role={status==='error'?'alert':'status'}>{status==='error'?tr('The archive could not load.','تعذر تحميل الأرشيف.'):tr('No recordings here yet.','لا توجد تسجيلات هنا بعد.')}</p>:<>
         <div className="wp-wheel" ref={wheel} dir="ltr" tabIndex={0} role="group" aria-roledescription="carousel" aria-label={tr('Artwork wheel — swipe to change recording','عجلة الأغلفة — اسحب لتغيير التسجيل')} onKeyDown={key}
@@ -143,7 +148,7 @@ export default function MusicPlayerPage({lang,type:typeProp,workType,onClose,pla
         </div></>}
     </div>
     <div className="wp-meta" aria-hidden={!flipped||undefined} inert={!flipped||undefined}>
-      <header className="wp-top"><button type="button" className="wp-icon" onClick={()=>setFlipped(false)} aria-label={tr('Back to the player','العودة إلى المشغل')}><ChevronLeft size={20}/></button><span className="wp-meta-title">{tr('Recording details','تفاصيل التسجيل')}</span><span className="wp-icon wp-spacer" aria-hidden="true"/></header>
+      <header className="wp-top"><button type="button" className="wp-icon" onClick={()=>setFlipped(false)} aria-label={tr('Back to the player','العودة إلى المشغل')}><BackIcon size={20}/></button><span className="wp-meta-title">{tr('Recording details','تفاصيل التسجيل')}</span><span className="wp-icon wp-spacer" aria-hidden="true"/></header>
       {current&&<>
         <div className="wp-meta-head"><img src={art} alt=""/><div><h2 dir="auto">{current.title}</h2><p dir="auto">{current.artist||'DJ Khalil'}</p></div></div>
         <dl className="wp-meta-list">{metaRows(current,tr,workType,ar).map(([label,value])=><div key={label}><dt>{label}</dt><dd dir="auto">{value}</dd></div>)}</dl>
@@ -153,7 +158,7 @@ export default function MusicPlayerPage({lang,type:typeProp,workType,onClose,pla
     </div>
     <div className="wp-browse" aria-hidden={!browse||undefined} inert={!browse||undefined}>
       <header className="wp-top">
-        <button type="button" className="wp-icon" onClick={()=>setBrowse(browse==='recordings'?'collections':'')} aria-label={browse==='recordings'?tr('Back to collections','العودة إلى المجموعات'):tr('Back to the player','العودة إلى المشغل')}><ChevronLeft size={20}/></button>
+        <button type="button" className="wp-icon" onClick={()=>setBrowse(browse==='recordings'?'collections':'')} aria-label={browse==='recordings'?tr('Back to collections','العودة إلى المجموعات'):tr('Back to the player','العودة إلى المشغل')}><BackIcon size={20}/></button>
         <span className="wp-meta-title">{browse==='recordings'?(viewing?viewing.title:tr('All recordings','كل التسجيلات')):tr('Collections','المجموعات')}</span>
         <span className="wp-icon wp-spacer" aria-hidden="true"/>
       </header>
@@ -168,5 +173,11 @@ export default function MusicPlayerPage({lang,type:typeProp,workType,onClose,pla
     </div>
     </div>
   </div>
-  </section>;
+  </section>
+  {channels&&createPortal(<div className="wp-channels" role="dialog" aria-modal="true" aria-label={tr('Channels mixer','مازج القنوات')} dir={ar?'rtl':'ltr'}>
+    <header className="wp-top"><button type="button" className="wp-icon" onClick={()=>setChannels(false)} aria-label={tr('Close the mixer','إغلاق المازج')}><BackIcon size={20}/></button><span className="wp-meta-title">{current?.title||tr('Channels','القنوات')}</span><span className="wp-icon wp-spacer" aria-hidden="true"/></header>
+    <div id="echo-channels-overlay-controller" className="home-archive-controller"/>
+    <span id="echo-channels-overlay-status" className="home-archive-mixer-status" role="status"/>
+  </div>,document.body)}
+  </>;
 }

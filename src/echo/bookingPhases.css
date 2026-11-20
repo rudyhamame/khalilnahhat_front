@@ -1,7 +1,7 @@
 .booking-phase{box-sizing:border-box;width:100%;max-width:calc(1280px + 2 * var(--echo-viewport-gutter,16px));margin:0 auto;padding:clamp(40px,6vw,80px) var(--echo-viewport-gutter,16px) 0;scroll-margin-top:calc(var(--echo-header-overlay-height,96px) + 56px)}
 .booking-phase span{display:block;color:#d9b46e;font-size:12px;font-weight:700;letter-spacing:.18em}
 .booking-phase h2{margin:6px 0 0;color:#f4f7f3;font:700 clamp(30px,4.4vw,56px)/1.1 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:.04em}
-.phase-bar{position:fixed;z-index:30;inset-inline:0;top:calc(var(--echo-header-overlay-height,96px) + 6px);display:flex;justify-content:center;gap:6px;padding:0 12px;pointer-events:none;opacity:0;transform:translateY(-8px);transition:opacity .25s,transform .25s}
+.phase-bar{position:fixed;z-index:30;inset-inline:0;top:10px;display:flex;justify-content:center;gap:6px;padding:0 12px;pointer-events:none;opacity:0;transform:translateY(-8px);transition:opacity .25s,transform .25s}
 .phase-bar.is-shown{opacity:1;transform:none}
 .phase-bar button{pointer-events:auto;display:inline-flex;align-items:center;gap:7px;min-height:34px;padding:0 12px;border:1px solid #ffffff2e;border-radius:999px;background:#0c1417d9;color:#c9d3cd;font:600 13px/1 'Manrope','Noto Sans Arabic',sans-serif;cursor:pointer;backdrop-filter:blur(6px)}
 .phase-bar button b{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#ffffff1f;font-size:12px}
@@ -75,3 +75,7 @@ html body .echo[data-page=home][data-theme] .workbench-step :is(.rw-service-grid
 html body .echo[data-page=home][data-theme] :is(#references,#additional-notes) .booking-step-card>.booking-card-title{border-bottom:0!important;padding-bottom:0!important;margin-bottom:16px!important}
 /* Room under the "03.01 DJ SERVICE *" label, above the Yes / Skip choices. */
 html body .echo[data-page=home][data-theme] .dj-choice>.avail-kicker{display:block;margin-bottom:14px}
+
+/* The STEP.SEC.ATOM badge sits at the opposite (end) side of its label row. */
+html body .echo[data-page=home][data-theme] :is(.avail-kicker,.rentals-hero-kicker,.rw-kicker):has(>.ysf-order){display:flex;align-items:center;gap:8px}
+html body .echo[data-page=home][data-theme] :is(.avail-kicker,.rentals-hero-kicker,.rw-kicker)>.ysf-order{order:2;margin-inline:auto 0}

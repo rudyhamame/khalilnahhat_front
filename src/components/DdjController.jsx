@@ -1,3 +1,4 @@
+import {displayImageUrl} from '../lib/displayImage';
 import {useCallback,useEffect,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
 import {ARCHIVE_PLAYER_STATE,archivePlayerCommand,readArchivePlayerState} from '../lib/archivePlayerBridge';
@@ -7,7 +8,7 @@ import {StemChannelControls} from './StemChannels';
 import './ddjController.css';
 
 // A 4-channel performance DJ controller drawn from a reference photo. Coordinates are in photo-derived units (1047 x 495).
-const W=1047,H=495,DECK2=680;
+const W=1047,H=495,DECK2=680,LABEL_H=26;// LABEL_H: room under the controller for the one-line model name
 const PORTRAIT='https://res.cloudinary.com/nqiooluk/image/upload/v1793064081/khalil/site-assets/90c13a68010e/echo/blue-portrait.webp';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const rad=d=>d*Math.PI/180;
@@ -87,6 +88,8 @@ function Deck({dx,n,real,player,eq}){
   const setTempo=value=>archivePlayerCommand('rate',Math.round((value+.5)*100)/100);
   const resetTempo=()=>archivePlayerCommand('rate',1);
   const C={x:189,y:194},DIM=36;
+  // The recording's artwork, cut to the circle of the left record (it turns with the platter).
+  const jogArt=player?.track?.coverImage?displayImageUrl(player.track.coverImage):'';
   const seek=t=>archivePlayerCommand('seek',clamp(t,0,dur));
   const ang=e=>{const p=toSvg(e,e.currentTarget);return Math.atan2(p.y-C.y,p.x-C.x-dx)*180/Math.PI;};
   return <g transform={`translate(${dx} 0)`} className={`deck${real?' is-real':''}`}>
@@ -104,14 +107,14 @@ function Deck({dx,n,real,player,eq}){
       <circle cx={C.x} cy={C.y} r="150" fill="#050606" stroke="#2a2d2f" strokeWidth="1.2"/><circle cx={C.x} cy={C.y} r="147" fill="none" stroke="#0e1011" strokeWidth="5"/>
       {Array.from({length:DIM},(_,i)=>{const a=rad(i*360/DIM-90);const on=real&&progress>0&&i/DIM<=progress;return <circle key={i} className={`dimple${on?' on':''}`} cx={C.x+Math.cos(a)*136} cy={C.y+Math.sin(a)*136} r="7.4"/>;})}
       <circle cx={C.x} cy={C.y} r="123" fill="url(#platter)" stroke="#000" strokeWidth="1.4"/>
-      <g className="platter" style={{animationPlayState:playing?'running':'paused'}}><circle cx={C.x} cy={C.y} r="123" fill="transparent"/><line x1={C.x} y1={C.y-120} x2={C.x} y2={C.y-107} stroke="#2b2f31" strokeWidth="1.4"/>
+      <g className="platter" style={{animationPlayState:playing?'running':'paused'}}><circle cx={C.x} cy={C.y} r="123" fill="transparent"/>{real&&jogArt&&<><clipPath id={`jogArt${n}`}><circle cx={C.x} cy={C.y} r="122"/></clipPath><image href={jogArt} x={C.x-123} y={C.y-123} width="246" height="246" preserveAspectRatio="xMidYMid slice" clipPath={`url(#jogArt${n})`} opacity=".92"/></>}<line x1={C.x} y1={C.y-120} x2={C.x} y2={C.y-107} stroke="#2b2f31" strokeWidth="1.4"/>
         <circle cx={C.x} cy={C.y} r="50" fill="#3d4143" stroke="#1b1e1f" strokeWidth="2"/><circle cx={C.x} cy={C.y} r="47" fill="none" stroke="#505558" strokeWidth=".6"/>
         <path d={`M${C.x-36} ${C.y-27} A45 45 0 0 1 ${C.x+36} ${C.y-27}`} fill="none" stroke="#2a2d2f" strokeWidth="2.4"/><path d={`M${C.x-36} ${C.y+27} A45 45 0 0 0 ${C.x+36} ${C.y+27}`} fill="none" stroke="#2a2d2f" strokeWidth="2.4"/></g>
-      <circle cx={C.x} cy={C.y} r="150" fill="transparent" className="jog-hit" tabIndex={ready?0:-1} role="slider" aria-label="Jog wheel: drag to scrub" aria-valuemin={0} aria-valuemax={Math.round(dur)} aria-valuenow={Math.round(pos)}
+      <circle cx={C.x} cy={C.y} r="150" fill="transparent" className="jog-hit" tabIndex={ready?0:-1} role="slider" aria-label="Jog wheel: drag to scratch and scrub" aria-valuemin={0} aria-valuemax={Math.round(dur)} aria-valuenow={Math.round(pos)}
         onKeyDown={e=>{if(ready&&(e.key==='ArrowRight'||e.key==='ArrowLeft')){e.preventDefault();seek(pos+(e.key==='ArrowRight'?5:-5));}}}
-        onPointerDown={e=>{if(!ready)return;e.currentTarget.setPointerCapture(e.pointerId);scrub.current={a:ang(e),t:pos};}}
-        onPointerMove={e=>{const s=scrub.current;if(!s)return;const a=ang(e);let d=a-s.a;if(d>180)d-=360;if(d<-180)d+=360;s.a=a;s.t=clamp(s.t+d/360*1.8,0,dur);seek(s.t);}}
-        onPointerUp={()=>{scrub.current=null;}} onPointerCancel={()=>{scrub.current=null;}}/>
+        onPointerDown={e=>{if(!ready)return;e.currentTarget.setPointerCapture(e.pointerId);scrub.current={a:ang(e),t:pos,at:performance.now()};archivePlayerCommand('scratch',{phase:'start'});}}
+        onPointerMove={e=>{const s=scrub.current;if(!s)return;const a=ang(e);let d=a-s.a;if(d>180)d-=360;if(d<-180)d+=360;const now=performance.now(),step=d/360*1.8;s.a=a;s.t=clamp(s.t+step,0,dur);archivePlayerCommand('scratch',{phase:'move',pos:s.t,vel:step/Math.max(.008,(now-s.at)/1000)});s.at=now;}}
+        onPointerUp={()=>{if(scrub.current)archivePlayerCommand('scratch',{phase:'end'});scrub.current=null;}} onPointerCancel={()=>{if(scrub.current)archivePlayerCommand('scratch',{phase:'end'});scrub.current=null;}}/>
       <T x={98} y={326} s={5} f="#c5cacd">REV</T><T x={280} y={326} s={5} f="#c5cacd">FWD</T>
       <path d="M98 331 Q108 343 132 348" fill="none" stroke="#d6dbde" strokeWidth="1.1"/><path d="M280 331 Q270 343 246 348" fill="none" stroke="#d6dbde" strokeWidth="1.1"/>
     </g>
@@ -146,9 +149,9 @@ export default function DdjController({stems,mic,masterMeter}){
   const stemOn=Boolean(stems?.mode);
   const micLevel=mic?.micMeter;
   // The status line (separating progress, notices) lives in the mixer face's footer when that footer exists.
-  const footerStatus=document.getElementById('home-archive-mixer-status');
+  const footerStatus=document.getElementById('echo-channels-overlay-status')||document.getElementById('home-archive-mixer-status');
   const status=<div className="ddj-msg" role="status">{stemOn?'Stems on: faders, CUE (solo) and the A·THRU·B switch (mute) control Vocals, Drums, Bass and Music.':stems?<StemChannelControls stems={stems}/>:''}{mic?.notice?` ${mic.notice}`:''}</div>;
-  return <div className="ddj-host"><svg className="ddj-svg" viewBox={`0 0 ${W} ${H}`} role="group" aria-label="Performance DJ controller" preserveAspectRatio="xMidYMid meet">
+  return <div className="ddj-host"><svg className="ddj-svg" viewBox={`0 0 ${W} ${H+LABEL_H}`} role="group" aria-label="Performance DJ controller" preserveAspectRatio="xMidYMid meet">
     <defs>
       <linearGradient id="body" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#141618"/><stop offset="1" stopColor="#0a0b0c"/></linearGradient>
       <radialGradient id="knobBody" cx=".4" cy=".32"><stop offset="0" stopColor="#4d5357"/><stop offset=".6" stopColor="#15181a"/><stop offset="1" stopColor="#050606"/></radialGradient>
@@ -197,7 +200,7 @@ export default function DdjController({stems,mic,masterMeter}){
       <T x={474} y={457} s={7} f="#e8ecee" w={700} ls="0">❮ A</T><T x={598} y={457} s={7} f="#e8ecee" w={700} ls="0">B ❯</T>
       <T x={535} y={437} s={5} f="#e8ecee" w={800} ls=".14em">ECHO FADER</T>
       <Fader x={498} y={453} len={74} value={dv('xf',.5)} onChange={sd('xf')} vertical={false} ariaLabel="Crossfader (visual)" capW={22} capH={10}/>
-      <T x={384} y={452} s={4.2} f="#e8ecee" a="start">PERFORMANCE</T><T x={384} y={460} s={4.2} f="#e8ecee" a="start">DJ CONTROLLER</T><T x={384} y={474} s={8.6} f="#f1f3f4" a="start" w={800} ls=".02em">ECHO-1000</T>
+      <T x={W/2} y={H+17} s={7} f="#e8ecee" a="middle" w={700} ls=".14em">PERFORMANCE DJ CONTROLLER · ECHO-1000</T>
       {/* master + equalizer (the 7-band archive equalizer lives where the photo has Beat FX) */}
       <rect x="619" y="9" width="75" height="9" fill="#17191b" stroke="#2a2d2f"/><T x={656.5} y={16} s={5.2} f="#e8ecee">MASTER</T>
       <Knob cx={656.5} cy={49} r={14} value={player.volume??.75} min={0} max={1} onChange={v=>archivePlayerCommand('volume',v)} label="LEVEL" labelY={28} ariaLabel="Master level"/>
