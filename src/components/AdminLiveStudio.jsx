@@ -7,7 +7,6 @@ import {useLiveStatus,liveSessionIdentity} from '../hooks/useLiveStatus';
 import {useWebrtcBroadcast} from '../hooks/useWebrtcBroadcast';
 import {apiRequest} from '../lib/api';
 import {startStudioBroadcast} from '../lib/studioRecordingFallback';
-import MicStrip,{OutputStrip} from './MicStrip';
 import {useAutoDuck} from '../hooks/useAutoDuck';
 import {useOutputFormat} from '../hooks/useOutputFormat';
 import ObsBroadcast from './ObsBroadcast';
@@ -118,15 +117,18 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  // OBS is the only source: Open preview finds its Virtual Camera (and an OBS audio device, if one exists) by name. Nothing else is ever opened.
  const hasAudioInput=Boolean(webrtc.selectedAudioDeviceId);
  const [obsOpening,setObsOpening]=useState(false);
- const openObs=async()=>{
+ const openObs=async(silent=false)=>{
   // Browsers hide device names until camera access was granted once: ask briefly, release it, then read the list.
-  try{const probe=await navigator.mediaDevices.getUserMedia({video:true});probe.getTracks().forEach(track=>track.stop());}catch{/* the list below may still name it */}
+  if(!silent)try{const probe=await navigator.mediaDevices.getUserMedia({video:true});probe.getTracks().forEach(track=>track.stop());}catch{/* the list below may still name it */}
   const devices=await navigator.mediaDevices.enumerateDevices().catch(()=>[]);
   const camera=devices.find(item=>item.kind==='videoinput'&&OBS_DEVICE.test(item.label)),audio=devices.find(item=>item.kind==='audioinput'&&OBS_DEVICE.test(item.label));
-  if(!camera){adminToast('OBS Virtual Camera not found. In OBS click Start Virtual Camera, then try again.',true);return;}
+  if(!camera){if(!silent)adminToast('OBS Virtual Camera not found. In OBS click Start Virtual Camera, then try again.',true);return;}
   webrtc.setSelectedVideoDeviceId(camera.deviceId);webrtc.setSelectedAudioDeviceId(audio?.deviceId||'');
   void webrtc.selectSource('camera',null,audio?'mic':'none');setObsOpening(true);
  };
+ // Opens the private preview by itself when OBS Virtual Camera appears; Go live then waits for the click.
+ const autoObs=useRef();autoObs.current=()=>{if(enabled&&!webrtc.isPreviewing&&!webrtc.isBroadcasting&&!webrtc.previewBusy&&!webrtc.isConnecting&&!obsOpening&&!legacyObs&&!isLiveOnAir&&!reserved)void openObs(true);};
+ useEffect(()=>{const run=()=>autoObs.current();run();const id=setInterval(run,4000);navigator.mediaDevices?.addEventListener?.('devicechange',run);return()=>{clearInterval(id);navigator.mediaDevices?.removeEventListener?.('devicechange',run);};},[enabled]);
  // Runs on the render after the device ids are set, so the preview opens on OBS exactly once.
  useEffect(()=>{if(!obsOpening)return;setObsOpening(false);void webrtc.preparePreview();},[obsOpening]);// eslint-disable-line react-hooks/exhaustive-deps
  // Picking another mixer device while the private preview is open reopens the preview on it.
@@ -138,7 +140,6 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  const previewFormat=output.format;
  const goLiveClick=()=>{if(beforeGoLive())void webrtc.goLive(broadcastTitle);};
  const actionButtons=(()=>{const otherLive=legacyObs||((isLiveOnAir||reserved)&&!webrtc.isBroadcasting);return <>
-                      <button type="button" className={`admin-live-fullscreen studio-preview-toggle${webrtc.previewBusy?' st-busy':webrtc.isPreviewing||webrtc.isBroadcasting?' st-ok':''}`} disabled={webrtc.isConnecting||webrtc.previewBusy||webrtc.isBroadcasting||otherLive} aria-label={webrtc.previewBusy?'Opening devices…':webrtc.isPreviewing?'Close private preview':'Open private preview'} title={webrtc.isBroadcasting?'Preview stays open while you are live':otherLive?'Preview is controlled by the current source':webrtc.previewBusy?'Opening devices…':webrtc.isPreviewing?'Close private preview':'Open private preview · not on air'} onClick={webrtc.isPreviewing?webrtc.closePreview:()=>{void openObs();}}>{webrtc.previewBusy?<LoaderCircle size={18} className="studio-opening-spinner" aria-hidden="true"/>:webrtc.isPreviewing||webrtc.isBroadcasting?<EyeOff size={18} aria-hidden="true"/>:<Eye size={18} aria-hidden="true"/>}<span>{webrtc.previewBusy?'Opening…':webrtc.isPreviewing?'Close preview':'Open preview'}</span></button>
                       {webrtc.isBroadcasting
                         ?<>{webrtc.preflight?<button type="button" className="admin-live-fullscreen studio-go-live st-busy" disabled aria-label="Go live preflight"><LoaderCircle size={16} className="studio-opening-spinner" aria-hidden="true"/><span>Go live preflight</span></button>:null}<button type="button" className={`admin-live-fullscreen studio-go-live is-live ${webrtc.inputLost?'st-lost':webrtc.paused?'st-halted':'st-onair'}`} disabled={webrtc.isConnecting} aria-label="End live" title="End live" onClick={stopLive}><Square size={16} fill="currentColor" aria-hidden="true"/><span>End live</span></button></>
                         :isLiveOnAir&&!webrtc.preflight&&liveStream?.broadcastSource==='browser'
@@ -163,7 +164,6 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
               <div className={`admin-live-preview${previewFormat==='portrait'?' is-portrait-only':''}`}>
                 {(webrtc.isPreviewing||webrtc.isBroadcasting)&&<div className="studio-preview-toolbar" role="toolbar" aria-label="Preview tools">{previewFormat!=='landscape'&&<span ref={setCropSlot} className="studio-preview-toolbar-crop"/>}</div>}
                 <div className={`admin-live-monitor studio-preview-pair${previewFormat==='landscape'?' is-landscape-only':previewFormat==='portrait'?' is-portrait-only':''}`} ref={liveFrame} aria-label="Landscape and portrait previews">
-                <MicStrip localMonitor={webrtc.localMonitor} onLocalMute={webrtc.setLocalMonitorMuted} showInput={hasAudioInput} muted={inputMuted} onMute={setInputMuted} voiceMeter={voiceMeter} devices={webrtc.audioInputs} deviceId={webrtc.voiceDeviceId} onPickDevice={async id=>{if(id&&id===webrtc.selectedAudioDeviceId)webrtc.setSelectedAudioDeviceId(webrtc.audioInputs.find(entry=>entry.deviceId&&entry.deviceId!==id)?.deviceId||'');await webrtc.selectVoiceDevice(id);await webrtc.setVoice(true);}} actions={actionButtons} inputStream={inputMeter} on={webrtc.voiceOn} level={webrtc.voiceLevel} stream={webrtc.voiceStream} disabled={!webrtc.isPreviewing&&!webrtc.isBroadcasting} onToggle={()=>void webrtc.setVoice(!webrtc.voiceOn)} onLevel={webrtc.updateVoiceLevel} master={webrtc.masterLevel} onMaster={webrtc.updateMasterLevel} auto={autoLevel} ducking={ducking} onAuto={on=>{setAutoLevel(on);try{localStorage.setItem('echo-auto-level',on?'1':'0');}catch{/* Session choice still works. */}}}/>
                 <section className="studio-preview-window" aria-label="Landscape preview" hidden={previewFormat==='portrait'}>
                  <header className="studio-preview-window-head"><h4>Landscape<em className="studio-source-tag">Landscape Source</em></h4></header>
                  <div className="admin-live-preview-frame-shell studio-preview-landscape" ref={primaryFrame}>
@@ -173,7 +173,6 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
                  </div>
                 </section>
                 {previewFormat!=='landscape'&&<StudioPreviewMirror cropSlot={cropSlot} source={previewFormat==='portrait'?'Source':'Crop of landscape'} primaryRef={primaryFrame} active={previewActive} posterImage={liveStream?.posterImage} waiting={reserved} indicatorRef={setPortraitIndicators} pan={previewFormat==='portrait'?.5:webrtc.portraitPan} onPan={previewFormat==='portrait'?undefined:webrtc.setPortraitPan}/>}
-                <OutputStrip listenStream={listenStream} stream={outputMeter} level={webrtc.outputLevel} onLevel={webrtc.updateOutputLevel} muted={webrtc.outputMuted} onMute={webrtc.setOutputMuted} disabled={!webrtc.isPreviewing&&!webrtc.isBroadcasting}/>
                 </div>
                 <div className="studio-audience-stack">
               {controlHint&&controlHint!==dismissedHint&&<div className={`studio-control-hint${' is-info'}`} role="status" aria-live="polite"><Info size={17} aria-hidden="true"/><p>{controlHint}</p><button type="button" className="studio-hint-close" aria-label="Dismiss message" title="Dismiss" onClick={()=>setDismissedHint(controlHint)}><X size={14} aria-hidden="true"/></button></div>}
@@ -181,7 +180,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
                 </div>
 <div className="studio-comments-below"><AdminLiveComments token={token} session={isLiveOnAir?session:null} enabled={enabled}/></div>
 <section ref={settingsArea} className="studio-control-dock studio-controls-redesign" aria-labelledby="studio-controller-title">
- <header className="studio-controller-heading"><button type="button" className="studio-column-button" onClick={()=>toggleColumn('left')} title={hidden.left?'Open the controls column':'Close the controls column'} aria-label={hidden.left?'Open the controls column':'Close the controls column'} aria-expanded={!hidden.left}>{hidden.left?<PanelLeftOpen size={20}/>:<PanelLeftClose size={20}/>}</button><h3 id="studio-controller-title">Live control</h3><div className="studio-controller-tools"><div className="studio-control-status" data-state={studioState} role="status"><strong>{{preflight:'Go live preflight',live:'On air',opening:'Opening preview',connecting:'Connecting',preview:'Private preview',offline:'OBS disconnected'}[studioState]}</strong></div>{studioState==='live'&&<LiveElapsedTimer key={session||'local-live'} session={session}/>}{statusBadges.map(badge=><span key={badge.key} className="studio-badge" data-tone={badge.tone} title={badge.title}>{badge.text}</span>)}</div></header>
+ <header className="studio-controller-heading"><button type="button" className="studio-column-button" onClick={()=>toggleColumn('left')} title={hidden.left?'Open the controls column':'Close the controls column'} aria-label={hidden.left?'Open the controls column':'Close the controls column'} aria-expanded={!hidden.left}>{hidden.left?<PanelLeftOpen size={20}/>:<PanelLeftClose size={20}/>}</button><h3 id="studio-controller-title">Live control</h3><div className="studio-controller-tools"><div className="studio-control-status" data-state={studioState} role="status"><strong>{{preflight:'Go live preflight',live:'On air',opening:'Opening preview',connecting:'Connecting',preview:'Private preview',offline:'OBS disconnected'}[studioState]}</strong></div>{studioState==='live'&&<LiveElapsedTimer key={session||'local-live'} session={session}/>}{statusBadges.map(badge=><span key={badge.key} className="studio-badge" data-tone={badge.tone} title={badge.title}>{badge.text}</span>)}{actionButtons}</div></header>
  <div className="studio-control-workspace">
  <div className="studio-settings-tabs" role="tablist" aria-orientation="horizontal" aria-label="Stream settings sections" onKeyDown={event=>{
    const tabs=SETTINGS_TABS.map(([id])=>id),index=tabs.indexOf(settingsTab);

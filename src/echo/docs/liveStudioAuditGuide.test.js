@@ -32,7 +32,7 @@ test('audit content remains behind the admin dashboard gate',()=>{
 });
 test('the refactored studio renders its offline controls without accessing capture devices',()=>{
  const html=renderToStaticMarkup(createElement(AdminLiveStudio,{enabled:false,token:''}));
- assert.match(html,/aria-label="Live studio"/);assert.match(html,/Private preview|Open private preview/);
+ assert.match(html,/aria-label="Live studio"/);assert.doesNotMatch(html,/Open private preview/);
  assert.match(html,/Live control/);assert.match(html,/OBS disconnected/);
 });
 

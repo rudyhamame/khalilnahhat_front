@@ -207,7 +207,7 @@ export default function LoginPage({ lang, isAuthenticated, username, loginError,
         </div> : formBody(m, false)}
       </div></div>)}
     </div>{!embedded&&<a className="access-guest" href="/" onClick={()=>{try{window.sessionStorage.setItem('echo-guest','1');}catch{/* private mode: the guest flag is skipped */}}}>{tr('Continue as guest','المتابعة كضيف')}<ArrowUpRight size={16} aria-hidden="true" /></a>}
-    {!embedded&&!isAuthenticated&&<div className="access-app-badge"><ClientAppBadge tr={tr} className="client-app-badge--access"/></div>}{!embedded&&!isAuthenticated&&<div className="access-rotate" role="note"><p>{tr("Please use your phone in portrait mode.","يرجى استخدام الهاتف بشكل عمودي.")}</p><p>{tr("Or download the app instead:","أو حمّل التطبيق بدلاً من ذلك:")}</p><ClientAppBadge tr={tr} className="client-app-badge--access"/></div>}</>}
+    {!embedded&&!isAuthenticated&&<div className="access-app-badge"><ClientAppBadge tr={tr} className="client-app-badge--access"/></div>}</>}
   </section>;
   return embedded ? content : <EchoShell lang={lang}>{content}</EchoShell>;
 }

@@ -170,7 +170,7 @@
 @media(prefers-reduced-motion:reduce){.admin-workspace .studio-source-options{transition:none}}
 
 .studio-source-audio-test{left:50px;right:auto}
-.admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-monitor.studio-preview-pair{display:grid!important;grid-template-columns:minmax(0,256fr) minmax(0,81fr);align-items:stretch;gap:12px;width:100%;max-width:none;margin-inline:auto}
+.admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-monitor.studio-preview-pair{display:grid!important;grid-template-columns:minmax(0,256fr) minmax(0,60fr);align-items:stretch;gap:12px;width:100%;max-width:none;margin-inline:auto}
 .admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-pair>.admin-live-preview-frame-shell{width:100%;min-width:0;margin:0;position:relative;overflow:hidden;background:#08090a;border-radius:10px}
 .admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-landscape{aspect-ratio:16/9;height:auto}
 .admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-portrait{aspect-ratio:9/16;height:100%}
@@ -305,7 +305,7 @@
 .admin-workspace #admin-live-stream .studio-audio-processing>.admin-live-control{min-height:26px;margin:4px 0 0;padding:4px 0;border:0;border-radius:0;background:none;color:#c8b18a;font-size:12px;text-align:start}
 
 /* Frame geometry is independent of the controls and their content height. */
-.admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-pair{align-items:start;align-self:start}
+.admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-pair{align-items:end;align-self:start}
 .admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-pair>.studio-preview-landscape{aspect-ratio:16/9;height:auto;align-self:start}
 .admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-pair>.studio-preview-portrait{aspect-ratio:9/16;height:auto;align-self:start}
 /* The full-height controller stays on the left, independent of website language. */
@@ -1193,7 +1193,7 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 .collab-landscape-overlay{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000;z-index:1}
 /* One-source output format: the unused preview disappears and the other uses the width. */
 .admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-pair.is-landscape-only{grid-template-columns:minmax(0,1fr)}
-.admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-pair.is-portrait-only{grid-template-columns:minmax(0,320px);justify-content:center}
+.admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-pair.is-portrait-only{grid-template-columns:minmax(0,240px);justify-content:center}
 .studio-preview-window[hidden]{display:none!important}
 .collab .collab-format,.studio-block .collab-format{display:grid;gap:6px}
 
@@ -1234,7 +1234,7 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 @media(min-width:901px){
 .admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-monitor.studio-preview-pair.is-collab{display:block!important;position:relative;container-type:inline-size}
 .admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-pair.is-collab>.studio-preview-window[aria-label="Landscape preview"]{width:100%}
-.admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-pair.is-collab>.studio-preview-window[aria-label="Portrait preview"]{position:absolute;z-index:3;right:2cqw;bottom:2cqw;width:23cqw;min-width:0;border:1px solid #ffffff45;border-radius:10px;overflow:hidden;background:#000;box-shadow:0 10px 28px #000b}
+.admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-pair.is-collab>.studio-preview-window[aria-label="Portrait preview"]{position:absolute;z-index:3;right:2cqw;bottom:2cqw;width:17cqw;min-width:0;border:1px solid #ffffff45;border-radius:10px;overflow:hidden;background:#000;box-shadow:0 10px 28px #000b}
 .studio-preview-pair.is-collab>.studio-preview-window[aria-label="Portrait preview"] .studio-preview-portrait{width:100%;aspect-ratio:9/16;height:auto}
 /* The window title becomes a caption over the bottom of the overlay. */
 .studio-preview-pair.is-collab>.studio-preview-window[aria-label="Portrait preview"]>.studio-preview-window-head{position:absolute;z-index:4;inset:auto 0 0 0;display:flex;flex-wrap:wrap;align-items:center;gap:4px;padding:14px 6px 5px;background:linear-gradient(transparent,#000d);pointer-events:none}
@@ -2261,3 +2261,6 @@ html body #admin-live-stream#admin-live-stream#admin-live-stream .admin-live-pre
 /* Divider lines between set list | preview | audience requests. */
 html body #admin-live-stream#admin-live-stream#admin-live-stream .admin-live-single.has-requests-aside>.admin-live-preview .admin-live-setlist-aside{border-inline-end:1px solid #303030!important}
 html body #admin-live-stream#admin-live-stream#admin-live-stream .admin-live-single.has-requests-aside>.admin-live-preview .admin-live-requests-aside{border-inline-start:1px solid #303030!important}
+
+/* Landscape-only preview: no padding around it. */
+.admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-monitor.studio-preview-pair.is-landscape-only{padding:0!important}
