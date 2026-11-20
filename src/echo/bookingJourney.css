@@ -55,9 +55,9 @@ html body .echo[data-page=home][data-theme] #availability.booking-journey .booki
 html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-guests-row{display:grid;gap:14px;padding:0;border:0}
 html body .echo[data-page=home][data-theme] #availability.booking-journey .event-type-guests{position:relative;display:flex;align-items:center;gap:12px;width:100%;margin:0;padding:0;border:0;background:none}
 html body .echo[data-page=home][data-theme] #availability.booking-journey .event-type-guests svg{position:absolute;inset-inline-start:16px;top:50%;translate:0 -50%;pointer-events:none}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .event-type-guests input{box-sizing:border-box;width:100%;height:62px;min-height:62px;padding:16px;padding-inline-start:48px;border:1px solid #c3dfcd30;border-radius:12px;background:#ffffff05;color:#f1f6f2;font:500 18px/1.4 'Manrope','Noto Sans Arabic',sans-serif}
+html body .echo[data-page=home][data-theme] #availability.booking-journey .event-type-guests input{box-sizing:border-box;width:100%;height:40px;min-height:40px;padding:8px 12px;padding-inline-start:40px;border:1px solid #c3dfcd30;border-radius:12px;background:#ffffff05;color:#f1f6f2;font:400 13px/1.4 'Manrope','Noto Sans Arabic',sans-serif}
 html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-venue-fields{position:relative;display:flex;flex-direction:column;gap:14px;overflow:visible}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-venue-fields :is(input,select){width:100%;height:50px;min-height:50px;font:400 16px/1.4 'Manrope','Noto Sans Arabic',sans-serif;padding:12px 14px}
+html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-venue-fields :is(input:not([type=radio],[type=checkbox]),select){width:100%;height:40px;min-height:40px;font:400 13px/1.4 'Manrope','Noto Sans Arabic',sans-serif;padding:8px 12px}
 html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-venue-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
 html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-map-toggle{width:100%;min-height:48px}
 .booking-venue-map{height:420px;min-width:0;margin-top:20px;overflow:hidden;border:1px solid #ffffff20;border-radius:16px}
@@ -207,13 +207,13 @@ html body .echo .booking-journey .booking-step:first-of-type{border-top:0!import
  html.echo-ipad body .echo[data-page=home][data-theme] #availability.booking-journey :is(input,textarea)::placeholder{font-size:13px;font-weight:400;line-height:1.4;letter-spacing:normal}
  html.echo-ipad body .echo[data-page=home][data-theme] #availability.booking-journey .avail-guests-row{grid-template-columns:minmax(0,1fr);justify-content:stretch;width:100%;min-width:0}
  html.echo-ipad body .echo[data-page=home][data-theme] #availability.booking-journey .event-type-guests{width:100%;max-width:none;min-width:0}
- html.echo-ipad body .echo[data-page=home][data-theme] #availability.booking-journey .event-type-guests input{flex:1 1 auto;width:100%;height:50px;min-height:50px;padding:12px 14px;padding-inline-start:42px;font-size:16px}
+ html.echo-ipad body .echo[data-page=home][data-theme] #availability.booking-journey .event-type-guests input{flex:1 1 auto;width:100%;height:40px;min-height:40px;padding:8px 12px;padding-inline-start:40px;font-size:13px}
  html.echo-ipad body .echo[data-page=home][data-theme] #availability.booking-journey .event-type-guests svg{inset-inline-start:14px}
 }
 
 /* Guest count: the field gets a real width (it was shrink-wrapped to ~160px, leaving ~80px of text space), and a long placeholder ellipsizes instead of being cut. */
 html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-guests-row{grid-template-columns:minmax(0,1fr)}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-guests-row .event-type-guests{width:min(100%,320px);max-width:100%;justify-self:start;min-width:0}
+html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-guests-row .event-type-guests{width:100%;max-width:100%;justify-self:start;min-width:0}
 html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-guests-row .event-type-guests input{width:100%;min-width:0;text-overflow:ellipsis}
 
 /* The results box keeps a fixed height however many venues come back: it scrolls inside instead of growing the step.
@@ -241,3 +241,6 @@ html body .echo[data-page=home][data-theme] #availability.booking-journey .booki
 html body .echo[data-page=home][data-theme] #availability.booking-journey input[data-booking-field^="customer."][readonly]{opacity:.55;color:#aab8b0;background:#ffffff08;border-color:#ffffff14;cursor:not-allowed;-webkit-text-fill-color:#aab8b0}
 html body .echo[data-page=home][data-theme] #availability.booking-journey input[data-booking-field^="customer."][readonly]::placeholder{color:#8d9a93}
 html body .echo[data-page=home][data-theme] #availability.booking-journey select[data-booking-field="customer.contactMethod"]:disabled{opacity:.55;color:#aab8b0;background-color:#ffffff08;border-color:#ffffff14;cursor:not-allowed;-webkit-text-fill-color:#aab8b0}
+
+/* The Reset button sits in the card's top corner: keep the title clear of it. */
+html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-step-card:has(>.booking-reset)>.booking-card-title{padding-inline-end:124px}

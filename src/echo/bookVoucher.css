@@ -25,3 +25,12 @@
  .book-voucher{transition:none}
  .book-voucher:hover{transform:none}
 }
+
+/* One line, in flow above the photo (order 0); the hero is bottom-anchored, so the text below never moves when it loads. */
+.book-hero>.book-voucher{order:0;flex:none;margin:0 0 auto;flex-wrap:nowrap;white-space:nowrap}
+.book-voucher-copy{display:flex;align-items:baseline;gap:8px}
+.book-voucher-copy :is(small,strong,em){white-space:nowrap}
+@media(max-width:480px){.book-hero>.book-voucher{width:auto;max-width:calc(100% - 32px);padding:8px 12px;gap:10px;justify-content:center}.book-voucher-icon{display:none}.book-voucher-copy{gap:6px}.book-voucher-copy em{display:none}.book-voucher-copy strong{font-size:20px}.book-voucher-code{padding:5px 8px;font-size:12px;letter-spacing:.06em}}
+
+/* Landscape: the voucher sits under the hero title (the wide-screen grid places it there too). */
+@media(orientation:landscape){.book-hero>.book-voucher{order:3;margin:12px 0 0}}

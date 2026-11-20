@@ -397,5 +397,5 @@
 .avail-phone-contact{display:flex;flex-wrap:wrap;gap:8px 18px;margin:0;padding:10px 12px;border:1px solid #ffffff24;border-radius:12px}
 .avail-phone-contact legend{padding:0 6px;font-size:13px;opacity:.85}
 .avail-phone-contact label{display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-size:14px}
-.avail-phone-contact input{accent-color:#e3d3a3}
+.avail-phone-contact input[type=radio]{flex:none;width:18px;height:18px;min-width:0;min-height:0;margin:0;padding:0;accent-color:#e3d3a3}
 .avail-phone-contact:disabled label{cursor:default;opacity:.8}

@@ -327,7 +327,7 @@ html.echo-access-open,html.echo-access-open body{overflow:clip}
 /* Phone + tablet portrait: the character stands above the forms (head clear, body behind the card); the page scrolls instead of clipping. */
 .access-hero-inset,.access-sketches,.access-tear-lines,.access-tear-vlines,.access-hero-vignette,.access-landscape-title,.access-app-badge{display:none}
 @media(max-width:1000px) and (orientation:portrait),(min-width:1001px) and (orientation:landscape){
- html.echo-access-open body .echo-access:not(.echo-order-access){--hero-h:clamp(500px,94svh,1020px);display:flex;flex-direction:column;align-items:center;overflow-x:clip!important;overflow-y:auto!important;overscroll-behavior:contain;padding-top:12px!important;padding-bottom:20px}
+ html.echo-access-open body .echo-access:not(.echo-order-access){--hero-h:clamp(420px,76svh,860px);display:flex;flex-direction:column;align-items:center;overflow-x:clip!important;overflow-y:auto!important;overscroll-behavior:contain;padding-top:12px!important;padding-bottom:20px}
  html.echo-access-open body .echo-access .access-pair :is(.access-intro,.access-google-heading,.access-reassurance,.access-app-login,.client-app-badge--card){display:none!important}
  html.echo-access-open body .echo-access .access-hero-photo{position:fixed;top:auto;bottom:0;left:50%;height:var(--hero-h);width:auto;opacity:1;z-index:2;pointer-events:none;clip-path:polygon(var(--tear));animation:access-photo-in 1s cubic-bezier(.2,.8,.2,1) both,access-tear-breathe 3.4s ease-in-out infinite}
  html.echo-access-open body .echo-access .access-pair{flex:none;height:auto;min-height:0;width:100%;align-items:start}
@@ -443,7 +443,7 @@ html.echo-access-open body .echo-access:not(.echo-order-access) .access-pair{pos
 @keyframes access-vtear-breathe{0%,100%{clip-path:polygon(var(--vtear-a))}33%{clip-path:polygon(var(--vtear-b))}66%{clip-path:polygon(var(--vtear-c))}}
 @media(min-width:1001px) and (orientation:landscape){
  html.echo-access-open body .echo-access:not(.echo-order-access){--cw:min(46vw,calc(100svh * .66 + 4vw))}
- html.echo-access-open body .echo-access:not(.echo-order-access) .access-hero-photo{left:auto;right:0;transform:none;height:100svh;clip-path:polygon(var(--vtear));animation:access-photo-in 1s cubic-bezier(.2,.8,.2,1) both,access-vtear-breathe 3.4s ease-in-out infinite}
+ html.echo-access-open body .echo-access:not(.echo-order-access) .access-hero-photo{--photo-h:78svh;left:auto;right:0;transform:none;height:var(--photo-h);clip-path:polygon(var(--vtear));animation:access-photo-in 1s cubic-bezier(.2,.8,.2,1) both,access-vtear-breathe 3.4s ease-in-out infinite}
  html.echo-access-open body .echo-access:not(.echo-order-access) .access-sketches{clip-path:polygon(var(--vtear));animation:access-sketch-drift 38s linear infinite,access-sketch-pulse 5s ease-in-out infinite,access-vtear-breathe 3.4s ease-in-out infinite}
  html.echo-access-open body .echo-access:not(.echo-order-access) .access-hero-vignette{background:none;clip-path:polygon(var(--vtear));animation:access-vtear-breathe 3.4s ease-in-out infinite}
  html.echo-access-open body .echo-access:not(.echo-order-access) .access-hero-inset,.echo-access:not(.echo-order-access) .access-tear-lines{display:none}
@@ -532,8 +532,8 @@ html[dir=rtl].echo-login-leaving .echo-access.is-leaving :is(.access-hero-photo,
 /* Landscape: centre the DJ Khalil logo over the forms column and the character in his column (--cw = character column width). */
 @media(min-width:1001px) and (orientation:landscape){
  html.echo-access-open{--cw:min(46vw,calc(100svh * .66 + 4vw))}
- html.echo-access-open body .echo-access:not(.echo-order-access) .access-hero-photo{right:calc((var(--cw) - 100svh * .6615) / 2)}
- html[dir=rtl].echo-access-open body .echo-access:not(.echo-order-access) .access-hero-photo{right:auto;left:calc((var(--cw) - 100svh * .6615) / 2)}
+ html.echo-access-open body .echo-access:not(.echo-order-access) .access-hero-photo{right:calc((var(--cw) - var(--photo-h) * .6615) / 2)}
+ html[dir=rtl].echo-access-open body .echo-access:not(.echo-order-access) .access-hero-photo{right:auto;left:calc((var(--cw) - var(--photo-h) * .6615) / 2)}
 }
 
 /* Narrow landscape: the two forms share a small column, so stack the signup fields, drop the leading icons and shrink hints so no placeholder is cut off. */

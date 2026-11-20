@@ -90,7 +90,7 @@
 @media(max-width:640px){.client-workspace .cw-profile{grid-template-columns:1fr}}
 .client-workspace .cw-phone-contact{display:flex;flex-wrap:wrap;gap:8px 18px;margin:0;padding:10px 12px;border:1px solid #ffffff24;border-radius:12px}
 .client-workspace .cw-phone-contact label{display:inline-flex;align-items:center;gap:8px;flex-direction:row}
-.client-workspace .cw-phone-contact input{width:auto;accent-color:#e3d3a3}
+.client-workspace .cw-phone-contact input[type=radio]{flex:none;width:18px;height:18px;min-width:0;min-height:0;margin:0;padding:0;accent-color:#e3d3a3}
 
 /* Profile photo + pan/zoom cropper (Personal info tab) */
 .client-workspace .cw-avatar{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
