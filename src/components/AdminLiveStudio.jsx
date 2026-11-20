@@ -18,12 +18,12 @@ import LiveDestinations from './LiveDestinations';
 import LiveGoalPicker from './LiveGoalPicker';
 import LiveSetListPicker from './LiveSetListPicker';
 import AdminLiveAudience from './AdminLiveAudience';
-import ObsSourceSetup from './ObsSourceSetup';
 import StudioControlSection from './StudioControlSection';
 import {LIVE_QUALITY,getLiveQuality,setLiveQuality} from '../lib/liveQuality';
 import './adminLiveStudio.css';
 import './studioControls.css';
 
+const OBS_DEVICE=/obs|virtual/i;
 const SETTINGS_TABS=[['studio','Setup',Layers],['destinations','Destinations',Share2]];
 
 
@@ -116,19 +116,26 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  // The live is on air but this browser is not sending it (page reloaded, connection lost, live paused with no input): the sources must stay selectable so "Reconnect live" has something to reacquire.
  const reconnectHere=isLiveOnAir&&liveStream?.broadcastSource==='browser'&&!webrtc.isBroadcasting,liveLocksInput=isLiveOnAir&&!reconnectHere,inputsHeld=(reserved&&!reconnectHere)||liveLocksInput;
  const [liveQuality,setQualityState]=useState(()=>getLiveQuality().id),[qualityBusy,setQualityBusy]=useState(false);
- // The one source is OBS: its Virtual Camera is chosen by hand (nothing is picked or opened automatically), then the preview opens.
- const pickCamera=id=>{webrtc.setSelectedVideoDeviceId(id);if(!webrtc.sourceChosen)void webrtc.selectSource('camera',null,'none');};
+ // OBS is the only source: Open preview finds its Virtual Camera (and an OBS audio device, if one exists) by name. Nothing else is ever opened.
  const hasAudioInput=Boolean(webrtc.selectedAudioDeviceId);
- // Browsers hide camera names until camera access was granted once: ask briefly, release it, then read the list again (picks up an OBS Virtual Camera started later).
- const scanCameras=async()=>{try{const probe=await navigator.mediaDevices.getUserMedia({video:true});probe.getTracks().forEach(track=>track.stop());}catch(error){adminToast(error?.name==='NotAllowedError'?'Allow camera access in the browser, then scan again.':'No camera could be opened. Start OBS Virtual Camera first.',true);}await webrtc.refreshDevices();};
- // Choosing or clearing the audio input switches the audio mode once the new device id is in place.
- useEffect(()=>{if(!webrtc.sourceChosen||webrtc.isBroadcasting||webrtc.previewBusy||webrtc.paused||webrtc.inputLost)return;const want=webrtc.selectedAudioDeviceId?'mic':'none';if(webrtc.audioMode!==want)void webrtc.selectAudio(want);},[webrtc.selectedAudioDeviceId]);// eslint-disable-line react-hooks/exhaustive-deps
+ const [obsOpening,setObsOpening]=useState(false);
+ const openObs=async()=>{
+  // Browsers hide device names until camera access was granted once: ask briefly, release it, then read the list.
+  try{const probe=await navigator.mediaDevices.getUserMedia({video:true});probe.getTracks().forEach(track=>track.stop());}catch{/* the list below may still name it */}
+  const devices=await navigator.mediaDevices.enumerateDevices().catch(()=>[]);
+  const camera=devices.find(item=>item.kind==='videoinput'&&OBS_DEVICE.test(item.label)),audio=devices.find(item=>item.kind==='audioinput'&&OBS_DEVICE.test(item.label));
+  if(!camera){adminToast('OBS Virtual Camera not found. In OBS click Start Virtual Camera, then try again.',true);return;}
+  webrtc.setSelectedVideoDeviceId(camera.deviceId);webrtc.setSelectedAudioDeviceId(audio?.deviceId||'');
+  void webrtc.selectSource('camera',null,audio?'mic':'none');setObsOpening(true);
+ };
+ // Runs on the render after the device ids are set, so the preview opens on OBS exactly once.
+ useEffect(()=>{if(!obsOpening)return;setObsOpening(false);void webrtc.preparePreview();},[obsOpening]);// eslint-disable-line react-hooks/exhaustive-deps
  // Picking another mixer device while the private preview is open reopens the preview on it.
  const lastMixer=useRef(webrtc.selectedAudioDeviceId);
  useEffect(()=>{if(lastMixer.current===webrtc.selectedAudioDeviceId)return;lastMixer.current=webrtc.selectedAudioDeviceId;if(webrtc.isPreviewing&&webrtc.audioMode==='mic'){if(webrtc.paused||webrtc.inputLost)void webrtc.setPausedAudio('mic');else if(!webrtc.isBroadcasting)void webrtc.preparePreview();}},[webrtc.selectedAudioDeviceId]);// eslint-disable-line react-hooks/exhaustive-deps
  // Picking another camera while the private preview is open reopens the preview on it.
  const lastCamera=useRef(webrtc.selectedVideoDeviceId);
- useEffect(()=>{if(lastCamera.current===webrtc.selectedVideoDeviceId)return;lastCamera.current=webrtc.selectedVideoDeviceId;if(webrtc.isPreviewing&&webrtc.sourceKind==='camera'){if(webrtc.paused||webrtc.inputLost)void webrtc.setPausedInput({kind:'camera'});else if(!webrtc.isBroadcasting)void webrtc.preparePreview();}else if(!webrtc.isPreviewing&&webrtc.sourceChosen&&webrtc.sourceKind==='camera'&&webrtc.selectedVideoDeviceId&&webrtc.selectedVideoDeviceId!=='none'&&!webrtc.previewBusy&&!webrtc.isBroadcasting)void webrtc.preparePreview();},[webrtc.selectedVideoDeviceId]);// eslint-disable-line react-hooks/exhaustive-deps
+ useEffect(()=>{if(lastCamera.current===webrtc.selectedVideoDeviceId)return;lastCamera.current=webrtc.selectedVideoDeviceId;if(webrtc.isPreviewing&&webrtc.sourceKind==='camera'){if(webrtc.paused||webrtc.inputLost)void webrtc.setPausedInput({kind:'camera'});else if(!webrtc.isBroadcasting)void webrtc.preparePreview();}},[webrtc.selectedVideoDeviceId]);// eslint-disable-line react-hooks/exhaustive-deps
  const previewFormat=output.format;
  const changeLiveQuality=async id=>{
   if(id===liveQuality)return;
@@ -142,7 +149,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  };
  const goLiveClick=()=>{if(beforeGoLive())void webrtc.goLive(broadcastTitle);};
  const actionButtons=(()=>{const otherLive=legacyObs||((isLiveOnAir||reserved)&&!webrtc.isBroadcasting);return <>
-                      <button type="button" className={`admin-live-fullscreen studio-preview-toggle${webrtc.previewBusy?' st-busy':webrtc.isPreviewing||webrtc.isBroadcasting?' st-ok':''}`} disabled={webrtc.isConnecting||webrtc.previewBusy||webrtc.isBroadcasting||otherLive} aria-label={webrtc.previewBusy?'Opening devices…':webrtc.isPreviewing?'Close private preview':'Open private preview'} title={webrtc.isBroadcasting?'Preview stays open while you are live':otherLive?'Preview is controlled by the current source':webrtc.previewBusy?'Opening devices…':webrtc.isPreviewing?'Close private preview':'Open private preview · not on air'} onClick={webrtc.isPreviewing?webrtc.closePreview:()=>{if(!webrtc.sourceChosen){adminToast('No input set. Choose a video input first.',true);return;}void webrtc.preparePreview();}}>{webrtc.previewBusy?<LoaderCircle size={18} className="studio-opening-spinner" aria-hidden="true"/>:webrtc.isPreviewing||webrtc.isBroadcasting?<EyeOff size={18} aria-hidden="true"/>:<Eye size={18} aria-hidden="true"/>}<span>{webrtc.previewBusy?'Opening…':webrtc.isPreviewing?'Close preview':'Open preview'}</span></button>
+                      <button type="button" className={`admin-live-fullscreen studio-preview-toggle${webrtc.previewBusy?' st-busy':webrtc.isPreviewing||webrtc.isBroadcasting?' st-ok':''}`} disabled={webrtc.isConnecting||webrtc.previewBusy||webrtc.isBroadcasting||otherLive} aria-label={webrtc.previewBusy?'Opening devices…':webrtc.isPreviewing?'Close private preview':'Open private preview'} title={webrtc.isBroadcasting?'Preview stays open while you are live':otherLive?'Preview is controlled by the current source':webrtc.previewBusy?'Opening devices…':webrtc.isPreviewing?'Close private preview':'Open private preview · not on air'} onClick={webrtc.isPreviewing?webrtc.closePreview:()=>{void openObs();}}>{webrtc.previewBusy?<LoaderCircle size={18} className="studio-opening-spinner" aria-hidden="true"/>:webrtc.isPreviewing||webrtc.isBroadcasting?<EyeOff size={18} aria-hidden="true"/>:<Eye size={18} aria-hidden="true"/>}<span>{webrtc.previewBusy?'Opening…':webrtc.isPreviewing?'Close preview':'Open preview'}</span></button>
                       {webrtc.isBroadcasting
                         ?<>{webrtc.preflight?<button type="button" className="admin-live-fullscreen studio-go-live st-busy" disabled aria-label="Go live preflight"><LoaderCircle size={16} className="studio-opening-spinner" aria-hidden="true"/><span>Go live preflight</span></button>:null}<button type="button" className={`admin-live-fullscreen studio-go-live is-live ${webrtc.inputLost?'st-lost':webrtc.paused?'st-halted':'st-onair'}`} disabled={webrtc.isConnecting} aria-label="End live" title="End live" onClick={stopLive}><Square size={16} fill="currentColor" aria-hidden="true"/><span>End live</span></button></>
                         :isLiveOnAir&&!webrtc.preflight&&liveStream?.broadcastSource==='browser'
@@ -204,7 +211,6 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  <LiveSetListPicker token={token} value={setListId} onChange={setSetListId} disabled={webrtc.isConnecting||reserved||isLiveOnAir}/>
  </div></StudioControlSection>
  
- <StudioControlSection step="03" title="Source setup" description="OBS is the source: pick its Virtual Camera and, if you use one, a mixer." className="studio-sources-card"><div className="studio-block studio-input-block"><ObsSourceSetup onScan={scanCameras} disabled={loading||Boolean(error)||((webrtc.paused||webrtc.inputLost)?webrtc.previewBusy||webrtc.isConnecting:inputLocked||inputsHeld)} cameras={webrtc.videoInputs} cameraId={webrtc.selectedVideoDeviceId} onCamera={pickCamera} mixers={webrtc.audioInputs} mixerId={webrtc.selectedAudioDeviceId} onMixer={id=>{if(id&&id===webrtc.voiceDeviceId&&webrtc.voiceOn)void webrtc.setVoice(false);webrtc.setSelectedAudioDeviceId(id);}}/></div></StudioControlSection>
 
 
 

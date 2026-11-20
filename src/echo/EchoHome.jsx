@@ -97,7 +97,7 @@ function EchoHomeContent({ lang, user, token }) {
   // Where the square sits the moment the greeting starts (title and paragraph still in place): the glide starts from exactly there.
   useLayoutEffect(()=>{
     const player=document.querySelector('.hero-introduction .hero-intro-frame');
-    if(engaged&&player&&!copyGone){const box=player.getBoundingClientRect();playerTop.current={x:box.left,y:box.top};}
+    if(engaged&&player&&!copyGone){const box=player.getBoundingClientRect();playerTop.current={x:box.left,y:box.top,winY:document.querySelector('.hero-introduction .hero-character-window')?.getBoundingClientRect().top};}
     if(!engaged)playerTop.current=null;
   },[engaged]);
   useLayoutEffect(()=>{
@@ -106,6 +106,9 @@ function EchoHomeContent({ lang, user, token }) {
     if(!from||(Math.abs(from.x-box.left)<2&&Math.abs(from.y-box.top)<2)||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
     // fastest route: a straight glide from that spot to its final central position
     player.animate([{transform:`translate(${from.x-box.left}px,${from.y-box.top}px)`},{transform:'translate(0,0)'}],{duration:700,easing:'cubic-bezier(.3,.8,.3,1)'});
+    // Phones portrait (two rows): row 2 is pushed up by the same glide instead of jumping when the title unmounts.
+    const win=document.querySelector('.hero-introduction .hero-character-window'),winBox=win?.getBoundingClientRect();
+    if(win&&from.winY!=null&&Math.abs(from.winY-winBox.top)>2)win.animate([{transform:`translateY(${from.winY-winBox.top}px)`},{transform:'translateY(0)'}],{duration:700,easing:'cubic-bezier(.3,.8,.3,1)'});
   },[copyGone]);
   // Keep the chosen introduction language when returning through a page link.
   const [heroLanguageChosen,setHeroLanguageChosen]=useState(()=>{try{const saved=sessionStorage.getItem('echo-home-section');return sessionStorage.getItem('echo-home-language-selected')==='1'||Boolean(saved&&saved!=='home');}catch{return false;}});

@@ -44,6 +44,7 @@ export default function HeroIntroductionAudio({lang,onSkip,onBegin,animationComp
  const [headerIntroLanguage]=useState(()=>{try{const value=sessionStorage.getItem(HEADER_INTRO_LANGUAGE_KEY);return value==='ar'||value==='en'?value:null;}catch{return null;}});
  const chooseLanguageRef=useRef(null);
  const [selectedLanguage,setSelectedLanguage]=useState(null);
+ const [frameShown,setFrameShown]=useState(false);// the square only grows once the title has finished unmounting (EchoHome removes it 460ms after the tap)
  const [frameOpen,setFrameOpen]=useState(false);// phones portrait: one line until tapped (CSS only collapses it there)
  const [languageChosen,setLanguageChosen]=useState(()=>Boolean(rememberedLanguage()));
  const [chosenLanguage,setChosenLanguage]=useState(()=>headerIntroLanguage||rememberedLanguage()||lang.lang);
@@ -63,7 +64,7 @@ export default function HeroIntroductionAudio({lang,onSkip,onBegin,animationComp
  const audio=useRef(null),root=useRef(null),focus=useRef(null),request=useRef(0),id=useId();
  const [playing,setPlaying]=useState(false),[waiting,setWaiting]=useState(false),[position,setPosition]=useState(0),[duration,setDuration]=useState(narration.duration),[error,setError]=useState('');
  const transportPosition=Math.floor(position*20)/20;
- useEffect(()=>{onTransportState?.({playing:playing&&!waiting&&!staging,engaged:phase==='started'&&!staging,language:selectedLanguage});},[playing,waiting,staging,phase,selectedLanguage,onTransportState]);
+ useEffect(()=>{onTransportState?.({playing:playing&&!waiting&&!staging,engaged:(phase==='started'&&!staging)||(frameOpen&&window.matchMedia('(orientation:portrait) and (max-width:760px)').matches),language:selectedLanguage});},[playing,waiting,staging,phase,selectedLanguage,onTransportState,frameOpen]);
  // Keep timeline ticks local to the showcase instead of re-rendering the whole homepage.
  useEffect(()=>{window.dispatchEvent(new CustomEvent(HERO_EQUIPMENT_TIMELINE,{detail:{playing:playing&&!waiting&&!staging,language:selectedLanguage,position:transportPosition,started:phase==='started'&&!staging}}));},[playing,waiting,staging,selectedLanguage,transportPosition,phase]);
  const tr=(en,arabic)=>ar?arabic:en;
@@ -196,6 +197,7 @@ export default function HeroIntroductionAudio({lang,onSkip,onBegin,animationComp
   seek(Math.max(0,Math.min(1,along/(2*(w+h))))*duration);
  };
  const dragFrame=event=>{if(event.target.closest?.('button,input')&&!event.currentTarget.hasPointerCapture?.(event.pointerId))return;if(event.buttons===1||event.pointerType==='touch')seekFromFrame(event);};
+ useEffect(()=>{if(!frameOpen){setFrameShown(false);return undefined;}const t=setTimeout(()=>setFrameShown(true),window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:540);return()=>clearTimeout(t);},[frameOpen]);
  // Back to the one-line bar when the greeting is about to finish (last 1.5s).
  useEffect(()=>{if(playing&&duration>3&&position>=duration-1.5)setFrameOpen(false);},[playing,position,duration]);
  const togglePlay=()=>{if(selectedLanguage!==chosenLanguage||phase!=='started')chooseLanguage(chosenLanguage);else if(playing)pausePlayback();else void startPlayback();};
@@ -205,9 +207,9 @@ export default function HeroIntroductionAudio({lang,onSkip,onBegin,animationComp
   {/* The curved lyrics over the record are removed; the sentence now shows as a subtitle above the player. */}
   {!languageChosen&&<FullscreenLanguageChooser onChoose={language=>{rememberLanguage(language);setChosenLanguage(language);lang.setLanguage(language);setLanguageChosen(true);onLanguageSelect?.(language);}}/>}
   <div className="hero-intro-player" aria-label={tr('Echo introduction — English','مقدّمة إيكو — بالعربي')}>
-   <div className="hero-intro-frame" ref={frame} onPointerDown={event=>{if(event.target.closest?.('button,input,.hero-intro-meta'))return;event.currentTarget.setPointerCapture?.(event.pointerId);seekFromFrame(event);}} onPointerMove={dragFrame} data-ready={phase==='started'&&!staging?'true':undefined} data-open={frameOpen?'true':'false'}>
+   <div className="hero-intro-frame" ref={frame} onPointerDown={event=>{if(event.target.closest?.('button,input,.hero-intro-meta'))return;event.currentTarget.setPointerCapture?.(event.pointerId);seekFromFrame(event);}} onPointerMove={dragFrame} data-ready={phase==='started'&&!staging?'true':undefined} data-open={frameShown?'true':'false'}>
     <svg className="hero-intro-frame-line" width={box.w} height={box.h} viewBox={`0 0 ${box.w||1} ${box.h||1}`} aria-hidden="true"><rect className="is-track" x="2" y="2" width={Math.max(0,box.w-4)} height={Math.max(0,box.h-4)} rx="20"/><rect className="is-fill" x="2" y="2" width={Math.max(0,box.w-4)} height={Math.max(0,box.h-4)} rx="20" pathLength="100" strokeDasharray={`${duration?Math.min(100,position/duration*100):0} 100`}/></svg>
-   <div className="hero-intro-meta" role="button" tabIndex={0} aria-expanded={frameOpen} onClick={toggleFrame} onKeyDown={e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();toggleFrame();}}}><span>{tr('ECHO GREETING','ترحيب إيكو')}</span><time dir="ltr">{introClock(position)} / {introClock(duration)}</time></div>
+   <div className="hero-intro-meta" role="button" tabIndex={0} aria-expanded={frameShown} onClick={toggleFrame} onKeyDown={e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();toggleFrame();}}}><span>{tr('ECHO GREETING','ترحيب إيكو')}</span><time dir="ltr">{introClock(position)} / {introClock(duration)}</time></div>
     <div className="hero-intro-stage" data-active="false"/>
    <div className={`hero-intro-subtitle hero-intro-lines${phase==='started'&&!staging&&(playing||position>0)&&cue?'':' is-idle'}`} dir={ar?'rtl':'ltr'} lang={ar?'ar':'en'} aria-hidden="true" ref={linesBox}>
     <div className="hero-intro-list" ref={linesList}>{narration.cues.map((line,lineIndex)=><p key={lineIndex} className={lineIndex===cueIndex?'is-current':lineIndex<cueIndex?'is-past':'is-next'}>{narration.words.slice(line.from,line.to).map((word,offset)=>{const index=line.from+offset;return <span key={index} className={index===activeWord?'is-active':index<activeWord?'is-said':undefined}>{word.text} </span>;})}</p>)}</div>
