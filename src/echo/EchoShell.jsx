@@ -114,7 +114,6 @@ export default function EchoShell({ lang, user, onLogout, children }) {
   useBrowserChromeTheme(current,introLanguageSelected);
   return (
     <div className={`echo${(publicPageSection(current)&&current!=='/')||accessPage?' echo-public-page':''}${assistantOverlay?' echo-ai-overlay-page':''}`} data-theme="dark" data-page={publicPageSection(current)||accessPage ? "home" : "inner"} ref={shell}>
-      <a className="echo-skip" href="#echo-main">{ar ? 'انتقل إلى المحتوى' : 'Skip to content'}</a>
       <header ref={header} className="echo-header">
         <a className="echo-logo echo-logo--paired" href="/" aria-label="DJ Khalil Nahhat — Echo Event Entertainment home"><span className="echo-brand-pair"><img className="echo-brand-mark" src="/echo/dj-khalil-nahhat-logo.svg" alt="DJ Khalil Nahhat" width="240" height="90" /><img className="echo-event-brand-mark" src="/echo/echo-event-entertainment-white-original.png" alt="ECHO Event & Entertainment" width="1392" height="1130" /></span></a>
         {pageTitle&&<h1 className="echo-page-title">{pageTitle}</h1>}

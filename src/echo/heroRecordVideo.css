@@ -84,8 +84,6 @@
  html body .echo[data-page=home][data-theme] .hero-introduction .hero-character-window{scale:.6}
 }
 
-/* No idle prompt line ("Press play…"). */
-.hero-intro-player .hero-intro-subtitle.is-idle{display:none}
 
 /* Landscape screens wider than a phone (tablet and desktop), greeting not playing: only the title and the player, the player directly under the title (no gap, no app badge), with the Explore button centred under the player. */
 @media(min-width:721px) and (orientation:landscape){
@@ -111,3 +109,6 @@
 @media(min-width:721px) and (orientation:landscape){
  html:not([dir=rtl]) body .echo[data-page=home] .hero-introduction>.hero-equipment-showcase{right:auto!important;inset-inline:var(--echo-viewport-gutter,48px) auto!important;top:calc(var(--echo-header-overlay-height,96px) + 300px)!important;bottom:24px!important;width:var(--title-room,calc(50vw - 24px))!important;max-width:none!important;z-index:6}
 }
+
+/* No idle prompt line ("Press play…") in the player. */
+.hero-intro-player .hero-intro-subtitle.is-idle{display:none}

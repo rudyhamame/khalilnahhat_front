@@ -78,7 +78,7 @@ html body .echo.echo-public-page .header-mini-player .hmp-next{display:grid}
 
 /* Greeting page: a larger header (logos and account controls). */
 @media(min-width:721px){
-html body .echo[data-page=home][data-theme] .echo-header{min-height:136px!important}
+html body .echo[data-page=home][data-theme] .echo-header{min-height:92px!important}
 html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img{height:64px!important;max-height:64px!important}
 html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img+img{height:78px!important;max-height:78px!important}
 html body .echo[data-page=home][data-theme] .echo-header .echo-icon-button{width:60px!important;height:60px!important;min-height:60px!important}
@@ -255,7 +255,7 @@ html body .echo .echo-header .is-assistant>.echo-header-nav-button[aria-disabled
 
 /* Phones: every page's header matches the Home header (same size, logos and button positions). */
 @media(max-width:600px){
- html body .echo.echo-public-page[data-theme][data-page]>.echo-header{padding:10px 16px!important;min-height:72px!important;gap:0 12px;align-items:center}
+ html body .echo.echo-public-page[data-theme][data-page]>.echo-header{padding:12px 16px!important;min-height:72px!important;gap:0 12px;align-items:center}
  html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-brand-pair{gap:12px}
  html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-brand-pair>img{height:45px;max-height:45px}
  html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-brand-pair>img+img{height:38px;max-height:38px}
@@ -351,3 +351,17 @@ html body .echo .echo-header>.echo-header-nav.is-home{display:none!important}
  html:is(.echo-ipad,:root) body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img:first-child{width:144px!important;object-fit:contain;object-position:left center}
  html:is(.echo-ipad,:root) body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img+img{width:auto!important;height:68px!important;max-height:68px!important;margin-inline-start:6px!important}
 }
+
+/* One header padding for every page and screen: 12px above/below, and side padding that grows with the screen from 16px (phones) to 48px (from 1200px up). */
+html body .echo[data-theme]>.echo-header{padding:12px clamp(16px,4vw,48px)!important}
+
+/* The paired logo link has no top or bottom padding anywhere (header, footer, login). */
+html body .echo .echo-logo.echo-logo--paired{padding-top:0!important;padding-bottom:0!important}
+
+/* ONE logo size for the whole website (home, login and every other page, on every screen): DJ Khalil 54px tall, Echo 68px tall.
+   The #_ in :not() lifts this above every older per-page / per-screen logo rule. */
+html body .echo[data-theme]>.echo-header .echo-brand-pair>img:not(#_){height:54px!important;max-height:54px!important;width:144px!important;max-width:none!important;flex:none!important;object-fit:contain}
+html body .echo[data-theme]>.echo-header .echo-brand-pair>img+img:not(#_){height:68px!important;max-height:68px!important;width:auto!important;margin-inline-start:6px!important;object-position:left center!important}
+
+/* One header height for every page: 92px (68px Echo logo + 12px padding above and below). A page that adds a second row (the section links under the header on narrow screens) grows only by that row. */
+html body .echo[data-theme]>.echo-header{min-height:92px!important;height:auto!important}

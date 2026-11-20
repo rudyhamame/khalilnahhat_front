@@ -325,8 +325,8 @@ html.echo-access-open,html.echo-access-open body{overflow:clip}
 @media(prefers-reduced-motion:reduce){.access-google-skeleton,.access-google-button:not([hidden]){animation:none}}
 
 /* Phone + tablet portrait: the character stands above the forms (head clear, body behind the card); the page scrolls instead of clipping. */
-.access-hero-inset,.access-sketches,.access-tear-lines,.access-hero-vignette,.access-blend{display:none}
-@media(max-width:1000px) and (orientation:portrait),(min-width:1001px) and (max-width:1400px) and (orientation:landscape) and (any-pointer:coarse){
+.access-hero-inset,.access-sketches,.access-tear-lines,.access-tear-vlines,.access-hero-vignette,.access-blend{display:none}
+@media(max-width:1000px) and (orientation:portrait),(min-width:1001px) and (orientation:landscape){
  html.echo-access-open body .echo-access:not(.echo-order-access){--hero-h:clamp(500px,94svh,1020px);display:flex;flex-direction:column;align-items:center;overflow-x:clip!important;overflow-y:auto!important;overscroll-behavior:contain;padding-top:12px!important;padding-bottom:20px}
  html.echo-access-open body .echo-access .access-pair :is(.access-intro,.access-google-heading,.access-reassurance,.access-app-login,.client-app-badge--card){display:none!important}
  html.echo-access-open body .echo-access .access-hero-photo{position:fixed;top:auto;bottom:0;left:50%;height:var(--hero-h);width:auto;opacity:1;z-index:2;pointer-events:none;clip-path:polygon(var(--tear));animation:access-photo-in 1s cubic-bezier(.2,.8,.2,1) both,access-tear-breathe 3.4s ease-in-out infinite}
@@ -369,13 +369,13 @@ html.echo-access-open,html.echo-access-open body{overflow:clip}
  /* No card around the login: the fields sit straight on the page. */
  html body .echo-access:not(.echo-order-access) .access-pair .access-form-wrap{background:none;border:0;box-shadow:none;border-radius:0;padding:0;-webkit-backdrop-filter:none;backdrop-filter:none}
  /* Tiny white pen sketches of DJ Khalil tiled behind the form; two layers drift in opposite directions and pulse. */
- .access-tear-lines{display:block;position:fixed;left:50%;width:104vw;height:140px;transform:translateX(-50%);top:calc(100% - var(--form-h,350px) - 140px);z-index:3;pointer-events:none;overflow:visible}
+ .access-tear-lines{display:block;position:fixed;left:50%;width:112vw;height:140px;transform:translateX(-50%);top:calc(100% - var(--form-h,350px) - 140px);z-index:3;pointer-events:none;overflow:visible}
  .access-tear-lines path{fill:none;stroke:#f3e9d2;vector-effect:non-scaling-stroke;stroke-linejoin:round}
  .access-sketches{display:block;position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.22;
   background:url(/echo/khalil-sketch-pattern.png) 0 0/260px 260px repeat,url(/echo/khalil-sketch-pattern.png) 110px 80px/360px 360px repeat;
   clip-path:polygon(var(--tear));animation:access-sketch-drift 38s linear infinite,access-sketch-pulse 5s ease-in-out infinite,access-tear-breathe 3.4s ease-in-out infinite}
  /* Inset on the character: his torn edge is shaded, so he sits further back behind the form's page. Painted only on his own pixels (masked by the same image). */
- .access-hero-vignette{display:block;position:fixed;inset:0;z-index:1;pointer-events:none;box-shadow:inset 0 0 90px 12px #000000b0;background:linear-gradient(to top,#000000a0 calc(var(--form-h,350px) + 30px),#0000 calc(var(--form-h,350px) + 190px));clip-path:polygon(var(--tear));animation:access-tear-breathe 3.4s ease-in-out infinite}
+ .access-hero-vignette{display:block;position:fixed;inset:0;z-index:1;pointer-events:none;box-shadow:inset 0 -90px 70px -50px #000000b0;background:linear-gradient(to top,#000000a0 calc(var(--form-h,350px) + 30px),#0000 calc(var(--form-h,350px) + 190px));clip-path:polygon(var(--tear));animation:access-tear-breathe 3.4s ease-in-out infinite}
  .access-hero-inset{display:block;position:fixed;bottom:0;left:50%;transform:translateX(-50%);height:var(--hero-h);aspect-ratio:1016/1536;z-index:2;pointer-events:none;background:linear-gradient(to top,#00000054 calc(var(--form-h,350px) + 30px),#0000 calc(var(--form-h,350px) + 95px));-webkit-mask:url(/echo/login-hero-khalil.webp) center/100% 100% no-repeat;mask:url(/echo/login-hero-khalil.webp) center/100% 100% no-repeat;clip-path:polygon(var(--tear));animation:access-tear-breathe 3.4s ease-in-out infinite}
  /* Wavy line contouring the character's fade-out, riding just above the form. */
  .access-wave{display:block;position:fixed;left:0;width:100%;bottom:calc(var(--form-h,350px) - 2px);height:64px;z-index:3;pointer-events:none;overflow:visible;filter:drop-shadow(0 -4px 6px #0009)}
@@ -401,7 +401,7 @@ html.echo-access-open,html.echo-access-open body{overflow:clip}
 @media(prefers-reduced-motion:reduce){.access-wave path{animation:none!important;stroke-dashoffset:0}}
 @keyframes access-tear-breathe{0%,100%{clip-path:polygon(var(--tear-a))}33%{clip-path:polygon(var(--tear-b))}66%{clip-path:polygon(var(--tear-c))}}
 @media(prefers-reduced-motion:reduce){.access-hero-photo,.access-hero-inset,.access-hero-vignette{animation:none!important}}
-@media(max-width:1000px) and (orientation:portrait),(min-width:1001px) and (max-width:1400px) and (orientation:landscape) and (any-pointer:coarse){
+@media(max-width:1000px) and (orientation:portrait),(min-width:1001px) and (orientation:landscape){
  html body .echo-access:not(.echo-order-access) .access-pair :is(.access-input input,.access-google-card,.google-bridge-button,.access-field>span:first-child){font-family:'Permanent Marker','Cairo',cursive!important}
 }
 @keyframes access-sketch-drift{to{background-position:260px 260px,-250px 440px}}
@@ -414,13 +414,13 @@ html.echo-access-open,html.echo-access-open body{overflow:clip}
 @media(prefers-reduced-motion:reduce){.access-loader i{animation-duration:2s}}
 
 /* Exit scene after a successful sign-in, in choppy cartoon frames: front elements leave, then the backdrop blends into the home page colours. */
-html.echo-login-leaving .echo-header,.echo-access.is-leaving :is(.access-pair,.access-guest,.access-tear-lines){animation:access-leave-out .7s steps(6,end) forwards!important}
+html.echo-login-leaving .echo-header,.echo-access.is-leaving :is(.access-pair,.access-guest,.access-tear-lines,.access-tear-vlines){animation:access-leave-out .7s steps(6,end) forwards!important}
 .echo-access.is-leaving .access-blend{display:block;position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0;background:radial-gradient(ellipse 70% 55% at 50% 38%,#17332d,transparent 80%),#0d1418;animation:access-blend-in 1.5s steps(6,end) .7s forwards}
 @keyframes access-leave-out{to{opacity:0;translate:0 48px}}
 @keyframes access-blend-in{to{opacity:1}}
 
 /* Tablet landscape: both phone-style forms side by side under the tear (no tabs). */
-@media(min-width:1001px) and (max-width:1400px) and (orientation:landscape) and (any-pointer:coarse){
+@media(min-width:1001px) and (orientation:landscape){
  html.echo-access-open body .echo-access:not(.echo-order-access) {padding-inline:48px!important}
  html.echo-access-open body .echo-access:not(.echo-order-access) .access-pair{grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:36px;align-items:start;max-width:1100px;margin-inline:auto}
  html:is(.echo-ipad,:root).echo-access-open body .echo.echo-public-page[data-theme][data-page]>.echo-header{padding-inline:48px!important}
@@ -430,3 +430,17 @@ html.echo-login-leaving .echo-header,.echo-access.is-leaving :is(.access-pair,.a
 
 /* Keyboard open: the scene keeps its size; the form slides up over the character only as far as needed to stay above the keyboard. */
 html.echo-access-open body .echo-access:not(.echo-order-access) .access-pair{position:relative;z-index:6;translate:0 calc(var(--echo-kb-lift,0px) * -1);transition:translate .18s ease-out}
+
+/* Landscape (wider than 1000px): the tear is upright. Forms on the left, the character page (sketches + character) on the right, split by a jagged vertical edge. */
+@keyframes access-vtear-breathe{0%,100%{clip-path:polygon(var(--vtear-a))}33%{clip-path:polygon(var(--vtear-b))}66%{clip-path:polygon(var(--vtear-c))}}
+@media(min-width:1001px) and (orientation:landscape){
+ html.echo-access-open body .echo-access:not(.echo-order-access){--cw:min(46vw,calc(100svh * .66 + 4vw))}
+ html.echo-access-open body .echo-access:not(.echo-order-access) .access-hero-photo{left:auto;right:0;transform:none;height:100svh;clip-path:polygon(var(--vtear));animation:access-photo-in 1s cubic-bezier(.2,.8,.2,1) both,access-vtear-breathe 3.4s ease-in-out infinite}
+ html.echo-access-open body .echo-access:not(.echo-order-access) .access-sketches{clip-path:polygon(var(--vtear));animation:access-sketch-drift 38s linear infinite,access-sketch-pulse 5s ease-in-out infinite,access-vtear-breathe 3.4s ease-in-out infinite}
+ html.echo-access-open body .echo-access:not(.echo-order-access) .access-hero-vignette{background:none;clip-path:polygon(var(--vtear));animation:access-vtear-breathe 3.4s ease-in-out infinite}
+ html.echo-access-open body .echo-access:not(.echo-order-access) .access-hero-inset,.echo-access:not(.echo-order-access) .access-tear-lines{display:none}
+ .echo-access:not(.echo-order-access) .access-tear-vlines{display:block;position:fixed;top:-6vh;height:112vh;width:140px;left:calc(100% - var(--cw) - 110px);z-index:3;pointer-events:none;overflow:visible}
+ .access-tear-vlines path{fill:none;stroke:#f3e9d2;vector-effect:non-scaling-stroke;stroke-linejoin:round}
+ html.echo-access-open body .echo-access:not(.echo-order-access) .access-pair{align-self:flex-start;margin:auto 0;width:min(760px,calc(100vw - var(--cw) - 96px));max-width:none;margin-inline-start:calc((100vw - var(--cw) - min(760px,100vw - var(--cw) - 96px)) / 2 - 48px)}
+}
+@media(min-width:1001px) and (orientation:landscape) and (prefers-reduced-motion:reduce){.access-hero-photo,.access-sketches,.access-hero-vignette{animation:none!important}}

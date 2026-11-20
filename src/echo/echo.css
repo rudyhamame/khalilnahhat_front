@@ -70,8 +70,6 @@
 .echo{font-size:16px;overflow-wrap:break-word}
 .echo p{margin:0 0 1.25rem}.echo h1,.echo h2,.echo h3{line-height:1.12}
 .echo button,.echo a,.echo input,.echo select,.echo textarea{-webkit-tap-highlight-color:transparent}
-.echo-skip{position:fixed;top:8px;inset-inline-start:8px;transform:translateY(-180%);z-index:100;background:var(--eclipse);color:var(--silver)!important;padding:12px 18px}
-.echo-skip:focus{transform:none}
 .echo-header{background:var(--silver);color:var(--eclipse);padding:20px max(4vw,20px);gap:24px;min-height:92px}
 .echo-logo{font-size:2.6rem;letter-spacing:-.02em;gap:6px;flex-shrink:0;direction:ltr}
 .echo-logo span{font-size:.75rem;color:inherit;letter-spacing:.18em;white-space:nowrap}

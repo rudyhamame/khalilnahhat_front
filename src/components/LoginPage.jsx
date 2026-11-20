@@ -13,18 +13,22 @@ import ClientAppBadge from '../echo/ClientAppBadge';
 // A torn-paper edge: one seeded jagged line (fine fibres plus the odd bigger bite) shared by the character's clip-path and the drawn rim, so they always match.
 const TEAR = (() => {
   let r = 11; const rnd = () => (r = (r * 16807) % 2147483647) / 2147483647;
-  const xs = []; for (let x = -20; x <= 1020; x += 2 + rnd() * 6) xs.push(x);
+  const xs = []; for (let x = -60; x < 1060; x += 2 + rnd() * 6) xs.push(x); xs.push(1060); // runs past both screen edges, ending exactly on 1060
   // three jagged variants over the same points: CSS morphs between them so the torn edge keeps shifting (breathing).
   const shapes = [];
   const shape = () => {
-    const pts = xs.map(x => [x, (rnd() - .5) * 7 + (rnd() < .1 ? (rnd() - .5) * 12 : 0) + Math.sin(x / 37 + rnd() * 2) * 3 - Math.max(0, Math.abs(x - 500) - 300) * .45]);
+    const pts = xs.map(x => [x, (rnd() - .5) * 7 + (rnd() < .1 ? (rnd() - .5) * 12 : 0) + Math.sin(x / 37 + rnd() * 2) * 3]); // level across the whole width (no upward sweep at the sides)
     shapes.push(pts);
     return ['calc(50% - 50vw) 0', 'calc(50% + 50vw) 0', ...[...pts].reverse().map(([x, y]) => `calc(50% + ${((x - 500) / 10).toFixed(2)}vw) calc(100% - var(--form-h,350px) - 30px + ${y.toFixed(1)}px)`)].join(',');
   };
   const [a, b, c] = [shape(), shape(), shape()];
   // drawn lines hugging the tear: same points, pushed down by a few px each, morphing in step with the clip-path.
   const lines = [0, 7, 15].map(dy => shapes.map(pts => 'M' + pts.map(([x, y]) => `${x.toFixed(1)} ${(y + dy).toFixed(1)}`).join('L')));
-  return { lines, style: { '--tear': a, '--tear-a': a, '--tear-b': b, '--tear-c': c } };
+  // landscape: the same jagged edge turned upright (runs top to bottom; the character page is to its right, 100% - --cw from the left).
+  const vshape = pts => [...pts.map(([x, y]) => `calc(100% - var(--cw,45vw) + ${y.toFixed(1)}px) ${(x / 10).toFixed(2)}%`), '100% 106%', '100% -6%'].join(',');
+  const [va, vb, vc] = shapes.map(vshape);
+  const vlines = [0, 7, 15].map(dx => shapes.map(pts => 'M' + pts.map(([x, y]) => `${(y - dx).toFixed(1)} ${x.toFixed(1)}`).join('L')));
+  return { lines, vlines, style: { '--tear': a, '--tear-a': a, '--tear-b': b, '--tear-c': c, '--vtear': va, '--vtear-a': va, '--vtear-b': vb, '--vtear-c': vc } };
 })();
 export default function LoginPage({ lang, isAuthenticated, username, loginError, signupError, onLogin, onSignup, onLogout, onGoogleLogin, embedded=false }) {
   useAccessViewport(!embedded);
@@ -158,7 +162,7 @@ export default function LoginPage({ lang, isAuthenticated, username, loginError,
       </>; };
   const content = <section ref={accessRoot} className={embedded ? "echo-access echo-order-access" : `echo-access${leaving ? ' is-leaving' : ''}`} data-access-mode={mode} dir={ar ? 'rtl' : 'ltr'} aria-labelledby={embedded ? undefined : "access-title"} aria-label={embedded ? tr("Account access", "الدخول إلى الحساب") : undefined}>
     {!embedded && !ready && <div className="access-loader" role="status" aria-label={tr('Loading', 'جارٍ التحميل')}><i/></div>}
-    {!embedded && <><div className="access-backdrop" aria-hidden="true"/><div className="access-blend" aria-hidden="true"/><div className="access-sketches" aria-hidden="true" style={TEAR.style}/>{ready&&<><div className="access-hero-vignette" aria-hidden="true" style={TEAR.style}/><img className="access-hero-photo" style={TEAR.style} src="/echo/login-hero-khalil.webp" width="1016" height="1536" alt={tr('DJ Khalil in sunglasses and a black denim jacket','دي جي خليل بنظارة شمسية وجاكيت جينز أسود')} fetchPriority="high"/><div className="access-hero-inset" aria-hidden="true" style={TEAR.style}/><svg className="access-tear-lines" viewBox="-20 -110 1040 140" preserveAspectRatio="none" aria-hidden="true">{TEAR.lines.map((d, i) => <path key={i} d={d[0]} style={{ opacity: [.9, .6, .35][i], strokeWidth: [2.2, 1.6, 1.1][i] }}><animate attributeName="d" dur="3.4s" repeatCount="indefinite" values={[d[0], d[1], d[2], d[0]].join(';')} keyTimes="0;.33;.66;1" calcMode="spline" keySplines=".42 0 .58 1;.42 0 .58 1;.42 0 .58 1"/></path>)}</svg></>}</>}
+    {!embedded && <><div className="access-backdrop" aria-hidden="true"/><div className="access-blend" aria-hidden="true"/><div className="access-sketches" aria-hidden="true" style={TEAR.style}/>{ready&&<><div className="access-hero-vignette" aria-hidden="true" style={TEAR.style}/><img className="access-hero-photo" style={TEAR.style} src="/echo/login-hero-khalil.webp" width="1016" height="1536" alt={tr('DJ Khalil in sunglasses and a black denim jacket','دي جي خليل بنظارة شمسية وجاكيت جينز أسود')} fetchPriority="high"/><div className="access-hero-inset" aria-hidden="true" style={TEAR.style}/><svg className="access-tear-lines" viewBox="-60 -110 1120 140" preserveAspectRatio="none" aria-hidden="true">{TEAR.lines.map((d, i) => <path key={i} d={d[0]} style={{ opacity: [.9, .6, .35][i], strokeWidth: [2.2, 1.6, 1.1][i] }}><animate attributeName="d" dur="3.4s" repeatCount="indefinite" values={[d[0], d[1], d[2], d[0]].join(';')} keyTimes="0;.33;.66;1" calcMode="spline" keySplines=".42 0 .58 1;.42 0 .58 1;.42 0 .58 1"/></path>)}</svg><svg className="access-tear-vlines" viewBox="-110 -60 140 1120" preserveAspectRatio="none" aria-hidden="true">{TEAR.vlines.map((d, i) => <path key={i} d={d[0]} style={{ opacity: [.9, .6, .35][i], strokeWidth: [2.2, 1.6, 1.1][i] }}><animate attributeName="d" dur="3.4s" repeatCount="indefinite" values={[d[0], d[1], d[2], d[0]].join(';')} keyTimes="0;.33;.66;1" calcMode="spline" keySplines=".42 0 .58 1;.42 0 .58 1;.42 0 .58 1"/></path>)}</svg></>}</>}
 
     {embedded || isAuthenticated ? <div className="access-content"><div className="access-form-wrap">
       {embedded && <header className="access-embedded-heading"><h2>{mode === 'signin' ? tr('Your next great event starts here.', 'فعاليتك القادمة تبدأ هنا.') : tr('Let’s make it yours.', 'لنصنع فعاليتك معاً.')}</h2><p>{mode === 'signin' ? tr('Sign in to plan with Echo AI.', 'سجّل الدخول للتخطيط مع إيكو AI.') : tr('Create an account to plan and keep your event details together.', 'أنشئ حساباً للتخطيط وحفظ تفاصيل فعاليتك في مكان واحد.')}</p></header>}
