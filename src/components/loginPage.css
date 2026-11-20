@@ -508,3 +508,9 @@ html[dir=rtl].echo-access-open body .echo.echo-public-page[data-theme][data-page
 /* exit scene mirrored: the forms side leaves to the right, the character side to the left */
 html[dir=rtl].echo-login-leaving .echo-access.is-leaving :is(.access-pair,.access-guest,.access-app-badge,.access-panel-l){animation:access-slide-right .9s cubic-bezier(.65,0,.35,1) forwards!important}
 html[dir=rtl].echo-login-leaving .echo-access.is-leaving :is(.access-hero-photo,.access-hero-inset,.access-hero-vignette,.access-sketches,.access-tear-lines,.access-tear-vlines,.access-panel-r){animation:access-slide-left .9s cubic-bezier(.65,0,.35,1) forwards!important}
+
+/* Landscape: the darkening on the character's side hugs the tear (the right edge of the forms column) instead of the bottom edge. */
+@media(min-width:1001px) and (orientation:landscape){
+ html.echo-access-open body .echo-access:not(.echo-order-access) .access-hero-vignette{box-shadow:none;background:linear-gradient(to right,#0000 calc(100% - var(--cw,45vw) - 4px),#000000b0 calc(100% - var(--cw,45vw)),#0000 calc(100% - var(--cw,45vw) + 150px))}
+ html[dir=rtl].echo-access-open body .echo-access:not(.echo-order-access) .access-hero-vignette{background:linear-gradient(to right,#0000 calc(var(--cw,45vw) - 150px),#000000b0 var(--cw,45vw),#0000 calc(var(--cw,45vw) + 4px))}
+}

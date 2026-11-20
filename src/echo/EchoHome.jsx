@@ -6,7 +6,7 @@ import HeroRingButton from './HeroRingButton';
 import useHeroHeadphoneAnimation from './useHeroHeadphoneAnimation';
 import englishIntro from './data/heroIntroduction.en.json';
 import arabicIntro from './data/heroIntroduction.ar.json';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2 } from 'lucide-react';
 import { usePageMeta } from './meta';
 import { playPercussion } from './percussion';
@@ -85,6 +85,19 @@ function EchoHomeContent({ lang, user, token }) {
   const heroVisual = useRef(null);
   const [greetingStart,setGreetingStart]=useState(0),[greetingReady,setGreetingReady]=useState(0);
   const [introTransport,setIntroTransport]=useState(null);
+  // While the greeting plays the title and the paragraph are unmounted and the player takes the middle of the left column: it glides there (FLIP: from where it was to where it now sits).
+  const engaged=Boolean(introTransport?.engaged),playerTop=useRef(null),[copyGone,setCopyGone]=useState(false);
+  // The title and paragraph first animate out (fade + rise), and are unmounted when that finishes; only then does the player glide to the middle.
+  useEffect(()=>{
+    if(!engaged){setCopyGone(false);return undefined;}
+    const timer=setTimeout(()=>setCopyGone(true),matchMedia('(prefers-reduced-motion: reduce)').matches?0:460);
+    return()=>clearTimeout(timer);
+  },[engaged]);
+  useLayoutEffect(()=>{
+    const player=document.querySelector('.hero-introduction .hero-intro-player');if(!player)return;
+    const top=player.getBoundingClientRect().top,from=playerTop.current;playerTop.current=top;
+    if(from!=null&&Math.abs(from-top)>2&&!matchMedia('(prefers-reduced-motion: reduce)').matches)player.animate([{transform:`translateY(${from-top}px)`},{transform:'none'}],{duration:650,easing:'cubic-bezier(.3,.9,.3,1)'});
+  },[copyGone]);
   // Keep the chosen introduction language when returning through a page link.
   const [heroLanguageChosen,setHeroLanguageChosen]=useState(()=>{try{const saved=sessionStorage.getItem('echo-home-section');return sessionStorage.getItem('echo-home-language-selected')==='1'||Boolean(saved&&saved!=='home');}catch{return false;}});
 
@@ -156,10 +169,10 @@ function EchoHomeContent({ lang, user, token }) {
     </div>
 
     <section className="echo-hero">
-      <div className="echo-hero-copy"><div className="hero-copy-content"><div className="hero-intro-heading-group">
-        {user&&<p className="hero-returning-greeting">{tr('Welcome back','أهلاً بعودتك')}{clientName&&<>{ar?'، ':', '}<bdi className="echo-client-name">{clientName}</bdi></>}</p>}
-        <h1 className="echo-hero-title"><span className="is-active">{tr('DJ, sound, lighting & LED walls for your event','دي جي وصوت وإضاءة وشاشات LED لفعاليتك')}</span></h1>
-        <p className="echo-hero-subline">{tr('For weddings, engagements and parties across the GTA. Arabic and multicultural music, premium sound, lighting and LED walls, and one team that looks after every detail from the first call to the last song.','لحفلات الزفاف والخطوبة والمناسبات في منطقة تورونتو الكبرى. موسيقى عربية ومتعددة الثقافات، وصوت وإضاءة وشاشات LED احترافية، وفريق واحد يهتم بكل التفاصيل من أول اتصال حتى آخر أغنية.')}</p>
+      <div className="echo-hero-copy"><div className="hero-copy-content"><div className={`hero-intro-heading-group${copyGone?' is-engaged':engaged?' is-leaving-copy':''}`}>
+        {!copyGone&&user&&<p className="hero-returning-greeting">{tr('Welcome back','أهلاً بعودتك')}{clientName&&<>{ar?'، ':', '}<bdi className="echo-client-name">{clientName}</bdi></>}</p>}
+        {!copyGone&&<h1 className="echo-hero-title"><span className="is-active">{tr('DJ, sound, lighting & LED walls for your event','دي جي وصوت وإضاءة وشاشات LED لفعاليتك')}</span></h1>}
+        {!copyGone&&<p className="echo-hero-subline">{tr('For weddings, engagements and parties across the GTA. Arabic and multicultural music, premium sound, lighting and LED walls, and one team that looks after every detail from the first call to the last song.','لحفلات الزفاف والخطوبة والمناسبات في منطقة تورونتو الكبرى. موسيقى عربية ومتعددة الثقافات، وصوت وإضاءة وشاشات LED احترافية، وفريق واحد يهتم بكل التفاصيل من أول اتصال حتى آخر أغنية.')}</p>}
         <HeroIntroductionAudio hideAppBadge={Boolean(user&&!user.isAdmin)} onSkip={()=>leaveForMusic('skip')} lang={lang} animationReady={headphone.ready} animationFailed={headphone.failed} onAnimationRetry={headphone.retry} onLanguageSelect={()=>{setHeroLanguageChosen(true);try{sessionStorage.setItem('echo-home-language-selected','1');}catch{}}} onLanguageReset={()=>{setHeroLanguageChosen(false);try{sessionStorage.removeItem('echo-home-language-selected');sessionStorage.removeItem('echo-home-section');}catch{}setGreetingStart(0);setGreetingReady(0);}} onTransportState={setIntroTransport} animationComplete={greetingReady} onBegin={()=>{setGreetingReady(0);setGreetingStart(value=>Math.abs(value)+1);}} onStop={()=>{setGreetingReady(0);setGreetingStart(value=>-(Math.abs(value)+1));}}/>
         {heroLanguageChosen&&<HeroRingButton label={tr('Skip to content','انتقل إلى المحتوى')} onClick={()=>leaveForMusic('hero')}/>}
         {heroLanguageChosen&&!(user&&!user.isAdmin)&&<ClientAppBadge tr={tr}/>}

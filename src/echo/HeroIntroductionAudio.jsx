@@ -7,6 +7,7 @@ import englishNarration from './data/heroIntroduction.en.json';
 import {createLiveAudioFocus} from '../lib/liveAudioFocus';
 import {archivePlayerCommand,subscribeArchivePlayerState} from '../lib/archivePlayerBridge';
 import ClientAppBadge from './ClientAppBadge';
+import './greetingFont.css';
 import './heroIntroductionAudio.css';
 import {HERO_EQUIPMENT_TIMELINE} from './heroEquipmentCues';
 import {HEADER_INTRO_LANGUAGE_KEY} from './i18n';
@@ -61,7 +62,7 @@ export default function HeroIntroductionAudio({lang,onSkip,onBegin,animationComp
  const audio=useRef(null),root=useRef(null),focus=useRef(null),request=useRef(0),id=useId();
  const [playing,setPlaying]=useState(false),[waiting,setWaiting]=useState(false),[position,setPosition]=useState(0),[duration,setDuration]=useState(narration.duration),[error,setError]=useState('');
  const transportPosition=Math.floor(position*20)/20;
- useEffect(()=>{onTransportState?.({playing:playing&&!waiting&&!staging,language:selectedLanguage});},[playing,waiting,staging,selectedLanguage,onTransportState]);
+ useEffect(()=>{onTransportState?.({playing:playing&&!waiting&&!staging,engaged:phase==='started'&&!staging,language:selectedLanguage});},[playing,waiting,staging,phase,selectedLanguage,onTransportState]);
  // Keep timeline ticks local to the showcase instead of re-rendering the whole homepage.
  useEffect(()=>{window.dispatchEvent(new CustomEvent(HERO_EQUIPMENT_TIMELINE,{detail:{playing:playing&&!waiting&&!staging,language:selectedLanguage,position:transportPosition,started:phase==='started'&&!staging}}));},[playing,waiting,staging,selectedLanguage,transportPosition,phase]);
  const tr=(en,arabic)=>ar?arabic:en;
@@ -186,14 +187,15 @@ export default function HeroIntroductionAudio({lang,onSkip,onBegin,animationComp
   let along;if(py<=eps)along=px;else if(px>=w-eps)along=w+py;else if(py>=h-eps)along=w+h+(w-px);else along=2*w+h+(h-py);
   seek(Math.max(0,Math.min(1,along/(2*(w+h))))*duration);
  };
- const dragFrame=event=>{if(event.buttons===1||event.pointerType==='touch')seekFromFrame(event);};
+ const dragFrame=event=>{if(event.target.closest?.('button,input')&&!event.currentTarget.hasPointerCapture?.(event.pointerId))return;if(event.buttons===1||event.pointerType==='touch')seekFromFrame(event);};
  return <div ref={root} className="hero-audio-introduction" data-room-entered={roomEntered?'true':'false'} data-welcome-pending={phase==='idle'?'true':undefined} data-started={position>0||playing?true:undefined}>
   {/* The curved lyrics over the record are removed; the sentence now shows as a subtitle above the player. */}
   {!languageChosen&&<FullscreenLanguageChooser onChoose={language=>{rememberLanguage(language);setChosenLanguage(language);lang.setLanguage(language);setLanguageChosen(true);onLanguageSelect?.(language);}}/>}
   <div className="hero-intro-player" aria-label={tr('Echo introduction — English','مقدّمة إيكو — بالعربي')}>
-   <div className="hero-intro-frame" ref={frame} onPointerDown={event=>{event.currentTarget.setPointerCapture?.(event.pointerId);seekFromFrame(event);}} onPointerMove={dragFrame} data-ready={phase==='started'&&!staging?'true':undefined}>
+   <div className="hero-intro-frame" ref={frame} onPointerDown={event=>{if(event.target.closest?.('button,input'))return;event.currentTarget.setPointerCapture?.(event.pointerId);seekFromFrame(event);}} onPointerMove={dragFrame} data-ready={phase==='started'&&!staging?'true':undefined}>
     <svg className="hero-intro-frame-line" width={box.w} height={box.h} viewBox={`0 0 ${box.w||1} ${box.h||1}`} aria-hidden="true"><rect className="is-track" x="2" y="2" width={Math.max(0,box.w-4)} height={Math.max(0,box.h-4)} rx="20"/><rect className="is-fill" x="2" y="2" width={Math.max(0,box.w-4)} height={Math.max(0,box.h-4)} rx="20" pathLength="100" strokeDasharray={`${duration?Math.min(100,position/duration*100):0} 100`}/></svg>
    <div className="hero-intro-meta"><span>{tr('ECHO GREETING','ترحيب إيكو')}</span><time dir="ltr">{introClock(position)} / {introClock(duration)}</time></div>
+    <div className="hero-intro-stage" data-active="false"/>
    <p className={`hero-intro-subtitle${phase==='started'&&!staging&&(playing||position>0)&&cue?'':' is-idle'}`} dir={ar?'rtl':'ltr'} lang={ar?'ar':'en'} aria-hidden="true">{phase==='started'&&!staging&&(playing||position>0)&&cue?narration.words.slice(cue.from,cue.to).map((word,offset)=>{const index=cue.from+offset;return <span key={index} className={index===activeWord?'is-active':index<activeWord?'is-said':undefined}>{word.text} </span>;}):''}</p>
    <input type="range" className="hero-intro-seek" aria-label={tr('Greeting position','موضع الترحيب')} min="0" max={duration||1} step="0.1" value={Math.min(position,duration||1)} disabled={staging||phase!=='started'} style={{'--seek':`${duration?Math.min(100,position/duration*100):0}%`}} onChange={event=>seek(Number(event.target.value))}/>
    <div className="hero-intro-controls hero-intro-controls-inline" role="group" aria-label={tr('Introduction playback','التحكم بالمقدّمة')} aria-busy={staging||waiting} dir="ltr">

@@ -87,7 +87,6 @@
 
 /* Landscape screens wider than a phone (tablet and desktop), greeting not playing: only the title and the player, the player directly under the title (no gap, no app badge), with the Explore button centred under the player. */
 @media(min-width:721px) and (orientation:landscape){
- html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group:has(.hero-audio-introduction:not([data-started])) :is(.client-app-badge){display:none!important}
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .hero-intro-player{position:static!important;inset:auto!important;width:100%!important;margin:14px 0 0!important}
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .hero-ring-cta{position:static!important;inset:auto!important;display:flex!important;margin:20px auto 0!important}
 }
@@ -155,3 +154,74 @@ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-
 html body .echo .hero-intro-frame .hero-intro-controls-inline{flex:none;width:100%;margin:6px 0 0!important;justify-content:space-between!important;gap:0!important}
 html body .echo .hero-intro-frame .hero-intro-controls-inline :is(.hero-intro-launch,.hero-intro-transport-button){--intro-control-size:40px}
 html body .echo .hero-intro-frame .hero-intro-meta{flex:none}
+
+/* The highlight is never clipped: the transcript area doesn't crop, the lines have room for the marker pill, and the pill is no longer scaled past its box. */
+html body .echo .hero-intro-frame .hero-intro-subtitle{overflow:visible!important;padding:6px 12px!important;line-height:1.9!important;row-gap:2px}
+html body .echo .hero-intro-frame .hero-intro-subtitle span{padding:.08em .32em!important;margin-inline-end:.18em!important}
+html body .echo .hero-intro-frame .hero-intro-subtitle .is-active{transform:none!important;box-shadow:0 2px 0 #ab7c3e;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+/* No marker highlight: the spoken word is simply gold, bold and underlined with a thin gold line. */
+html body .echo .hero-intro-frame .hero-intro-subtitle .is-active{background:none!important;box-shadow:none!important;color:#f2d79b!important;font-weight:700;text-decoration:underline;text-decoration-color:#d9b46e;text-decoration-thickness:2px;text-underline-offset:.28em;padding:0!important;border-radius:0}
+
+/* ===== 3D object inside the player square ===== The object stage sits between the label and the transcript. It has no height until an object is on show; then it opens and the square grows to fit it (and shrinks back after). */
+.hero-intro-frame .hero-intro-stage{position:relative;flex:none;width:100%;height:0;margin:0;overflow:visible;transition:height .55s cubic-bezier(.3,.9,.3,1)}
+.hero-intro-frame .hero-intro-stage[data-active=true]{height:230px}
+.hero-intro-stage>.hero-equipment-showcase{position:absolute!important;inset:0!important;width:auto!important;max-width:none!important;z-index:1;pointer-events:none;opacity:0;transition:opacity .45s ease}
+.hero-intro-stage>.hero-equipment-showcase.is-visible{opacity:1}
+html body .echo .hero-intro-frame .hero-intro-subtitle{flex:1 1 auto;min-height:96px}
+
+/* Caption of the 3D object, in the site's type: the category is a small gold tag, the name is set in the display face (Anton, caps) in warm white, with a gold rule beneath. */
+.hero-intro-stage .hero-equipment-caption{position:absolute;left:0;right:0;bottom:0;padding:0 8px!important;text-align:center}
+.hero-intro-stage .hero-equipment-caption>span{display:inline-block;padding:3px 10px;border:1px solid color-mix(in srgb,var(--equipment-accent,#d9b46e) 70%,transparent);border-radius:999px;font:600 10px/1.2 'Noto Sans','Noto Sans Arabic',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:var(--equipment-accent,#d9b46e);background:#0d141899}
+.hero-intro-stage .hero-equipment-caption>h2{margin:6px 0 6px;font:400 clamp(20px,1.9vw,26px)/1.1 Anton,Impact,'Cairo',sans-serif;letter-spacing:.03em;text-transform:uppercase;color:#f4ecd8;text-wrap:balance}
+[dir=rtl] .hero-intro-stage .hero-equipment-caption>h2{font-family:'Cairo','Noto Sans Arabic',sans-serif;font-weight:900;text-transform:none;letter-spacing:0}
+.hero-intro-stage .hero-equipment-rule{width:44px;height:2px;margin:0 auto;border-radius:2px;background:linear-gradient(90deg,transparent,var(--equipment-accent,#d9b46e),transparent);opacity:.9}
+.hero-intro-stage .hero-equipment-object{height:calc(100% - 86px);min-height:0}
+
+/* While the greeting plays (title and paragraph unmounted) the player is centred in the left column; the Skip to content button sits at the column's bottom-left. */
+@media(min-width:721px) and (orientation:landscape){
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group.is-engaged{justify-content:center}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group.is-engaged .hero-intro-frame{margin-inline:auto}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .hero-ring-cta{margin:auto auto 0 0!important;align-self:flex-start;transform:scale(1.35);transform-origin:left bottom}
+ html[dir=rtl] body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .hero-ring-cta{margin:auto 0 0 auto!important;align-self:flex-end;transform-origin:right bottom}
+}
+
+/* The square grows to fit the 3D object: sideways in landscape (the object opens on the left, the transcript moves right), downwards in portrait (the object opens above the transcript). */
+@media(orientation:landscape){
+ .hero-intro-frame .hero-intro-stage{position:absolute;left:16px;top:44px;bottom:62px;width:0;height:auto;overflow:visible;transition:width .55s cubic-bezier(.3,.9,.3,1)}
+ .hero-intro-frame .hero-intro-stage[data-active=true]{height:auto;width:calc(46% - 16px)}
+ .hero-intro-player .hero-intro-frame{transition:width .55s cubic-bezier(.3,.9,.3,1)}
+ .hero-intro-player .hero-intro-frame:has(.hero-intro-stage[data-active=true]){width:min(100%,470px)}
+ html body .echo .hero-intro-frame .hero-intro-subtitle{transition:margin .55s cubic-bezier(.3,.9,.3,1)}
+ html body .echo .hero-intro-frame:has(.hero-intro-stage[data-active=true]) .hero-intro-subtitle{margin-inline-start:46%!important}
+}
+@media(orientation:portrait){
+ .hero-intro-frame .hero-intro-stage[data-active=true]{height:230px}
+}
+/* Greeting playing: the player is centred in the whole left column; the button stays at its bottom-left and the Android ad steps aside. */
+@media(min-width:721px) and (orientation:landscape){
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group.is-engaged{position:relative;height:calc(100% - 24px);margin-top:12px!important}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group.is-engaged .hero-ring-cta{position:absolute!important;inset:auto auto 0 0!important;margin:0!important}
+ html[dir=rtl] body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group.is-engaged .hero-ring-cta{inset:auto 0 0 auto!important}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group.is-engaged .client-app-badge{display:none!important}
+}
+
+/* Landscape: the Skip to content button is centred under the record/character complex (its centre follows the complex's offset, --cx) at the bottom of the hero; the checkbox moves to the bottom of the left column to make room. */
+@media(min-width:721px) and (orientation:landscape){
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group.is-engaged{position:static}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .hero-ring-cta,
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group.is-engaged .hero-ring-cta,
+ html[dir=rtl] body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group.is-engaged .hero-ring-cta{position:absolute!important;inset:auto auto 26px calc(50% + var(--cx,0px))!important;margin:0!important;align-self:auto;transform:translateX(-50%) scale(1.35);transform-origin:center bottom;z-index:8}
+ .hero-skip-login{justify-content:flex-start;padding-inline:var(--echo-viewport-gutter,48px)}
+}
+
+/* Greeting starts: the title, paragraph (and "welcome back" line) fade and rise away before they are unmounted. */
+.hero-intro-heading-group.is-leaving-copy :is(.echo-hero-title,.echo-hero-subline,.hero-returning-greeting){animation:hero-copy-out .42s cubic-bezier(.4,0,.2,1) both;pointer-events:none}
+@keyframes hero-copy-out{to{opacity:0;transform:translateY(-18px)}}
+@media(prefers-reduced-motion:reduce){.hero-intro-heading-group.is-leaving-copy :is(.echo-hero-title,.echo-hero-subline,.hero-returning-greeting){animation:none}}
+
+/* Landscape: the Android badge sits opposite the Skip to content button, centred at the bottom of the left column (the button is centred under the record/character on the right); the checkbox steps up above it. */
+@media(min-width:721px) and (orientation:landscape){
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .client-app-badge--player,
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group.is-engaged .client-app-badge--player{display:flex!important;position:absolute!important;inset:auto auto 26px calc(50% - var(--cx,0px))!important;transform:translateX(-50%);margin:0!important;z-index:8}
+ .hero-skip-login{bottom:calc(env(safe-area-inset-bottom,0px) + 88px)}
+}

@@ -1,4 +1,5 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
+import {createPortal} from 'react-dom';
 import englishNarration from './data/heroIntroduction.en.json';
 import arabicNarration from './data/heroIntroduction.ar.json';
 import {EQUIPMENT_MODELS} from './equipmentModels';
@@ -80,8 +81,18 @@ function HeroEquipmentShowcaseScene(){
  useEffect(()=>{const query=matchMedia('(prefers-reduced-motion: reduce)'),change=()=>setReducedMotion(query.matches);query.addEventListener('change',change);return()=>query.removeEventListener('change',change);},[]);
  // Warm the next models before their spoken cues; release earlier scenes after their exit transition.
  const visible=started?cues.filter(item=>position>=item.start-20&&position<item.end+0.65):[];
- return <aside className={`hero-equipment-showcase${cue?' is-visible':''}`} aria-label={ar?'تجهيزات مذكورة في المقدّمة':'Equipment featured in the introduction'} aria-hidden={!cue} dir={ar?'rtl':'ltr'}>
+ // Landscape tablet/desktop: the 3D object is drawn inside the greeting player's square (its .hero-intro-stage), which grows to fit it while an object is on show.
+ const [host,setHost]=useState(null),[wide,setWide]=useState(()=>matchMedia('(min-width:721px) and (orientation:landscape)').matches);
+ useEffect(()=>{const query=matchMedia('(min-width:721px) and (orientation:landscape)'),change=()=>setWide(query.matches);query.addEventListener('change',change);return()=>query.removeEventListener('change',change);},[]);
+ useEffect(()=>{
+  const find=()=>setHost(document.querySelector('.hero-intro-stage'));find();
+  const observer=new MutationObserver(find);observer.observe(document.body,{childList:true,subtree:true});
+  return()=>observer.disconnect();
+ },[]);
+ useEffect(()=>{if(!host)return undefined;host.dataset.active=cue?'true':'false';return()=>{host.dataset.active='false';};},[host,cue]);
+ const aside=<aside className={`hero-equipment-showcase${cue?' is-visible':''}`} aria-label={ar?'تجهيزات مذكورة في المقدّمة':'Equipment featured in the introduction'} aria-hidden={!cue} dir={ar?'rtl':'ltr'}>
   <div className="hero-equipment-halo"/>
   {visible.map(item=><EquipmentScene key={`${language}:${item.id}`} cue={item} active={cue?.id===item.id} playing={transport?.playing} ar={ar} reducedMotion={reducedMotion} starts={starts} position={position}/>)}
  </aside>;
+ return host?createPortal(aside,host):aside;
 }

@@ -1,0 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Cormorant+Garamond:ital,wght@1,500;1,600;1,700&display=swap');
+/* The greeting transcript is set like a greeting card: Cormorant Garamond italic for English (an elegant, high-contrast serif), Aref Ruqaa (a calligraphic Ruqaa face) for Arabic. */
+html body .echo .hero-intro-frame .hero-intro-subtitle{font-family:'Cormorant Garamond','Playfair Display',Georgia,serif!important;font-style:italic;font-weight:600!important;font-size:clamp(23px,2.1vw,30px)!important;line-height:1.5!important;letter-spacing:.01em}
+html body .echo .hero-intro-frame .hero-intro-subtitle[lang=ar]{font-family:'Aref Ruqaa','Noto Sans Arabic',serif!important;font-style:normal;font-weight:400!important;font-size:clamp(22px,2vw,28px)!important;line-height:1.9!important;letter-spacing:0}
+html body .echo .hero-intro-frame .hero-intro-subtitle .is-active{font-weight:700!important}
+html body .echo .hero-intro-frame .hero-intro-subtitle[lang=ar] .is-active{font-weight:700!important}
