@@ -1,6 +1,6 @@
 import {djWorkTypeText} from '../lib/djWorkTypeText';
 import {useEffect,useMemo,useRef,useState} from 'react';
-import {ChevronLeft,ChevronRight,Disc3,Info,Pause,Play,Repeat,SkipBack,SkipForward,Shuffle,Square} from 'lucide-react';
+import {ChevronLeft,ChevronRight,Disc3,Pause,Play,Repeat,SkipBack,SkipForward,Shuffle,Square} from 'lucide-react';
 import {displayImageUrl} from '../lib/displayImage';
 import {useArchivePlayerState,useArchivePlaybackPosition} from '../hooks/useArchivePlayerState';
 import {fetchMusicArchiveCatalog} from '../lib/musicArchiveCatalog';
@@ -120,7 +120,6 @@ export default function MusicPlayerPage({lang,type:typeProp,workType,onClose,pla
         {onClose&&hint==='back'&&!browse&&!flipped&&<span className="wp-back-hint" aria-hidden="true">{tr('Finished listening? Tap the arrow to head back.','خلّصت استماع؟ اضغط على السهم للرجوع.')}</span>}
         <button type="button" ref={badge} className={`wp-badge${hint==='browse'&&!browse?' is-hinting':''}`} title={tr('Browse collections and recordings','تصفّح المجموعات والتسجيلات')} aria-label={tr('Browse collections','تصفّح المجموعات')} aria-haspopup="true" aria-expanded={Boolean(browse)} onClick={()=>setBrowse('collections')}><img src={art} alt=""/></button>
         {hint==='browse'&&!browse&&!flipped&&<span className="wp-badge-hint" aria-hidden="true">{tr('Tap the round picture to browse collections, then pick a recording.','اضغط على الصورة الدائرية لتصفّح المجموعات ثم اختر تسجيلاً.')}</span>}
-        <button type="button" className="wp-icon" onClick={()=>setFlipped(true)} disabled={!current} aria-label={tr('Show the recording details','عرض تفاصيل التسجيل')}><Info size={20}/></button>
       </header>
       {!current?<p className="wp-empty" role={status==='error'?'alert':'status'}>{status==='error'?tr('The archive could not load.','تعذر تحميل الأرشيف.'):tr('No recordings here yet.','لا توجد تسجيلات هنا بعد.')}</p>:<>
         <div className="wp-wheel" ref={wheel} dir="ltr" tabIndex={0} role="group" aria-roledescription="carousel" aria-label={tr('Artwork wheel — swipe to change recording','عجلة الأغلفة — اسحب لتغيير التسجيل')} onKeyDown={key}

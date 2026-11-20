@@ -1,0 +1,4 @@
+.submitted-notice{box-sizing:border-box;width:min(100%,720px);margin:12px auto;padding:14px 16px;border:1px solid #d9b46e66;border-radius:12px;background:#d9b46e14;color:#e9eee8;font-size:14px;line-height:1.6}
+.submitted-notice strong{display:block;margin-bottom:4px;color:#e9c98a;font-size:15px}
+.submitted-notice p{margin:4px 0}
+.submitted-notice a{color:#e9c98a;text-decoration:underline}
