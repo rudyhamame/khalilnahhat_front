@@ -161,7 +161,7 @@ export default function HeroIntroductionAudio({lang,onSkip,onBegin,animationComp
     request.current++;pendingGreeting.current=null;stagingRef.current=false;setStaging(false);
     audio.current?.pause();setPlaying(false);setWaiting(false);setPosition(0);setError('');
     rememberLanguage(null);setLanguageChosen(false);setSelectedLanguage(null);setRoomEntered(false);
-    phaseRef.current='idle';setPhase('idle');onLanguageReset?.();
+    phaseRef.current='idle';setPhase('idle');setFrameOpen(false);onLanguageReset?.();
     try{sessionStorage.removeItem(HEADER_INTRO_LANGUAGE_KEY);}catch{/* Storage unavailable */}
     root.current?.closest('.hero-introduction')?.scrollIntoView({block:'start',behavior:'instant'});
     requestAnimationFrame(()=>document.querySelector('.hero-language-modal .hero-language-entry button')?.focus({preventScroll:true}));
@@ -196,6 +196,8 @@ export default function HeroIntroductionAudio({lang,onSkip,onBegin,animationComp
   seek(Math.max(0,Math.min(1,along/(2*(w+h))))*duration);
  };
  const dragFrame=event=>{if(event.target.closest?.('button,input')&&!event.currentTarget.hasPointerCapture?.(event.pointerId))return;if(event.buttons===1||event.pointerType==='touch')seekFromFrame(event);};
+ // Back to the one-line bar when the greeting is about to finish (last 1.5s).
+ useEffect(()=>{if(playing&&duration>3&&position>=duration-1.5)setFrameOpen(false);},[playing,position,duration]);
  const togglePlay=()=>{if(selectedLanguage!==chosenLanguage||phase!=='started')chooseLanguage(chosenLanguage);else if(playing)pausePlayback();else void startPlayback();};
  // Tapping the collapsed greeting opens it and starts the greeting; tapping it again only collapses it (playback continues).
  const toggleFrame=()=>{if(!frameOpen){setFrameOpen(true);if(!playing&&!staging&&!waiting&&animationReady)togglePlay();}else setFrameOpen(false);};
@@ -221,7 +223,7 @@ export default function HeroIntroductionAudio({lang,onSkip,onBegin,animationComp
     </span>
    </button>
     <button type="button" className="hero-intro-launch hero-intro-transport-button" disabled={staging||phase!=='started'} onClick={()=>seek((audio.current?.currentTime||0)-(narration.playbackOffset||0)-10)} aria-label={tr('Rewind 10 seconds','رجوع ١٠ ثواني')} title={tr('Rewind 10 seconds','رجوع ١٠ ثواني')}><span className="hero-intro-launch-face" aria-hidden="true"><span className="hero-intro-control-symbol"><RotateCcw size={25}/><span className="hero-intro-skip-seconds">10</span></span></span></button>
-    <button type="button" className="hero-intro-launch hero-intro-transport-button" disabled={staging||phase!=='started'} onClick={()=>{pendingGreeting.current=null;pausePlayback();seek(0);phaseRef.current='idle';setPhase('idle');onStop?.();}} aria-label={tr('Stop introduction','إيقاف المقدّمة')} title={tr('Stop','إيقاف')}><span className="hero-intro-launch-face" aria-hidden="true"><span className="hero-intro-control-symbol"><Square size={21} fill="currentColor"/></span></span></button>
+    <button type="button" className="hero-intro-launch hero-intro-transport-button" disabled={staging||phase!=='started'} onClick={()=>{pendingGreeting.current=null;pausePlayback();seek(0);phaseRef.current='idle';setPhase('idle');setFrameOpen(false);onStop?.();}} aria-label={tr('Stop introduction','إيقاف المقدّمة')} title={tr('Stop','إيقاف')}><span className="hero-intro-launch-face" aria-hidden="true"><span className="hero-intro-control-symbol"><Square size={21} fill="currentColor"/></span></span></button>
     <button type="button" className="hero-intro-launch hero-intro-transport-button" disabled={staging||phase!=='started'} onClick={()=>seek((audio.current?.currentTime||0)-(narration.playbackOffset||0)+10)} aria-label={tr('Forward 10 seconds','تقديم ١٠ ثواني')} title={tr('Forward 10 seconds','تقديم ١٠ ثواني')}><span className="hero-intro-launch-face" aria-hidden="true"><span className="hero-intro-control-symbol"><RotateCw size={25}/><span className="hero-intro-skip-seconds">10</span></span></span></button>
     <button type="button" className="hero-intro-launch hero-intro-transport-button hero-intro-skip-down" onClick={()=>{pendingGreeting.current=null;request.current++;audio.current?.pause();onSkip?.();}} aria-label={tr('Skip the introduction and continue to Music','تخطّي المقدّمة والمتابعة إلى الموسيقى')} title={tr('Continue to Music','المتابعة إلى الموسيقى')}><span className="hero-intro-launch-face" aria-hidden="true"><span className="hero-intro-control-symbol"><ChevronsDown size={27}/></span></span></button>
    </div>
@@ -231,6 +233,6 @@ export default function HeroIntroductionAudio({lang,onSkip,onBegin,animationComp
    {!hideAppBadge&&<ClientAppBadge tr={tr} className="client-app-badge--player"/>}
   </div>
   {phase==='started'&&!staging&&<p className="curved-intro-accessible" dir={ar?'rtl':'ltr'} lang={ar?'ar':'en'} aria-live="polite" aria-atomic="true">{cue.text}</p>}
-  <audio id={`intro-audio-${id}`} ref={audio} preload="auto" playsInline src={initialAudioSource.current} lang={ar?'ar':'en'} onLoadedMetadata={()=>{const value=audio.current.duration-(activeNarration.current.playbackOffset||0);if(Number.isFinite(value))setDuration(value);}} onTimeUpdate={sync} onSeeked={sync} onPlaying={()=>{if(!stagingRef.current){setPlaying(true);setWaiting(false);}}} onPause={()=>{if(!stagingRef.current){setPlaying(false);setWaiting(false);sync();}}} onWaiting={()=>{if(!stagingRef.current)setWaiting(true);}} onEnded={()=>{setPlaying(false);setWaiting(false);sync();}} onError={()=>{if(!stagingRef.current){setPlaying(false);setWaiting(false);setError(tr('The introduction is unavailable. Please try again.','المقدّمة مو متاحة هلّق. جرّبوا مرّة تانية.'));}}}/>
+  <audio id={`intro-audio-${id}`} ref={audio} preload="auto" playsInline src={initialAudioSource.current} lang={ar?'ar':'en'} onLoadedMetadata={()=>{const value=audio.current.duration-(activeNarration.current.playbackOffset||0);if(Number.isFinite(value))setDuration(value);}} onTimeUpdate={sync} onSeeked={sync} onPlaying={()=>{if(!stagingRef.current){setPlaying(true);setWaiting(false);}}} onPause={()=>{if(!stagingRef.current){setPlaying(false);setWaiting(false);sync();}}} onWaiting={()=>{if(!stagingRef.current)setWaiting(true);}} onEnded={()=>{setPlaying(false);setWaiting(false);setFrameOpen(false);sync();}} onError={()=>{if(!stagingRef.current){setPlaying(false);setWaiting(false);setError(tr('The introduction is unavailable. Please try again.','المقدّمة مو متاحة هلّق. جرّبوا مرّة تانية.'));}}}/>
  </div>;
 }

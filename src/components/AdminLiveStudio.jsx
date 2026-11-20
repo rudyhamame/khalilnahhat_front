@@ -119,6 +119,8 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  // The one source is OBS: its Virtual Camera is chosen by hand (nothing is picked or opened automatically), then the preview opens.
  const pickCamera=id=>{webrtc.setSelectedVideoDeviceId(id);if(!webrtc.sourceChosen)void webrtc.selectSource('camera',null,'none');};
  const hasAudioInput=Boolean(webrtc.selectedAudioDeviceId);
+ // Browsers hide camera names until camera access was granted once: ask briefly, release it, then read the list again (picks up an OBS Virtual Camera started later).
+ const scanCameras=async()=>{try{const probe=await navigator.mediaDevices.getUserMedia({video:true});probe.getTracks().forEach(track=>track.stop());}catch(error){adminToast(error?.name==='NotAllowedError'?'Allow camera access in the browser, then scan again.':'No camera could be opened. Start OBS Virtual Camera first.',true);}await webrtc.refreshDevices();};
  // Choosing or clearing the audio input switches the audio mode once the new device id is in place.
  useEffect(()=>{if(!webrtc.sourceChosen||webrtc.isBroadcasting||webrtc.previewBusy||webrtc.paused||webrtc.inputLost)return;const want=webrtc.selectedAudioDeviceId?'mic':'none';if(webrtc.audioMode!==want)void webrtc.selectAudio(want);},[webrtc.selectedAudioDeviceId]);// eslint-disable-line react-hooks/exhaustive-deps
  // Picking another mixer device while the private preview is open reopens the preview on it.
@@ -202,7 +204,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  <LiveSetListPicker token={token} value={setListId} onChange={setSetListId} disabled={webrtc.isConnecting||reserved||isLiveOnAir}/>
  </div></StudioControlSection>
  
- <StudioControlSection step="03" title="Source setup" description="OBS is the source: pick its Virtual Camera and, if you use one, a mixer." className="studio-sources-card"><div className="studio-block studio-input-block"><ObsSourceSetup disabled={loading||Boolean(error)||((webrtc.paused||webrtc.inputLost)?webrtc.previewBusy||webrtc.isConnecting:inputLocked||inputsHeld)} cameras={webrtc.videoInputs} cameraId={webrtc.selectedVideoDeviceId} onCamera={pickCamera} mixers={webrtc.audioInputs} mixerId={webrtc.selectedAudioDeviceId} onMixer={id=>{if(id&&id===webrtc.voiceDeviceId&&webrtc.voiceOn)void webrtc.setVoice(false);webrtc.setSelectedAudioDeviceId(id);}}/></div></StudioControlSection>
+ <StudioControlSection step="03" title="Source setup" description="OBS is the source: pick its Virtual Camera and, if you use one, a mixer." className="studio-sources-card"><div className="studio-block studio-input-block"><ObsSourceSetup onScan={scanCameras} disabled={loading||Boolean(error)||((webrtc.paused||webrtc.inputLost)?webrtc.previewBusy||webrtc.isConnecting:inputLocked||inputsHeld)} cameras={webrtc.videoInputs} cameraId={webrtc.selectedVideoDeviceId} onCamera={pickCamera} mixers={webrtc.audioInputs} mixerId={webrtc.selectedAudioDeviceId} onMixer={id=>{if(id&&id===webrtc.voiceDeviceId&&webrtc.voiceOn)void webrtc.setVoice(false);webrtc.setSelectedAudioDeviceId(id);}}/></div></StudioControlSection>
 
 
 

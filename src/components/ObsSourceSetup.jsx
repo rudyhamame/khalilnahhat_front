@@ -25,13 +25,14 @@ function DeviceList({label,kind,Icon,devices,selected,disabled,onPick}){
     </button>;})}</div>;
 }
 // The Studio has one source: OBS. The camera is the OBS Virtual Camera (OBS composes one or two cameras); the audio input is optional because the voice microphone has its own channel.
-export default function ObsSourceSetup({disabled,cameras=[],cameraId='',onCamera,mixers=[],mixerId='',onMixer}){
+export default function ObsSourceSetup({disabled,cameras=[],cameraId='',onCamera,mixers=[],mixerId='',onMixer,onScan}){
   const hasObs=cameras.some(item=>OBS.test(item.label||''));
   return <div className="studio-scenario-inputs" aria-label="Source setup" aria-disabled={disabled}>
     <header className="ss-setup-heading"><div><span className="ss-eyebrow">SOURCE</span><h4>OBS</h4></div><span className={`ss-setup-status${disabled?' is-locked':''}`}>{disabled?'Controls locked':hasObs?'OBS Virtual Camera found':'Start OBS Virtual Camera'}</span></header>
     <div className="ss-input-grid">
       <InputCard Icon={Camera} title="OBS Virtual Camera" category="VIDEO · PICTURE FROM OBS" count={cameras.length}>
-        {!hasObs&&<p className="ss-input-hint">Start OBS, click Start Virtual Camera, then reload this page so the camera appears here. OBS composes one or two cameras and records the live.</p>}
+        {!hasObs&&<p className="ss-input-hint">Start OBS, click Start Virtual Camera, then press Scan for cameras. OBS composes one or two cameras and records the live.</p>}
+        {onScan&&<button type="button" className="admin-live-control" disabled={disabled} onClick={()=>void onScan()}>Scan for cameras</button>}
         {cameras.length?<DeviceList label="Camera" kind="Camera" Icon={Camera} devices={cameras} selected={cameraId} disabled={disabled} onPick={onCamera}/>:<div className="ss-input-empty"><Camera size={22}/><strong>No cameras available</strong><p>Allow camera access to see your devices here.</p></div>}
       </InputCard>
       <InputCard Icon={AudioLines} title="Audio input" category="AUDIO · MIXER OR INTERFACE (OPTIONAL)" count={mixers.length}>
