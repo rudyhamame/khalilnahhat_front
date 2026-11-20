@@ -1,11 +1,11 @@
 import {useEffect,useState} from 'react';
-import {Camera,Image,Images,Upload,Film,AudioLines,Mic,Check,PictureInPicture2,Crop} from 'lucide-react';
-import StudioOverlayEditor from './StudioOverlayEditor';
+import {Camera,Image,Images,Upload,Film,AudioLines,Mic,Check} from 'lucide-react';
 import {CropStage} from './PausePhotoPicker';
 import {DEFAULT_CROP} from '../lib/pausePhoto';
-import {STUDIO_SCENARIOS,scenarioById,assignStudioCamera} from '../lib/studioScenarios';
+import {STUDIO_SCENARIOS,scenarioById} from '../lib/studioScenarios';
 import './studioScenarioInputs.css';
-const ICON={camera:Camera,cameras:PictureInPicture2,image:Image,video:Film};
+const OBS=/obs|virtual/i;
+const ICON={camera:Camera,image:Image,video:Film};
 // Scenario picker plus only the inputs that scenario uses: the camera list, the photo, the mixer device. The voice microphone is optional
 // everywhere and lives on the MIC channel beside the preview. Videos are chosen in the video player.
 // A device name without the vendor/product id the browser appends, e.g. "HP IR Camera (04f2:b6d0)" -> "HP IR Camera" + "04f2:b6d0".
@@ -27,7 +27,7 @@ function DeviceList({label,kind,Icon,devices,selected,disabled,onPick,usedId='',
   return <div className="ss-devices" role="radiogroup" aria-label={label} onKeyDown={navigate}>{devices.map((item,index)=>{const info=describe(item,index,kind),on=current===item.deviceId;
     return <button key={item.deviceId||index} type="button" role="radio" aria-checked={on} tabIndex={on?0:-1} disabled={disabled} title={info.name} onClick={()=>onPick(item.deviceId)}>
       <span className="ss-device-icon"><Icon size={17} aria-hidden="true"/></span>
-      <span className="ss-device-text"><strong>{info.name}</strong>{info.detail&&<small>{info.detail}</small>}{usedId&&item.deviceId===usedId&&<small className="ss-device-used">In use by {usedBy}: pick it to move it here</small>}</span>
+      <span className="ss-device-text"><strong>{info.name}</strong>{info.detail&&<small>{info.detail}</small>}{OBS.test(info.name)&&<small className="ss-device-used">OBS Virtual Camera · recommended</small>}{usedId&&item.deviceId===usedId&&<small className="ss-device-used">In use by {usedBy}: pick it to move it here</small>}</span>
       <span className="ss-device-state" aria-hidden="true">{on?<><b>Selected</b><Check size={14}/></>:<i/>}</span>
     </button>;})}</div>;
 }
@@ -50,12 +50,8 @@ function PhotoViewer({file,name,crop,onCrop,disabled,onGallery,onPhoto}){
     </>}
   </div>;
 }
-export default function StudioScenarios({value,disabled,onScenario,cameras=[],cameraId='',onCamera,overlayCameraId='',onOverlayCamera=()=>{},overlay,onOverlay=()=>{},getOverlayVideo,previewing=false,mixers=[],mixerId='',onMixer,photoName='',photoView=DEFAULT_CROP,onPhotoView=()=>{},photoFile=null,onPhoto,onGallery,disabledTitle='Close private preview or end live before changing the scenario'}){
+export default function StudioScenarios({value,disabled,onScenario,cameras=[],cameraId='',onCamera,mixers=[],mixerId='',onMixer,photoName='',photoView=DEFAULT_CROP,onPhotoView=()=>{},photoFile=null,onPhoto,onGallery,disabledTitle='Close private preview or end live before changing the scenario'}){
   const scenario=scenarioById(value);
-  const pickCamera=(target,id)=>{
-    const next=assignStudioCamera(cameraId,overlayCameraId,target,id);
-    onCamera(next.cameraId);onOverlayCamera(next.overlayId);
-  };
   return <div className="studio-scenarios">
     <div className="studio-label-row"><h4 className="studio-label">Scenario</h4></div>
     <div className="studio-scenario-grid" role="radiogroup" aria-label="Studio scenario">{STUDIO_SCENARIOS.map(item=>{const Icon=ICON[item.video];return <button key={item.id} type="button" role="radio" aria-checked={value===item.id} disabled={disabled} title={disabled?disabledTitle:value===item.id?`${item.title}: click again to deselect and turn the preview off`:item.title} onClick={()=>onScenario(item)}>
@@ -67,20 +63,12 @@ export default function StudioScenarios({value,disabled,onScenario,cameras=[],ca
     {scenario&&<div className="studio-scenario-inputs" aria-label="Scenario inputs" aria-disabled={disabled}>
       <header className="ss-setup-heading"><div><span className="ss-eyebrow">INPUT SETUP</span><h4>{scenario.title}</h4></div><span className={`ss-setup-status${disabled?' is-locked':''}`}>{disabled?'Controls locked':'Configure sources'}</span></header>
       <div className="ss-input-grid">
-        {scenario.video==='cameras'&&<>
-          <InputCard Icon={Camera} title="Landscape camera" category="LANDSCAPE · FILLS THE 16:9 FRAME" count={cameras.length}>
-            {cameras.length?<DeviceList label="Landscape camera" kind="Camera" Icon={Camera} devices={cameras} usedId={overlayCameraId} usedBy={scenario.windows?'the portrait window':'the portrait camera'} selected={cameraId} disabled={disabled} onPick={id=>pickCamera('landscape',id)}/>:<div className="ss-input-empty"><Camera size={22}/><strong>No cameras available</strong><p>Allow camera access to see your devices here.</p></div>}
-          </InputCard>
-          <InputCard Icon={PictureInPicture2} title="Portrait camera" category={scenario.windows?"PORTRAIT · FILLS THE 9:16 WINDOW":"PORTRAIT · CUT AS YOU LIKE"} count={cameras.length}>
-            {cameras.length>1?<DeviceList label="Portrait camera" kind="Camera" Icon={Camera} devices={cameras} usedId={cameraId} usedBy={scenario.windows?'the landscape window':'the landscape camera'} selected={overlayCameraId} disabled={disabled} onPick={id=>pickCamera('portrait',id)}/>:<div className="ss-input-empty"><PictureInPicture2 size={22}/><strong>A second camera is needed</strong><p>Connect another camera, then allow access. Two different cameras are used in this scenario.</p></div>}
-          </InputCard>
-          {overlay&&<InputCard className="ss-input-card--wide" Icon={Crop} title="Portrait camera · cut and place" category="OUTPUT 16:9 · CHANGES APPLY LIVE"><StudioOverlayEditor overlay={overlay} onOverlay={onOverlay} getOverlayVideo={getOverlayVideo} previewing={previewing}/></InputCard>}
-        </>}
-        {scenario.video!=='cameras'&&<InputCard Icon={ICON[scenario.video]} title={scenario.video==='camera'?'Camera':scenario.video==='image'?'Photo':'Video player'} category="VIDEO SOURCE" count={scenario.video==='camera'?cameras.length:undefined}>
+        <InputCard Icon={ICON[scenario.video]} title={scenario.video==='camera'?'Camera':scenario.video==='image'?'Photo':'Video player'} category="VIDEO SOURCE" count={scenario.video==='camera'?cameras.length:undefined}>
+          {scenario.video==='camera'&&!cameras.some(item=>OBS.test(item.label||''))&&<p className="ss-input-hint">Tip: start OBS Virtual Camera before opening the Studio, then pick it here. OBS composes one or two cameras and records the live.</p>}
           {scenario.video==='camera'&&(cameras.length?<DeviceList label="Camera" kind="Camera" Icon={Camera} devices={cameras} selected={cameraId} disabled={disabled} onPick={onCamera}/>:<div className="ss-input-empty"><Camera size={22}/><strong>No cameras available</strong><p>Allow camera access to see your devices here.</p></div>)}
           {scenario.video==='image'&&<PhotoViewer file={photoFile} name={photoName} crop={photoView} onCrop={onPhotoView} disabled={disabled} onGallery={onGallery} onPhoto={onPhoto}/>}
           {scenario.video==='video'&&<><ol className="ss-source-steps"><li><span>1</span><div><strong>Add your videos</strong><p>Choose files in the video player below.</p></div></li><li><span>2</span><div><strong>Play when you’re ready</strong><p>Playback starts only when you press Play.</p></div></li></ol>{!scenario.mixer&&<p className="ss-source-note"><AudioLines size={14}/>The video’s sound feeds the audio input.</p>}</>}
-        </InputCard>}
+        </InputCard>
         {scenario.mixer&&<InputCard Icon={AudioLines} title="Mixer / audio interface" category="AUDIO SOURCE" count={mixers.length}>
           {mixers.length?<DeviceList label="Mixer" kind="Audio device" Icon={AudioLines} devices={mixers} selected={mixerId} disabled={disabled} onPick={onMixer}/>:<div className="ss-input-empty"><AudioLines size={22}/><strong>No audio devices available</strong><p>Allow microphone access to see your mixer or interface.</p></div>}
         </InputCard>}

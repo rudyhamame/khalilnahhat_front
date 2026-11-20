@@ -30,3 +30,10 @@ html body .echo-access .client-app-badge--card,html body .echo-access .client-ap
 html body .echo-access .client-app-badge--card small{color:var(--access-muted,#a6b8ac)!important;opacity:1}
 html body .echo-access .client-app-badge--card svg{color:var(--access-accent,#8ad1bb)!important}
 html body .echo-access .client-app-badge--card:focus-visible{outline:2px solid var(--access-accent,#8ad1bb);outline-offset:3px}
+
+/* Phones portrait: hero badges: bare small Android icon (no box, no text). */
+@media(orientation:portrait) and (max-width:760px){
+ html body .hero-introduction .client-app-badge{box-sizing:border-box;width:40px!important;height:40px;min-height:0;padding:0!important;gap:0;justify-content:center}
+ html body .hero-introduction .client-app-badge span{display:none!important}
+ html body .hero-introduction .client-app-badge svg{width:24px;height:24px}
+}

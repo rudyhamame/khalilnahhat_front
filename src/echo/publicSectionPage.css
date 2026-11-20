@@ -86,3 +86,6 @@ html body .echo.echo-public-page[data-page=home][data-theme] #availability{--a-p
  html body .echo.echo-public-page[data-page=home][data-theme] #services.rental-workbench>.rental-with-feature{height:auto;min-height:100%;flex:none}
  html body .echo.echo-public-page[data-page=home][data-theme] #services .rental-with-feature>.home-work-feature{min-height:400px}
 }
+
+/* Services page: let the content scroll freely (mouse, touch) inside the fixed public-page frame. */
+html.echo-public-page-open body .echo.echo-public-page[data-page=home][data-theme] #echo-main:has(>#services){overflow-x:clip;overflow-y:auto;overscroll-behavior-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y}

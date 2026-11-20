@@ -123,11 +123,11 @@ html[dir=rtl] .hero-book-cta{right:auto;left:0}
   /* far edges fall away, so the centre feels nearer */
   radial-gradient(ellipse 80% 92% at 50% 56%,transparent 52%,#00000040 80%,#00000075 100%),
   /* contact shadow hugging the rim, dropped slightly down and to the right: the record and character sit in front of the backdrop */
-  radial-gradient(circle calc(var(--rec-d,min(44vw,86svh,920px)) * .91) at calc(50% + var(--cx,0px)) calc(50% + (var(--echo-header-overlay-height,96px) + 12px)/2),transparent 52%,#000000a6 59%,#00000052 68%,transparent 86%),
+  radial-gradient(circle calc(var(--rec-d,min(44vw,86svh,920px)) * .91) at calc(50% + var(--cx,0px)) calc(50% + (var(--echo-header-overlay-height,96px) + 12px)/2 + var(--push,0px)),transparent 52%,#000000a6 59%,#00000052 68%,transparent 86%),
   /* soft warm light pooled behind them, lifting them off the dark */
-  radial-gradient(circle calc(var(--rec-d,min(44vw,86svh,920px)) * 1.27) at calc(50% + var(--cx,0px)) calc(50% + (var(--echo-header-overlay-height,96px) + 12px)/2),#d8b89a30 0%,#8f6a5321 38%,#6d4b3310 62%,transparent 80%),
+  radial-gradient(circle calc(var(--rec-d,min(44vw,86svh,920px)) * 1.27) at calc(50% + var(--cx,0px)) calc(50% + (var(--echo-header-overlay-height,96px) + 12px)/2 + var(--push,0px)),#d8b89a30 0%,#8f6a5321 38%,#6d4b3310 62%,transparent 80%),
   radial-gradient(ellipse 46% 60% at 62% 42%,color-mix(in srgb,#ae8b73 14%,transparent) 0%,transparent 70%),
-  radial-gradient(ellipse 50% 62% at calc(50% + var(--cx,0px)) calc(50% + (var(--echo-header-overlay-height,96px) + 12px)/2),color-mix(in srgb,#8f6a53 18%,transparent) 0%,color-mix(in srgb,#6d4b33 12%,transparent) 48%,transparent 78%),
+  radial-gradient(ellipse 50% 62% at calc(50% + var(--cx,0px)) calc(50% + (var(--echo-header-overlay-height,96px) + 12px)/2 + var(--push,0px)),color-mix(in srgb,#8f6a53 18%,transparent) 0%,color-mix(in srgb,#6d4b33 12%,transparent) 48%,transparent 78%),
   radial-gradient(ellipse 44% 50% at 70% 100%,color-mix(in srgb,#d48f6a 11%,transparent) 0%,transparent 72%),
   radial-gradient(ellipse 52% 56% at 30% 100%,color-mix(in srgb,#10766a 24%,transparent) 0%,transparent 72%),
   radial-gradient(ellipse 44% 52% at 98% 4%,color-mix(in srgb,#29a899 16%,transparent) 0%,transparent 70%),

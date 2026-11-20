@@ -13,11 +13,10 @@ export const liveStudioAuditGuide={
  table(['Owner','Responsibility'],[
  ['AdminLiveStudio.jsx','Operator UI, source/scenario selection, go-live prerequisites, pause/countdown controls, folder actions and reconnect orchestration.'],
  ['useWebrtcBroadcast.js','Capture and publishing lifecycle, private preview, stream tracks, pause/preflight, audio mixing and recording startup/stop.'],
- ['useSecondSource / useCollabOutputs','Secondary input and output composition. The current studio resets the former two-source mode to one source; two-camera and two-window scenarios are configured through the primary source pipeline.'],
- ['useStudioRecordingMonitor.js + studioRecordingMonitor.js','Non-overlapping folder and server progress reads, latest-recording selection, stale-result suppression, terminal-state stop and account/recording identity binding.'],
+ ['useOutputFormat.js','Landscape or Portrait live ratio, remembered in this browser. Two-camera layouts are composed in OBS and arrive as the OBS Virtual Camera.'],
  ['useStudioWorkspaceLayout.js','Preview heading measurements, available control workspace height, fullscreen observation and listener cleanup.'],
  ['LiveElapsedTimer.jsx','Session-scoped elapsed display stored in sessionStorage. This measures this tab’s connection time, not authoritative broadcast duration.'],
- ['recordingOutputs / directRecording / diskRecordingStore','Recording output creation, disk manifests and chunks, upload/finish recovery.'],
+ ['Recording','The Studio no longer records in the browser. Recording is done in OBS (Matroska, hardware encoder) and the file is added to the archive by hand.'],
  ['LiveDestinations / liveDestinationSources','Social destination controls and output source choices.'],
  ['LiveArchiveAdmin / PostingStudio','Saved recording management, export/render jobs and explicit publishing of ready Echo portrait reels. Publishing is separate from going live.'],
  ]),

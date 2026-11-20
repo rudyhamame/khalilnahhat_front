@@ -22,7 +22,7 @@ test('the dashboard guide selects the audit tab and renders fixes and open findi
  const html=renderToStaticMarkup(createElement(Guide,{search:new URL(liveStudioAuditGuideRoute,'https://echo.invalid').search}));
  assert.match(html,/aria-current="page"[^>]*>.*?Live Studio Audit/);
  for(const section of liveStudioAuditGuide.sections)assert.ok(html.includes(`id="guide-${section.id}"`));
- for(const text of ['useStudioRecordingMonitor','ready or partial','cancellation token','not a deployment certification'])assert.ok(html.includes(text),text);
+ for(const text of ['ready or partial','cancellation token','not a deployment certification'])assert.ok(html.includes(text),text);
 });
 test('audit content remains behind the admin dashboard gate',()=>{
  for(const user of [null,{isAdmin:false}]){

@@ -16,3 +16,12 @@ html body .echo .skip-login-option,html body .echo .skip-login-option>span:not(.
 /* End of the home page: centred along the bottom of the hero, above the player rail. */
 .hero-skip-login{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 14px);z-index:7;display:flex;justify-content:center;padding-inline:16px}
 .hero-skip-login .skip-login-option{background:#0d1418b3;padding:8px 14px;border-radius:14px;backdrop-filter:blur(6px)}
+
+/* Phones portrait: the hero option is one smaller line. */
+@media(orientation:portrait) and (max-width:760px){
+ html body .hero-skip-login{padding-inline:8px}
+ html body .hero-skip-login .skip-login-option{gap:8px;max-width:100%;padding:6px 10px}
+ html body .hero-skip-login .skip-login-option>span:not(.skip-login-box){font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+ html body .hero-skip-login .skip-login-box{width:18px;height:18px}
+ html body .hero-skip-login .skip-login-box::after{left:5px;top:1px;width:5px;height:9px}
+}

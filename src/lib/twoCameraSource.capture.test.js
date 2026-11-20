@@ -1,6 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {captureTwoCameras} from './twoCameraSource.js';
-import {assignStudioCamera} from './studioScenarios.js';
 // Fakes: a camera stream, a canvas and a video element, enough for the capture to run.
 const track=()=>({stop(){this.stopped=true;},addEventListener(){},requestFrame(){},contentHint:''});
 const stream=()=>{const t=track();return {t,getTracks:()=>[t],getVideoTracks:()=>[t],getSettings:()=>({})};};
@@ -36,7 +35,7 @@ test('moving an active camera to portrait and back releases captures and output 
   let pair={cameraId:'cam-a',overlayId:'cam-b'};
   let source=await captureTwoCameras({...pair,windows:true,media,doc:handoffDoc,clock});
   for(const target of ['portrait','landscape']){
-    pair=assignStudioCamera(pair.cameraId,pair.overlayId,target,'cam-a');
+    pair=target==='portrait'?{cameraId:pair.cameraId==='cam-a'?'none':pair.cameraId,overlayId:'cam-a'}:{cameraId:'cam-a',overlayId:pair.overlayId==='cam-a'?'none':pair.overlayId};
     source.cleanup();
     assert.equal(active.size,0);assert.ok(outputs.every(t=>t.stopped));
     source=await captureTwoCameras({...pair,windows:true,media,doc:handoffDoc,clock});
