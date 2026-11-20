@@ -67,3 +67,4 @@
 }
 @media(prefers-reduced-motion:reduce){.studio-scenario-inputs .ss-devices>button{transition:none}}
 .ss-input-card--wide{grid-column:1/-1}
+.studio-scenario-inputs .ss-input-hint{margin:0 0 10px;font-size:12.5px;line-height:1.4;color:var(--aw-muted,#b8bdc2)}

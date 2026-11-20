@@ -331,7 +331,7 @@ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-
 
 /* Phones portrait: the greeting square never expands when the 3D stage activates. */
 @media(orientation:portrait) and (max-width:760px){
- html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group.is-engaged{--sq:min(calc(var(--col) * .68),calc(100svh - 360px))}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group.is-engaged{--col:calc(100vw - 110px);--sq:min(calc(var(--col) * .82),calc(100svh - 360px))}
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .is-engaged .hero-intro-frame,
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .is-engaged .hero-intro-frame:has(.hero-intro-stage[data-active=true]){width:var(--sq)!important;height:var(--sq)!important}
 }
@@ -371,4 +371,84 @@ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-
 @media(orientation:portrait) and (max-width:760px){
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .hero-intro-player{width:100%!important;transform:none!important;translate:none!important;display:flex;flex-direction:column;align-items:center}
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-audio-introduction .hero-intro-player .hero-intro-frame{margin-inline:auto!important}
+}
+
+/* Phones portrait: the title and greeting sit higher, tucked up under the header. */
+@media(orientation:portrait) and (max-width:760px){
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-copy-content .hero-intro-heading-group,
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-copy-content .hero-intro-heading-group.is-engaged{margin-top:6px!important}
+}
+
+/* ===== Phones portrait: two real rows that never overlap =====
+   Row 1: the content (title, greeting, Android badge), natural height.
+   Row 2: the record and the character, filling the rest and clipped to their own row. */
+@media(orientation:portrait) and (max-width:760px){
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction{display:grid!important;grid-template-rows:min-content minmax(0,1fr);grid-template-columns:minmax(0,1fr);--push:0px;--rec-d:0px}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction::before{display:none}
+ /* row 1 */
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction>.echo-hero{grid-row:1;grid-column:1;position:relative;height:auto!important;max-height:none!important;min-height:0;padding-bottom:0}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .echo-hero-copy,
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-copy-content,
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group,
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group.is-engaged{height:auto!important;max-height:none!important;min-height:0}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .client-app-badge--player{position:static!important;inset:auto!important;transform:none!important;margin:12px auto 0!important}
+ /* row 2 */
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction>.hero-character-window{grid-row:2;grid-column:1;position:relative;inset:auto;width:100%;height:auto;min-height:0;overflow:visible;scale:none;translate:none;transform:none;z-index:1}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction>.hero-character-window::before{content:'';position:absolute;inset:-50% 0 0;z-index:0;pointer-events:none;background:radial-gradient(circle min(70cqw,72cqh) at 50% 50%,#8f6a5330 0%,#6d4b3318 55%,transparent 100%)}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction>.hero-character-window>.hero-record-video{--d:min(92cqw,96cqh);width:var(--d);top:0;left:50%;transform:translateX(-50%)}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction>.hero-character-window .hero-character-frames .echo-continuous-artist:not([data-archive-stage=true]){--d:min(92cqw,96cqh);--echo-hero-art-height:calc(var(--d) * 3.09);top:calc(var(--d) / 2 - var(--echo-hero-art-height) * .16);bottom:auto}
+}
+
+/* Phones portrait: no "Skip the login next time" sentence on the hero. */
+@media(orientation:portrait) and (max-width:760px){
+ html body .hero-skip-login{display:none!important}
+}
+
+/* Phones portrait: the Android icon is the header copy (next to the language button); the in-page copy is hidden. */
+.client-app-badge--header{display:none!important}
+@media(orientation:portrait) and (max-width:760px){
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group:not(#x):not(#y):not(#z) .client-app-badge:not(.client-app-badge--header){display:none!important}
+ html body .echo .echo-header .client-app-badge--header{display:flex!important;position:absolute;top:26px;right:172px;margin:0;box-sizing:border-box;width:40px;height:40px;padding:0;gap:0;justify-content:center;align-items:center;z-index:5}
+ html[dir=rtl] body .echo .echo-header .client-app-badge--header{right:auto;left:172px}
+}
+
+/* Phones portrait: the glow lives inside the record's own row (window::before + the record's halo), so it always follows the record. The old page-centred rings are removed. */
+@media(orientation:portrait) and (max-width:760px){
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction{background:radial-gradient(ellipse at 50% 50%,#2f2c2d 0%,#0D1418 78%)!important}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction>.hero-character-window::before{--d:min(92cqw,96cqh);background:radial-gradient(circle calc(var(--d) * .85) at 50% calc(50cqh + var(--d) / 2),#d8b89a30 0%,#8f6a5321 45%,#6d4b3310 70%,transparent 100%)}
+}
+
+/* Phones portrait: a small gap between the rows, and row 1 grows/shrinks smoothly so it pushes row 2 down/up (greeting open/close, playback). */
+@media(orientation:portrait) and (max-width:760px){
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction{row-gap:10px}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-audio-introduction .hero-intro-player .hero-intro-frame{transition:width .4s cubic-bezier(.4,0,.2,1),height .4s cubic-bezier(.4,0,.2,1)}
+}
+@media(orientation:portrait) and (max-width:760px) and (prefers-reduced-motion:reduce){
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-audio-introduction .hero-intro-player .hero-intro-frame{transition:none}
+}
+
+/* Phones portrait: once the greeting is opened it sits at the very top of row 1. */
+@media(orientation:portrait) and (max-width:760px){
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-copy-content .hero-intro-heading-group.is-engaged{margin-top:0!important}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group.is-engaged .hero-intro-player{margin-top:0!important}
+}
+
+/* Phones portrait: the smaller opened square keeps its label and the five controls on one line each. */
+@media(orientation:portrait) and (max-width:760px){
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame[data-open=true] .hero-intro-meta{white-space:nowrap;font-size:10px;letter-spacing:.08em;gap:6px}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame[data-open=true] .hero-intro-meta time{font-size:10px;white-space:nowrap}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame[data-open=true] .hero-intro-controls{flex-wrap:nowrap!important;gap:0!important;justify-content:space-between!important;padding-inline:6px}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame[data-open=true] .hero-intro-controls .hero-intro-transport-button{flex:0 1 36px;width:36px;min-width:0;height:36px;padding:0}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame[data-open=true] .hero-intro-controls svg{max-width:24px;max-height:24px}
+}
+
+/* Header Android button: bare white icon (no background, border or padding). */
+@media(orientation:portrait) and (max-width:760px){
+ html body .echo .echo-header .client-app-badge--header{background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important;color:#fff!important;transform:none}
+ html body .echo .echo-header .client-app-badge--header svg{color:#fff!important;width:26px;height:26px}
+}
+@media(orientation:portrait) and (max-width:760px){
+ html body .echo .echo-header .client-app-badge--header,
+ html body .echo .echo-header .client-app-badge--header:is(:hover,:active,:focus,:focus-visible){transform:none!important;scale:none!important;transition:none!important;outline:0;-webkit-tap-highlight-color:transparent}
+ html body .echo .echo-header .client-app-badge--header svg{transform:none!important;scale:none!important;transition:none!important}
 }

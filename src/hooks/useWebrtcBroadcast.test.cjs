@@ -323,8 +323,7 @@ test('split audio: a shared tab used for both picture and sound is not asked for
  await h.hook.preparePreview({kind:'display'});assert.equal(asked,0);assert.equal(h.mixers[0].source,sound);h.unmount();
 });
 test('video viewer scenario publishes the video audio without capturing an external audio device',async()=>{
- const {scenarioById,scenarioSetup}=await import('../lib/studioScenarios.js');
- const setup=scenarioSetup(scenarioById('video')),sound={kind:'audio',enabled:true,stop(){}};
+ const setup={kind:'video',audio:'file'},sound={kind:'audio',enabled:true,stop(){}};
  let separateCaptures=0;
  const h=harness({sourceKind:setup.kind,audioMode:setup.audio,
   audioCapture:async()=>{separateCaptures++;throw new Error('The video already supplies audio');},
