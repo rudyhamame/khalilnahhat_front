@@ -171,7 +171,7 @@ function OntologyArchiveWorkspace({token}){
  const audioDraft=useRef(null),[hasDraft,setHasDraft]=useState(false),[browserDraft,setBrowserDraft]=useState(null);
  useEffect(()=>{
   if(editor||!draftOwner)return;let active=true;
-  loadRecordingDraft(`${draftOwner}:new`,{includeAudio:false}).then(saved=>{if(!active)return;setHasDraft(Boolean(saved));setBrowserDraft(saved?{...saved.editor.value,id:'browser-recording-draft',name:recordingName(saved.editor.value)||'Untitled recording',status:'DRAFT',browserDraft:true}:null);}).catch(()=>{});
+  loadRecordingDraft(`${draftOwner}:new`,{includeAudio:false}).then(saved=>{if(!active)return;setHasDraft(Boolean(saved));setBrowserDraft(saved?{...saved.editor.value,id:'browser-recording-draft',name:recordingName(saved.editor.value)||'No info set',noInfo:!recordingName(saved.editor.value),status:'DRAFT',browserDraft:true}:null);}).catch(()=>{});
   return()=>{active=false;};
  },[editor,draftOwner]);
  useEffect(()=>{
@@ -360,7 +360,7 @@ function OntologyArchiveWorkspace({token}){
  const saveVocab=()=>task(async()=>{const {item}=await apiRequest(`${ontologyPath}/vocabulary${vocabEditor.id?`/${encodeURIComponent(vocabEditor.id)}`:''}`,{token,method:vocabEditor.id?'PUT':'POST',body:(({firstName:_first,lastName:_last,...rest})=>rest)(vocabEditor.value)});setVocabulary(rows=>[...rows.filter(row=>row.id!==item.id),item].sort((a,b)=>a.name.localeCompare(b.name)));if(item.kind===pendingReference.current?.kind)pendingReference.current.onSelect(item.id,item);pendingReference.current=null;setVocabEditor(null);notifyWorkElementsChanged();});
  const deleteRecording=row=>task(async()=>{const result=await apiRequest(`${ontologyPath}/recordings/${encodeURIComponent(row.id)}`,{token,method:'DELETE',body:{revision:row.revision,permanent:true}});if(result.ok!==true||result.deleted!==true||result.id!==row.id)throw Error('Permanent deletion was not confirmed. The server may need updating.');setItems(current=>current.filter(item=>item.id!==row.id));setAllItems(current=>current.filter(item=>item.id!==row.id));setSelected(null);setContentSelection(null);setEditor(null);if(draftOwner)deleteRecordingDraft(`${draftOwner}:${row.id}`).catch(()=>{});},'Recording deleted.');
  const selectedType=workTypes.find(type=>type.id===typeId);
- const visibleRecordings=browserDraft&&(filters.status||'ALL')==='DRAFT'?[browserDraft,...items]:items;
+ const visibleRecordings=browserDraft&&['ALL','DRAFT'].includes(filters.status||'ALL')?[browserDraft,...items]:items;// an audio-only draft saved in this browser is listed right away, as "No info set" until it has details
  const typeCollections=collections.filter(c=>c.workTypeId===typeId),pickedCollectionRow=collections.find(c=>c.id===collectionId),inCollection=pickedCollectionRow?new Set(pickedCollectionRow.recordingIds||[]):null;
  // Text search by recording NAME only.
  const needle=(filters.q||'').trim().toLowerCase();

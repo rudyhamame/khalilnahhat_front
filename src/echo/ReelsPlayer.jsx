@@ -1,6 +1,6 @@
 import {djWorkTypeText} from '../lib/djWorkTypeText';
 import {useEffect,useRef,useState} from 'react';
-import {ArrowLeft,ChevronLeft,ChevronRight,RefreshCw} from 'lucide-react';
+import {ArrowLeft,Clapperboard,RefreshCw} from 'lucide-react';
 import {apiRequest} from '../lib/api';
 import {ARCHIVE_PLAYER_STATE,archivePlayerCommand} from '../lib/archivePlayerBridge';
 import {windowAt,cropStyle} from '../lib/reelCrop';
@@ -23,7 +23,7 @@ function CroppedReel({item,videoRef,onError,onLoadedMetadata,onEnded}){
 
 export default function ReelsPlayer({lang,workType,onClose,closing=false}){
  const ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en,title=djWorkTypeText(workType,ar).name;
- const [items,setItems]=useState([]),[selected,setSelected]=useState(''),[status,setStatus]=useState('loading'),[retry,setRetry]=useState(0),[failed,setFailed]=useState(false);
+ const [items,setItems]=useState([]),[selected,setSelected]=useState(''),[status,setStatus]=useState('loading'),[retry,setRetry]=useState(0),[failed,setFailed]=useState(false),[list,setList]=useState(false);
  const video=useRef(null),resume=useRef(false);
  useEffect(()=>{
   let alive=true;setStatus('loading');setFailed(false);
@@ -37,7 +37,6 @@ export default function ReelsPlayer({lang,workType,onClose,closing=false}){
   return()=>document.removeEventListener('visibilitychange',hidden);
  },[]);
  useEffect(()=>{const audio=event=>{if(event.detail?.playing)video.current?.pause();};window.addEventListener(ARCHIVE_PLAYER_STATE,audio);return()=>window.removeEventListener(ARCHIVE_PLAYER_STATE,audio);},[]);
- const step=direction=>{if(items.length<2)return;resume.current=Boolean(video.current&&!video.current.paused);video.current?.pause();setFailed(false);setSelected(items[(index+direction+items.length)%items.length].id);};
  const back=()=>{video.current?.pause();onClose?.();};
  const handleMetadata=()=>{
   if(!resume.current)return;
@@ -52,7 +51,7 @@ export default function ReelsPlayer({lang,workType,onClose,closing=false}){
  };
  const handleKey=event=>{
   if(event.key!=='Escape')return;
-  event.preventDefault();event.stopPropagation();back();
+  event.preventDefault();event.stopPropagation();if(list){setList(false);return;}back();
  };
 
  return <section className="reels-player" dir={ar?'rtl':'ltr'} aria-label={title||tr('Video player','مشغّل الفيديو')} onKeyDown={handleKey}>
@@ -72,7 +71,13 @@ export default function ReelsPlayer({lang,workType,onClose,closing=false}){
     onEnded={handleEnded}
    />
   )}
-  <header className="reels-player-top"><button type="button" onClick={back} aria-label={tr('Back','رجوع')}><ArrowLeft size={20}/></button><span>{title}</span><button type="button" onClick={()=>setRetry(value=>value+1)} aria-label={tr('Refresh videos','تحديث الفيديوهات')}><RefreshCw size={18}/></button></header>
-  {status==='loading'?<div className="reels-player-message" role="status">{tr('Loading videos…','جارٍ تحميل الفيديوهات…')}</div>:status==='error'||failed?<div className="reels-player-message" role="alert"><p>{tr('This video could not load. Please retry.','تعذر تحميل الفيديو. يرجى المحاولة مجدداً.')}</p><button type="button" onClick={()=>setRetry(value=>value+1)}>{tr('Retry','إعادة المحاولة')}</button></div>:!current?<div className="reels-player-message" role="status"><p>{tr('No videos here yet.','لا توجد فيديوهات هنا بعد.')}</p></div>:<footer className="reels-player-caption"><strong>{current.title}</strong><div><button type="button" disabled={items.length<2} onClick={()=>step(-1)} aria-label={tr('Previous video','الفيديو السابق')}><ChevronLeft size={20}/></button><span>{index+1} / {items.length}</span><button type="button" disabled={items.length<2} onClick={()=>step(1)} aria-label={tr('Next video','الفيديو التالي')}><ChevronRight size={20}/></button></div></footer>}
+  <header className="reels-player-top"><button type="button" onClick={back} aria-label={tr('Back','رجوع')}><ArrowLeft size={20}/></button>
+   <button type="button" className={`reels-record${list?' is-open':''}`} onClick={()=>setList(value=>!value)} aria-haspopup="dialog" aria-expanded={list} aria-label={tr('All reels','كل الفيديوهات')} title={tr('All reels','كل الفيديوهات')}><i aria-hidden="true"><Clapperboard size={18}/></i></button>
+   <button type="button" onClick={()=>setRetry(value=>value+1)} aria-label={tr('Refresh videos','تحديث الفيديوهات')}><RefreshCw size={18}/></button></header>
+  {list&&<div className="reels-list" role="dialog" aria-label={tr('All reels','كل الفيديوهات')}>
+   <p className="reels-list-title">{tr('All reels','كل الفيديوهات')} <small>{items.length}</small></p>
+   <ul>{items.map((item,i)=><li key={item.id}><button type="button" className={item.id===current?.id?'is-current':''} aria-current={item.id===current?.id||undefined} onClick={()=>{resume.current=true;video.current?.pause();setFailed(false);setSelected(item.id);setList(false);}}><span className="reels-list-n">{i+1}</span><strong dir="auto">{item.title}</strong></button></li>)}</ul>
+  </div>}
+  {status==='loading'?<div className="reels-player-message" role="status">{tr('Loading videos…','جارٍ تحميل الفيديوهات…')}</div>:status==='error'||failed?<div className="reels-player-message" role="alert"><p>{tr('This video could not load. Please retry.','تعذر تحميل الفيديو. يرجى المحاولة مجدداً.')}</p><button type="button" onClick={()=>setRetry(value=>value+1)}>{tr('Retry','إعادة المحاولة')}</button></div>:!current?<div className="reels-player-message" role="status"><p>{tr('No videos here yet.','لا توجد فيديوهات هنا بعد.')}</p></div>:<footer className="reels-player-caption"><strong>{current.title}</strong><div><span>{index+1} / {items.length}</span></div></footer>}
  </section>;
 }
