@@ -25,7 +25,7 @@ export default function RentalsHero({ar=false}){
   const yesOn=prefs;// only selected when the client chooses it here, never because the DJ service was already in the booking
   return <>
     <img className="dj-service-hero" src="/echo/dj-service-hero.webp" width="1536" height="1024" alt={tr('A DJ at the decks, headphones on, mixing a live set','دي جي خلف الأجهزة يضع السماعات ويمزج مجموعة حيّة')} loading="lazy"/>
-  <BookingStep number={6} className="dj-service-step" title={tr('Would you like DJ Khalil at your event?','هل تريد دي جي خليل في فعاليتك؟')} cardTitle=""
+  <BookingStep number={6} className="dj-service-step" title={tr('Would you like DJ Khalil at your event?','هل تريد دي جي خليل في فعاليتك؟')} cardTitle={tr('Add the DJ service','إضافة خدمة الدي جي')}
     copy={tr('Music shaped around your event: a DJ who reads the room, MC hosting when you need a voice, and the sound, lighting and effects to match. Tell us if you want this service, or skip it and go straight to the other services.','موسيقى مصمّمة على قياس مناسبتك: دي جي يقرأ أجواء القاعة، وتقديم للحفل عند الحاجة، مع الصوت والإضاءة والمؤثرات التي تناسبها. أخبرنا إن كنت تريد هذه الخدمة، أو تجاوزها إلى بقية الخدمات.')}>
     <aside className="event-type-column dj-choice">
       <span className="avail-kicker"><FieldCode code="03.01"/>{tr('DJ SERVICE *','خدمة الدي جي *')}</span>

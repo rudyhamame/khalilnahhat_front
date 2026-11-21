@@ -248,7 +248,7 @@ export default function HomeAvailability({lang}){
    {editNote&&<p className="avail-edit-note" role="status">{editNote}</p>}
 
    <PhaseHeading n={1} ar={ar}/>
-   <BookingStep number={1} onReset={updatePersonal} resetLabel={refreshing?tr('Updating…','جارٍ التحديث…'):tr('Update','تحديث')} ResetIcon={RefreshCw} title={tr('Who are we planning with?','مع من نخطط؟')} cardTitle="" copy={signedIn?tr('These contact details come from your account. To update them, visit Personal info in your dashboard. Choose how we should reach you below.','معلومات التواصل مأخوذة من حسابك. لتعديلها، افتح المعلومات الشخصية في لوحة حسابك. اختر أدناه طريقة التواصل المفضلة.'):tr('Tell us who to reach and how. Before your booking is sent you create your account and confirm your email with a code.','أخبرنا بمن نتواصل معه وكيف. قبل إرسال حجزك تنشئ حسابك وتؤكد بريدك الإلكتروني برمز.')}>
+   <BookingStep number={1} onReset={updatePersonal} resetLabel={refreshing?tr('Updating…','جارٍ التحديث…'):tr('Update','تحديث')} ResetIcon={RefreshCw} title={tr('Who are we planning with?','مع من نخطط؟')} cardTitle={tr('Your details','بياناتك')} copy={signedIn?tr('These contact details come from your account. To update them, visit Personal info in your dashboard. Choose how we should reach you below.','معلومات التواصل مأخوذة من حسابك. لتعديلها، افتح المعلومات الشخصية في لوحة حسابك. اختر أدناه طريقة التواصل المفضلة.'):tr('Tell us who to reach and how. Before your booking is sent you create your account and confirm your email with a code.','أخبرنا بمن نتواصل معه وكيف. قبل إرسال حجزك تنشئ حسابك وتؤكد بريدك الإلكتروني برمز.')}>
     {personalFields}
    </BookingStep>
    <PhaseHeading n={2} ar={ar}/>

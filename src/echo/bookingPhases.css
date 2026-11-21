@@ -79,8 +79,6 @@ html body .echo[data-page=home][data-theme] .dj-choice>.avail-kicker{display:blo
 /* The STEP.SEC.ATOM badge sits at the opposite (end) side of its label row. */
 html body .echo[data-page=home][data-theme] :is(.avail-kicker,.rentals-hero-kicker,.rw-kicker):has(>.ysf-order){display:flex;align-items:center;gap:8px}
 html body .echo[data-page=home][data-theme] :is(.avail-kicker,.rentals-hero-kicker,.rw-kicker)>.ysf-order{order:2;margin-inline:auto 0}
-/* DJ service label: the badge and the label swap places (badge at the start, label at the end). */
-html body .echo[data-page=home][data-theme] .dj-choice>.avail-kicker>.ysf-order{order:-1;margin-inline:0 auto}
 
 /* Room under the "DJ Khalil Service" step heading, before its hero image. */
 html body .echo #booking-phase-3.booking-phase{padding-bottom:clamp(18px,2.6vw,36px)}
@@ -89,8 +87,6 @@ html body .echo #booking-phase-3.booking-phase{padding-bottom:clamp(18px,2.6vw,3
 .ea-atom-code{display:inline-block;margin-inline-end:6px;padding:1px 6px;border-radius:6px;background:#e3d3a31a;color:#e3d3a3;font-style:normal;font-weight:700;font-size:11px;letter-spacing:.04em;font-variant-numeric:tabular-nums;white-space:nowrap}
 /* The DJ choice card has no title and no Reset button, so the empty title row takes no space. */
 html body .echo[data-page=home][data-theme] .dj-service-step .booking-card-title[aria-hidden=true]{display:none}
-/* Every avail-kicker: the badge and the label swap places (badge at the start, label at the end). */
-html body .echo[data-page=home][data-theme] .avail-kicker:has(>.ysf-order)>.ysf-order{order:-1;margin-inline:0 auto}
 /* The longer step names must not crowd the step bar: the inactive steps show only their number on narrow screens (already so below 560px), and the names wrap on medium ones. */
 @media(max-width:1100px){.phase-bar button:not(.is-active) span{display:none}}
 html body .echo[data-page=home][data-theme] .mc-step .booking-card-title[aria-hidden=true]{display:none}
@@ -109,3 +105,13 @@ html body .echo[data-page=home][data-theme] .mc-row>div{display:grid;grid-templa
 html body .echo[data-page=home][data-theme] .mc-row dt{grid-area:label;flex-wrap:wrap;color:#eef4ef;font-size:14px;font-weight:600}
 html body .echo[data-page=home][data-theme] .mc-row dd{grid-area:note;color:#9fb5a8;font-size:12.5px}
 html body .echo[data-page=home][data-theme] .mc-row .mc-row-choice{grid-area:choice}
+/* The line under a card title runs edge to edge across the card (the title keeps its own inset). */
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-step-card>.booking-card-title:not([aria-hidden=true]){margin-inline:calc(-1 * clamp(24px,2.6vw,36px));padding-inline:clamp(24px,2.6vw,36px)}
+/* Compact card header: the title row is as short as its content (the Reset button's height), the title is centred vertically in it, and the Reset button sits on the same centre line. */
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-step-card>.booking-card-title:not([aria-hidden=true]){display:flex;align-items:center;min-height:34px;margin-block-end:16px;padding-block:12px;line-height:1.2}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-step-card>.booking-reset{top:calc(clamp(24px,2.6vw,36px) + 12px);height:34px;min-height:34px}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-step-card>.booking-card-title:not([aria-hidden=true]){box-sizing:border-box;margin-block-start:calc(-1 * clamp(24px,2.6vw,36px));min-height:62px;padding-block:0}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-step-card>.booking-reset{top:14px}
+
+/* Field labels follow the page direction: label first, badge at the opposite end (left-to-right in English, right-to-left in Arabic). */
+html body .echo[data-page=home][data-theme] .avail-kicker:has(>.ysf-order)>.ysf-order{order:2;margin-inline:auto 0}

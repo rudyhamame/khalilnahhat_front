@@ -324,6 +324,10 @@ html.echo-access-open,html.echo-access-open body{overflow:clip}
 @keyframes access-google-in{from{opacity:0}to{opacity:1}}
 @media(prefers-reduced-motion:reduce){.access-google-skeleton,.access-google-button:not([hidden]){animation:none}}
 
+/* Use Google's clean white button everywhere, without adding an outer card or rim. */
+html body .echo-access:not(.echo-order-access) .access-pair .google-bridge-button{min-height:42px;border:0;background:#fff;color:#202124;box-shadow:none}
+html body .echo-access:not(.echo-order-access) .access-pair .google-bridge-button:hover:not(:disabled){background:#f8f9fa;color:#202124}
+
 /* Phone + tablet portrait: the character stands above the forms (head clear, body behind the card); the page scrolls instead of clipping. */
 .access-hero-inset,.access-sketches,.access-tear-lines,.access-tear-vlines,.access-hero-vignette,.access-landscape-title,.access-app-badge{display:none}
 @media(max-width:1000px) and (orientation:portrait),(min-width:1001px) and (orientation:landscape){
@@ -550,3 +554,9 @@ html[dir=rtl].echo-login-leaving .echo-access.is-leaving :is(.access-hero-photo,
 
 /* Login page: no account menu button in the header, on any screen. */
 html.echo-access-open body .echo-header .echo-account-menu{display:none!important}
+
+/* One custom Google control everywhere: white centre with the login page's hand-inked colour rim. */
+html body .echo-access:not(.echo-order-access) .access-pair .google-bridge-button{box-sizing:border-box;min-height:40px!important;height:40px;padding:0 12px;border:1.5px solid #fff!important;border-radius:22px 10px 20px 12px/12px 20px 10px 22px!important;background:#fff!important;color:#1f1f1f!important;box-shadow:none!important;transform:rotate(.55deg)!important;font:500 14px/20px 'Roboto','Noto Sans',Arial,sans-serif!important;letter-spacing:.01em;transition:transform .18s ease,background .18s ease}
+html body .echo-access:not(.echo-order-access) .access-pair .google-bridge-button:hover:not(:disabled){background:#f8f8f8!important;border-color:#fff!important;color:#1f1f1f!important;box-shadow:none!important;transform:rotate(0deg) translateY(-1px)!important}
+html body .echo-access:not(.echo-order-access) .access-pair .google-bridge-button:focus-visible{outline:2px solid #fff;outline-offset:6px}
+@media(prefers-reduced-motion:reduce){html body .echo-access:not(.echo-order-access) .access-pair .google-bridge-button{transition:none}}
