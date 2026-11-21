@@ -21,11 +21,12 @@ export default function PartyLights(){
   };
   window.addEventListener('echo:music-frame',frame);
   const timer=setInterval(()=>{
+   if(document.hidden)return;
    const now=performance.now(),dt=Math.min(.5,(now-last)/1000);last=now;
    hue+=(reduced?2:(live?5+energy*22:4))*dt;               // the whole palette turns slowly together
    if(!live){energy*=.96;pulse*=.9;}
    write();
-  },60);
+  },120);
   write();
   return()=>{window.removeEventListener('echo:music-frame',frame);clearInterval(timer);};
  },[]);

@@ -3,7 +3,7 @@ import { createMusicPulse, readMusicBands } from '../lib/musicPulse';
 import { recordingBeatGrid } from '../lib/recordingBeatGrid';
 import { connectEqualizer, equalizerGain, flatEqualizer } from '../lib/audioEqualizer';
 
-export default function usePartyLighting(audioRef, enabled) {
+export default function usePartyLighting(audioRef, enabled, highRefresh = false) {
   const lighting = useRef(null);
   const graph = useRef(null);
   const equalizer = useRef(flatEqualizer());
@@ -48,7 +48,10 @@ export default function usePartyLighting(audioRef, enabled) {
           signalSource = output;
         } catch { /* Keep the direct sound path if tone filters are unavailable. */ }
         const analyser = context.createAnalyser();
-        analyser.fftSize = 2048;
+        // 1024 retains useful bass resolution without scanning 2048 samples for
+        // every decorative frame. Audio processing itself stays on Web Audio's
+        // realtime thread; this analyser is only for the UI.
+        analyser.fftSize = 1024;
         analyser.smoothingTimeConstant = .3;
         signalSource.connect(analyser);
         graph.current.analyser = analyser;
@@ -80,17 +83,23 @@ export default function usePartyLighting(audioRef, enabled) {
     const tick = time => {
       if (!running) return;
       frame = requestAnimationFrame(tick);
-      if (time - lastFrame < 32) return;
+      // The normal player does not need video-rate metering. Keeping it around
+      // 12 fps prevents full-page visual work from starving decoding/painting.
+      // The expanded mixer gets a quicker meter response while it is visible.
+      if (time - lastFrame < (highRefresh ? 40 : 80)) return;
       lastFrame = time;
       const current = graph.current;
       if (!current?.analyser || current.element !== element) return;
       const analyser = current.analyser;
       frequencies ||= new Uint8Array(analyser.frequencyBinCount);
-      waveform ||= new Float32Array(analyser.fftSize);
+      waveform ||= new Uint8Array(analyser.fftSize);
       analyser.getByteFrequencyData(frequencies);
-      analyser.getFloatTimeDomainData(waveform);
+      analyser.getByteTimeDomainData(waveform);
       let squares = 0;
-      for (const value of waveform) squares += value * value;
+      for (const value of waveform) {
+        const sample = (value - 128) / 128;
+        squares += sample * sample;
+      }
       const signal = tracker.sample({ ...readMusicBands(frequencies, current.context.sampleRate, analyser.fftSize), rms: Math.sqrt(squares / waveform.length), time: element.currentTime * 1000, volume: element.muted ? 0 : element.volume });
       const recordingGrid = recordingBeatGrid({trackId:element.dataset.trackId, audioUrl:element.currentSrc || element.src, time:element.currentTime});
       window.dispatchEvent(new CustomEvent('echo:music-frame', { detail: { ...signal, ...recordingGrid, playing: true, trackId: element.dataset.trackId, time: element.currentTime, audible: !element.muted && element.volume > .001 } }));
@@ -132,7 +141,7 @@ export default function usePartyLighting(audioRef, enabled) {
       element.removeEventListener('seeked', start);
       document.removeEventListener('visibilitychange', visible);
     };
-  }, [audioRef, enabled]);
+  }, [audioRef, enabled, highRefresh]);
 
   useEffect(() => () => {
     graph.current?.source.disconnect();

@@ -82,7 +82,7 @@ function ArchiveMusicPlayer() {
   const [playbackRate, setPlaybackRate] = useState(1);
   const current = tracks.find((track) => track.id === selected) || tracks[0];
   const currentUrl = current?.audioUrl || '';
-  const { unlock, setEqualizerBand, channelMeter, audioGraph } = usePartyLighting(audio, enabled);
+  const { unlock, setEqualizerBand, channelMeter, audioGraph } = usePartyLighting(audio, enabled, mixerOpen);
   const stems = useStemPlayer({audio,track:current,audioGraph,unlock,master:volume,active:enabled&&mixerOpen});
   const mic = useMicChannel({ master: volume, minimized: false, masterMeter: channelMeter });
   const changeEqualizer = (band, value) => {

@@ -6,7 +6,7 @@
 @keyframes wp-in{from{opacity:0;transform:translateY(28px) scale(.97)}to{opacity:1;transform:none}}
 /* Colour blend: the three artwork hues, scaled and brightened by the beat. */
 .wp>.artwork-glow{position:fixed;z-index:0;opacity:calc(.5 + var(--energy)*.5);transition:opacity .25s}
-.wp>.artwork-glow>i{animation:none!important;transform:scale(calc(1 + var(--beat)*.35 + var(--energy)*.15));filter:blur(9vmax) saturate(calc(1.1 + var(--energy)));transition:transform .09s linear}
+.wp>.artwork-glow>i{animation:none!important;transform:scale(calc(1 + var(--beat)*.35 + var(--energy)*.15));filter:blur(9vmax) saturate(1.15);transition:transform .09s linear;will-change:transform}
 .wp>.artwork-glow>i:nth-child(2){transform:scale(calc(1 + var(--bass)*.5))}
 .wp>.artwork-glow>i:nth-child(3){transform:scale(calc(1 + var(--high)*.8))}
 .wp-grain{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.2;mix-blend-mode:overlay;
