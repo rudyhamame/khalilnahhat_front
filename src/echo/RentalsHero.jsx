@@ -15,7 +15,7 @@ export default function RentalsHero({ar=false}){
   // Yes: add the DJ service to the booking and open the music preferences.
   const yes=()=>{
     if(order&&!djAdded)djServiceChanges(order.order,'dj').forEach(({path,value})=>order.setField(path,value));
-    setSkipped(false);setPrefs(true);// the Music Preferences sub-step appears (and scrolls into view) by itself once the service is added
+    setSkipped(false);setPrefs(true);window.dispatchEvent(new Event('echo:dj-service-chosen'));// the Music Preferences sub-step scrolls into view only because of this click
   };
   // Skip: go on to the other services without adding the DJ service.
   const skip=()=>{if(order&&djAdded)order.removeService('dj');setSkipped(true);setPrefs(false);scrollTo('booking-phase-4');};
