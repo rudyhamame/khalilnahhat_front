@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { apiRequest, apiBaseUrl } from '../lib/api';
-import { initialStemMix, STEM_CHANNELS, STEM_REQUIRED, stemGain, scheduleStemSources, stemDecodeBytes, stemDecodeLimit } from '../lib/stemMix';
+import { initialStemMix, STEM_CHANNELS, STEM_REQUIRED, stemGain, scheduleStemSources, stemDecodeBytes, stemDecodeLimit, STEM_FOLDED_INTO_OTHER } from '../lib/stemMix';
 
 export default function useStemPlayer({audio, track, audioGraph, unlock, master, active=false}) {
   const [status,setStatus] = useState({status:'idle',channels:[]});
@@ -129,7 +129,7 @@ export default function useStemPlayer({audio, track, audioGraph, unlock, master,
         const buffer=await graph.context.decodeAudioData(await response.arrayBuffer());
         decodedBytes+=buffer.length*buffer.numberOfChannels*Float32Array.BYTES_PER_ELEMENT;
         if(decodedBytes>limit)throw new Error('Separated channels exceeded the mixer memory limit. Original audio remains available.');
-        if(STEM_CHANNELS.includes(channel.name))buffers[channel.name]=buffer;
+        if(STEM_CHANNELS.includes(channel.name)||STEM_FOLDED_INTO_OTHER.includes(channel.name))buffers[channel.name]=buffer;
       }
       if(request!==generation.current || current.current!==id) return;
       if(STEM_REQUIRED.some(name=>!buffers[name]))throw new Error('The separated channels are incomplete.');

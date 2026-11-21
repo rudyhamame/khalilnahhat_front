@@ -15,6 +15,7 @@ export default function WorkTypeJourney({ar,workTypes,renderCard:renderWorkCard,
  useEffect(()=>subscribeArchivePlayerState(event=>setPlaying(Boolean(event.detail?.playing))),[]);
  // Each of the six story boxes enters only when its own viewport reaches the reader. The class is installed
  // before paint so off-screen boxes never flash in their resting position first.
+ const entered=useRef(new Set());
  useLayoutEffect(()=>{
   const node=root.current;
   if(!node||window.matchMedia('(prefers-reduced-motion: reduce)').matches||!('IntersectionObserver' in window))return undefined;
@@ -22,6 +23,7 @@ export default function WorkTypeJourney({ar,workTypes,renderCard:renderWorkCard,
   node.classList.add('is-box-reveal-ready');
   const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{
    if(!entry.isIntersecting)return;
+   entered.current.add(entry.target.dataset.work);// remembered, so a re-render (e.g. playback starting) does not drop the class and hide the box again
    entry.target.classList.add('is-box-entered');
    observer.unobserve(entry.target);
   }),{threshold:.18,rootMargin:'-8% 0px -8%'});
@@ -31,15 +33,15 @@ export default function WorkTypeJourney({ar,workTypes,renderCard:renderWorkCard,
  // Each sound keeps its player in its own story below the overview.
  const renderCard=(work,index)=>renderWorkCard(work,index,{compact:false,active:activeType===work.id,onOpen:()=>onOpenWork?.(work.id)});
 
- // Opening a box centres its player in the middle of the screen (the page's own smooth scrolling does the movement). The slot grows while it opens, so it is centred again once it has its final size.
+ // Opening a box makes its whole section one full screen and scrolls that section to the very top of the screen (the page's own smooth scrolling does the movement). The section grows while it opens, so it is aligned again once it has its final size.
  useEffect(()=>{
   if(!activeType)return undefined;
-  const slot=()=>root.current?.querySelector(`.work-story[data-work="${activeType}"] .work-story-card-slot`);
-  const centre=()=>{const target=slot();if(!target)return false;target.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center',inline:'nearest'});return true;};
+  const slot=()=>root.current?.querySelector(`.work-story[data-work="${activeType}"]`);
+  const centre=()=>{const target=slot();if(!target)return false;target.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start',inline:'nearest'});return true;};
   // A link straight to a recording sets the type before the boxes have loaded: keep looking for the box (up to about 8 seconds), centre it once it exists, then centre again after it has grown.
   let later=0,tries=0;
-  const poll=setInterval(()=>{if(centre()){clearInterval(poll);later=setTimeout(centre,550);}else if(++tries>40)clearInterval(poll);},200);
-  if(centre()){clearInterval(poll);later=setTimeout(centre,550);}
+  const poll=setInterval(()=>{if(centre()){clearInterval(poll);later=setTimeout(centre,750);}else if(++tries>40)clearInterval(poll);},200);
+  if(centre()){clearInterval(poll);later=setTimeout(centre,750);}
   return()=>{clearInterval(poll);clearTimeout(later);};
  },[activeType]);
 
@@ -55,7 +57,7 @@ export default function WorkTypeJourney({ar,workTypes,renderCard:renderWorkCard,
   </section>
   <div className="work-stories">{workTypes.map((work,index)=>{
    const {name,details}=djWorkTypeText(work,ar);
-   return <section key={work.id} data-work={work.id} data-tone={index%6} id={index===0?'work-story-first':`work-story-${work.id.toLowerCase()}`} className={`work-story${index%2?' is-card-right':''}${playing&&activeType===work.id?' is-playing':''}`} aria-labelledby={`work-story-title-${work.id}`}>
+   return <section key={work.id} data-work={work.id} data-tone={index%6} id={index===0?'work-story-first':`work-story-${work.id.toLowerCase()}`} className={`work-story${index%2?' is-card-right':''}${playing&&activeType===work.id?' is-playing':''}${entered.current.has(work.id)?' is-box-entered':''}`} aria-labelledby={`work-story-title-${work.id}`}>
     <div className="work-story-card-slot"><div className="work-story-card">{renderCard(work,index)}</div></div>
     <a className="work-story-listen is-under-box" href="#work-journey-top">{ar?'العودة إلى الأعلى':'Back to top'}<ArrowUp size={18}/></a>
     <div className="work-story-copy" id={`work-story-copy-${work.id}`}><div className="work-story-copy-inner">

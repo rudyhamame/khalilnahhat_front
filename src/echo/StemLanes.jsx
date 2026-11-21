@@ -12,9 +12,9 @@ import {bufferFor,buildPyramid,recordingWaveformPath,RECORDING_WAVE_SAMPLE_RATE,
 import './stemLanes.css';
 import './recordingWaveform.css';
 
-const CHANNELS=['vocals','drums','bass','guitar','piano','other'];
-const LABELS={vocals:'Vocals',drums:'Drums',bass:'Bass',guitar:'Guitar',piano:'Piano',other:'Other'};
-const HUES={vocals:330,drums:35,bass:210,guitar:280,piano:175,other:95};
+const CHANNELS=['vocals','drums','bass','other'];
+const LABELS={vocals:'Vocals',drums:'Drums',bass:'Bass',other:'Other'};
+const HUES={vocals:330,drums:35,bass:210,other:95};
 const initialMix=()=>Object.fromEntries(CHANNELS.map(name=>[name,{volume:1,muted:false,solo:false}]));
 const STORE='echo-stem-lanes';
 const readChoice=()=>{try{const saved=JSON.parse(localStorage.getItem(STORE)||'null');if(Array.isArray(saved)&&saved.every(name=>CHANNELS.includes(name)))return saved;}catch{/* storage blocked */}return CHANNELS;};
@@ -56,7 +56,7 @@ export default function StemLanes({audioUrl,fingerprint,savedStems,onStems,ensur
    last.current=state;
    if(state==='ready'&&value.channels?.length){
     setStatus({state:'processing',stage:'Saving the channels in this browser…',channels:[]});
-    try{const files=await stash(url,value.channels,value);setStatus({state:'ready',stage:'',channels:fromFiles(files),partial:Object.keys(files).length<6});return;}
+    try{const files=await stash(url,value.channels,value);setStatus({state:'ready',stage:'',channels:fromFiles(files),partial:false});return;}
     catch{/* keep using the server copy when the browser cannot store it */}
    }
    setStatus({state,stage:value.stage||'',channels:value.channels||[],partial:Boolean(value.partial)});
@@ -83,7 +83,7 @@ export default function StemLanes({audioUrl,fingerprint,savedStems,onStems,ensur
   let alive=true;
   getStems(url).catch(()=>null).then(found=>{
    if(!alive)return;
-   if(found)setStatus({state:'ready',stage:'',channels:fromFiles(found.files),partial:Object.keys(found.files).length<6});
+   if(found)setStatus({state:'ready',stage:'',channels:fromFiles(found.files),partial:false});
    else refresh(url);
   });
   return()=>{alive=false;clearTimeout(poll.current);};
@@ -101,14 +101,6 @@ export default function StemLanes({audioUrl,fingerprint,savedStems,onStems,ensur
   setStatus({state:'idle',stage:'',channels:[]});stemsRef.current?.(null);
  };
  // Split right here in the editor: upload the draft audio if needed, then start the separation.
- const upgrade=async()=>{
-  try{
-   setStatus({state:'processing',stage:'Checking the OVH server…',channels:[]});await ensureWorkerReady(token);
-   setStatus({state:'processing',stage:'Starting the six-channel separation…',channels:[]});last.current='processing';failures.current=0;
-   await apiRequest(`${query(source.current||audioUrl)}&upgrade=1`,{method:'POST',token});
-   clearTimeout(poll.current);poll.current=setTimeout(()=>refresh(source.current||audioUrl),3000);
-  }catch(error){setStatus({state:'unavailable',stage:error.message||'Channel separation could not start.',channels:[]});}
- };
  const start=async()=>{
   try{
    setStatus({state:'uploading',stage:'Checking the OVH server…',channels:[]});await ensureWorkerReady(token);
@@ -267,7 +259,7 @@ const slot=useDomSlot('recording-stem-slot'),[menu,setMenu]=useState(false);
   if(busy)return null;
   return <div className={`stem-lanes is-note is-${status.state}`}>{head}<div className="stem-lanes-card"><span className="stem-lanes-badge" aria-hidden="true">{busy?<i className="stem-lanes-spin"/>:<Layers size={20}/>}</span><div className="stem-lanes-copy" role="status"><strong>{title}{status.state==='processing'&&known&&<em>{percent}%</em>}</strong><p>{hint}</p>{status.state==='processing'&&<div className={`stem-lanes-bar${known?'':' is-indeterminate'}`} role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow={known?percent:undefined}><i style={known?{width:`${percent}%`}:undefined}/></div>}</div>{!busy&&<div className="stem-lanes-actions"><button type="button" className="stem-lanes-start" onClick={start}>{status.state==='unavailable'?'Try again':'Split channels'}</button></div>}</div></div>;
  }
- return <div className="stem-lanes" ref={box}>{head}{status.partial&&<p className="stem-lanes-partial">This split has four channels. <button type="button" onClick={upgrade}>Split again with Guitar and Piano</button></p>}<div className="stem-lanes-grid">{CHANNELS.filter(name=>chosen.includes(name)&&status.channels.some(channel=>channel.name===name)).map(name=>{const channel=mix[name];return <div className="stem-lane" key={name} style={{'--lane':`hsl(${HUES[name]} 55% 60%)`}}>
+ return <div className="stem-lanes" ref={box}>{head}<div className="stem-lanes-grid">{CHANNELS.filter(name=>chosen.includes(name)&&status.channels.some(channel=>channel.name===name)).map(name=>{const channel=mix[name];return <div className="stem-lane" key={name} style={{'--lane':`hsl(${HUES[name]} 55% 60%)`}}>
   <div className="stem-lane-strip"><strong>{LABELS[name]}</strong><div className="stem-lane-buttons"><button type="button" className="is-round" aria-label={playing&&soloing(name)?`Pause ${LABELS[name]}`:`Play ${LABELS[name]} alone`} title={playing&&soloing(name)?'Pause':'Play this channel alone'} onClick={()=>playLane(name)}>{playing&&soloing(name)?<Pause size={11} fill="currentColor"/>:<Play size={11} fill="currentColor"/>}</button><button type="button" className="is-round" aria-label={`Download ${LABELS[name]}`} title="Download this channel" onClick={()=>downloadLane(name)}><Download size={11}/></button><button type="button" aria-label={`Mute ${LABELS[name]}`} aria-pressed={channel.muted} onClick={()=>change(name,{muted:!channel.muted})}>M</button><button type="button" aria-label={`Solo ${LABELS[name]}`} aria-pressed={channel.solo} onClick={()=>change(name,{solo:!channel.solo})}>S</button></div><input type="range" min="0" max="1" step=".01" value={channel.volume} style={{'--v':`${channel.volume*100}%`}} aria-label={`${LABELS[name]} volume`} onChange={event=>change(name,{volume:Number(event.target.value)})}/><output className="stem-lane-volume" aria-label={`${LABELS[name]} volume percentage`}>{Math.round(channel.volume*100)}%</output></div>
   <div className="stem-lane-wave" onPointerDown={laneSeek} onPointerMove={laneDrag}><svg viewBox={`${viewBoxX(view.live??view.s,duration||1,laneBuffer)} 0 1000 80`} data-wave-from={laneBuffer.from} data-wave-span={laneBuffer.span} preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="40" x2={laneBuffer.units} y2="40" className="audio-tape-baseline"/><path className="audio-tape-wave" d={peaks[name]&&duration?recordingWaveformPath(peaks[name],laneBuffer):''}/></svg><div className="stem-lane-zoom" style={{width:`${view.z*100}%`,transform:`translateX(-${(view.live??view.s)*100}%)`}}>{duration>0&&regions.map(region=><span key={region.id} className={`stem-lane-region${region.id===currentRegionId?' is-current':''}${playing?' is-playing':''}`} style={{left:`${region.start/duration*100}%`,width:`${(region.end-region.start)/duration*100}%`,'--atom-color':`hsl(${(region.index*67+145)%360} 48% 55%)`}}/>)}<i className="stem-lane-head" aria-hidden="true"/></div></div>
  </div>;})}</div></div>;
