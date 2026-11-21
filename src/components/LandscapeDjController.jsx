@@ -8,6 +8,9 @@ import {archivePlayerCommand} from '../lib/archivePlayerBridge';
 import {EQUALIZER_BANDS} from '../lib/audioEqualizer';
 import {recordingBeatGrid} from '../lib/recordingBeatGrid';
 import {mediaScratch} from '../lib/mediaScratch';
+import {apiRequest} from '../lib/api';
+import {createAiDjAutopilot} from '../lib/aiDjAutopilot';
+import {localDjPlan,safeDjPlan} from '../lib/aiDjPlanner';
 import {StemChannelControls} from './StemChannels';
 import './ddjController.css';
 
@@ -131,7 +134,10 @@ export default function LandscapeDjController({stems,mic,audioGraph,unlock:unloc
   const [settings,setSettings]=useState({});
   const [last,setLast]=useState('FLAT');
   const [fxDeck,setFxDeck]=useState(1);
-  const media=useRef({}), strips=useRef({}), scratchers=useRef({}),uiClock=useRef({});
+  const [aiState,setAiState]=useState({enabled:false,phase:'off',message:'AI DJ is off.'});
+  const media=useRef({}), strips=useRef({}), scratchers=useRef({}),uiClock=useRef({}),loadWaiters=useRef({});
+  const playerState=useRef(player),deckState=useRef(decks),libraryState=useRef(library);
+  playerState.current=player;deckState.current=decks;libraryState.current=library;
   const dv=(key,fallback=0)=>settings[key]??fallback;
   const sd=key=>value=>setSettings(previous=>({...previous,[key]:value}));
   const headphones=useRef(null), meters=useRef({}), masterLadder=useRef(null);
@@ -281,6 +287,48 @@ export default function LandscapeDjController({stems,mic,audioGraph,unlock:unloc
       setDecks(previous=>({...previous,[n]:{track,playing:false,position:0,duration:0,playbackRate:1}}));
     }
   };
+  const adapter=useRef({});
+  const autopilot=useRef(null);
+  adapter.current={
+    status:state=>{setAiState(state);if(state.target){const pair=[state.active,state.target];setLayers([pair.find(n=>n%2)??3,pair.find(n=>n%2===0)??2]);}},
+    library:()=>libraryState.current,
+    deck:n=>{
+      const element=n===1?audioGraph.current?.element:media.current[n],state=n===1?playerState.current:deckState.current[n];
+      return state?.track&&element?{track:state.track,position:()=>element.currentTime||0,duration:()=>Number.isFinite(element.duration)?element.duration:state.duration||0,rate:()=>element.playbackRate||1}:null;
+    },
+    async plan(state){
+      let token='';try{token=localStorage.getItem('khalil-auth-token')||'';}catch{/* Local fallback remains available. */}
+      if(!token)throw Error('AI sign-in unavailable');
+      const result=await apiRequest('/admin/ai-dj/plan',{method:'POST',token,body:state,timeoutMs:14000});
+      return safeDjPlan(result.plan,{current:state.current,candidates:state.candidates,played:state.played});
+    },
+    fallback:state=>localDjPlan(state),
+    load:(n,track,cue=0)=>new Promise(resolve=>{
+      const element=media.current[n];
+      if(deckState.current[n]?.track?.id===track.id&&element?.readyState>=1){element.currentTime=Math.min(cue,Math.max(0,(element.duration||0)-.1));resolve(true);return;}
+      const previous=loadWaiters.current[n];if(previous){clearTimeout(previous.timer);previous.resolve(false);}
+      const finish=ok=>{const waiter=loadWaiters.current[n];if(!waiter)return;clearTimeout(waiter.timer);delete loadWaiters.current[n];if(ok&&media.current[n])media.current[n].currentTime=Math.min(cue,Math.max(0,(media.current[n].duration||0)-.1));resolve(ok);};
+      loadWaiters.current[n]={resolve:finish,timer:setTimeout(()=>finish(false),15000)};
+      loadDeck(n,track.id);
+    }),
+    async play(n){const element=media.current[n];if(!element)return false;if(element.paused)command(n,'toggle');await new Promise(resolve=>setTimeout(resolve,80));return !element.paused;},
+    pause:n=>{if(n===1)archivePlayerCommand('pause');else media.current[n]?.pause();},
+    rate:(n,value)=>command(n,'rate',value),
+    bass:(n,value)=>strip(n)?.set('low',value),
+    crossfader:value=>moveCrossfader(value),
+  };
+  if(!autopilot.current)autopilot.current=createAiDjAutopilot(new Proxy({}, {get:(_target,key)=>(...args)=>adapter.current[key](...args)}));
+  const toggleAi=()=>{
+    if(autopilot.current.enabled){autopilot.current.stop();return;}
+    if(!player.track){setNotice('Load a recording on Deck 1 before starting AI DJ.');return;}
+    unlock();moveCrossfader(0);
+    if(!player.playing)archivePlayerCommand('toggle');
+    autopilot.current.start(1);
+  };
+  useEffect(()=>()=>{
+    autopilot.current?.stop();
+    for(const waiter of Object.values(loadWaiters.current)){clearTimeout(waiter.timer);waiter.resolve(false);}
+  },[]);
   const setBand=(band,label,v)=>{archivePlayerCommand('equalizer',{band,gain:v});setLast(`${label} ${v>0?'+':''}${v} dB`);};
   const stemOn=Boolean(stems?.mode);
   const micLevel=mic?.micMeter;
@@ -310,8 +358,10 @@ export default function LandscapeDjController({stems,mic,audioGraph,unlock:unloc
     return()=>cancelAnimationFrame(frame);
   },[]);
   const view=[0,0,W,TH];
-  return <div className="ddj-host ddj-performance" dir="ltr">{[2,3,4].map(n=><audio key={n} ref={el=>{media.current[n]=el;}} crossOrigin="anonymous" preload="metadata" src={decks[n]?.track?.audioUrl} onLoadedMetadata={e=>sync(n,e.currentTarget,true)} onTimeUpdate={e=>sync(n,e.currentTarget)} onRateChange={e=>sync(n,e.currentTarget,true)} onPlay={e=>sync(n,e.currentTarget,true)} onPause={e=>sync(n,e.currentTarget,true)} onEnded={e=>sync(n,e.currentTarget,true)} onError={()=>setNotice('Deck '+n+' could not load this recording.')}/>)}
-    <div className="ddj-library">{layers.map(n=><label key={n}>Deck {n}<select id={'ddj-load-'+n} value={(n===1?player:decks[n])?.track?.id||''} onChange={event=>loadDeck(n,event.target.value)}><option value="" disabled>Load recording</option>{library.map(track=><option key={track.id} value={track.id}>{track.title}</option>)}</select></label>)}{(notice||player.error)&&<span role="status">{notice||player.error}</span>}</div>
+  return <div className="ddj-host ddj-performance" dir="ltr">{[2,3,4].map(n=><audio key={n} ref={el=>{media.current[n]=el;}} crossOrigin="anonymous" preload="auto" src={decks[n]?.track?.audioUrl} onLoadedMetadata={e=>{sync(n,e.currentTarget,true);loadWaiters.current[n]?.resolve(true);}} onTimeUpdate={e=>sync(n,e.currentTarget)} onRateChange={e=>sync(n,e.currentTarget,true)} onPlay={e=>sync(n,e.currentTarget,true)} onPause={e=>sync(n,e.currentTarget,true)} onEnded={e=>sync(n,e.currentTarget,true)} onError={()=>{loadWaiters.current[n]?.resolve(false);setNotice('Deck '+n+' could not load this recording.');}}/>)}
+    <div className="ddj-library">{layers.map(n=><label key={n}>Deck {n}<select id={'ddj-load-'+n} value={(n===1?player:decks[n])?.track?.id||''} onChange={event=>loadDeck(n,event.target.value)}><option value="" disabled>Load recording</option>{library.map(track=><option key={track.id} value={track.id}>{track.title}</option>)}</select></label>)}
+      <div className="ddj-ai"><button type="button" className={aiState.enabled?'is-on':''} aria-pressed={aiState.enabled} onClick={toggleAi}>{aiState.enabled?'STOP AI DJ':'START AI DJ'}</button><span role="status" title={aiState.message}>{aiState.message}</span></div>
+      {(notice||player.error)&&<span className="ddj-library-notice" role="status">{notice||player.error}</span>}</div>
     <div className="ddj-stage"><div className="ddj-frame" style={{aspectRatio:`${view[2]} / ${view[3]}`,'--ratio':view[2]/view[3]}}><svg className="ddj-svg" viewBox={view.join(" ")} role="group" aria-label="Performance DJ controller" preserveAspectRatio="xMidYMid meet">
     <defs>
       <linearGradient id="body" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#141618"/><stop offset="1" stopColor="#0a0b0c"/></linearGradient>
