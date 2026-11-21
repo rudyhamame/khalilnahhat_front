@@ -81,3 +81,6 @@ html body .echo[data-page=home][data-theme] :is(.avail-kicker,.rentals-hero-kick
 html body .echo[data-page=home][data-theme] :is(.avail-kicker,.rentals-hero-kicker,.rw-kicker)>.ysf-order{order:2;margin-inline:auto 0}
 /* DJ service label: the badge and the label swap places (badge at the start, label at the end). */
 html body .echo[data-page=home][data-theme] .dj-choice>.avail-kicker>.ysf-order{order:-1;margin-inline:0 auto}
+
+/* Room under the "DJ Khalil Service" step heading, before its hero image. */
+html body .echo #booking-phase-3.booking-phase{padding-bottom:clamp(18px,2.6vw,36px)}

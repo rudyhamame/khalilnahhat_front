@@ -20,7 +20,7 @@ html body .echo.echo-public-page[data-page=home][data-theme]:has(#live)::after{c
 .ab-page{--ab-text:#eef4ef;--ab-muted:#b9cbbf;--ab-mint:#a6e3ce;--ab-gold:#d9b46e;--ab-line:#ffffff1f;--ab-card:#ffffff08;--ab-gutter:clamp(20px,4.5vw,64px);--ab-gap:clamp(72px,10vw,140px);
  color:var(--ab-text);font-family:'Manrope','Noto Sans Arabic',sans-serif;line-height:1.7;overflow-x:clip;padding-bottom:var(--ab-gap)}
 .ab-page *{box-sizing:border-box}
-.ab-wrap{width:min(1240px,100% - 2*var(--ab-gutter));margin-inline:auto}
+.ab-wrap{width:min(1440px,100% - 2*var(--ab-gutter));margin-inline:auto}
 .ab-page h1,.ab-page h2,.ab-page h3,.ab-page p,.ab-page figure,.ab-page ul{margin:0;padding:0}
 .ab-page ul{list-style:none}
 .ab-page a{color:inherit;text-decoration:none}
@@ -37,7 +37,7 @@ html body .echo.echo-public-page[data-page=home][data-theme]:has(#live)::after{c
 .ab-title{font:400 clamp(48px,7.6vw,112px)/.98 Anton,'Cairo',sans-serif;letter-spacing:-.01em;text-transform:uppercase;text-wrap:balance}
 .ab-title span{display:block;margin-top:clamp(14px,1.6vw,24px);font:600 clamp(16px,1.7vw,22px)/1.5 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:.06em;text-transform:none;color:var(--ab-gold)}
 [dir=rtl] .ab-title{font-family:Cairo,'Noto Sans Arabic',sans-serif;font-weight:900;letter-spacing:0;line-height:1.25;text-transform:none}
-.ab-lede{max-width:44ch;margin-top:clamp(22px,2.4vw,34px);font-size:clamp(18px,1.55vw,22px);line-height:1.75;color:#dfe8e1}
+.ab-lede{max-width:52ch;margin-top:clamp(22px,2.4vw,34px);font-size:clamp(18px,1.55vw,22px);line-height:1.75;color:#dfe8e1}
 .ab-actions{display:flex;flex-wrap:wrap;gap:14px;margin-top:clamp(26px,3vw,40px)}
 .ab-button{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:14px 28px;border:1px solid #ffffff38;border-radius:999px;background:#ffffff0a;color:var(--ab-text);font:700 16px/1.2 'Manrope','Noto Sans Arabic',sans-serif;transition:background .2s,border-color .2s,transform .2s,gap .2s}
 .ab-button:hover{background:#ffffff16;border-color:#ffffff66;transform:translateY(-1px)}
@@ -47,11 +47,6 @@ html body .echo.echo-public-page[data-page=home][data-theme]:has(#live)::after{c
 
 .ab-hero-art{position:relative;display:grid;place-items:end center;min-width:0;isolation:isolate}
 .ab-hero-art img{display:block;width:min(100%,560px);height:auto;filter:drop-shadow(0 28px 36px #0009)}
-.ab-ring{position:absolute;inset-inline:0;bottom:6%;margin-inline:auto;aspect-ratio:1;border-radius:50%;z-index:-1;border:1px solid #a6e3ce33}
-.ab-ring-1{width:96%;background:radial-gradient(circle,#a6e3ce26,transparent 68%)}
-.ab-ring-2{width:76%;border-color:#d9b46e40}
-.ab-ring-3{width:56%;border-color:#ffffff1f}
-@media(prefers-reduced-motion:no-preference){.ab-ring-2{animation:ab-spin 48s linear infinite;border-style:dashed}.ab-ring-3{animation:ab-spin 36s linear infinite reverse;border-style:dotted}}
 @keyframes ab-spin{to{transform:rotate(360deg)}}
 
 /* Facts */
@@ -167,3 +162,8 @@ html body .echo .ab-page .ab-links{margin-top:clamp(14px,1.8vw,24px)}
   radial-gradient(ellipse 36% 36% at 98% 40%,#442f0acc,transparent 74%),
   linear-gradient(180deg,#0f2a22 0%,#132b18 30%,#3a3314 62%,#4a3d17 100%)}
 .ab-backdrop::after{content:"";position:absolute;inset:0;opacity:.2;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Cpath fill='%23fff' filter='url(%23grain)' d='M0 0h180v180H0z'/%3E%3C/svg%3E")}
+/* The photo (a cutout with a soft halo baked in) is cut flat at its box: fade the sides and the bottom so no straight edge shows and it melts into the page. */
+.ab-hero-art img{
+ -webkit-mask-image:linear-gradient(to right,transparent 0,#000 18%,#000 82%,transparent 100%),linear-gradient(to bottom,#000 0,#000 74%,transparent 99%);
+ mask-image:linear-gradient(to right,transparent 0,#000 18%,#000 82%,transparent 100%),linear-gradient(to bottom,#000 0,#000 74%,transparent 99%);
+ -webkit-mask-composite:source-in;mask-composite:intersect;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:100% 100%;mask-size:100% 100%}

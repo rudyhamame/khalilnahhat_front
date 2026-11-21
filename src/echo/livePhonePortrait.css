@@ -33,7 +33,7 @@ html.echo-live-page-open body .echo[data-page=home][data-theme] .echo-header{bor
 @media(orientation:landscape){
 html body .echo[data-page=home][data-theme] #live>.viewport-fit-content:has(.is-phone){padding-top:0!important}
 html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-switcher.home-live-columns.is-phone :is(.home-live-catalog,.home-live-requests){inset:12px 12px 12px auto;width:min(400px,40%);height:auto;max-height:none;border-radius:18px}
-html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-switcher.home-live-columns.is-phone .home-live-comments-wrapper{inset:auto auto 0 0;width:min(440px,42%);padding:56px 16px 16px}
+html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-switcher.home-live-columns.is-phone .home-live-comments-wrapper{inset:auto 0 0 0;width:auto;padding:56px 16px 16px}
 }
 
 /* The Live page is a full-screen overlay over the whole app, like the 3D Room: above the header, footer player, side navigation and launchers. */
@@ -43,3 +43,26 @@ html body .echo.echo-ai-overlay-page:has(#live)>.echo-header{display:none!import
 html body .echo.echo-public-page.echo-ai-overlay-page[data-page=home][data-theme] #echo-main>#live{flex:1;min-height:0;height:100%!important;max-height:none!important;padding:0!important}
 .home-live-overlay-close{position:absolute;z-index:20;top:14px;inset-inline-end:14px;display:grid;place-items:center;width:40px;height:40px;padding:0;border:1px solid #ffffff26;border-radius:50%;background:#0d1012dd;color:#e5eee8;cursor:pointer}
 .home-live-overlay-close:hover{background:#ffffff1a}.home-live-overlay-close:focus-visible{outline:2px solid #e3d3a3;outline-offset:3px}
+/* Comments run the full width of the picture (the feed and the box), in portrait and landscape. */
+html body .echo[data-page=home][data-theme] #live .home-live-console.is-phone .home-live-comments-wrapper :is(.home-live-comments,.is-overlay,form,.home-live-comment-feed){width:100%;max-width:none}
+
+/* Live toolbar (top left): the live status sits at the far left, then the tool buttons, all in one glass pill. */
+html body .echo[data-page=home][data-theme] #live .home-live-preview>.home-live-preview-top{top:12px;left:12px;right:auto;direction:ltr;display:flex;align-items:center;justify-content:flex-start;gap:2px;padding:5px 8px 5px 12px;border:1px solid #ffffff26;border-radius:999px;background:#080d10b8;box-shadow:0 8px 22px #0007,inset 0 1px 0 #ffffff14;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+html body .echo[data-page=home][data-theme] #live .home-live-preview-top>.home-live-status{position:static;flex:none;order:-1;width:10px;height:10px;margin:0 10px 0 0;padding:0;border-radius:50%;background:#e5605f;box-shadow:0 0 0 3px #e5605f2e}
+html body .echo[data-page=home][data-theme] #live .home-live-preview-top>.home-live-status.is-live{background:#50df90;box-shadow:0 0 0 3px #50df9030;animation:home-live-status-breathe 2s ease-in-out infinite}
+html body .echo[data-page=home][data-theme] #live .home-live-preview-top>.home-live-status::after{content:'';position:absolute;margin-inline-start:16px;width:1px;height:18px;background:#ffffff2e}
+html body .echo[data-page=home][data-theme] #live .home-live-preview>.home-live-preview-top>button{width:34px;height:34px;min-width:0;min-height:0;padding:0;border:0;border-radius:50%;background:transparent;color:#e8f0eb;display:grid;place-items:center;cursor:pointer;transition:background .18s,color .18s,transform .18s}
+html body .echo[data-page=home][data-theme] #live .home-live-preview>.home-live-preview-top>button:hover:not(:disabled){background:#ffffff1f;transform:translateY(-1px)}
+html body .echo[data-page=home][data-theme] #live .home-live-preview>.home-live-preview-top>button[aria-pressed=true]{background:#7fdcb326;color:#7fdcb3}
+html body .echo[data-page=home][data-theme] #live .home-live-preview>.home-live-preview-top>button:focus-visible{outline:2px solid #a6e3ce;outline-offset:1px}
+html body .echo[data-page=home][data-theme] #live .home-live-preview>.home-live-preview-top>button svg{width:18px;height:18px}
+/* Status with its text: a dot plus "LIVE" / "OFFLINE" (the label was visually hidden before). */
+html body .echo[data-page=home][data-theme] #live .home-live-preview-top>.home-live-status{display:inline-flex;align-items:center;gap:8px;width:auto;height:auto;margin:0 6px 0 0;padding:0 12px 0 2px;border:0;border-inline-end:1px solid #ffffff2e;border-radius:0;outline:0;background:none;box-shadow:none;animation:none}
+html body .echo[data-page=home][data-theme] #live .home-live-preview-top>.home-live-status::after{display:none}
+html body .echo[data-page=home][data-theme] #live .home-live-preview-top>.home-live-status::before{content:'';flex:none;width:10px;height:10px;border-radius:50%;background:#e5605f;box-shadow:0 0 0 3px #e5605f2e}
+html body .echo[data-page=home][data-theme] #live .home-live-preview-top>.home-live-status.is-live::before{background:#50df90;box-shadow:0 0 0 3px #50df9030;animation:home-live-status-breathe 2s ease-in-out infinite}
+html body .echo[data-page=home][data-theme] #live .home-live-preview-top>.home-live-status .home-live-status-label{position:static;width:auto;height:auto;margin:0;padding:0;overflow:visible;clip-path:none;white-space:nowrap;color:#e8f0eb;font:700 11px/1 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:.14em;text-transform:uppercase}
+html body .echo[data-page=home][data-theme] #live .home-live-preview-top>.home-live-status.is-live .home-live-status-label{color:#7ff0ad}
+@media(prefers-reduced-motion:reduce){html body .echo[data-page=home][data-theme] #live .home-live-preview-top>.home-live-status.is-live::before{animation:none}}
+/* The close button stays behind the set list / requests panels when they open over the picture. */
+html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-switcher.home-live-columns.is-phone :is(.home-live-catalog,.home-live-requests){z-index:30}

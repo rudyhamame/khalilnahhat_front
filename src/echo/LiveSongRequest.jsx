@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Check, Music2, Search, Send } from 'lucide-react';
 import { apiRequest } from '../lib/api';
-import LiveSignInPrompt from './LiveSignInPrompt';
 
 const cleanTitle = (value) => String(value || '').replace(/&(amp|quot|apos|lt|gt|#39);/g, (_, entity) => ({ amp: '&', quot: '"', apos: "'", lt: '<', gt: '>', '#39': "'" })[entity]);
 
@@ -12,7 +11,7 @@ function duration(value) {
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
 }
 export default function LiveSongRequest({ user, token, sessionIdentity, live, ar }) {
-  const signedIn=Boolean(user&&token);
+  const signedIn=true;// no account needed to request a song
     const [query, setQuery] = useState(''); const [results, setResults] = useState([]); const [selection, setSelection] = useState(null);
   const [searching, setSearching] = useState(false); const [searched, setSearched] = useState(false);
   const [searchError, setSearchError] = useState(''); const [error, setError] = useState(''); const [sent, setSent] = useState(''); const [sending, setSending] = useState(false);
@@ -53,7 +52,6 @@ export default function LiveSongRequest({ user, token, sessionIdentity, live, ar
     finally { if(version===generation.current)setSending(false); }
   };
   const ready = Boolean(selection);
-  if(!signedIn)return <aside className="echo-song-request"><LiveSignInPrompt ar={ar} kind="suggestions"/></aside>;
   return <aside className="echo-song-request" aria-labelledby="song-request-title">
     <div className="echo-request-title"><Music2 size={16} /><h2 id="song-request-title">{ar ? 'اطلب أغنية' : 'Request a song'}</h2></div>
     {sent && <div className="echo-request-success" role="status"><Check size={16} /><div><strong>{ar ? 'وصل طلبك' : 'Sent to Khalil'}</strong><small>{sent}</small></div></div>}

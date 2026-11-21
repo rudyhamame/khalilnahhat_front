@@ -312,7 +312,7 @@ function App() {
   const isAuthenticated = Boolean(authUser?.isAdmin);
   // A visitor who is not signed in (a guest) starts on the login page; the rest of the site stays reachable.
   useEffect(() => {
-    if (!isSessionReady || authUser || routePath !== '/' || window.sessionStorage.getItem('echo-guest') || window.localStorage.getItem('echo-skip-login')) return;
+    if (!isSessionReady || authUser || routePath !== '/' || window.sessionStorage.getItem('echo-guest')) return;
     window.history.replaceState({}, '', '/login');
     window.dispatchEvent(new PopStateEvent('popstate'));
   }, [isSessionReady, authUser, routePath]);

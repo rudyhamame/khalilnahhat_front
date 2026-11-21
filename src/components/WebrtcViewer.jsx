@@ -16,11 +16,11 @@ function WebrtcViewer({ lang = 'en', muted = false, volume = 1, equalizer = null
     let cancelled=false,timer;
     setCredentials(null);setCredentialError(false);
     const verify=async()=>{
-      try {await apiRequest('/auth/me',{token:accountToken});}
+      try {if(accountToken)await apiRequest('/auth/me',{token:accountToken});}
       catch(error){if(!cancelled&&[401,403].includes(error.status)){setCredentials(null);setCredentialError('auth');return;}}
       if(!cancelled)timer=setTimeout(verify,30000);
     };
-    if(accountToken&&sessionIdentity)fetchWebrtcViewerToken(accountToken,sessionIdentity).then(value=>{if(!cancelled&&value.session===sessionIdentity){setCredentials({binding:accountToken,session:sessionIdentity,...value});timer=setTimeout(verify,30000);}}).catch(error=>{if(!cancelled)setCredentialError([401,403].includes(error.status)?'auth':'unavailable');});
+    if(sessionIdentity)fetchWebrtcViewerToken(accountToken,sessionIdentity).then(value=>{if(!cancelled&&value.session===sessionIdentity){setCredentials({binding:accountToken,session:sessionIdentity,...value});timer=setTimeout(verify,30000);}}).catch(error=>{if(!cancelled)setCredentialError([401,403].includes(error.status)?'auth':'unavailable');});
     return()=>{cancelled=true;clearTimeout(timer);};
   },[accountToken,sessionIdentity]);
   const access=credentials?.binding===accountToken&&credentials?.session===sessionIdentity?credentials:null;
@@ -252,7 +252,7 @@ function WebrtcViewer({ lang = 'en', muted = false, volume = 1, equalizer = null
   return (
     <div className="live-stream-webrtc-shell">
       <video ref={videoRef} className="live-stream-webrtc-video" autoPlay playsInline muted={isMuted} />
-      {!accountToken || credentialError==='auth' ? <div className="live-stream-webrtc-status"><LiveSignInPrompt ar={ar} kind={credentialError==='auth'?'expired':'watch'}/></div> : credentialError ? <div className="live-stream-webrtc-status">{ar?'تعذر الاتصال. حاول مجدداً.':'Playback unavailable. Use Reconnect to try again.'}</div> : ['connecting', 'waiting', 'reconnecting'].includes(status) ? (
+      {credentialError==='auth' ? <div className="live-stream-webrtc-status"><LiveSignInPrompt ar={ar} kind={credentialError==='auth'?'expired':'watch'}/></div> : credentialError ? <div className="live-stream-webrtc-status">{ar?'تعذر الاتصال. حاول مجدداً.':'Playback unavailable. Use Reconnect to try again.'}</div> : ['connecting', 'waiting', 'reconnecting'].includes(status) ? (
         <div className="live-stream-webrtc-status">{status === 'waiting' ? (ar ? 'في انتظار الكاميرا…' : 'Waiting for the camera…') : (ar ? 'جارٍ الاتصال بالبث…' : 'Connecting to the live stream…')}</div>
       ) : null}
       {status === 'error' ? (

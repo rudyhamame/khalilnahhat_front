@@ -52,7 +52,6 @@ export default function AboutPage({lang}){
     </div>
    </div>
    <figure className="ab-hero-art" data-reveal aria-hidden="false">
-    <span className="ab-ring ab-ring-1" aria-hidden="true"/><span className="ab-ring ab-ring-2" aria-hidden="true"/><span className="ab-ring ab-ring-3" aria-hidden="true"/>
     <img src={ar?'/echo/rentals-hero-khalil-rtl.webp':'/echo/rentals-hero-khalil.webp'} width="680" height="1444" alt={tr('DJ Khalil with headphones around his neck','دي جي خليل وسماعاته حول رقبته')} fetchPriority="high"/>
    </figure>
   </section>

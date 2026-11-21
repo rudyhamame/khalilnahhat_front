@@ -6,7 +6,6 @@ import AccountMenu from './AccountMenu';
 import './headerNav.css';
 import ClientAppBadge,{AndroidIconLink} from './ClientAppBadge';
 import HeaderMiniPlayer from './HeaderMiniPlayer';
-import SkipLoginOption from './SkipLoginOption';
 import LanguageOverlay from './LanguageOverlay';
 import {useBrowserChromeTheme} from './useBrowserChromeTheme';
 import './navigation.css';
@@ -140,7 +139,6 @@ export default function EchoShell({ lang, user, onLogout, children }) {
       {languageOpen&&<LanguageOverlay current={lang.lang} onChoose={lang.setLanguage} onClose={()=>setLanguageOpen(false)}/>}
       {current==='/about' && <footer id="echo-footer" className="echo-footer">
         <div className="echo-footer-brand"><div className="echo-logo echo-logo--paired"><span className="echo-brand-pair"><img className="echo-brand-mark" src="/echo/dj-khalil-nahhat-logo.svg" alt="DJ Khalil Nahhat" width="240" height="90" /><img className="echo-event-brand-mark" src="/echo/echo-event-entertainment-white-original.png" alt="ECHO Event & Entertainment" width="1392" height="1130" /></span><p>{t.tagline}</p></div></div>
-        <div className="echo-footer-skip-login"><SkipLoginOption tr={tr}/></div>
         <div className="echo-footer-bottom"><span>© {new Date().getFullYear()} {t.brand}</span><span>{t.footer}</span></div>
         <div className="echo-builder-credit">
           <a className="echo-builder-signature" href="https://portfolio.mctoshs.ca" target="_blank" rel="noopener noreferrer" aria-label={tr('Designed & built by RH Software (opens the RH Software portfolio)','التصميم والتطوير بواسطة RH Software (يفتح معرض أعمال RH Software)')}>
