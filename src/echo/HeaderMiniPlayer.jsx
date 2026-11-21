@@ -40,7 +40,8 @@ export default function HeaderMiniPlayer({ar=false,path}){
  const progress=player.duration>0?Math.max(0,Math.min(1,position/player.duration)):0;
  const art=displayImageUrl(track.coverImage);
  const next=()=>{const list=player.tracks||[];if(list.length<2)return;const at=list.findIndex(item=>item.id===track.id),target=list[(at+1)%list.length];window.dispatchEvent(new CustomEvent('echo:archive-play',{detail:{id:target.id,ids:list.map(item=>item.id),inline:true}}));};
- const openPlayer=()=>{setMenu(false);if(path==='/music')window.dispatchEvent(new CustomEvent('echo:work-player-open',{detail:{type:track.workType,trackId:track.id}}));else window.location.assign(track.workType?`/music?play=${encodeURIComponent(track.workType)}`:`/music?recording=${encodeURIComponent(track.id)}`);};
+ const openPlayer=()=>{setMenu(false);if(path==='/music')window.dispatchEvent(new CustomEvent('echo:work-player-open',{detail:{type:track.workType,trackId:track.id}}));else{// The app is a single page: move to Music without reloading it (a reload re-downloads everything and is what made this slow).
+  window.history.pushState({},'',track.workType?`/music?play=${encodeURIComponent(track.workType)}`:`/music?recording=${encodeURIComponent(track.id)}`);window.dispatchEvent(new PopStateEvent('popstate'));window.scrollTo(0,0);}};
  const volume=Number.isFinite(player.volume)?player.volume:.75;
  const toggleMute=()=>{if(volume>0){lastVolume.current=volume;archivePlayerCommand('volume',0);}else archivePlayerCommand('volume',lastVolume.current||.75);};
  const closeRecording=()=>{setMenu(false);archivePlayerCommand('eject');setDismissed(true);};

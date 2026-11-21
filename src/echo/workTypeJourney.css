@@ -307,8 +307,10 @@ html:has(.work-type-journey .work-player-box.is-open){scrollbar-gutter:stable}
 }
 
 /* Tighter music-box sections: each is only as tall as its card (no full-screen minimum), with little padding between them. */
-html body .echo .work-type-journey .work-story{min-height:0!important;padding-block:clamp(10px,2svh,24px)!important}
+html body .echo .work-type-journey .work-story{min-height:0!important;padding-block:clamp(10px,2svh,24px)!important;transition:min-height .6s cubic-bezier(.22,1,.36,1),padding-block .6s cubic-bezier(.22,1,.36,1),grid-template-columns .48s cubic-bezier(.22,1,.36,1)}
 html body .echo .work-type-journey .work-story:last-child{padding-bottom:clamp(40px,6svh,72px)!important}
 html body .echo .work-type-journey .work-story:first-child{padding-top:clamp(16px,3svh,32px)!important}
 /* The music box that is open for playing takes the whole viewport (its section is one full screen tall, content centred). */
-html body .echo .work-type-journey .work-story:has(.work-player-box.is-open){min-height:100svh!important;align-content:center;padding-block:clamp(24px,5svh,56px)!important;transition:min-height .45s cubic-bezier(.22,1,.36,1)}
+html body .echo .work-type-journey .work-story:has(.work-player-box.is-open){min-height:100svh!important;align-content:center;padding-block:clamp(24px,5svh,56px)!important;transition:min-height .6s cubic-bezier(.22,1,.36,1),padding-block .6s cubic-bezier(.22,1,.36,1),grid-template-columns .48s cubic-bezier(.22,1,.36,1)}
+
+@media(prefers-reduced-motion:reduce){html body .echo .work-type-journey .work-story{transition:none!important}}

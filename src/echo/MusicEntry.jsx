@@ -1,3 +1,4 @@
+import './echo.css';
 import {useEffect,useState} from 'react';
 import {fetchCurrentUser} from '../lib/api';
 import EchoShell from './EchoShell';

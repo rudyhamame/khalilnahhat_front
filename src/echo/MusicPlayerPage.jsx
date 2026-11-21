@@ -96,9 +96,13 @@ export default function MusicPlayerPage({lang,type:typeProp,workType,onClose,pla
   // Swipe the wheel: drag follows the finger, release past a third of a cover changes the song.
   const drag=useRef(null);
   const down=event=>{drag.current={x:event.clientX,moved:0};wheel.current?.setPointerCapture?.(event.pointerId);wheel.current?.classList.add('is-dragging');};
-  const move=event=>{const d=drag.current;if(!d)return;d.moved=event.clientX-d.x;wheel.current?.style.setProperty('--drag',`${d.moved}px`);};
+  const move=event=>{const d=drag.current;if(!d)return;d.moved=event.clientX-d.x;
+    // Real time: once the artwork is dragged past half a cover, the next (or previous) recording takes the centre straight away and the drag carries on from there, so the title and details follow the finger instead of waiting for the release.
+    const unit=(wheel.current?.querySelector('.wp-cover.is-center')?.offsetWidth||120)*.75;
+    if(Math.abs(d.moved)>unit/2&&list.length>1){const dir=d.moved<0?1:-1;go(dir);d.x+=dir>0?-unit:unit;d.moved=event.clientX-d.x;d.stepped=true;}
+    wheel.current?.style.setProperty('--drag',`${d.moved}px`);};
   const up=()=>{const d=drag.current;if(!d)return;drag.current=null;wheel.current?.classList.remove('is-dragging');wheel.current?.style.setProperty('--drag','0px');
-    const unit=wheel.current?.querySelector('.wp-cover.is-center')?.offsetWidth||120;if(Math.abs(d.moved)>unit/3)go(d.moved<0?1:-1);else d.moved=0;wheel.current.dataset.swiped=Math.abs(d.moved)>6?'1':'';};
+    const unit=wheel.current?.querySelector('.wp-cover.is-center')?.offsetWidth||120;if(Math.abs(d.moved)>unit/3&&!d.stepped)go(d.moved<0?1:-1);else d.moved=0;wheel.current.dataset.swiped=Math.abs(d.moved)>6?'1':'';};
   const key=event=>{if(event.key==='ArrowRight')go(ar?-1:1);else if(event.key==='ArrowLeft')go(ar?1:-1);};
 
   const viewing=collections.find(item=>item.id===viewId)||null;

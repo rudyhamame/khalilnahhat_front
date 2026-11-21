@@ -14,6 +14,9 @@ export default function WorkPlayerBox({active,lang,type,workType,tone,onClose,ch
   setReady(false);
   if(!active)return;
   if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){setReady(true);return;}
+  // The turn animation normally unlocks the player; if it never reports its end (tab in the background, interrupted by a page change) unlock anyway so Back always works.
+  const unlock=setTimeout(()=>setReady(true),2200);
+  return()=>clearTimeout(unlock);
  },[active]);
  return <div className={`work-player-box${reels?' is-reels':''}${active?' is-open':''}${closing?' is-closing':''}`} data-tone={tone} onAnimationEnd={event=>{if(closing&&event.target===event.currentTarget&&event.animationName==='work-player-shrink')onClose?.();}}>
   <div className="work-player-turn" onAnimationEnd={event=>{if(event.animationName==='work-player-turn')setReady(true);}}>
