@@ -12,7 +12,10 @@ export default function WorkTypeJourney({ar,workTypes,renderCard:renderWorkCard,
  const root=useRef(null);
  // While a track plays in a box, that box's screen turns into a moving blend of the box's rim colours.
  const [playing,setPlaying]=useState(()=>Boolean(readArchivePlayerState().playing));
+ const [reelPlaying,setReelPlaying]=useState(false);
  useEffect(()=>subscribeArchivePlayerState(event=>setPlaying(Boolean(event.detail?.playing))),[]);
+ // A Reel video that is playing lights its box's screen the same way a playing recording does.
+ useEffect(()=>{const on=event=>setReelPlaying(Boolean(event.detail?.playing));window.addEventListener('echo:reel-playing',on);return()=>window.removeEventListener('echo:reel-playing',on);},[]);
  // Each of the six story boxes enters only when its own viewport reaches the reader. The class is installed
  // before paint so off-screen boxes never flash in their resting position first.
  const entered=useRef(new Set());
@@ -57,7 +60,7 @@ export default function WorkTypeJourney({ar,workTypes,renderCard:renderWorkCard,
   </section>
   <div className="work-stories">{workTypes.map((work,index)=>{
    const {name,details}=djWorkTypeText(work,ar);
-   return <section key={work.id} data-work={work.id} data-tone={index%6} id={index===0?'work-story-first':`work-story-${work.id.toLowerCase()}`} className={`work-story${index%2?' is-card-right':''}${playing&&activeType===work.id?' is-playing':''}${entered.current.has(work.id)?' is-box-entered':''}`} aria-labelledby={`work-story-title-${work.id}`}>
+   return <section key={work.id} data-work={work.id} data-tone={index%6} id={index===0?'work-story-first':`work-story-${work.id.toLowerCase()}`} className={`work-story${index%2?' is-card-right':''}${(playing||reelPlaying)&&activeType===work.id?' is-playing':''}${entered.current.has(work.id)?' is-box-entered':''}`} aria-labelledby={`work-story-title-${work.id}`}>
     <div className="work-story-card-slot"><div className="work-story-card">{renderCard(work,index)}</div></div>
     <a className="work-story-listen is-under-box" href="#work-journey-top">{ar?'العودة إلى الأعلى':'Back to top'}<ArrowUp size={18}/></a>
     <div className="work-story-copy" id={`work-story-copy-${work.id}`}><div className="work-story-copy-inner">
