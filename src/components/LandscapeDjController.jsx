@@ -7,6 +7,7 @@ import {createPortal} from 'react-dom';
 import {archivePlayerCommand} from '../lib/archivePlayerBridge';
 import {EQUALIZER_BANDS} from '../lib/audioEqualizer';
 import {recordingBeatGrid} from '../lib/recordingBeatGrid';
+import {mediaScratch} from '../lib/mediaScratch';
 import {StemChannelControls} from './StemChannels';
 import './ddjController.css';
 
@@ -17,7 +18,7 @@ const STEM_OF={1:'vocals',2:'drums',3:'bass',4:'other'};
 const STEM_NAME={vocals:'VOCALS',drums:'DRUMS',bass:'BASS',other:'MUSIC'};
 const PAD_MODES=['HOT CUE','BEAT LOOP','BEAT JUMP','KEY SHIFT'];
 
-function Deck({dx,n,player,command=archivePlayerCommand,art,switchLayer,mediaTime}){
+function Deck({dx,n,player,command=archivePlayerCommand,art,switchLayer,mediaTime,readout=true}){
   const dur=player.duration||0,pos=player.position||0,ready=Boolean(player.track)&&dur>0;
   const transportReady=Boolean(player.track)&&player.enabled!==false,progress=ready?clamp(pos/dur,0,1):0,playing=transportReady&&player.playing;
   const scrub=useRef(null);
@@ -84,9 +85,9 @@ function Deck({dx,n,player,command=archivePlayerCommand,art,switchLayer,mediaTim
         <circle cx={C.x} cy={C.y} r="50" fill="#3d4143" stroke="#1b1e1f" strokeWidth="2"/><circle cx={C.x} cy={C.y} r="47" fill="none" stroke="#505558" strokeWidth=".6"/>
         <path d={`M${C.x-36} ${C.y-27} A45 45 0 0 1 ${C.x+36} ${C.y-27}`} fill="none" stroke="#2a2d2f" strokeWidth="2.4"/><path d={`M${C.x-36} ${C.y+27} A45 45 0 0 0 ${C.x+36} ${C.y+27}`} fill="none" stroke="#2a2d2f" strokeWidth="2.4"/></g>
       <circle cx={C.x} cy={C.y} r="44" fill="#10191e" stroke="#63747d"/>
-      <T x={C.x} y={C.y-16} s={5} f="#91d5f7">DECK {n}</T>
-      <T x={C.x} y={C.y+2} s={10} f="#f1f6f7">{Math.floor(pos/60)}:{String(Math.floor(pos%60)).padStart(2,'0')}</T>
-      <T x={C.x} y={C.y+17} s={4.5} f="#a4c8ba">{bpm?Math.round(bpm*rate)+' BPM':'TAP BPM'}</T>
+      {readout&&<><T x={C.x} y={C.y-18} s={6} f="#91d5f7">DECK {n}</T>
+        <T x={C.x} y={C.y+3} s={12} f="#f1f6f7">{Math.floor(pos/60)}:{String(Math.floor(pos%60)).padStart(2,'0')}</T>
+        <T x={C.x} y={C.y+21} s={5.5} f="#a4c8ba">{bpm?Math.round(bpm*rate)+' BPM':'TAP BPM'}</T></>}
       <circle cx={C.x} cy={C.y} r="150" fill="transparent" className="jog-hit" tabIndex={ready?0:-1} role="slider" aria-label="Jog wheel: drag to scratch and scrub" aria-valuemin={0} aria-valuemax={Math.round(dur)} aria-valuenow={Math.round(pos)}
         onKeyDown={e=>{if(ready&&(e.key==='ArrowRight'||e.key==='ArrowLeft')){e.preventDefault();seek(pos+(e.key==='ArrowRight'?5:-5));}}}
         onPointerDown={e=>{if(!ready)return;e.currentTarget.setPointerCapture(e.pointerId);scrub.current={a:ang(e),t:pos,at:performance.now()};if(art)art.current.held=true;command('scratch',{phase:'start'});}}
@@ -130,7 +131,7 @@ export default function LandscapeDjController({stems,mic,audioGraph,unlock:unloc
   const [settings,setSettings]=useState({});
   const [last,setLast]=useState('FLAT');
   const [fxDeck,setFxDeck]=useState(1);
-  const media=useRef({}), strips=useRef({});
+  const media=useRef({}), strips=useRef({}), scratchers=useRef({}),uiClock=useRef({});
   const dv=(key,fallback=0)=>settings[key]??fallback;
   const sd=key=>value=>setSettings(previous=>({...previous,[key]:value}));
   const headphones=useRef(null), meters=useRef({}), masterLadder=useRef(null);
@@ -256,9 +257,15 @@ export default function LandscapeDjController({stems,mic,audioGraph,unlock:unloc
     }else if(type==='rate'){element.playbackRate=value;}
     else if(type==='stop'){element.pause();element.currentTime=0;}
     else if(type==='seek'){element.currentTime=value;}
-    else if(type==='scratch'&&value.phase==='move'){element.currentTime=value.pos;}
+    else if(type==='scratch'){
+      const state=scratchers.current[n]||(scratchers.current[n]={active:false,resume:false,target:0,timer:0});
+      mediaScratch(element,state,value,{duration:element.duration,normalRate:decks[n]?.playbackRate||1,resume:!element.paused,onPosition:position=>setDecks(previous=>({...previous,[n]:{...previous[n],position}}))});
+    }
   };
-  const sync=(n,el)=>{
+  const sync=(n,el,force=false)=>{
+    const now=performance.now();
+    if(!force&&now-(uiClock.current[n]||0)<125)return;
+    uiClock.current[n]=now;
     const state={playing:!el.paused,position:el.currentTime,duration:Number.isFinite(el.duration)?el.duration:0,playbackRate:el.playbackRate};
     setDecks(previous=>({...previous,[n]:{...previous[n],...state}}));
   };
@@ -283,6 +290,10 @@ export default function LandscapeDjController({stems,mic,audioGraph,unlock:unloc
   // The recording's artwork turns on the left record. It is a plain HTML image over the drawing (turned by the GPU, with a hole for the spindle), so the large SVG is never repainted while it spins.
   const jogArt=player.track?.coverImage?displayImageUrl(player.track.coverImage):'';
   const TH=H+LABEL_H,JC={x:189,y:194};
+  const jogBpm=Number(player.track?.sound?.bpm||player.track?.bpm)||recordingBeatGrid({trackId:player.track?.id,audioUrl:player.track?.audioUrl,time:0})?.bpm;
+  const jogRate=Number(player.playbackRate)||1;
+  const jogPosition=Number(player.position)||0;
+  const jogTime=`${Math.floor(jogPosition/60)}:${String(Math.floor(jogPosition%60)).padStart(2,'0')}`;
   // Artwork rotation, in degrees. One turn = 1.8 s of music at 1x (the same mapping the jog wheel uses to scrub), so the artwork turns at the music's speed while playing,
   // and while the record is held it follows the hand exactly (same direction, same speed) because the jog wheel adds its own angle changes here.
   const art=useRef({angle:0,held:false,el:null,playing:false,rate:1});
@@ -299,7 +310,7 @@ export default function LandscapeDjController({stems,mic,audioGraph,unlock:unloc
     return()=>cancelAnimationFrame(frame);
   },[]);
   const view=[0,0,W,TH];
-  return <div className="ddj-host ddj-performance" dir="ltr">{[2,3,4].map(n=><audio key={n} ref={el=>{media.current[n]=el;}} crossOrigin="anonymous" preload="metadata" src={decks[n]?.track?.audioUrl} onLoadedMetadata={e=>sync(n,e.currentTarget)} onTimeUpdate={e=>sync(n,e.currentTarget)} onRateChange={e=>sync(n,e.currentTarget)} onPlay={e=>sync(n,e.currentTarget)} onPause={e=>sync(n,e.currentTarget)} onEnded={e=>sync(n,e.currentTarget)} onError={()=>setNotice('Deck '+n+' could not load this recording.')}/>)}
+  return <div className="ddj-host ddj-performance" dir="ltr">{[2,3,4].map(n=><audio key={n} ref={el=>{media.current[n]=el;}} crossOrigin="anonymous" preload="metadata" src={decks[n]?.track?.audioUrl} onLoadedMetadata={e=>sync(n,e.currentTarget,true)} onTimeUpdate={e=>sync(n,e.currentTarget)} onRateChange={e=>sync(n,e.currentTarget,true)} onPlay={e=>sync(n,e.currentTarget,true)} onPause={e=>sync(n,e.currentTarget,true)} onEnded={e=>sync(n,e.currentTarget,true)} onError={()=>setNotice('Deck '+n+' could not load this recording.')}/>)}
     <div className="ddj-library">{layers.map(n=><label key={n}>Deck {n}<select id={'ddj-load-'+n} value={(n===1?player:decks[n])?.track?.id||''} onChange={event=>loadDeck(n,event.target.value)}><option value="" disabled>Load recording</option>{library.map(track=><option key={track.id} value={track.id}>{track.title}</option>)}</select></label>)}{(notice||player.error)&&<span role="status">{notice||player.error}</span>}</div>
     <div className="ddj-stage"><div className="ddj-frame" style={{aspectRatio:`${view[2]} / ${view[3]}`,'--ratio':view[2]/view[3]}}><svg className="ddj-svg" viewBox={view.join(" ")} role="group" aria-label="Performance DJ controller" preserveAspectRatio="xMidYMid meet">
     <defs>
@@ -311,7 +322,7 @@ export default function LandscapeDjController({stems,mic,audioGraph,unlock:unloc
     </defs>
     <rect x="0" y="0" width={W} height={H} rx="9" fill="url(#body)" stroke="#2c3033" strokeWidth="1.4"/>
     <rect x="370" y="3" width="326" height={H-6} fill="#0b0c0d" stroke="#2a2d2f"/>
-    {[1,2,3,4].map(n=><g key={n} display={layers.includes(n)?undefined:'none'}><Deck key={(n===1?player:decks[n])?.track?.id||n} mediaTime={()=>n===1?audioGraph.current?.element:media.current[n]} dx={n%2?0:DECK2} n={n} player={n===1?player:(decks[n]||{})} command={(type,value)=>command(n,type,value)} art={n===1?art:null} switchLayer={()=>setLayers(previous=>previous.map(value=>value===n?(n>2?n-2:n+2):value))}/></g>)}
+    {layers.map(n=><g key={n}><Deck key={(n===1?player:decks[n])?.track?.id||n} mediaTime={()=>n===1?audioGraph.current?.element:media.current[n]} dx={n%2?0:DECK2} n={n} player={n===1?player:(decks[n]||{})} command={(type,value)=>command(n,type,value)} art={n===1?art:null} readout={!(n===1&&jogArt)} switchLayer={()=>setLayers(previous=>previous.map(value=>value===n?(n>2?n-2:n+2):value))}/></g>)}
     {/* mic column */}
     <g className="mixer">
       <rect x="373" y="9" width="44" height="9" fill="#17191b" stroke="#2a2d2f"/><T x={395} y={16} s={5.2} f="#e8ecee">MIC</T>{mic?.active&&mic.latency&&<T x={395} y={6.5} s={3.4} f="#7fd6b0" aria-label="Browser audio latency">{(()=>{const total=mic.latency.base==null&&mic.latency.output==null?null:(mic.latency.base||0)+(mic.latency.output||0);return total==null?'LAT n/a':`LAT ${(total*1000).toFixed(1)} ms`;})()}</T>}
@@ -363,6 +374,11 @@ export default function LandscapeDjController({stems,mic,audioGraph,unlock:unloc
     </g>
   </svg>
   {layers[0]===1&&jogArt&&<img ref={el=>{art.current.el=el;}} className="ddj-jog-art" src={jogArt} alt="" aria-hidden="true" draggable="false" style={{left:`${(JC.x-49)/view[2]*100}%`,top:`${(JC.y-49)/view[3]*100}%`,width:`${98/view[2]*100}%`,height:`${98/view[3]*100}%`}}/>}
+  {layers[0]===1&&jogArt&&<svg className="ddj-jog-readout" viewBox={view.join(' ')} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+    <T x={JC.x} y={JC.y-18} s={6} f="#91d5f7">DECK 1</T>
+    <T x={JC.x} y={JC.y+3} s={12} f="#f1f6f7">{jogTime}</T>
+    <T x={JC.x} y={JC.y+21} s={5.5} f="#a4c8ba">{jogBpm?`${Math.round(jogBpm*jogRate)} BPM`:'TAP BPM'}</T>
+  </svg>}
   </div></div>
   {footerStatus&&createPortal(status,footerStatus)}</div>;
 }

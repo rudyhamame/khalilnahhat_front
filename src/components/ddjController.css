@@ -16,6 +16,7 @@
 .ddj-svg .ladder rect{fill:#47d97e;opacity:calc(.14 + .86*clamp(0, calc(var(--channel-level,0)*var(--n) - var(--i)), 1));transition:opacity .08s}
 .ddj-svg .ladder rect.warn{fill:#e4dc4e}.ddj-svg .ladder rect.hot{fill:#ff5a4f}
 .ddj-msg{flex:1;min-width:0}.ddj-msg p{margin:0}
+.ddj-loading{display:grid;place-items:center;width:100%;height:100%;min-height:220px;color:#c4d2d8;font:600 13px/1.4 system-ui;letter-spacing:.12em;text-transform:uppercase}
 /* The controller fills whatever the mixer face has left, so the whole face fits without scrolling. */
 /* The portal target adds no box of its own; the controller is laid out directly by the mixer face. */
 #home-music-archive .home-archive-flip-back .home-archive-controller{display:contents}
@@ -38,6 +39,8 @@
 .ddj-frame{position:relative;width:min(100cqw,calc(100cqh * var(--ratio,2.5)));max-height:100cqh}
 .ddj-frame>.ddj-svg{position:absolute;inset:0;width:100%;height:100%}
 .ddj-jog-art{position:absolute;border-radius:50%;object-fit:cover;pointer-events:none;user-select:none;opacity:.94;-webkit-mask:radial-gradient(circle,transparent 0 5%,#000 5.5%);mask:radial-gradient(circle,transparent 0 5%,#000 5.5%);will-change:transform;transform:translateZ(0)}
+.ddj-jog-readout{position:absolute;inset:0;z-index:2;width:100%;height:100%;overflow:visible;pointer-events:none;filter:drop-shadow(0 1px 2px #000) drop-shadow(0 0 3px #000)}
+.ddj-jog-readout text{font-family:'Manrope','Noto Sans',sans-serif;text-transform:uppercase;paint-order:stroke fill;stroke:#020608;stroke-width:.7px;stroke-linejoin:round}
 
 .ddj-performance{min-width:0;box-sizing:border-box}
 .ddj-library{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 12px;width:min(100%,760px);margin-inline:auto;flex:none}
@@ -46,6 +49,7 @@
 .ddj-library select{flex:1;width:0;padding:5px;text-overflow:ellipsis}
 .ddj-library span{grid-column:1/-1;overflow-wrap:anywhere;font:12px/1.4 system-ui;color:#ffd19c}
 .ddj-performance .ddj-stage{overflow:hidden}
+.ddj-performance .ddj-svg{filter:none}
 .ddj-performance .ddj-svg .ring-btn.is-live[aria-label^="Cue"] circle:first-child{stroke:#ee9d45}
 .ddj-performance .ddj-svg .ring-btn.is-live[aria-label="Play"] circle:first-child,.ddj-performance .ddj-svg .ring-btn.is-live[aria-label="Pause"] circle:first-child{stroke:#64cc87}
 .ddj-performance .ddj-svg .pad.on{fill:#66e2b6;filter:none}

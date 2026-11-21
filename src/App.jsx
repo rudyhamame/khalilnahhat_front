@@ -2,13 +2,8 @@ import { trackOnce } from './lib/analytics';
 import {startBookingRequestRefresh} from './lib/bookingRequestRefresh';
 import {signInDestination} from './lib/signInDestination.mjs';
 import {administratorDataChanged} from './echo/administratorChanges';
-import { useEffect, useMemo, useState } from 'react';
-import AdminPage from './components/AdminPage';
-import AdminLiveStudio from './components/AdminLiveStudio';
-import DashboardPage from './components/DashboardPage';
+import { lazy, useEffect, useMemo, useState } from 'react';
 import {clientWorkspaceView} from './lib/clientWorkspaceRoutes';
-import LoginPage from './components/LoginPage';
-import BookingSignupPage from './components/BookingSignupPage';
 import {
   createServiceRequest as createServiceRequestRequest,
   createArchiveItem as createArchiveItemRequest,
@@ -45,6 +40,11 @@ import { useLang } from './echo/i18n';
 import SessionExpiredNotice from './echo/SessionExpiredNotice';
 import './echo/echo.css';
 import { archiveAssetMap, siteData } from './data/siteData';
+
+const AdminPage = lazy(() => import('./components/AdminPage'));
+const DashboardPage = lazy(() => import('./components/DashboardPage'));
+const LoginPage = lazy(() => import('./components/LoginPage'));
+const BookingSignupPage = lazy(() => import('./components/BookingSignupPage'));
 
 const AUTH_TOKEN_STORAGE_KEY = 'khalil-auth-token';
 const AUTH_RETURN_STORAGE_KEY = 'khalil-auth-return';

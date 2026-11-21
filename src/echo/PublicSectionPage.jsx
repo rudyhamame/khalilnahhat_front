@@ -1,24 +1,26 @@
-import {useEffect} from 'react';
+import {lazy,Suspense,useEffect} from 'react';
 import {EventOrderProvider} from './EventOrderProvider';
 import {useEventOrder} from './eventOrderContext';
-import HomeLiveConsole from './HomeLiveConsole';
-import HomeAvailability from './HomeAvailability';
-import BookHero from './BookHero';
-import BookingStep from './BookingStep';
-import MusicPreferencesStep from './MusicPreferencesStep';
-import {PhaseBar,PhaseHeading} from './BookingPhases';
-import RentalsHero from './RentalsHero';
-import ReferencesSection from './ReferencesSection';
-import AdditionalNotesSection from './AdditionalNotesSection';
-import HomeWorkArchive from './HomeWorkArchive';
-import ServiceVinyl from './ServiceVinyl';
-import HomeBookingAssistant from './HomeBookingAssistant';
-import Room3D from './Room3D';
-import HomeContact from './HomeContact';
-import AboutPage from './AboutPage';
-import SeasonalTree from './SeasonalTree';
 import {useSeasonalTheme} from './seasonalTheme';
 import './publicSectionPage.css';
+
+const HomeLiveConsole=lazy(()=>import('./HomeLiveConsole'));
+const HomeAvailability=lazy(()=>import('./HomeAvailability'));
+const BookHero=lazy(()=>import('./BookHero'));
+const BookingStep=lazy(()=>import('./BookingStep'));
+const MusicPreferencesStep=lazy(()=>import('./MusicPreferencesStep'));
+const PhaseBar=lazy(()=>import('./BookingPhases').then(module=>({default:module.PhaseBar})));
+const PhaseHeading=lazy(()=>import('./BookingPhases').then(module=>({default:module.PhaseHeading})));
+const RentalsHero=lazy(()=>import('./RentalsHero'));
+const ReferencesSection=lazy(()=>import('./ReferencesSection'));
+const AdditionalNotesSection=lazy(()=>import('./AdditionalNotesSection'));
+const HomeWorkArchive=lazy(()=>import('./HomeWorkArchive'));
+const ServiceVinyl=lazy(()=>import('./ServiceVinyl'));
+const HomeBookingAssistant=lazy(()=>import('./HomeBookingAssistant'));
+const Room3D=lazy(()=>import('./Room3D'));
+const HomeContact=lazy(()=>import('./HomeContact'));
+const AboutPage=lazy(()=>import('./AboutPage'));
+const SeasonalTree=lazy(()=>import('./SeasonalTree'));
 
 function SectionContent({section,lang,user,token,liveStream,liveSessions,isSessionReady,auth}){
  const order=useEventOrder(),theme=useSeasonalTheme();
@@ -38,7 +40,7 @@ function SectionContent({section,lang,user,token,liveStream,liveSessions,isSessi
   about:()=> <AboutPage lang={lang}/>,
   tree:()=> <SeasonalTree standalone ar={lang.lang==='ar'} reviews={[]} media={[]} loading={false} lights={theme.lights} audio={theme.audio} photoIds={theme.photoIds}/>,
  };
- return content[section]?.()||null;
+ return <Suspense fallback={<div className="echo-section-loading" role="status">Loading…</div>}>{content[section]?.()||null}</Suspense>;
 }
 export default function PublicSectionPage(props){
  return <EventOrderProvider frameless user={props.user} token={props.token} lang={props.lang} auth={props.auth} isSessionReady={props.isSessionReady} onCreateServiceRequest={props.onCreateServiceRequest}><SectionContent {...props}/></EventOrderProvider>;

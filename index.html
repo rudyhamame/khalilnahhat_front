@@ -5,7 +5,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&amp;family=Aref+Ruqaa:wght@700&amp;family=Amiri:ital,wght@0,700;1,700&amp;family=Cinzel+Decorative:wght@700&amp;family=Dancing+Script:wght@700&amp;family=Great+Vibes&amp;family=Lalezar&amp;family=Lobster&amp;family=Mirza:wght@700&amp;family=Pacifico&amp;family=Playfair+Display:ital,wght@1,600&amp;family=Reem+Kufi:wght@700&amp;family=Satisfy&amp;family=Anton&amp;family=Cairo:wght@900&amp;family=Noto+Sans+Arabic:wght@400;700&amp;family=Noto+Sans:wght@400;700&amp;display=swap" rel="stylesheet" />
     <meta charset="UTF-8" />
     <link rel="preload" as="image" href="/echo/dj-khalil-nahhat-logo.svg" type="image/svg+xml" />
-    <style>html,body{margin:0;background:#0d1418;color:#e5eee8}</style>
+    <style>
+      html,body{margin:0;background:#0d1418;color:#e5eee8}
+      #root:empty::before,.echo-startup{position:fixed;inset:0;display:grid;place-content:center;gap:14px;background:#0d1418;color:#b9c9c0;font:600 12px/1.4 system-ui,sans-serif;letter-spacing:.16em;text-align:center;text-transform:uppercase}
+      #root:empty::before{content:'Loading Echo…'}
+      .echo-startup span{width:34px;height:34px;margin:auto;border:2px solid #73918755;border-top-color:#a8d7c5;border-radius:50%;animation:echo-startup-spin .8s linear infinite}
+      @keyframes echo-startup-spin{to{transform:rotate(1turn)}}
+      @media(prefers-reduced-motion:reduce){.echo-startup span{animation:none}}
+    </style>
     <link rel="icon" type="image/svg+xml" href="https://res.cloudinary.com/nqiooluk/image/upload/v1793064085/khalil/site-assets/cb1719dc5065/echo/dj-khalil-nahhat-logo.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=overlays-content" />
     <meta name="theme-color" content="#0d1418" />

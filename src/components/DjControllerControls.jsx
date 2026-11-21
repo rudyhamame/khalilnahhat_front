@@ -5,7 +5,22 @@ export const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 export const rad=d=>d*Math.PI/180;
 export function usePlayer(){
   const [state,setState]=useState(readArchivePlayerState);
-  useEffect(()=>{const on=e=>setState(e.detail);window.addEventListener(ARCHIVE_PLAYER_STATE,on);setState(readArchivePlayerState());return()=>window.removeEventListener(ARCHIVE_PLAYER_STATE,on);},[]);
+  const latest=useRef(state),lastPaint=useRef(0),timer=useRef(0);
+  useEffect(()=>{
+    const flush=()=>{timer.current=0;lastPaint.current=performance.now();setState(latest.current);};
+    const on=event=>{
+      const next=event.detail,previous=latest.current;
+      latest.current=next;
+      const transportChanged=['track','playing','preparing','buffering','duration','volume','playbackRate','equalizer','error','enabled'].some(key=>!Object.is(previous?.[key],next?.[key]));
+      const elapsed=performance.now()-lastPaint.current;
+      if(transportChanged||elapsed>=125){clearTimeout(timer.current);flush();}
+      else if(!timer.current)timer.current=setTimeout(flush,125-elapsed);
+    };
+    window.addEventListener(ARCHIVE_PLAYER_STATE,on);
+    latest.current=readArchivePlayerState();
+    flush();
+    return()=>{window.removeEventListener(ARCHIVE_PLAYER_STATE,on);clearTimeout(timer.current);};
+  },[]);
   return state;
 }
 export const toSvg=(e,node)=>{const svg=node.ownerSVGElement||node,m=svg.getScreenCTM().inverse(),p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(m);};

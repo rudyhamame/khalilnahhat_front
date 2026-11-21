@@ -125,12 +125,12 @@ html body .echo[data-theme] .work-journey-top{position:absolute;bottom:max(24px,
 }
 
 /* The page really contains the journey: every wrapper grows with it (no fixed first-screen height with content spilling out below), so VP1 holds only VP1 and the dark textured page background runs behind every screen. */
-html body .echo.echo-public-page[data-page=home][data-theme]:has(.work-type-journey){height:auto!important;min-height:var(--echo-visible-viewport-height,100svh)}
-html:has(.work-type-journey) :is(body,.echo-page-surface){height:auto!important;min-height:0}
-html body .echo.echo-public-page[data-page=home][data-theme] #echo-main:has(.work-type-journey){display:block;height:auto!important;max-height:none!important;overflow:visible!important}
-html body .echo.echo-public-page[data-page=home][data-theme] #khalil-work-archive:has(.work-type-journey),
-html body .echo.echo-public-page[data-page=home][data-theme] #khalil-work-archive:has(.work-type-journey) :is(.work-archive-flip,.work-archive-flip-inner,.home-work,.home-work-layout){height:auto!important;max-height:none!important;overflow:visible!important}
-html body .echo.echo-public-page[data-page=home][data-theme] #khalil-work-archive:has(.work-type-journey) .work-archive-front{position:relative;inset:auto;height:auto!important;overflow:visible!important}
+html body .echo.echo-public-page[data-page=home][data-theme]:has(#khalil-work-archive:not(:has(.is-flipped)) .work-type-journey){height:auto!important;min-height:var(--echo-visible-viewport-height,100svh)}
+html:has(#khalil-work-archive:not(:has(.is-flipped)) .work-type-journey) :is(body,.echo-page-surface){height:auto!important;min-height:0}
+html body .echo.echo-public-page[data-page=home][data-theme] #echo-main:has(>#khalil-work-archive:not(:has(.is-flipped)) .work-type-journey){display:block;height:auto!important;max-height:none!important;overflow:visible!important}
+html body .echo.echo-public-page[data-page=home][data-theme] #khalil-work-archive:not(:has(.is-flipped)):has(.work-type-journey),
+html body .echo.echo-public-page[data-page=home][data-theme] #khalil-work-archive:not(:has(.is-flipped)):has(.work-type-journey) :is(.work-archive-flip,.work-archive-flip-inner,.home-work,.home-work-layout){height:auto!important;max-height:none!important;overflow:visible!important}
+html body .echo.echo-public-page[data-page=home][data-theme] #khalil-work-archive:not(:has(.is-flipped)):has(.work-type-journey) .work-archive-front{position:relative;inset:auto;height:auto!important;overflow:visible!important}
 .work-type-journey .work-journey-overview.home-work-showcase{max-height:none}
 /* VP1 is exactly one screen below the header: its content is sized to fit, never taller. */
 .work-type-journey .work-journey-overview.home-work-showcase{min-height:calc(var(--echo-page-height,85svh) - var(--echo-page-inset,12px));height:calc(var(--echo-page-height,85svh) - var(--echo-page-inset,12px));overflow:hidden;overflow:clip;padding-bottom:64px}

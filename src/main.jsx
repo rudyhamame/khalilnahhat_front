@@ -1,6 +1,5 @@
-import React from 'react';
+import React, {Suspense} from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './App';
 import SmartCartLauncher from './echo/SmartCartLauncher';
 import {prepareHeroHeadphoneFrames} from './echo/heroHeadphoneFrames';
 import AdministratorWorkView from './echo/AdministratorWorkView';
@@ -19,6 +18,10 @@ import './echo/navigation.css';
 import { installSmoothResize } from './lib/smoothResize';
 import { installNoAutofill } from './lib/noAutofill';
 import { apiBaseUrl } from './lib/api';
+
+const App = React.lazy(() => window.location.pathname === '/music'
+  ? import('./echo/MusicEntry')
+  : import('./App'));
 
 // iPadOS can identify as a Mac when desktop browsing is enabled.
 document.documentElement.classList.toggle('echo-ipad',
@@ -45,7 +48,11 @@ debugLayout();
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <SeasonalPlayerHost>
-    <div className="echo-page-surface" id="echo-page-surface"><App /></div>
+    <div className="echo-page-surface" id="echo-page-surface">
+      <Suspense fallback={<div className="echo-startup" role="status" aria-live="polite"><span/>Loading Echo…</div>}>
+        <App />
+      </Suspense>
+    </div>
     <SmartCartLauncher />
     <AdministratorWorkView />
     <ArchiveFooter />

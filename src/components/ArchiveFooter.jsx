@@ -1,15 +1,17 @@
-import DdjController from './DdjController';
 import useMicChannel from '../hooks/useMicChannel';
 import { EQUALIZER_BANDS, flatEqualizer, equalizerGain } from '../lib/audioEqualizer';
 import usePartyLighting from '../hooks/usePartyLighting';
 import useStemPlayer from '../hooks/useStemPlayer';
-import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { apiRequest } from '../lib/api';
 import {fetchArchivePlaybackCatalog} from '../lib/musicArchiveCatalog';
 import {ARCHIVE_PLAYER_COMMAND,publishArchivePlayerState,ARCHIVE_MIXER_STATE,readArchiveMixerState} from '../lib/archivePlayerBridge';
 import { preparePerformer } from '../lib/songPerformance';
+import {mediaScratch} from '../lib/mediaScratch';
 import './archiveFooter.css';
+
+const DdjController = lazy(() => import('./DdjController'));
 
 export default function ArchiveFooter() {
   const [adminRoute, setAdminRoute] = useState(() => /^\/admin(?:\/|$)/.test(window.location.pathname));
@@ -211,21 +213,7 @@ function ArchiveMusicPlayer() {
     }else if(type==='equalizer-reset'){
       for(const band of EQUALIZER_BANDS)changeEqualizer(band.key,0);
     }else if(type==='scratch'){
-      // Jog-wheel scratching: while the record is held the music follows the hand (forward at the hand's speed, backward as short grains), and normal playback resumes on release.
-      const element=audio.current,state=scratch.current;
-      if(!element||!Number.isFinite(duration)||duration<=0)return;
-      const stopGrain=()=>{clearTimeout(state.timer);if(state.active)element.pause();};
-      if(value?.phase==='start'){state.active=true;state.was=playing;element.pause();}
-      else if(value?.phase==='move'&&state.active){
-        const target=Math.max(0,Math.min(duration,Number(value.pos)||0));element.currentTime=target;setPosition(target);
-        const velocity=Number(value.vel)||0,forward=velocity>=0;
-        element.playbackRate=forward?Math.max(.25,Math.min(4,velocity||1)):1;
-        element.play().catch(()=>{});
-        clearTimeout(state.timer);state.timer=setTimeout(()=>{if(state.active)element.pause();},forward?110:45);
-      }else if(value?.phase==='end'&&state.active){
-        stopGrain();state.active=false;element.playbackRate=playbackRate;
-        if(state.was)element.play().catch(()=>{});
-      }
+      mediaScratch(audio.current,scratch.current,value,{duration,normalRate:playbackRate,resume:playing,onPosition:setPosition});
     }else if(type==='seek'){
       const next=Number(value);
       if(audio.current&&Number.isFinite(next)&&Number.isFinite(duration)&&duration>0){
@@ -271,6 +259,11 @@ function ArchiveMusicPlayer() {
       onTimeUpdate={(event) => setPosition(event.currentTarget.currentTime)}
       onWaiting={() => setBuffering(true)} onPlaying={() => setBuffering(false)} onCanPlay={() => setBuffering(false)}
       onEnded={() => step(1)} onError={() => { if (currentUrl) { setError('Track unavailable. Choose another recording.'); setPlaying(false); setBuffering(false); } }} />
-    {mixerOpen&&channelsTarget&&createPortal(<DdjController stems={stems} mic={mic} masterMeter={channelMeter} audioGraph={audioGraph} unlock={unlock}/>,channelsTarget)}
+    {mixerOpen&&channelsTarget&&createPortal(
+      <Suspense fallback={<div className="ddj-loading" role="status">Loading mixer…</div>}>
+        <DdjController stems={stems} mic={mic} masterMeter={channelMeter} audioGraph={audioGraph} unlock={unlock}/>
+      </Suspense>,
+      channelsTarget,
+    )}
   </>;
 }

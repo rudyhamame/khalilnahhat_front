@@ -1,6 +1,6 @@
 import {djWorkTypeText} from '../lib/djWorkTypeText';
 import {useEffect,useRef,useState} from 'react';
-import {ArrowLeft,Clapperboard,Maximize,Pause,Play,RefreshCw,Volume2,VolumeX} from 'lucide-react';
+import {ArrowLeft,Clapperboard,Maximize,Minimize,Pause,Play,RefreshCw,RotateCcw,RotateCw,Volume2,VolumeX} from 'lucide-react';
 import {apiRequest} from '../lib/api';
 import {ARCHIVE_PLAYER_STATE,archivePlayerCommand} from '../lib/archivePlayerBridge';
 import {windowAt,cropStyle} from '../lib/reelCrop';
@@ -22,30 +22,44 @@ function CroppedReel({item,videoRef,onError,onLoadedMetadata,onEnded}){
 }
 
 const clock=seconds=>Number.isFinite(seconds)&&seconds>=0?`${Math.floor(seconds/60)}:${String(Math.floor(seconds%60)).padStart(2,'0')}`:'0:00';
-// The Reels controls, drawn by the site (the browser's own controls are off): play / pause, a seek bar, time, sound and full screen.
+// The Reels controls, drawn by the site (the browser's own controls are off): a big play button, a floating glass bar with a buffered seek bar, ±10 s,
+// time, a volume slider and full screen. The bar hides itself a moment after the video starts and returns on a tap or movement.
 function ReelControls({videoRef,rootRef,tr,videoKey}){
- const [state,setState]=useState({playing:false,time:0,duration:0,muted:false,volume:1});
+ const [state,setState]=useState({playing:false,time:0,duration:0,buffered:0,muted:false,volume:1,full:false}),[shown,setShown]=useState(true),hide=useRef(0);
  useEffect(()=>{
   const v=videoRef.current;if(!v)return undefined;
-  const sync=()=>setState({playing:!v.paused&&!v.ended,time:v.currentTime||0,duration:Number.isFinite(v.duration)?v.duration:0,muted:v.muted,volume:v.volume});
-  const events=['play','pause','ended','timeupdate','durationchange','loadedmetadata','volumechange','seeked'];
-  events.forEach(name=>v.addEventListener(name,sync));sync();
-  return()=>events.forEach(name=>v.removeEventListener(name,sync));
+  const sync=()=>{const ranges=v.buffered;let buffered=0;for(let i=0;i<ranges.length;i++)if(ranges.start(i)<=v.currentTime+.5)buffered=Math.max(buffered,ranges.end(i));setState({playing:!v.paused&&!v.ended,time:v.currentTime||0,duration:Number.isFinite(v.duration)?v.duration:0,buffered,muted:v.muted,volume:v.volume,full:Boolean(document.fullscreenElement)});};
+  const events=['play','pause','ended','timeupdate','durationchange','loadedmetadata','volumechange','seeked','progress'];
+  events.forEach(name=>v.addEventListener(name,sync));document.addEventListener('fullscreenchange',sync);sync();
+  return()=>{events.forEach(name=>v.removeEventListener(name,sync));document.removeEventListener('fullscreenchange',sync);};
  },[videoRef,videoKey]);
+ // Show on any tap / movement, hide 2.5 s later while playing.
+ const wake=()=>{setShown(true);clearTimeout(hide.current);hide.current=setTimeout(()=>{if(videoRef.current&&!videoRef.current.paused)setShown(false);},2500);};
+ useEffect(()=>{const node=rootRef.current;if(!node)return undefined;node.addEventListener('pointermove',wake);node.addEventListener('pointerdown',wake);return()=>{node.removeEventListener('pointermove',wake);node.removeEventListener('pointerdown',wake);clearTimeout(hide.current);};},[rootRef,videoKey]);// eslint-disable-line react-hooks/exhaustive-deps
+ useEffect(()=>{if(state.playing)wake();else{setShown(true);clearTimeout(hide.current);}},[state.playing]);// eslint-disable-line react-hooks/exhaustive-deps
  const toggle=()=>{const v=videoRef.current;if(!v)return;if(v.paused||v.ended)v.play().catch(()=>{});else v.pause();};
  const seek=event=>{const v=videoRef.current;if(v&&state.duration)v.currentTime=Number(event.target.value)/1000*state.duration;};
+ const skip=seconds=>{const v=videoRef.current;if(v)v.currentTime=Math.max(0,Math.min(v.duration||0,v.currentTime+seconds));};
  const mute=()=>{const v=videoRef.current;if(v)v.muted=!v.muted;};
+ const volume=event=>{const v=videoRef.current;if(!v)return;v.volume=Number(event.target.value)/100;v.muted=v.volume===0;};
  const full=()=>{const node=rootRef.current;if(!node)return;if(document.fullscreenElement)document.exitFullscreen?.();else node.requestFullscreen?.().catch(()=>{});};
- const percent=state.duration?state.time/state.duration*100:0;
- return <div className="reels-controls" role="group" aria-label={tr('Video controls','أدوات التحكم بالفيديو')}>
-  <input className="reels-seek" type="range" min="0" max="1000" step="1" value={Math.round(percent*10)} onChange={seek} aria-label={tr('Seek','تقديم وتأخير')} style={{'--p':`${percent}%`}}/>
-  <div className="reels-controls-row">
-   <button type="button" className="reels-play" onClick={toggle} aria-label={state.playing?tr('Pause','إيقاف مؤقت'):tr('Play','تشغيل')}>{state.playing?<Pause size={20} fill="currentColor"/>:<Play size={20} fill="currentColor"/>}</button>
-   <span className="reels-time" dir="ltr">{clock(state.time)} / {clock(state.duration)}</span>
-   <button type="button" onClick={mute} aria-pressed={state.muted} aria-label={state.muted?tr('Unmute','تشغيل الصوت'):tr('Mute','كتم الصوت')}>{state.muted||state.volume===0?<VolumeX size={18}/>:<Volume2 size={18}/>}</button>
-   <button type="button" onClick={full} aria-label={tr('Full screen','ملء الشاشة')}><Maximize size={18}/></button>
+ const percent=state.duration?state.time/state.duration*100:0,buffered=state.duration?Math.min(100,state.buffered/state.duration*100):0,silent=state.muted||state.volume===0;
+ return <>
+  {!state.playing&&<button type="button" className="reels-bigplay" onClick={toggle} aria-label={tr('Play','تشغيل')}><Play size={34} fill="currentColor"/></button>}
+  <div className={`reels-controls${shown?' is-shown':''}`} role="group" aria-label={tr('Video controls','أدوات التحكم بالفيديو')}>
+   <div className="reels-seekbox" style={{'--p':`${percent}%`,'--b':`${buffered}%`}}>
+    <input className="reels-seek" type="range" min="0" max="1000" step="1" value={Math.round(percent*10)} onChange={seek} aria-label={tr('Seek','تقديم وتأخير')} aria-valuetext={`${clock(state.time)} / ${clock(state.duration)}`}/>
+   </div>
+   <div className="reels-controls-row">
+    <button type="button" className="reels-play" onClick={toggle} aria-label={state.playing?tr('Pause','إيقاف مؤقت'):tr('Play','تشغيل')}>{state.playing?<Pause size={20} fill="currentColor"/>:<Play size={20} fill="currentColor"/>}</button>
+    <button type="button" className="reels-skip" onClick={()=>skip(-10)} aria-label={tr('Back 10 seconds','رجوع ١٠ ثوانٍ')}><RotateCcw size={18}/><b>10</b></button>
+    <button type="button" className="reels-skip" onClick={()=>skip(10)} aria-label={tr('Forward 10 seconds','تقدم ١٠ ثوانٍ')}><RotateCw size={18}/><b>10</b></button>
+    <span className="reels-time" dir="ltr"><b>{clock(state.time)}</b> / {clock(state.duration)}</span>
+    <span className="reels-sound"><button type="button" onClick={mute} aria-pressed={silent} aria-label={silent?tr('Unmute','تشغيل الصوت'):tr('Mute','كتم الصوت')}>{silent?<VolumeX size={18}/>:<Volume2 size={18}/>}</button><input type="range" min="0" max="100" value={silent?0:Math.round(state.volume*100)} onChange={volume} aria-label={tr('Volume','مستوى الصوت')} style={{'--v':`${silent?0:Math.round(state.volume*100)}%`}}/></span>
+    <button type="button" onClick={full} aria-label={state.full?tr('Exit full screen','إنهاء ملء الشاشة'):tr('Full screen','ملء الشاشة')}>{state.full?<Minimize size={18}/>:<Maximize size={18}/>}</button>
+   </div>
   </div>
- </div>;
+ </>;
 }
 
 export default function ReelsPlayer({lang,workType,onClose,closing=false}){
