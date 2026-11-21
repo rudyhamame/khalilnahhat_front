@@ -283,3 +283,7 @@ html body .echo.echo-public-page[data-page=home][data-theme] #echo-main>section.
 .wp-card>.wp-deck>.wp-top>.wp-badge{grid-column:2}
 .wp-card>.wp-deck>.wp-top>:is(.wp-icon,a.wp-icon):last-child{grid-column:3;justify-self:end}
 .wp-card>.wp-deck>.wp-top>.wp-badge-hint,.wp-card>.wp-deck>.wp-top>.wp-back-hint{grid-column:1/-1}
+
+/* The mixer layover sits over the live party lighting; the lights are its background and the controls stay above them. */
+.wp-channels{background:#04060a}
+.wp-channels>*:not(.party-lights){position:relative;z-index:1}

@@ -1,0 +1,9 @@
+/* Vibe lighting: a harmonised colour atmosphere (analogous hues, +0 / +35 / -35) that drifts and breathes with the audio. */
+.party-lights{position:absolute;inset:0;overflow:hidden;pointer-events:none;background:#05070b;--hue:200;--e:0;--p:0}
+.party-lights>*{position:absolute;inset:0}
+.pl-wash{background:
+ radial-gradient(ellipse 75% 65% at 18% 20%,hsl(var(--hue) 70% 48%/calc(.30 + var(--e)*.35)),transparent 70%),
+ radial-gradient(ellipse 75% 65% at 84% 26%,hsl(calc(var(--hue) + 35) 72% 50%/calc(.26 + var(--e)*.35)),transparent 70%),
+ radial-gradient(ellipse 90% 60% at 50% 105%,hsl(calc(var(--hue) - 35) 74% 46%/calc(.28 + var(--e)*.4)),transparent 72%);filter:blur(18px)}
+.pl-glow{background:radial-gradient(circle at 50% 55%,hsl(calc(var(--hue) + 15) 80% 60%/calc(var(--p)*.22 + var(--e)*.12)),transparent 62%);mix-blend-mode:screen}
+@media(prefers-reduced-motion:reduce){.pl-glow{opacity:.5}}

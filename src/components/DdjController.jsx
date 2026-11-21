@@ -85,7 +85,7 @@ function StandardController({stems,mic,masterMeter}){
   // The status line (separating progress, notices) lives in the mixer face's footer when that footer exists.
   const footerStatus=document.getElementById('echo-channels-overlay-status')||document.getElementById('home-archive-mixer-status');
   const status=<div className="ddj-msg" role="status">{stemOn?'Stems on: faders, CUE (solo) and the A·THRU·B switch (mute) control Vocals, Drums, Bass and Music.':stems?<StemChannelControls stems={stems}/>:''}{mic?.notice?` ${mic.notice}`:''}</div>;
-  // The recording's artwork turns on the left record. It is a plain HTML image over the drawing (turned by the GPU, with a hole for the spindle), so the large SVG is never repainted while it spins.
+  // The recording's artwork turns on the small inner circle (the label) of deck 1. It is a plain HTML image over the drawing (turned by the GPU, with a hole for the spindle), so the large SVG is never repainted while it spins.
   const jogArt=player.track?.coverImage?displayImageUrl(player.track.coverImage):'';
   const TH=H+LABEL_H,JC={x:189,y:194};
   // Artwork rotation, in degrees. One turn = 1.8 s of music at 1x (the same mapping the jog wheel uses to scrub), so the artwork turns at the music's speed while playing,
@@ -167,7 +167,7 @@ function StandardController({stems,mic,masterMeter}){
       <T x={656.5} y={473} s={3.6} f="#aab3b7">EQ FLAT</T>
     </g>
   </svg>
-  {jogArt&&<img ref={el=>{art.current.el=el;}} className="ddj-jog-art" src={jogArt} alt="" aria-hidden="true" draggable="false" style={{left:`${(JC.x-123)/W*100}%`,top:`${(JC.y-123)/TH*100}%`,width:`${246/W*100}%`,height:`${246/TH*100}%`}}/>}
+  {jogArt&&<img ref={el=>{art.current.el=el;}} className="ddj-jog-art" src={jogArt} alt="" aria-hidden="true" draggable="false" style={{left:`${(JC.x-49)/W*100}%`,top:`${(JC.y-49)/TH*100}%`,width:`${98/W*100}%`,height:`${98/TH*100}%`}}/>}
   </div></div>
   {footerStatus&&createPortal(status,footerStatus)}</div>;
 }

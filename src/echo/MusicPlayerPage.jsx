@@ -11,6 +11,7 @@ import {archivePlayerCommand,publishArchiveMixerState} from '../lib/archivePlaye
 import {archiveResults} from '../lib/archiveSearch';
 import {archiveLibrary} from '../lib/archiveLibrary';
 import ArtworkGlow from './ArtworkGlow';
+import PartyLights from './PartyLights';
 import MusicContentLoader from './MusicContentLoader';
 import './musicPlayerPage.css';
 
@@ -176,6 +177,7 @@ export default function MusicPlayerPage({lang,type:typeProp,workType,onClose,pla
   </div>
   </section>
   {channels&&createPortal(<div className="wp-channels" role="dialog" aria-modal="true" aria-label={tr('Channels mixer','مازج القنوات')} dir={ar?'rtl':'ltr'}>
+    <PartyLights/>
     <header className="wp-top" dir={ar?'rtl':'ltr'}><button type="button" className="wp-icon" onClick={()=>setChannels(false)} aria-label={tr('Close the mixer','إغلاق المازج')}><BackIcon size={20}/></button><span className="wp-meta-title">{current?.title||tr('Channels','القنوات')}</span><span className="wp-icon wp-spacer" aria-hidden="true"/></header>
     <div id="echo-channels-overlay-controller" className="home-archive-controller"/>
     <span id="echo-channels-overlay-status" className="home-archive-mixer-status" role="status"/>

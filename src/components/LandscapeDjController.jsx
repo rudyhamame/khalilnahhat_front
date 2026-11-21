@@ -362,7 +362,7 @@ export default function LandscapeDjController({stems,mic,audioGraph,unlock:unloc
       <T x={656.5} y={473} s={3.6} f="#aab3b7">EQ FLAT</T>
     </g>
   </svg>
-  {layers[0]===1&&jogArt&&<img ref={el=>{art.current.el=el;}} className="ddj-jog-art" src={jogArt} alt="" aria-hidden="true" draggable="false" style={{left:`${(JC.x-123)/view[2]*100}%`,top:`${(JC.y-123)/view[3]*100}%`,width:`${246/view[2]*100}%`,height:`${246/view[3]*100}%`}}/>}
+  {layers[0]===1&&jogArt&&<img ref={el=>{art.current.el=el;}} className="ddj-jog-art" src={jogArt} alt="" aria-hidden="true" draggable="false" style={{left:`${(JC.x-49)/view[2]*100}%`,top:`${(JC.y-49)/view[3]*100}%`,width:`${98/view[2]*100}%`,height:`${98/view[3]*100}%`}}/>}
   </div></div>
   {footerStatus&&createPortal(status,footerStatus)}</div>;
 }
