@@ -34,3 +34,9 @@ html body .dj-prefs-section .rentals-hero-form .djf.djf .djf-head{margin-bottom:
 .dj-prefs-section .djf-step{padding-block:clamp(24px,3vw,44px)}
 .dj-prefs-section .djf-card-body{display:grid;gap:14px;min-width:0}
 .dj-prefs-section .djf-card-action{display:flex;flex-wrap:wrap;gap:8px}
+/* The banner shows the whole picture, centred (not cropped to a strip): its black background merges with the dark page. */
+.dj-service-hero{height:auto;aspect-ratio:3/2;max-height:min(640px,80svh);width:auto;max-width:100%;margin-inline:auto;object-fit:contain;object-position:center}
+/* Transparent picture: no frame, box, shadow or background, so it sits directly on the page backdrop. */
+.dj-service-hero{border-radius:0;box-shadow:none;border:0;background:none;-webkit-mask-image:none;mask-image:none}
+/* Floating look: a soft shadow that follows the cut-out's own outline (the picture is transparent), a tight one close in and a wide one further down. */
+.dj-service-hero{filter:drop-shadow(0 10px 14px #000a) drop-shadow(0 34px 46px #000c)}

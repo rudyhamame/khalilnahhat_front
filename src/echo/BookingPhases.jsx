@@ -25,6 +25,8 @@ export function PhaseBar({ar=false}){
   update();window.addEventListener('scroll',schedule,{passive:true});window.addEventListener('resize',schedule);const timer=setInterval(schedule,1000);
   return()=>{cancelAnimationFrame(frame);window.removeEventListener('scroll',schedule);window.removeEventListener('resize',schedule);clearInterval(timer);};
  },[]);
+ // The page's own textured backdrop keeps its texture and changes colour with the step in view.
+ useEffect(()=>{const root=document.querySelector('.echo');root?.setAttribute('data-booking-phase',String(state.active));return()=>root?.removeAttribute('data-booking-phase');},[state.active]);
  const go=n=>document.getElementById(`booking-phase-${n}`)?.scrollIntoView({behavior:window.matchMedia?.('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
  return <nav className={`phase-bar${state.show?' is-shown':''}`} aria-label={ar?'خطوات الحجز':'Booking steps'} dir={ar?'rtl':'ltr'}>
   {PHASES.map(([en,arabic],index)=><button key={en} type="button" className={state.active===index+1?'is-active':''} aria-current={state.active===index+1?'step':undefined} onClick={()=>go(index+1)}><b>{index+1}</b><span>{ar?arabic:en}</span></button>)}

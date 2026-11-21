@@ -1,5 +1,5 @@
 import {djWorkTypeText} from '../lib/djWorkTypeText';
-import {useEffect,useRef,useState} from 'react';
+import {useEffect,useLayoutEffect,useRef,useState} from 'react';
 import {readArchivePlayerState,subscribeArchivePlayerState} from '../lib/archivePlayerBridge';
 import {ArrowDown,ArrowUp} from 'lucide-react';
 import './workTypeJourney.css';
@@ -13,6 +13,21 @@ export default function WorkTypeJourney({ar,workTypes,renderCard:renderWorkCard,
  // While a track plays in a box, that box's screen turns into a moving blend of the box's rim colours.
  const [playing,setPlaying]=useState(()=>Boolean(readArchivePlayerState().playing));
  useEffect(()=>subscribeArchivePlayerState(event=>setPlaying(Boolean(event.detail?.playing))),[]);
+ // Each of the six story boxes enters only when its own viewport reaches the reader. The class is installed
+ // before paint so off-screen boxes never flash in their resting position first.
+ useLayoutEffect(()=>{
+  const node=root.current;
+  if(!node||window.matchMedia('(prefers-reduced-motion: reduce)').matches||!('IntersectionObserver' in window))return undefined;
+  const stories=[...node.querySelectorAll('.work-story')];
+  node.classList.add('is-box-reveal-ready');
+  const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{
+   if(!entry.isIntersecting)return;
+   entry.target.classList.add('is-box-entered');
+   observer.unobserve(entry.target);
+  }),{threshold:.18,rootMargin:'-8% 0px -8%'});
+  stories.forEach(story=>observer.observe(story));
+  return()=>{observer.disconnect();node.classList.remove('is-box-reveal-ready');};
+ },[workTypes]);
  // Each sound keeps its player in its own story below the overview.
  const renderCard=(work,index)=>renderWorkCard(work,index,{compact:false,active:activeType===work.id,onOpen:()=>onOpenWork?.(work.id)});
 

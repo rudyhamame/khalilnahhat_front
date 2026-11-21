@@ -115,3 +115,24 @@ html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.b
 
 /* Field labels follow the page direction: label first, badge at the opposite end (left-to-right in English, right-to-left in Arabic). */
 html body .echo[data-page=home][data-theme] .avail-kicker:has(>.ysf-order)>.ysf-order{order:2;margin-inline:auto 0}
+/* Card header band: its own background, edge to edge, with the card's top corners. */
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-step-card>.booking-card-title:not([aria-hidden=true]){background:linear-gradient(180deg,#ffffff12,#ffffff08);border-radius:23px 23px 0 0;border-bottom:1px solid #ffffff1f}
+/* Card header title colour. */
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-step-card>.booking-card-title:not([aria-hidden=true]){color:#e8d7a6!important}
+
+/* The "edit personal information" hyperlink under the contact fields: its own line, clearly a link. */
+html body .echo[data-page=home][data-theme] #availability .personal-info-note a{display:inline-block;margin-top:8px;color:#e8d7a6;font-weight:700;text-decoration:underline;text-underline-offset:3px}
+html body .echo[data-page=home][data-theme] #availability .personal-info-note a:hover{color:#fff}
+
+
+/* Same texture on every step; only its colour changes (hue shifts of the original green backdrop), fading between steps. */
+.book-backdrop{transition:filter .8s ease,opacity .8s ease}
+.echo[data-booking-phase='1'] .book-backdrop{filter:hue-rotate(0deg)}
+.echo[data-booking-phase='2'] .book-backdrop{filter:hue-rotate(65deg) saturate(1.15)}
+.echo[data-booking-phase='3'] .book-backdrop{background:#0d1418!important}/* step 3: the Music page's plain dark colour; the backdrop's own film grain layer (::after) stays, like the Music page's grain */
+.echo[data-booking-phase='4'] .book-backdrop{filter:hue-rotate(125deg) saturate(1.1)}
+.echo[data-booking-phase='5'] .book-backdrop{filter:hue-rotate(185deg) saturate(1.15)}
+@media(prefers-reduced-motion:reduce){.book-backdrop{transition:none}}
+/* MC row: no line under it; more room under the DJ SERVICE buttons. */
+html body .echo[data-page=home][data-theme] .mc-row>div{border-bottom:0}
+html body .echo[data-page=home][data-theme] .dj-service-step .dj-choice{margin-bottom:clamp(18px,2.4vw,28px)}

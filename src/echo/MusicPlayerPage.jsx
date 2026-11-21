@@ -66,6 +66,7 @@ export default function MusicPlayerPage({lang,type:typeProp,workType,onClose,pla
   const inPlayer=Boolean(current&&player.track?.id===current.id),playing=inPlayer&&player.playing,busy=inPlayer&&(player.preparing||player.buffering);
   const duration=inPlayer&&player.duration?player.duration:seconds(current?.duration);
   const start=(track,queue=list)=>{if(!track)return;setSelectedId(track.id);window.dispatchEvent(new CustomEvent('echo:archive-play',{detail:{id:track.id,ids:queue.map(item=>item.id),inline:true}}));};
+  const openChannels=()=>{if(current&&!inPlayer)window.dispatchEvent(new CustomEvent('echo:archive-play',{detail:{id:current.id,ids:list.map(item=>item.id),inline:true,autoplay:false}}));setChannels(true);};
   // A QR visit follows the same queue and playback event as choosing the recording by hand.
   useEffect(()=>{
     if(!playbackReady||status!=='ready'||!linkedRecording.current||linkStarted.current)return;
@@ -119,8 +120,8 @@ export default function MusicPlayerPage({lang,type:typeProp,workType,onClose,pla
   <div className="wp-stage">
     <div className={`wp-card${flipped?' is-flipped':''}${browse?' is-browsing':''}`}>
     <div className="wp-deck" aria-hidden={flipped||browse?true:undefined} inert={flipped||Boolean(browse)||undefined}>
-      <header className="wp-top">
-        <button type="button" className="wp-icon wp-channels-btn" disabled={!current} onClick={()=>setChannels(true)} aria-label={tr('Channels: mix the vocals, drums, bass and music','القنوات: ميكس الغناء والطبول والباس والموسيقى')} title={tr('Channels','القنوات')}><SlidersHorizontal size={20}/></button>
+      <header className="wp-top" dir={ar?'rtl':'ltr'}>
+        <button type="button" className="wp-icon wp-channels-btn" disabled={!current} onClick={openChannels} aria-label={tr('Channels: mix the vocals, drums, bass and music','القنوات: ميكس الغناء والطبول والباس والموسيقى')} title={tr('Channels','القنوات')}><SlidersHorizontal size={20}/></button>
         <button type="button" ref={badge} className={`wp-badge${hint==='browse'&&!browse?' is-hinting':''}`} title={tr('Browse collections and recordings','تصفّح المجموعات والتسجيلات')} aria-label={tr('Browse collections','تصفّح المجموعات')} aria-haspopup="true" aria-expanded={Boolean(browse)} onClick={()=>setBrowse('collections')}><img src={art} alt=""/></button>
         {hint==='browse'&&!browse&&!flipped&&<span className="wp-badge-hint" aria-hidden="true">{tr('Tap the round picture to browse collections, then pick a recording.','اضغط على الصورة الدائرية لتصفّح المجموعات ثم اختر تسجيلاً.')}</span>}
         {onClose&&hint==='back'&&!browse&&!flipped&&<span className="wp-back-hint" aria-hidden="true">{tr('Finished listening? Tap the arrow to head back.','خلّصت استماع؟ اضغط على السهم للرجوع.')}</span>}
@@ -148,7 +149,7 @@ export default function MusicPlayerPage({lang,type:typeProp,workType,onClose,pla
         </div></>}
     </div>
     <div className="wp-meta" aria-hidden={!flipped||undefined} inert={!flipped||undefined}>
-      <header className="wp-top"><button type="button" className="wp-icon" onClick={()=>setFlipped(false)} aria-label={tr('Back to the player','العودة إلى المشغل')}><BackIcon size={20}/></button><span className="wp-meta-title">{tr('Recording details','تفاصيل التسجيل')}</span><span className="wp-icon wp-spacer" aria-hidden="true"/></header>
+      <header className="wp-top" dir={ar?'rtl':'ltr'}><button type="button" className="wp-icon" onClick={()=>setFlipped(false)} aria-label={tr('Back to the player','العودة إلى المشغل')}><BackIcon size={20}/></button><span className="wp-meta-title">{tr('Recording details','تفاصيل التسجيل')}</span><span className="wp-icon wp-spacer" aria-hidden="true"/></header>
       {current&&<>
         <div className="wp-meta-head"><img src={art} alt=""/><div><h2 dir="auto">{current.title}</h2><p dir="auto">{current.artist||'DJ Khalil'}</p></div></div>
         <dl className="wp-meta-list">{metaRows(current,tr,workType,ar).map(([label,value])=><div key={label}><dt>{label}</dt><dd dir="auto">{value}</dd></div>)}</dl>
@@ -157,7 +158,7 @@ export default function MusicPlayerPage({lang,type:typeProp,workType,onClose,pla
       </>}
     </div>
     <div className="wp-browse" aria-hidden={!browse||undefined} inert={!browse||undefined}>
-      <header className="wp-top">
+      <header className="wp-top" dir={ar?'rtl':'ltr'}>
         <button type="button" className="wp-icon" onClick={()=>setBrowse(browse==='recordings'?'collections':'')} aria-label={browse==='recordings'?tr('Back to collections','العودة إلى المجموعات'):tr('Back to the player','العودة إلى المشغل')}><BackIcon size={20}/></button>
         <span className="wp-meta-title">{browse==='recordings'?(viewing?viewing.title:tr('All recordings','كل التسجيلات')):tr('Collections','المجموعات')}</span>
         <span className="wp-icon wp-spacer" aria-hidden="true"/>
@@ -175,7 +176,7 @@ export default function MusicPlayerPage({lang,type:typeProp,workType,onClose,pla
   </div>
   </section>
   {channels&&createPortal(<div className="wp-channels" role="dialog" aria-modal="true" aria-label={tr('Channels mixer','مازج القنوات')} dir={ar?'rtl':'ltr'}>
-    <header className="wp-top"><button type="button" className="wp-icon" onClick={()=>setChannels(false)} aria-label={tr('Close the mixer','إغلاق المازج')}><BackIcon size={20}/></button><span className="wp-meta-title">{current?.title||tr('Channels','القنوات')}</span><span className="wp-icon wp-spacer" aria-hidden="true"/></header>
+    <header className="wp-top" dir={ar?'rtl':'ltr'}><button type="button" className="wp-icon" onClick={()=>setChannels(false)} aria-label={tr('Close the mixer','إغلاق المازج')}><BackIcon size={20}/></button><span className="wp-meta-title">{current?.title||tr('Channels','القنوات')}</span><span className="wp-icon wp-spacer" aria-hidden="true"/></header>
     <div id="echo-channels-overlay-controller" className="home-archive-controller"/>
     <span id="echo-channels-overlay-status" className="home-archive-mixer-status" role="status"/>
   </div>,document.body)}

@@ -2264,3 +2264,18 @@ html body #admin-live-stream#admin-live-stream#admin-live-stream .admin-live-sin
 
 /* Landscape-only preview: no padding around it. */
 .admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-monitor.studio-preview-pair.is-landscape-only{padding:0!important}
+
+/* OBS recording instructions tab. */
+.obs-guide{display:grid;gap:12px;padding:4px 2px;color:#e6eee9;font-size:13px;line-height:1.55}
+.obs-guide-lead{margin:0;color:#cfdcd4}
+.obs-guide h4{margin:6px 0 0;color:#fff;font-size:13px;letter-spacing:.06em;text-transform:uppercase}
+.obs-guide-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.obs-guide-table th,.obs-guide-table td{padding:8px 8px;border-bottom:1px solid #ffffff14;text-align:start;vertical-align:top}
+.obs-guide-table thead th{color:#9fb5a8;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.obs-guide-table tbody th{color:#fff;font-weight:600;white-space:nowrap}
+.obs-guide-table td b{color:#e3d3a3}
+.obs-guide-table td:last-child{color:#b9cbbf}
+.obs-guide ol{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.obs-guide li{display:grid;grid-template-columns:26px minmax(0,1fr);gap:10px;align-items:start}
+.obs-guide li p{margin:0;color:#dbe7e0}
+.obs-guide-n{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#e3d3a31a;color:#e3d3a3;font:700 12px/1 'Manrope',sans-serif}

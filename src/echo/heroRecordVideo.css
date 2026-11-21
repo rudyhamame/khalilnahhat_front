@@ -128,7 +128,7 @@ html[dir=rtl] body .echo[data-theme]>.echo-header .echo-brand-pair>img+img:not(#
 }
 
 /* Greeting player: the progress line is a rounded square drawn around the transcript. The track is a faint outline, the gold line fills it clockwise from the top-left corner; tap or drag along it to seek. The spoken word is highlighted like marker pen, words already said are bright, words still to come are dim. */
-.hero-intro-player .hero-intro-frame{position:relative;box-sizing:border-box;width:100%;margin:10px 0 0;padding:18px 20px 16px;border-radius:22px;background:#0d141866;cursor:pointer;touch-action:none}
+.hero-intro-player .hero-intro-frame{position:relative;box-sizing:border-box;width:100%;margin:10px 0 0;padding:18px 20px 16px;border-radius:22px;background:radial-gradient(circle at 50% 50%,#8b302f66 0 12%,#5c272840 13% 23%,transparent 32%),repeating-radial-gradient(circle at 50% 50%,transparent 0 15px,#d8b89a12 16px 17px,transparent 18px 27px),radial-gradient(circle at 18% 8%,#e1c0a15c 0,transparent 42%),radial-gradient(circle at 88% 92%,#8f6a5352 0,transparent 48%),linear-gradient(145deg,#644633e8 0%,#33221deb 46%,#15100fef 100%);box-shadow:inset 0 0 72px #0b0706a8,inset 0 1px 0 #f1d3b333;cursor:pointer;touch-action:none}
 .hero-intro-player .hero-intro-frame:not([data-ready=true]){cursor:default}
 .hero-intro-frame-line{position:absolute;inset:0;overflow:visible;pointer-events:none}
 .hero-intro-frame-line rect{fill:none;stroke-width:3.5;stroke-linecap:round}
@@ -488,3 +488,31 @@ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-
  .hero-intro-ticker-track>span.is-said{color:#d8e6dd}
  .hero-intro-ticker-track>span.is-active{color:#e3c184;font-weight:700}
 }
+
+/* Home hero, left column: its content (greeting, title, text, player) is centred vertically in the space under the header. */
+html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-copy-content>.hero-intro-heading-group{display:flex!important;flex-direction:column;justify-content:center!important;align-self:stretch;height:100%!important;margin-top:0!important;padding-top:0;box-sizing:border-box}
+
+/* Greeting box: a sheet of paper. Warm off-white with paper fibre and a faint grain, a soft edge and a lift shadow; the text inside turns dark ink. */
+html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame{
+ background:
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45  0 0 0 0 .36  0 0 0 0 .22  0 0 0 .5 0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23p)' opacity='.55'/%3E%3C/svg%3E"),
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.012 .5' numOctaves='2' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 .6  0 0 0 0 .5  0 0 0 0 .32  0 0 0 .35 0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23f)'/%3E%3C/svg%3E"),
+  radial-gradient(120% 90% at 20% 0,#fbf5e6 0,#f1e8d2 60%,#e8dcc0 100%)!important;
+ border:1px solid #d9cba8;box-shadow:0 14px 30px #0007,0 2px 0 #fff8 inset,0 -6px 14px #a58d5a22 inset}
+html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame :is(.hero-intro-meta,.hero-intro-meta span,.hero-intro-meta time){color:#5a4a2c!important}
+html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame .hero-intro-subtitle,html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame .hero-intro-subtitle span{color:#7b6a48}
+html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame .hero-intro-subtitle .is-active,html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame .hero-intro-lines .hero-intro-list p>span.is-said{color:#2b2112!important;text-decoration-color:#b5832e}
+html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame :is(.hero-intro-launch,.hero-intro-transport-button){color:#2b2112}
+.hero-intro-frame .hero-intro-frame-line .is-track{stroke:#2b211222}
+.hero-intro-frame .hero-intro-frame-line .is-fill{stroke:#b5832e;filter:none}
+/* Paper box: dark ink for the hint and the transport buttons. */
+html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame .hero-intro-start-hint{color:#5a4a2c!important;opacity:.85}
+html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame :is(.hero-intro-launch,.hero-intro-transport-button,.hero-intro-skip,.hero-intro-controls-inline button){color:#2b2112!important}
+html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame button{color:#2b2112!important;opacity:1}
+html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame button :is(svg,span,i){color:#2b2112!important;opacity:1}
+html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame :is(svg.lucide-play,svg.lucide-pause,svg.lucide-play *,svg.lucide-pause *){color:#2b2112!important;fill:#2b2112!important;stroke:#2b2112!important}
+html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-player .hero-intro-frame :is(.hero-intro-control-symbol,.hero-intro-control-symbol .hero-intro-skip-seconds){color:#2b2112!important}
+html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-player .hero-intro-frame .hero-intro-control-symbol>svg{filter:none}
+html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-player .hero-intro-frame .hero-intro-control-symbol>svg:not([class*=lucide-square]){fill:none}
+html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-player .hero-intro-frame .hero-intro-control-symbol>svg[class*=lucide-play]{fill:#2b2112}
+html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame .hero-intro-controls-inline>button:first-child .hero-intro-launch-face svg :is(path,polygon,circle,rect){fill:#2b2112!important;stroke:none!important}

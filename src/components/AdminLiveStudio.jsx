@@ -6,6 +6,7 @@ import {adminToast} from './adminToast';
 import {useLiveStatus,liveSessionIdentity} from '../hooks/useLiveStatus';
 import {useWebrtcBroadcast} from '../hooks/useWebrtcBroadcast';
 import {apiRequest} from '../lib/api';
+import ObsRecordingGuide from './ObsRecordingGuide';
 import {startStudioBroadcast} from '../lib/studioRecordingFallback';
 import {useAutoDuck} from '../hooks/useAutoDuck';
 import {useOutputFormat} from '../hooks/useOutputFormat';
@@ -22,7 +23,7 @@ import './adminLiveStudio.css';
 import './studioControls.css';
 
 const OBS_DEVICE=/obs|virtual/i;
-const SETTINGS_TABS=[['studio','Setup',Layers],['destinations','Destinations',Share2]];
+const SETTINGS_TABS=[['studio','Setup',Layers],['destinations','Destinations',Share2],['obs','OBS recording',Video]];
 
 
 export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSessions=[],setListActions,onLiveStreamChange,onReviewLiveRequest}) {
@@ -216,6 +217,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  </fieldset>
  </section>
  </div>
+ <div className="studio-settings-panel" role="tabpanel" id="studio-settings-panel-obs" aria-labelledby="studio-settings-tab-obs" hidden={settingsTab!=='obs'} tabIndex={0}><ObsRecordingGuide/></div>
  <div className="studio-settings-panel" role="tabpanel" id="studio-settings-panel-destinations" aria-labelledby="studio-settings-tab-destinations" hidden={settingsTab!=='destinations'} tabIndex={0}>
 <LiveDestinations format={output.format} compact onFeedback={setDestinationFeedback} onSetup={openDestination} landscapeTarget={landscapeIndicators} portraitTarget={portraitIndicators} token={token} enabled={enabled} roomName={liveStream?.broadcastMode==='whep'?liveStream?.obs?.roomName:liveStream?.webrtcRoomName} isLive={isLiveOnAir} mode={liveStream?.broadcastMode}/>
  </div>

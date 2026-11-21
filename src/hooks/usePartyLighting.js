@@ -34,13 +34,16 @@ export default function usePartyLighting(audioRef, enabled) {
         const stemInput = context.createGain();
         source.connect(originalGain);
         originalGain.connect(stemInput);
-        stemInput.connect(context.destination);
+        const mixInput = context.createGain();
+        stemInput.connect(mixInput);
+        mixInput.connect(context.destination);
+        graph.current.mixInput = mixInput;
         source.disconnect(context.destination);
         graph.current.originalGain = originalGain;
         graph.current.stemInput = stemInput;
-        let signalSource = stemInput;
+        let signalSource = mixInput;
         try {
-          const { filters, output } = connectEqualizer(context, stemInput, equalizer.current);
+          const { filters, output } = connectEqualizer(context, mixInput, equalizer.current);
           graph.current.filters = filters;
           signalSource = output;
         } catch { /* Keep the direct sound path if tone filters are unavailable. */ }
@@ -138,4 +141,3 @@ export default function usePartyLighting(audioRef, enabled) {
   }, []);
   return { lighting, unlock, meter, player, setEqualizerBand, channelMeter, audioGraph:graph };
 }
-

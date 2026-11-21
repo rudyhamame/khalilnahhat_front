@@ -92,6 +92,7 @@ function ArchiveMusicPlayer() {
     unlock();
     const request = ++archiveRequest.current;
     const ids = event.detail?.ids;
+    const autoplay = event.detail?.autoplay !== false;
     if (!Array.isArray(ids) || !ids.includes(event.detail.id)) return;
     archiveQueue.current = ids;
     try {
@@ -100,7 +101,7 @@ function ArchiveMusicPlayer() {
       const byId = new Map(catalog.songs.filter(song => song.audioUrl).map(song => [song.id, song]));
       const items = ids.map(id => byId.get(id)).filter(Boolean);
       if (!items.some(song => song.id === event.detail.id)) throw new Error('This recording is no longer published.');
-      const open = () => { setPlaying(false); setTracks(items); setSelected(event.detail.id); setEnabled(true); beginPlayback({inline:event.detail.inline===true}); };
+      const open = () => { setPlaying(false); setTracks(items); setSelected(event.detail.id); setEnabled(true); if(autoplay)beginPlayback({inline:event.detail.inline===true}); };
       if (event.detail.id !== currentIdRef.current) fadeOutThen(open); else open();
     } catch (error) { setError(error.message || 'Could not open this recording.'); }
   };
@@ -233,6 +234,8 @@ function ArchiveMusicPlayer() {
     }else if(type==='queue'&&Array.isArray(value)&&value.length&&new Set(value).size===value.length&&value.includes(current?.id)){
       const byId=new Map(tracks.map(track=>[track.id,track]));
       if(value.every(id=>byId.has(id))){archiveQueue.current=value;setTracks(value.map(id=>byId.get(id)));}
+    }else if(type==='deck-toggle'&&mixerOpen&&current&&enabled){
+      cancelPreparation();setError('');unlock();setPlaying(value=>!value);
     }else if(type==='toggle'&&current&&enabled){
       if(preparing)cancelPreparation();else if(playing)setPlaying(false);else beginPlayback({inline:true});
     }else if(type==='stop'){
@@ -268,6 +271,6 @@ function ArchiveMusicPlayer() {
       onTimeUpdate={(event) => setPosition(event.currentTarget.currentTime)}
       onWaiting={() => setBuffering(true)} onPlaying={() => setBuffering(false)} onCanPlay={() => setBuffering(false)}
       onEnded={() => step(1)} onError={() => { if (currentUrl) { setError('Track unavailable. Choose another recording.'); setPlaying(false); setBuffering(false); } }} />
-    {mixerOpen&&channelsTarget&&createPortal(<DdjController stems={stems} mic={mic} masterMeter={channelMeter}/>,channelsTarget)}
+    {mixerOpen&&channelsTarget&&createPortal(<DdjController stems={stems} mic={mic} masterMeter={channelMeter} audioGraph={audioGraph} unlock={unlock}/>,channelsTarget)}
   </>;
 }

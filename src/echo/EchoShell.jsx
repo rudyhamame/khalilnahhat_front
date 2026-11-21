@@ -121,8 +121,8 @@ export default function EchoShell({ lang, user, onLogout, children }) {
         {(current==='/'||current==='/login')&&<button type="button" className="echo-icon-button echo-lang echo-lang-start" onClick={()=>{if(current==='/')window.dispatchEvent(new Event('echo:hero-language-request'));else setLanguageOpen(true);}} aria-label={tr('Choose language','اختار اللغة')} title={tr('Choose language','اختار اللغة')}><Languages size={22} aria-hidden="true"/></button>}
         {pageTitle&&<h1 className="echo-page-title">{pageTitle}</h1>}
         <HeaderMiniPlayer ar={ar} path={current}/>
+        {current==='/'&&!(user&&!user.isAdmin)&&<AndroidIconLink tr={tr}/>}
         <div className="echo-header-actions">
-          {current==='/'&&!(user&&!user.isAdmin)&&<AndroidIconLink tr={tr}/>}
           {(()=>{
             const badge=(()=>{
             // Two initials like "RH": first and last name, else the first and last word of the display name, else one letter.

@@ -38,3 +38,18 @@
 .ddj-frame{position:relative;width:min(100cqw,calc(100cqh * var(--ratio,2.5)));max-height:100cqh}
 .ddj-frame>.ddj-svg{position:absolute;inset:0;width:100%;height:100%}
 .ddj-jog-art{position:absolute;border-radius:50%;object-fit:cover;pointer-events:none;user-select:none;opacity:.94;-webkit-mask:radial-gradient(circle,transparent 0 40.5%,#000 41%);mask:radial-gradient(circle,transparent 0 40.5%,#000 41%);will-change:transform;transform:translateZ(0)}
+
+.ddj-performance{min-width:0;box-sizing:border-box}
+.ddj-library{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 12px;width:min(100%,760px);margin-inline:auto;flex:none}
+.ddj-library label{display:flex;align-items:center;gap:6px;min-width:0;color:#c5d2d8;font:600 12px/1.3 system-ui;white-space:nowrap}
+.ddj-library select{min-width:0;border:1px solid #475258;border-radius:4px;background:#1c2327;color:#edf1f3;font:inherit}
+.ddj-library select{flex:1;width:0;padding:5px;text-overflow:ellipsis}
+.ddj-library span{grid-column:1/-1;overflow-wrap:anywhere;font:12px/1.4 system-ui;color:#ffd19c}
+.ddj-performance .ddj-stage{overflow:hidden}
+.ddj-performance .ddj-svg .ring-btn.is-live[aria-label^="Cue"] circle:first-child{stroke:#ee9d45}
+.ddj-performance .ddj-svg .ring-btn.is-live[aria-label="Play"] circle:first-child,.ddj-performance .ddj-svg .ring-btn.is-live[aria-label="Pause"] circle:first-child{stroke:#64cc87}
+.ddj-performance .ddj-svg .pad.on{fill:#66e2b6;filter:none}
+.ddj-performance .ddj-svg .knob.is-live,.ddj-performance .ddj-svg .jog-hit{touch-action:none}
+.ddj-performance :is(button,select,[tabindex="0"]):focus-visible{outline:2px solid #8dd7fe!important;outline-offset:-2px}
+.wp-channels:has(.ddj-performance) .home-archive-controller{grid-template-columns:minmax(0,1fr)}
+.wp-channels:has(.ddj-performance) .wp-meta-title{min-width:0;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
