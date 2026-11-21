@@ -34,8 +34,19 @@ export default function WorkTypeJourney({ar,workTypes,renderCard:renderWorkCard,
   return()=>{observer.disconnect();node.classList.remove('is-box-reveal-ready');};
  },[workTypes]);
  // Each sound keeps its player in its own story below the overview.
- const renderCard=(work,index)=>renderWorkCard(work,index,{compact:false,active:activeType===work.id,onOpen:()=>onOpenWork?.(work.id)});
+ const renderCard=(work,index)=>renderWorkCard(work,index,{compact:false,active:activeType===work.id,onOpen:()=>{openY.current=window.scrollY;onOpenWork?.(work.id);}});
 
+ // Opening a box locks the page's scrolling, which resets it to the top for a moment: put it back before the first paint so the page does not jump up and scroll down again.
+ const openY=useRef(0);
+ useLayoutEffect(()=>{if(!activeType||!openY.current)return;const y=openY.current;openY.current=0;window.scrollTo({top:y,behavior:'instant'});document.body.scrollTop=y;},[activeType]);
+ // Closing a box shrinks its full-screen section, which would drop the page back up to the top: keep the section's card where the box was.
+ const lastActive=useRef('');
+ useLayoutEffect(()=>{
+  const before=lastActive.current;lastActive.current=activeType;
+  if(activeType||!before)return;
+  const target=root.current?.querySelector(`.work-story[data-work="${before}"]`);
+  if(target)target.scrollIntoView({behavior:'instant',block:'start'});
+ },[activeType]);
  // Opening a box makes its whole section one full screen and scrolls that section to the very top of the screen (the page's own smooth scrolling does the movement). The section grows while it opens, so it is aligned again once it has its final size.
  useEffect(()=>{
   if(!activeType)return undefined;

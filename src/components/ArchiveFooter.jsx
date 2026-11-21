@@ -6,7 +6,7 @@ import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { apiRequest } from '../lib/api';
 import {fetchArchivePlaybackCatalog} from '../lib/musicArchiveCatalog';
-import {ARCHIVE_PLAYER_COMMAND,publishArchivePlayerState,ARCHIVE_MIXER_STATE,readArchiveMixerState} from '../lib/archivePlayerBridge';
+import {ARCHIVE_PLAYER_COMMAND,publishArchivePlayerState,ARCHIVE_MIXER_STATE,readArchiveMixerState,publishArchiveMixerState} from '../lib/archivePlayerBridge';
 import { preparePerformer } from '../lib/songPerformance';
 import {mediaScratch} from '../lib/mediaScratch';
 import './archiveFooter.css';
@@ -26,11 +26,11 @@ export default function ArchiveFooter() {
 
 function ArchiveMusicPlayer() {
   const [mixerOpen,setMixerOpen]=useState(readArchiveMixerState);
-  const [channelsTarget,setChannelsTarget]=useState(null);
   useEffect(()=>{
-    const sync=()=>{const open=readArchiveMixerState();setMixerOpen(open);setChannelsTarget(open?(document.getElementById('echo-channels-overlay-controller')||document.getElementById('home-archive-channels')):null);};
-    sync();window.addEventListener(ARCHIVE_MIXER_STATE,sync);
-    return()=>window.removeEventListener(ARCHIVE_MIXER_STATE,sync);
+    const sync=()=>setMixerOpen(readArchiveMixerState());
+    const close=()=>publishArchiveMixerState(false),key=event=>{if(event.key==='Escape'&&readArchiveMixerState())close();};
+    sync();window.addEventListener(ARCHIVE_MIXER_STATE,sync);window.addEventListener('echo:close-mixer',close);window.addEventListener('keydown',key);
+    return()=>{window.removeEventListener(ARCHIVE_MIXER_STATE,sync);window.removeEventListener('echo:close-mixer',close);window.removeEventListener('keydown',key);};
   },[]);
   const audio = useRef(null);
   const scratch = useRef({active:false,was:false,timer:0});
@@ -259,11 +259,13 @@ function ArchiveMusicPlayer() {
       onTimeUpdate={(event) => setPosition(event.currentTarget.currentTime)}
       onWaiting={() => setBuffering(true)} onPlaying={() => setBuffering(false)} onCanPlay={() => setBuffering(false)}
       onEnded={() => step(1)} onError={() => { if (currentUrl) { setError('Track unavailable. Choose another recording.'); setPlaying(false); setBuffering(false); } }} />
-    {mixerOpen&&channelsTarget&&createPortal(
-      <Suspense fallback={<div className="ddj-loading" role="status">Loading mixer…</div>}>
-        <DdjController stems={stems} mic={mic} masterMeter={channelMeter} audioGraph={audioGraph} unlock={unlock}/>
-      </Suspense>,
-      channelsTarget,
+    {mixerOpen&&createPortal(
+      <div className="wp-channels" role="dialog" aria-modal="true" aria-label="Mixer"><div className="home-archive-controller">
+        <Suspense fallback={<div className="ddj-loading" role="status">Loading mixer…</div>}>
+          <DdjController stems={stems} mic={mic} masterMeter={channelMeter} audioGraph={audioGraph} unlock={unlock}/>
+        </Suspense>
+      </div></div>,
+      document.body,
     )}
   </>;
 }

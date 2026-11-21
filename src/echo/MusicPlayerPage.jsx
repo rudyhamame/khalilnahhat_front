@@ -1,17 +1,15 @@
 import {djWorkTypeText} from '../lib/djWorkTypeText';
 import {useEffect,useMemo,useRef,useState} from 'react';
-import {createPortal} from 'react-dom';
-import {ChevronLeft,ChevronRight,Disc3,Pause,Play,Repeat,SkipBack,SkipForward,Shuffle,SlidersHorizontal,Square} from 'lucide-react';
+import {ChevronLeft,ChevronRight,Disc3,Pause,Play,Repeat,SkipBack,SkipForward,Shuffle,Square} from 'lucide-react';
 import {displayImageUrl} from '../lib/displayImage';
 import {useArchivePlayerState,useArchivePlaybackPosition} from '../hooks/useArchivePlayerState';
 import {fetchMusicArchiveCatalog} from '../lib/musicArchiveCatalog';
 import {asArchiveSong,atomFacts,fetchOntologyRecordings} from '../lib/musicOntology';
 import {apiRequest} from '../lib/api';
-import {archivePlayerCommand,publishArchiveMixerState} from '../lib/archivePlayerBridge';
+import {archivePlayerCommand} from '../lib/archivePlayerBridge';
 import {archiveResults} from '../lib/archiveSearch';
 import {archiveLibrary} from '../lib/archiveLibrary';
 import ArtworkGlow from './ArtworkGlow';
-import PartyLights from './PartyLights';
 import MusicContentLoader from './MusicContentLoader';
 import './musicPlayerPage.css';
 
@@ -35,7 +33,7 @@ function Time({trackId,children}){return children(useArchivePlaybackPosition(tra
 export default function MusicPlayerPage({lang,type:typeProp,workType,onClose,playbackReady=true}){
   const ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en;
   const type=useMemo(()=>typeProp??new URLSearchParams(window.location.search).get('type')??'',[typeProp]);
-  const [collections,setCollections]=useState([]),[songs,setSongs]=useState([]),[flipped,setFlipped]=useState(false),[channels,setChannels]=useState(false),[browse,setBrowse]=useState(''),[hint,setHint]=useState(onClose?'back':'browse'),[scope,setScope]=useState(''),[viewId,setViewId]=useState(''),[status,setStatus]=useState('loading'),[vocabulary,setVocabulary]=useState([]);
+  const [collections,setCollections]=useState([]),[songs,setSongs]=useState([]),[flipped,setFlipped]=useState(false),[browse,setBrowse]=useState(''),[hint,setHint]=useState(onClose?'back':'browse'),[scope,setScope]=useState(''),[viewId,setViewId]=useState(''),[status,setStatus]=useState('loading'),[vocabulary,setVocabulary]=useState([]);
   const [selectedId,setSelectedId]=useState(()=>new URLSearchParams(window.location.search).get('recording')||''),[shuffle,setShuffle]=useState(false),[repeat,setRepeat]=useState(false);
   const linkedRecording=useRef(new URLSearchParams(window.location.search).get('autoplay')==='1'?new URLSearchParams(window.location.search).get('recording')||'':'');
   const linkStarted=useRef(false);
@@ -67,7 +65,6 @@ export default function MusicPlayerPage({lang,type:typeProp,workType,onClose,pla
   const inPlayer=Boolean(current&&player.track?.id===current.id),playing=inPlayer&&player.playing,busy=inPlayer&&(player.preparing||player.buffering);
   const duration=inPlayer&&player.duration?player.duration:seconds(current?.duration);
   const start=(track,queue=list)=>{if(!track)return;setSelectedId(track.id);window.dispatchEvent(new CustomEvent('echo:archive-play',{detail:{id:track.id,ids:queue.map(item=>item.id),inline:true}}));};
-  const openChannels=()=>{if(current&&!inPlayer)window.dispatchEvent(new CustomEvent('echo:archive-play',{detail:{id:current.id,ids:list.map(item=>item.id),inline:true,autoplay:false}}));setChannels(true);};
   // A QR visit follows the same queue and playback event as choosing the recording by hand.
   useEffect(()=>{
     if(!playbackReady||status!=='ready'||!linkedRecording.current||linkStarted.current)return;
@@ -97,8 +94,6 @@ export default function MusicPlayerPage({lang,type:typeProp,workType,onClose,pla
   },[]);
 
   // Swipe the wheel: drag follows the finger, release past a third of a cover changes the song.
-  // The mixer itself (the saved channels of the recording: vocals, drums, bass, music) is drawn by the shared archive player into the Channels face.
-  useEffect(()=>{publishArchiveMixerState(channels);if(!channels)return undefined;const key=event=>{if(event.key==='Escape')setChannels(false);};window.addEventListener('keydown',key);return()=>{window.removeEventListener('keydown',key);publishArchiveMixerState(false);};},[channels]);
   const drag=useRef(null);
   const down=event=>{drag.current={x:event.clientX,moved:0};wheel.current?.setPointerCapture?.(event.pointerId);wheel.current?.classList.add('is-dragging');};
   const move=event=>{const d=drag.current;if(!d)return;d.moved=event.clientX-d.x;wheel.current?.style.setProperty('--drag',`${d.moved}px`);};
@@ -122,7 +117,6 @@ export default function MusicPlayerPage({lang,type:typeProp,workType,onClose,pla
     <div className={`wp-card${flipped?' is-flipped':''}${browse?' is-browsing':''}`}>
     <div className="wp-deck" aria-hidden={flipped||browse?true:undefined} inert={flipped||Boolean(browse)||undefined}>
       <header className="wp-top" dir={ar?'rtl':'ltr'}>
-        <button type="button" className="wp-icon wp-channels-btn" disabled={!current} onClick={openChannels} aria-label={tr('Channels: mix the vocals, drums, bass and music','القنوات: ميكس الغناء والطبول والباس والموسيقى')} title={tr('Channels','القنوات')}><SlidersHorizontal size={20}/></button>
         <button type="button" ref={badge} className={`wp-badge${hint==='browse'&&!browse?' is-hinting':''}`} title={tr('Browse collections and recordings','تصفّح المجموعات والتسجيلات')} aria-label={tr('Browse collections','تصفّح المجموعات')} aria-haspopup="true" aria-expanded={Boolean(browse)} onClick={()=>setBrowse('collections')}><img src={art} alt=""/></button>
         {hint==='browse'&&!browse&&!flipped&&<span className="wp-badge-hint" aria-hidden="true">{tr('Tap the round picture to browse collections, then pick a recording.','اضغط على الصورة الدائرية لتصفّح المجموعات ثم اختر تسجيلاً.')}</span>}
         {onClose&&hint==='back'&&!browse&&!flipped&&<span className="wp-back-hint" aria-hidden="true">{tr('Finished listening? Tap the arrow to head back.','خلّصت استماع؟ اضغط على السهم للرجوع.')}</span>}
@@ -176,11 +170,5 @@ export default function MusicPlayerPage({lang,type:typeProp,workType,onClose,pla
     </div>
   </div>
   </section>
-  {channels&&createPortal(<div className="wp-channels" role="dialog" aria-modal="true" aria-label={tr('Channels mixer','مازج القنوات')} dir={ar?'rtl':'ltr'}>
-    <PartyLights/>
-    <header className="wp-top" dir={ar?'rtl':'ltr'}><button type="button" className="wp-icon" onClick={()=>setChannels(false)} aria-label={tr('Close the mixer','إغلاق المازج')}><BackIcon size={20}/></button><span className="wp-meta-title">{current?.title||tr('Channels','القنوات')}</span><span className="wp-icon wp-spacer" aria-hidden="true"/></header>
-    <div id="echo-channels-overlay-controller" className="home-archive-controller"/>
-    <span id="echo-channels-overlay-status" className="home-archive-mixer-status" role="status"/>
-  </div>,document.body)}
   </>;
 }

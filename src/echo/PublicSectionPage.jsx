@@ -40,7 +40,7 @@ function SectionContent({section,lang,user,token,liveStream,liveSessions,isSessi
   about:()=> <AboutPage lang={lang}/>,
   tree:()=> <SeasonalTree standalone ar={lang.lang==='ar'} reviews={[]} media={[]} loading={false} lights={theme.lights} audio={theme.audio} photoIds={theme.photoIds}/>,
  };
- return <Suspense fallback={<div className="echo-section-loading" role="status">Loading…</div>}>{content[section]?.()||null}</Suspense>;
+ return <Suspense fallback={null}>{content[section]?.()||null}</Suspense>;
 }
 export default function PublicSectionPage(props){
  return <EventOrderProvider frameless user={props.user} token={props.token} lang={props.lang} auth={props.auth} isSessionReady={props.isSessionReady} onCreateServiceRequest={props.onCreateServiceRequest}><SectionContent {...props}/></EventOrderProvider>;

@@ -61,3 +61,21 @@
 .ddj-performance :is(button,select,[tabindex="0"]):focus-visible{outline:2px solid #8dd7fe!important;outline-offset:-2px}
 .wp-channels:has(.ddj-performance) .home-archive-controller{grid-template-columns:minmax(0,1fr)}
 .wp-channels:has(.ddj-performance) .wp-meta-title{min-width:0;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* The AI DJ button sits at the top of the mixer's middle column. */
+.ddj-ai-top{position:absolute;z-index:3;left:50%;top:1.5%;transform:translateX(-50%);display:grid;justify-items:center;gap:4px;max-width:30%}
+.ddj-ai-top button{min-height:26px;padding:4px 14px;border:1px solid #64727a;border-radius:999px;background:#182126;color:#e8eef1;font:800 10px/1 system-ui;letter-spacing:.08em;cursor:pointer;box-shadow:0 2px 8px #0008;white-space:nowrap}
+.ddj-ai-top button:hover{background:#223038}.ddj-ai-top button.is-on{border-color:#5fe0a7;background:#123d2d;color:#caffea;box-shadow:0 0 12px #5fe0a755}
+.ddj-ai-top span{padding:3px 8px;border-radius:6px;background:#000b;color:#ffd19c;font:10px/1.3 system-ui;text-align:center}
+
+.ddj-picker{position:absolute;z-index:5;left:50%;top:9%;transform:translateX(-50%);width:min(320px,60%);max-height:78%;display:grid;grid-template-rows:auto minmax(0,1fr);border:1px solid #64727a;border-radius:10px;background:#0d1114f2;box-shadow:0 14px 40px #000c;overflow:hidden;font:12px/1.3 system-ui;color:#e8eef1}
+.ddj-picker header{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid #2c363b}
+.ddj-picker header strong{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ddj-picker header span{color:#8fa2ab;font-size:10px}
+.ddj-picker header button{width:24px;height:24px;border:0;border-radius:50%;background:#223038;color:#fff;font-size:16px;line-height:1;cursor:pointer}
+.ddj-picker ul{margin:0;padding:4px;list-style:none;overflow:auto}
+.ddj-picker li button{width:100%;padding:8px 10px;border:0;border-radius:6px;background:transparent;color:inherit;text-align:start;font:inherit;cursor:pointer}.ddj-picker li button:hover{background:#223038}
+.ddj-picker li.is-empty{padding:10px;color:#8fa2ab}
+
+.ddj-ai-top{display:flex;flex-wrap:wrap;justify-content:center;max-width:44%;width:max-content}
+.ddj-ai-top .ddj-ai-note{flex-basis:100%;text-align:center}
+.ddj-ai-top .ddj-close-mixer{border-color:#8a5a5a;background:#2a1a1c}.ddj-ai-top .ddj-close-mixer:hover{background:#40262a}

@@ -1,6 +1,8 @@
 import {Btn,Knob,Fader,Ladder,T,clamp,rad,toSvg,usePlayer} from './DjControllerControls';
 import {displayImageUrl} from '../lib/displayImage';
-import {fetchArchivePlaybackCatalog} from '../lib/musicArchiveCatalog';
+import {fetchArchivePlaybackCatalog,fetchMusicArchiveCatalog} from '../lib/musicArchiveCatalog';
+import {fetchDjWorkTypes} from '../lib/musicOntology';
+import {djWorkTypeText} from '../lib/djWorkTypeText';
 import {createDjChannelStrip} from '../lib/djChannelStrip';
 import {useEffect,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
@@ -15,7 +17,7 @@ import {StemChannelControls} from './StemChannels';
 import './ddjController.css';
 
 // A 4-channel performance DJ controller drawn from a reference photo. Coordinates are in photo-derived units (1047 x 495).
-const W=1047,H=495,DECK2=680,LABEL_H=26;// LABEL_H: room under the controller for the one-line model name
+const W=1047,H=495,DECK2=680,LABEL_H=0;// LABEL_H: room under the controller for the one-line model name
 const COLS=[{n:3,x:447},{n:1,x:498},{n:2,x:549.5},{n:4,x:599.5}];
 const STEM_OF={1:'vocals',2:'drums',3:'bass',4:'other'};
 const STEM_NAME={vocals:'VOCALS',drums:'DRUMS',bass:'BASS',other:'MUSIC'};
@@ -69,7 +71,7 @@ function Deck({dx,n,player,command=archivePlayerCommand,art,switchLayer,mediaTim
       command('rate',2**(keys[i]/12));
     }
   };
-  const browse=()=>{const el=document.getElementById('ddj-load-'+n);el?.focus();try{el?.showPicker();}catch{/* The focused select also supports keyboard input. */}};
+  const browse=()=>window.dispatchEvent(new CustomEvent('echo:ddj-pick',{detail:{deck:n}}));
   const ang=e=>{const p=toSvg(e,e.currentTarget);return Math.atan2(p.y-C.y,p.x-C.x-dx)*180/Math.PI;};
   return <g transform={`translate(${dx} 0)`} className={`deck${transportReady?' is-real':''}`}>
     <g className="deck-top">
@@ -122,6 +124,21 @@ function Deck({dx,n,player,command=archivePlayerCommand,art,switchLayer,mediaTim
       <Fader x={339.5} y={298} len={150} value={tempo} onChange={transportReady?setTempo:undefined} onReset={resetTempo} ariaLabel={`Deck ${n} playback speed`} ariaValueText={`${rate.toFixed(2)} times normal speed`} capW={29} capH={14}/>
       <T x={339.5} y={483} s={5} max={40}>{rate.toFixed(2)}×</T></g>
   </g>;
+}
+
+// LOAD opens this drop list: work types first, then that type's collections, then its recordings.
+function LoadPicker({library,onPick}){
+  const [open,setOpen]=useState(0),[types,setTypes]=useState([]),[collections,setCollections]=useState([]),[type,setType]=useState(''),[collection,setCollection]=useState(null);
+  useEffect(()=>{const on=event=>{setOpen(event.detail?.deck||0);setType('');setCollection(null);};window.addEventListener('echo:ddj-pick',on);return()=>window.removeEventListener('echo:ddj-pick',on);},[]);
+  useEffect(()=>{if(!open||types.length)return;fetchDjWorkTypes().then(setTypes).catch(()=>{});fetchMusicArchiveCatalog().then(catalog=>setCollections(catalog.collections||[])).catch(()=>{});},[open,types.length]);
+  if(!open)return null;
+  const rows=collection?(collection.recordingIds||[]).map(id=>library.find(song=>song.id===id)).filter(Boolean):[];
+  const list=collection?rows.map(song=>({key:song.id,text:song.title,go:()=>{onPick(open,song.id);setOpen(0);}})):type?[...collections.filter(item=>item.workTypeId===type),{id:'__unclassified',title:'Unclassified recordings',recordingIds:library.filter(song=>(song.workType||song.workTypeId)===type&&!collections.some(item=>item.recordingIds?.includes(song.id))).map(song=>song.id)}].map(item=>({key:item.id,text:item.title,go:()=>setCollection(item)})):types.map(work=>({key:work.id,text:djWorkTypeText(work,false).name,go:()=>setType(work.id)}));
+  const title=collection?collection.title:type?(types.find(work=>work.id===type)&&djWorkTypeText(types.find(work=>work.id===type),false).name):'Work types';
+  return <div className="ddj-picker" role="dialog" aria-label={'Load deck '+open}>
+    <header><button type="button" onClick={()=>collection?setCollection(null):type?setType(''):setOpen(0)} aria-label="Back">‹</button><strong>{title}</strong><span>Deck {open}</span></header>
+    <ul>{list.map(item=><li key={item.key}><button type="button" onClick={item.go}>{item.text}</button></li>)}{!list.length&&<li className="is-empty">Nothing here yet.</li>}</ul>
+  </div>;
 }
 
 export default function LandscapeDjController({stems,mic,audioGraph,unlock:unlockAudio}){
@@ -359,9 +376,6 @@ export default function LandscapeDjController({stems,mic,audioGraph,unlock:unloc
   },[]);
   const view=[0,0,W,TH];
   return <div className="ddj-host ddj-performance" dir="ltr">{[2,3,4].map(n=><audio key={n} ref={el=>{media.current[n]=el;}} crossOrigin="anonymous" preload="auto" src={decks[n]?.track?.audioUrl} onLoadedMetadata={e=>{sync(n,e.currentTarget,true);loadWaiters.current[n]?.resolve(true);}} onTimeUpdate={e=>sync(n,e.currentTarget)} onRateChange={e=>sync(n,e.currentTarget,true)} onPlay={e=>sync(n,e.currentTarget,true)} onPause={e=>sync(n,e.currentTarget,true)} onEnded={e=>sync(n,e.currentTarget,true)} onError={()=>{loadWaiters.current[n]?.resolve(false);setNotice('Deck '+n+' could not load this recording.');}}/>)}
-    <div className="ddj-library">{layers.map(n=><label key={n}>Deck {n}<select id={'ddj-load-'+n} value={(n===1?player:decks[n])?.track?.id||''} onChange={event=>loadDeck(n,event.target.value)}><option value="" disabled>Load recording</option>{library.map(track=><option key={track.id} value={track.id}>{track.title}</option>)}</select></label>)}
-      <div className="ddj-ai"><button type="button" className={aiState.enabled?'is-on':''} aria-pressed={aiState.enabled} onClick={toggleAi}>{aiState.enabled?'STOP AI DJ':'START AI DJ'}</button><span role="status" title={aiState.message}>{aiState.message}</span></div>
-      {(notice||player.error)&&<span className="ddj-library-notice" role="status">{notice||player.error}</span>}</div>
     <div className="ddj-stage"><div className="ddj-frame" style={{aspectRatio:`${view[2]} / ${view[3]}`,'--ratio':view[2]/view[3]}}><svg className="ddj-svg" viewBox={view.join(" ")} role="group" aria-label="Performance DJ controller" preserveAspectRatio="xMidYMid meet">
     <defs>
       <linearGradient id="body" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#141618"/><stop offset="1" stopColor="#0a0b0c"/></linearGradient>
@@ -410,14 +424,13 @@ export default function LandscapeDjController({stems,mic,audioGraph,unlock:unloc
       <T x={474} y={457} s={7} f="#e8ecee" w={700} ls="0">❮ A</T><T x={598} y={457} s={7} f="#e8ecee" w={700} ls="0">B ❯</T>
       <T x={535} y={437} s={5} f="#e8ecee" w={800} ls=".14em">ECHO FADER</T>
       <Fader x={498} y={453} len={74} value={blend} onChange={moveCrossfader} onReset={()=>moveCrossfader(.5)} vertical={false} ariaLabel="Crossfader" capW={22} capH={10}/>
-      <T x={W/2} y={H+17} s={7} f="#e8ecee" a="middle" w={700} ls=".14em">PERFORMANCE DJ CONTROLLER · ECHO-1000</T>
       {/* master + equalizer (the 7-band archive equalizer lives where the photo has Beat FX) */}
       <rect x="619" y="9" width="75" height="9" fill="#17191b" stroke="#2a2d2f"/><T x={656.5} y={16} s={5.2} f="#e8ecee">MASTER</T>
       <Knob cx={656.5} cy={49} r={14} value={player.volume??.75} min={0} max={1} onChange={v=>archivePlayerCommand('volume',v)} label="LEVEL" labelY={28} ariaLabel="Master level"/>
       <g ref={masterLadder} className="master-ladder"><Ladder x={652} y={71} w={9} count={12} h={4} gap={2.4}/></g>
-      <rect x="619" y="214" width="75" height="9" fill="#17191b" stroke="#2a2d2f"/><T x={656.5} y={221} s={5} f="#e8ecee">EQUALIZER</T>
-      <rect x="626.5" y="228" width="60" height="14" rx="1" fill="#14202a" stroke="#2a2d2f"/><T x={656.5} y={238} s={5.2} f="#6fd3ff" w={700}>{last}</T>
-      {EQUALIZER_BANDS.map((b,i)=>{const cx=i%2?676.5:636.5,cy=264+Math.floor(i/2)*36;return <Knob key={b.key} cx={cx} cy={cy} r={9} value={eq[b.key]??0} min={-12} max={12} step={1} dots={7} onChange={v=>setBand(b.key,b.label.toUpperCase(),v)} label={b.label.toUpperCase()} labelY={cy+15.5} ariaLabel={`${b.label} equalizer gain`}/>;})}
+      <rect x="619" y="138" width="75" height="9" fill="#17191b" stroke="#2a2d2f"/><T x={656.5} y={145} s={5} f="#e8ecee">EQUALIZER</T>
+      <rect x="626.5" y="153" width="60" height="14" rx="1" fill="#14202a" stroke="#2a2d2f"/><T x={656.5} y={163} s={5.2} f="#6fd3ff" w={700}>{last}</T>
+      {EQUALIZER_BANDS.map((b,i)=>{const cx=i%2?676.5:636.5,cy=204+Math.floor(i/2)*46;return <Knob key={b.key} cx={cx} cy={cy} r={9} value={eq[b.key]??0} min={-12} max={12} step={1} dots={7} onChange={v=>setBand(b.key,b.label.toUpperCase(),v)} label={b.label.toUpperCase()} labelY={cy+15.5} ariaLabel={`${b.label} equalizer gain`}/>;})}
       <g className="ring-btn is-live" role="button" tabIndex={0} aria-label="Reset equalizer" onClick={()=>{archivePlayerCommand('equalizer-reset');setLast('FLAT');}} onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();archivePlayerCommand('equalizer-reset');setLast('FLAT');}}}>
         <circle cx="656.5" cy="450.5" r="15" fill="#e9eef1" stroke="#4a5155" strokeWidth="3"/><T x={656.5} y={452} s={4.4} f="#111" w={800}>RESET</T></g>
       <T x={656.5} y={473} s={3.6} f="#aab3b7">EQ FLAT</T>
@@ -429,6 +442,8 @@ export default function LandscapeDjController({stems,mic,audioGraph,unlock:unloc
     <T x={JC.x} y={JC.y+3} s={12} f="#f1f6f7">{jogTime}</T>
     <T x={JC.x} y={JC.y+21} s={5.5} f="#a4c8ba">{jogBpm?`${Math.round(jogBpm*jogRate)} BPM`:'TAP BPM'}</T>
   </svg>}
+  <LoadPicker library={library} onPick={loadDeck}/>
+  <div className="ddj-ai-top"><button type="button" className="ddj-close-mixer" onClick={()=>window.dispatchEvent(new Event('echo:close-mixer'))}>CLOSE MIXER</button><button type="button" className={aiState.enabled?'is-on':''} aria-pressed={aiState.enabled} onClick={toggleAi} title={aiState.message}>{aiState.enabled?'STOP AI DJ':'START AI DJ'}</button>{(notice||player.error)&&<span role="status" className="ddj-ai-note">{notice||player.error}</span>}</div>
   </div></div>
   {footerStatus&&createPortal(status,footerStatus)}</div>;
 }

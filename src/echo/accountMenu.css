@@ -19,3 +19,4 @@ html body .echo[data-page=home][data-theme] .echo-header .echo-account-menu .ech
 .echo-account-dropdown>a>svg:first-child{flex:none}
 /* A gap between the menu buttons, so their hover highlights do not touch. */
 .echo-account-dropdown{display:flex;flex-direction:column;gap:4px}
+.echo-account-dropdown button.echo-menu-mixer{color:#eef5f0}
