@@ -105,3 +105,7 @@ html body .echo .mc-row-choice button{min-width:52px;height:34px;padding:0 14px;
 html body .echo .mc-row-choice button[aria-pressed=true]{border-color:#a6e3ce;background:#a6e3ce26;color:#eafcf3}
 html body .echo .mc-row-choice button:disabled{opacity:.5;cursor:default}
 @media(max-width:560px){.mc-row>div{grid-template-columns:1fr auto;grid-template-areas:'t c' 'n c'}.mc-row dt{grid-area:t}.mc-row dd{grid-area:n}.mc-row-choice{grid-area:c}}
+html body .echo[data-page=home][data-theme] .mc-row>div{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"label choice" "note choice";align-items:center;gap:6px 14px}
+html body .echo[data-page=home][data-theme] .mc-row dt{grid-area:label;flex-wrap:wrap;color:#eef4ef;font-size:14px;font-weight:600}
+html body .echo[data-page=home][data-theme] .mc-row dd{grid-area:note;color:#9fb5a8;font-size:12.5px}
+html body .echo[data-page=home][data-theme] .mc-row .mc-row-choice{grid-area:choice}
