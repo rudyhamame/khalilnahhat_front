@@ -3,7 +3,23 @@ import {useEffect,useRef,useState} from 'react';
 import {ArrowLeft,ChevronLeft,ChevronRight,RefreshCw} from 'lucide-react';
 import {apiRequest} from '../lib/api';
 import {ARCHIVE_PLAYER_STATE,archivePlayerCommand} from '../lib/archivePlayerBridge';
+import {windowAt,cropStyle} from '../lib/reelCrop';
 import './reelsPlayer.css';
+
+// A video with a saved 9:16 crop: only the crop window is shown, centred in a 9:16 frame, and it follows the saved face track while playing.
+function CroppedReel({item,videoRef,onError,onLoadedMetadata,onEnded}){
+ const [style,setStyle]=useState(null);
+ useEffect(()=>{
+  let raf=0;
+  const tick=()=>{const v=videoRef.current;if(v&&v.videoWidth)setStyle(cropStyle(windowAt(v.videoWidth,v.videoHeight,item.crop,v.currentTime)));raf=requestAnimationFrame(tick);};
+  raf=requestAnimationFrame(tick);
+  return()=>cancelAnimationFrame(raf);
+ },[item,videoRef]);
+ const toggle=()=>{const v=videoRef.current;if(!v)return;if(v.paused)v.play().catch(()=>{});else v.pause();};
+ return <div className="reels-cropbox" onClick={toggle} role="button" tabIndex={0} aria-label={item.title} onKeyDown={event=>{if(event.key===' '||event.key==='Enter'){event.preventDefault();toggle();}}}>
+  <video ref={videoRef} src={item.videoUrl} playsInline preload="metadata" style={style||{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover'}} aria-label={item.title} onPlay={()=>archivePlayerCommand('pause')} onError={onError} onLoadedMetadata={onLoadedMetadata} onEnded={onEnded}/>
+ </div>;
+}
 
 export default function ReelsPlayer({lang,workType,onClose,closing=false}){
  const ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en,title=djWorkTypeText(workType,ar).name;
@@ -40,7 +56,8 @@ export default function ReelsPlayer({lang,workType,onClose,closing=false}){
  };
 
  return <section className="reels-player" dir={ar?'rtl':'ltr'} aria-label={title||tr('Video player','مشغّل الفيديو')} onKeyDown={handleKey}>
-  {current&&status==='ready'&&(
+  {current&&status==='ready'&&current.crop&&<CroppedReel key={`${current.id}:${retry}`} item={current} videoRef={video} onError={()=>setFailed(true)} onLoadedMetadata={handleMetadata} onEnded={handleEnded}/>}
+  {current&&status==='ready'&&!current.crop&&(
    <video
     key={`${current.id}:${retry}`}
     ref={video}

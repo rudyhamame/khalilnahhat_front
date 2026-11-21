@@ -1,6 +1,7 @@
 import {useCallback,useEffect,useRef,useState} from 'react';
-import {Film,Images,Image as ImageIcon,Play,Trash2,Upload,X,FolderOpen,Pencil,Plus,Minus,Inbox,Clapperboard} from 'lucide-react';
+import {Film,Images,Image as ImageIcon,Play,Trash2,Upload,X,FolderOpen,Pencil,Plus,Minus,Inbox,Clapperboard,Crop} from 'lucide-react';
 import {apiRequest} from '../lib/api';
+import ReelCropTool from './ReelCropTool';
 import {confirmDeletion} from '../lib/confirmDeletion';
 import {addToGallery,fetchGallery,fetchGalleryAlbums,saveGalleryAlbum,deleteGalleryAlbum,addGalleryAlbumItems,removeGalleryAlbumItem,galleryItemsForAlbum,GALLERY_MAX_BYTES} from '../lib/galleryApi';
 import {GalleryAlbumEditor,GalleryAssetEditor,GalleryExistingAssets} from './GalleryDialogs';
@@ -14,7 +15,7 @@ const addInBatches=async(albumId,ids,token)=>{for(let start=0;start<ids.length;s
 export default function GalleryAdmin({token}) {
   const [items,setItems]=useState([]),[albums,setAlbums]=useState([]),[albumId,setAlbumId]=useState('all');
   const [loading,setLoading]=useState(true),[error,setError]=useState(''),[albumSupported,setAlbumSupported]=useState(true);
-  const [filter,setFilter]=useState('all'),[busy,setBusy]=useState(null),[dragging,setDragging]=useState(false),[preview,setPreview]=useState(null);
+  const [filter,setFilter]=useState('all'),[busy,setBusy]=useState(null),[dragging,setDragging]=useState(false),[preview,setPreview]=useState(null),[cropping,setCropping]=useState(false);
   const [albumEditor,setAlbumEditor]=useState(null),[assetEditor,setAssetEditor]=useState(null),[existingAlbum,setExistingAlbum]=useState(null);
   const [selected,setSelected]=useState([]),[targetAlbum,setTargetAlbum]=useState('');
   const picker=useRef(null),dialog=useRef(null),generation=useRef(0);
@@ -114,6 +115,12 @@ export default function GalleryAdmin({token}) {
   };
   const editAsset=item=>{setPreview(null);setAssetEditor(item);};
   // Publish a gallery video to the Reels player (or take it back out). Only direct video files can play in Reels.
+  const saveCrop=async(item,reelCrop)=>{
+    setBusy({done:0,total:1});setError('');
+    try{await apiRequest('/content/media/'+item.id,{method:'PATCH',token,body:{reelCrop}});setPreview(current=>current&&current.id===item.id?{...current,reelCrop}:current);await load();setCropping(false);}
+    catch(e){if(!e.cancelled)setError(e.message||'Could not save the crop.');}
+    finally{setBusy(null);}
+  };
   const toggleReel=async item=>{
     const next=!item.reel;
     setBusy({done:0,total:1});setError('');
@@ -153,9 +160,9 @@ export default function GalleryAdmin({token}) {
         <div className="gallery-drop-hint" aria-hidden="true"><Upload size={22}/>Drop to add</div>
       </div>
     </div></div>
-    <dialog ref={dialog} className="gallery-viewer" onClose={()=>setPreview(null)} onClick={event=>{if(event.target===dialog.current)setPreview(null);}} aria-label={preview?.title||'Asset viewer'}>{preview&&<>
-      <header><div><strong>{preview.title}</strong><small>{preview.kind==='photo'?'Image':'Video'}</small></div><div>{preview.kind==='video'&&isPlayable(preview.mediaUrl)&&<button type="button" className={`gallery-reel${preview.reel?' is-on':''}`} disabled={Boolean(busy)} aria-pressed={Boolean(preview.reel)} onClick={()=>toggleReel(preview)}><Clapperboard size={15}/>{preview.reel?'Published to Reels · Remove':'Publish to Reels'}</button>}<button type="button" disabled={Boolean(busy)} onClick={()=>editAsset(preview)}><Pencil size={15}/>Edit</button><button type="button" className="gallery-delete is-text" disabled={Boolean(busy)} onClick={()=>remove(preview)}><Trash2 size={15}/>Delete</button><button type="button" className="gallery-close" onClick={()=>setPreview(null)} aria-label="Close viewer"><X size={18}/></button></div></header>
-      <div className="gallery-stage">{preview.kind==='photo'?<img src={preview.mediaUrl} alt={preview.title}/>:isPlayable(preview.mediaUrl)?<video src={preview.mediaUrl} controls autoPlay playsInline/>:<a className="gallery-external" href={preview.mediaUrl} target="_blank" rel="noopener noreferrer"><ImageIcon size={20}/>Open video link</a>}</div>
+    <dialog ref={dialog} className="gallery-viewer" onClose={()=>{setPreview(null);setCropping(false);}} onClick={event=>{if(event.target===dialog.current){setPreview(null);setCropping(false);}}} aria-label={preview?.title||'Asset viewer'}>{preview&&<>
+      <header><div><strong>{preview.title}</strong><small>{preview.kind==='photo'?'Image':'Video'}</small></div><div>{preview.kind==='video'&&isPlayable(preview.mediaUrl)&&<button type="button" className={`gallery-reel-crop${preview.reelCrop?' is-on':''}`} disabled={Boolean(busy)} aria-pressed={cropping} onClick={()=>setCropping(value=>!value)}><Crop size={15}/>{preview.reelCrop?'9:16 crop ✓':'9:16 crop'}</button>}{preview.kind==='video'&&isPlayable(preview.mediaUrl)&&<button type="button" className={`gallery-reel${preview.reel?' is-on':''}`} disabled={Boolean(busy)} aria-pressed={Boolean(preview.reel)} onClick={()=>toggleReel(preview)}><Clapperboard size={15}/>{preview.reel?'Published to Reels · Remove':'Publish to Reels'}</button>}<button type="button" disabled={Boolean(busy)} onClick={()=>editAsset(preview)}><Pencil size={15}/>Edit</button><button type="button" className="gallery-delete is-text" disabled={Boolean(busy)} onClick={()=>remove(preview)}><Trash2 size={15}/>Delete</button><button type="button" className="gallery-close" onClick={()=>setPreview(null)} aria-label="Close viewer"><X size={18}/></button></div></header>
+      <div className="gallery-stage">{cropping&&preview.kind==='video'?<ReelCropTool key={preview.id} item={preview} busy={Boolean(busy)} onSave={crop=>saveCrop(preview,crop)} onClose={()=>setCropping(false)}/>:preview.kind==='photo'?<img src={preview.mediaUrl} alt={preview.title}/>:isPlayable(preview.mediaUrl)?<video src={preview.mediaUrl} controls autoPlay playsInline/>:<a className="gallery-external" href={preview.mediaUrl} target="_blank" rel="noopener noreferrer"><ImageIcon size={20}/>Open video link</a>}</div>
     </>}</dialog>
     {albumEditor&&<GalleryAlbumEditor key={albumEditor.id||'new'} album={albumEditor.id?albumEditor:null} onSave={saveAlbum} onClose={()=>setAlbumEditor(null)}/>}
     {assetEditor&&<GalleryAssetEditor key={assetEditor.id} item={assetEditor} albums={albums} onSave={saveAsset} onClose={()=>setAssetEditor(null)}/>}

@@ -510,3 +510,12 @@ html.echo-recording-window .admin-workspace .ontology-view-recordings>.ontology-
 .admin-workspace .recording-info .ri-derived-name ul{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;list-style:none}
 .admin-workspace .recording-info .ri-derived-name li{padding:6px 12px;border-radius:999px;background:#202027;color:#f2f2f6;font-size:14px;font-weight:600}
 .admin-workspace .recording-info .ri-derived-name .ri-derived-empty{margin:0;font-size:13px;color:#8a8a96}
+
+/* Recording information column: a dark textured surface (fine grain + faint diagonal weave and a soft top glow), so it reads as its own panel. */
+.admin-workspace .ontology-editor-page .recording-info{
+ background:
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E"),
+  repeating-linear-gradient(135deg,#ffffff07 0 1px,transparent 1px 7px),
+  radial-gradient(120% 40% at 50% 0,#6a6fa022,transparent 70%),
+  linear-gradient(180deg,#14141a,#0f0f14)!important;
+ background-blend-mode:overlay,normal,normal,normal;box-shadow:inset -1px 0 0 #ffffff12,inset 0 0 60px #00000055}

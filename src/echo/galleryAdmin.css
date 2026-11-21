@@ -440,3 +440,26 @@ html body dialog.gallery-picker .gallery-picker-body{background:#121217!importan
 html body dialog.gallery-picker::backdrop{background:rgba(6,6,10,.9)}
 .gallery-viewer .gallery-reel{display:inline-flex;align-items:center;gap:6px;border:1px solid #e3d3a3aa;background:#e3d3a31f;color:#e8d7a6;border-radius:999px;padding:0 14px;font-weight:700}
 .gallery-viewer .gallery-reel.is-on{background:#a6e3ce26;border-color:#a6e3ce;color:#c0efdc}
+.gallery-viewer .gallery-reel-crop{display:inline-flex;align-items:center;gap:6px;border:1px solid #ffffff33;border-radius:999px;padding:0 14px;font-weight:700}
+.gallery-viewer .gallery-reel-crop.is-on{border-color:#a6e3ce;color:#c0efdc}
+.reel-crop{display:grid;gap:14px;width:100%;padding:14px;box-sizing:border-box;overflow:auto;max-height:calc(92svh - 70px)}
+.reel-crop-main{display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:14px;align-items:start}
+.reel-crop-source{position:relative;overflow:hidden;border-radius:12px;background:#000;touch-action:none;user-select:none}
+.reel-crop-source[data-mode=manual]{cursor:grab}.reel-crop-source[data-mode=follow]{cursor:crosshair}
+.reel-crop-source>video{display:block;width:100%;height:auto;pointer-events:none}
+.reel-crop-window{position:absolute;box-sizing:border-box;border:2px solid #e3d3a3;box-shadow:0 0 0 9999px #000a;pointer-events:none}
+.reel-crop-face{position:absolute;translate:-50% -50%;color:#7fdcb3;pointer-events:none;filter:drop-shadow(0 0 4px #000)}
+.reel-crop-progress{position:absolute;inset:auto 0 0;height:30px;background:#000b;display:grid;align-items:center}.reel-crop-progress>span{position:absolute;inset:0 auto 0 0;background:#7fdcb355}.reel-crop-progress>em{position:relative;padding-inline:12px;font-size:12px;font-style:normal;color:#fff}
+.reel-crop-result{display:grid;gap:6px;justify-items:center;color:#b9cbbf;font-size:12px}
+.reel-crop-frame{position:relative;overflow:hidden;width:100%;aspect-ratio:9/16;border-radius:14px;background:#000;border:1px solid #ffffff33}
+.reel-crop-controls{display:grid;gap:10px}
+.reel-crop-tabs{display:flex;flex-wrap:wrap;gap:8px}.reel-crop-tabs button{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid #ffffff33;border-radius:999px;background:transparent;color:inherit;cursor:pointer}
+.reel-crop-tabs button.is-on{border-color:#e3d3a3;background:#e3d3a31f;color:#e8d7a6}.reel-crop-tabs button:disabled{opacity:.4;cursor:not-allowed}
+.reel-crop-hint,.reel-crop-message{margin:0;font-size:13px;color:#b9cbbf}.reel-crop-message{color:#e8d7a6}
+.reel-crop-zoom{display:flex;align-items:center;gap:10px;font-size:13px}.reel-crop-zoom input{flex:1}
+.reel-crop-actions{display:flex;flex-wrap:wrap;gap:8px}.reel-crop-actions button,.reel-crop-go{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid #ffffff33;border-radius:10px;background:transparent;color:inherit;cursor:pointer}
+.reel-crop-save{margin-inline-start:auto;border-color:#a6e3ce!important;background:#a6e3ce26!important;color:#c0efdc!important;font-weight:700}.reel-crop-actions button:disabled,.reel-crop-go:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:700px){.reel-crop-main{grid-template-columns:1fr}.reel-crop-result{max-width:200px;margin-inline:auto}}
+/* Cover-artwork picker: the Album row is one slim line (label + a normal-height select), never a tall block. */
+html body dialog.gallery-picker .gallery-picker-albums{flex:0 0 auto!important;display:flex!important;flex-direction:row!important;align-items:center!important;height:auto!important;min-height:0!important;max-height:64px;overflow:hidden}
+html body dialog.gallery-picker .gallery-picker-albums select{flex:0 1 320px!important;align-self:center!important;height:40px!important;min-height:0!important;max-height:40px!important;width:auto;appearance:auto}
