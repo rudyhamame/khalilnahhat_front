@@ -40,3 +40,16 @@ html body .dj-prefs-section .rentals-hero-form .djf.djf .djf-head{margin-bottom:
 .dj-service-hero{border-radius:0;box-shadow:none;border:0;background:none;-webkit-mask-image:none;mask-image:none}
 /* Floating look: a soft shadow that follows the cut-out's own outline (the picture is transparent), a tight one close in and a wide one further down. */
 .dj-service-hero{filter:drop-shadow(0 10px 14px #000a) drop-shadow(0 34px 46px #000c)}
+
+/* Sub-step 03.02 (Music Preferences) under DJ Khalil Service: a connector line from the DJ step, a node, and a heading band. */
+.dj-substep{position:relative;box-sizing:border-box;max-width:1280px;margin:0 auto;padding:0 clamp(16px,2vw,32px) clamp(24px,3vw,48px);animation:dj-substep-in .5s cubic-bezier(.2,.8,.2,1) both}
+.dj-substep::before{content:'';position:absolute;inset-block:-28px 0;inset-inline-start:calc(clamp(16px,2vw,32px) + 19px);width:2px;background:linear-gradient(180deg,#e3d3a300,#e3d3a366 28px,#e3d3a333);border-radius:2px}
+.dj-substep-head{position:relative;display:grid;grid-template-columns:40px minmax(0,1fr);gap:16px;align-items:start;margin-bottom:clamp(18px,2.4vw,30px);padding-top:6px}
+.dj-substep-node{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:#e3d3a31f;border:1.5px solid #e3d3a3aa;color:#e8d7a6;box-shadow:0 0 0 5px #0d1418}
+.dj-substep-kicker{display:flex;align-items:center;gap:8px;margin:0 0 6px;color:#e3d3a3;font:700 12px/1.2 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:.14em}
+.dj-substep-head h3{margin:0 0 6px;color:#f4f7f3;font:700 clamp(24px,2.6vw,36px)/1.15 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:-.02em}
+.dj-substep-head p:not(.dj-substep-kicker){margin:0;max-width:60ch;color:#b9cbbf;font-size:15px;line-height:1.6}
+.dj-substep .dj-prefs-section{margin-inline-start:56px;margin-top:0}
+@media(max-width:700px){.dj-substep .dj-prefs-section{margin-inline-start:0}.dj-substep::before{display:none}}
+@keyframes dj-substep-in{from{opacity:0;transform:translateY(14px)}}
+@media(prefers-reduced-motion:reduce){.dj-substep{animation:none}}

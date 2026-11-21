@@ -247,11 +247,11 @@ export default function HomeAvailability({lang}){
    <SubmittedBookingNotice ar={ar}/>
    {editNote&&<p className="avail-edit-note" role="status">{editNote}</p>}
 
-   <PhaseHeading n={1} ar={ar}/>
+   <PhaseHeading id="personal" ar={ar}/>
    <BookingStep number={1} onReset={updatePersonal} resetLabel={refreshing?tr('Refreshing…','جارٍ التحديث…'):tr('Refresh','تحديث')} ResetIcon={RefreshCw} title={tr('Who are we planning with?','مع من نخطط؟')} cardTitle={tr('Your details','بياناتك')} copy={signedIn?tr('These contact details come from your account. To update them, visit Personal info in your dashboard. Choose how we should reach you below.','معلومات التواصل مأخوذة من حسابك. لتعديلها، افتح المعلومات الشخصية في لوحة حسابك. اختر أدناه طريقة التواصل المفضلة.'):tr('Tell us who to reach and how. Before your booking is sent you create your account and confirm your email with a code.','أخبرنا بمن نتواصل معه وكيف. قبل إرسال حجزك تنشئ حسابك وتؤكد بريدك الإلكتروني برمز.')}>
     {personalFields}
    </BookingStep>
-   <PhaseHeading n={2} ar={ar}/>
+   <PhaseHeading id="event" ar={ar}/>
    <BookingStep number={2} onReset={resetEvent} resetLabel={resetLabel} title={tr('What are we celebrating?','بماذا نحتفل؟')} cardTitle={tr('Choose your event','اختر نوع فعاليتك')} copy={tr('A wedding, a milestone, or a night with your team—each occasion has its own rhythm. Choose the closest match so Echo can shape the music, sound, lighting, and key moments around your celebration. Choose Other if your plans don’t fit a category.','لكل مناسبة إيقاعها، من الزفاف إلى الإنجازات واللقاءات مع فريقك. اختر النوع الأقرب لخططك كي ننسّق الموسيقى والصوت والإضاءة ولحظات الحفل بما يناسب احتفالك. اختر «أخرى» إن لم تجد النوع المناسب.')}>
     <EventTypeColumn ar={ar}/>
     {(event?.type==='other'||event?.title)&&<label className="booking-field"><span>{tr('What type of event is it? *','ما نوع فعاليتك؟ *')}</span><input data-booking-field="event.title" required={event?.type==='other'} aria-required={event?.type==='other'||undefined} maxLength={120} disabled={!canEdit} value={event?.title||''} onChange={e=>ctx?.setField('event.title',e.target.value||null)} placeholder={tr('Describe your event type','صف نوع فعاليتك')}/></label>}

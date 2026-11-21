@@ -136,3 +136,9 @@ html body .echo[data-page=home][data-theme] #availability .personal-info-note a:
 /* MC row: no line under it; more room under the DJ SERVICE buttons. */
 html body .echo[data-page=home][data-theme] .mc-row>div{border-bottom:0}
 html body .echo[data-page=home][data-theme] .dj-service-step .dj-choice{margin-bottom:clamp(18px,2.4vw,28px)}
+/* Room under the Yes / Skip DJ service buttons, before the MC row. */
+html body .echo[data-page=home][data-theme] .dj-choice>div[role=group]{margin-bottom:clamp(18px,2.4vw,28px)}
+
+/* MC heading uses the same label style as DJ SERVICE * (uppercase kicker, badge at the end). */
+html body .echo[data-page=home][data-theme] .mc-row dt{display:block;font-size:inherit;font-weight:inherit;color:inherit}
+html body .echo[data-page=home][data-theme] .mc-row dt .avail-kicker{display:flex;align-items:center;width:100%}
