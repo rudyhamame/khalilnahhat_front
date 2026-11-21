@@ -1,9 +1,8 @@
-import LiveStudioLauncher from './LiveStudioLauncher';
 import AdminSelect from './AdminSelect';
 import YouTubeConnection from './YouTubeConnection';
 import AdminWorkspace from './AdminWorkspace';
 import { Upload, Music2, Disc3, Search, Trash2, Archive, CalendarDays, Play } from 'lucide-react';
-import { lazy, Suspense, useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 // The studio pulls in the whole LiveKit client (a few MB): load it only when the Live studio panel is opened.
 const AdminLiveStudio = lazy(() => import('./AdminLiveStudio'));
 import AdminServicesPanel from './AdminServicesPanel';
@@ -647,6 +646,9 @@ function AdminPage({
   onRefreshTransactions,
   onAddArchiveItem,
 }) {
+  // The Live studio renders inside its tab. Once opened it stays mounted (hidden on other tabs) so switching tabs never cuts the live.
+  const [studioSeen, setStudioSeen] = useState(false);
+  useEffect(() => { if (activePanel === 'live-stream') setStudioSeen(true); }, [activePanel]);
   const [newSession, setNewSession] = useState(blankSession());
   const [archiveEditorTab, setArchiveEditorTab] = useState('track');
   const [archiveYoutubeUrl, setArchiveYoutubeUrl] = useState('');
@@ -932,7 +934,7 @@ function AdminPage({
               <YouTubeConnection token={token} sourceUrl={archiveYoutubeUrl} workspace sourceField={<label className="youtube-check-link"><span>Video URL</span><input type="url" placeholder="Paste a YouTube video link" value={archiveYoutubeUrl} onChange={event => setArchiveYoutubeUrl(event.target.value)} /></label>} />
             </section>
           )}
-          {studioWindow?<div hidden={activePanel !== 'live-stream'}><Suspense fallback={null}><AdminLiveStudio key={token} setListActions={{onRefresh:onRefreshLiveSessions,onAdd:onAddLiveSession,onUpdate:onUpdateLiveSession,onDelete:onDeleteLiveSession,archiveItems}} liveSessions={liveSessions} token={token} enabled={activePanel === 'live-stream'} liveStream={liveStream} onLiveStreamChange={onLiveStreamChange} onReviewLiveRequest={onReviewLiveRequest}/></Suspense></div>:activePanel === 'live-stream' && <LiveStudioLauncher token={token} liveStream={liveStream} onLiveStreamChange={onLiveStreamChange}/>}
+          {(studioWindow||studioSeen||activePanel === 'live-stream')&&<div hidden={activePanel !== 'live-stream'}><Suspense fallback={null}><AdminLiveStudio key={token} setListActions={{onRefresh:onRefreshLiveSessions,onAdd:onAddLiveSession,onUpdate:onUpdateLiveSession,onDelete:onDeleteLiveSession,archiveItems}} liveSessions={liveSessions} token={token} enabled={activePanel === 'live-stream'} liveStream={liveStream} onLiveStreamChange={onLiveStreamChange} onReviewLiveRequest={onReviewLiveRequest}/></Suspense></div>}
 
           <section id="admin-live-sessions" className="admin-panel admin-live-sessions-panel" hidden={activePanel !== 'live-sessions'}>
             <div className="section-label admin-panel-head">

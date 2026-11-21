@@ -59,3 +59,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     </SeasonalPlayerHost>
   </React.StrictMode>,
 );
+
+// Rotating the device reloads the page so every layout is rebuilt for the new orientation.
+matchMedia("(orientation:portrait)").addEventListener("change", () => location.reload());

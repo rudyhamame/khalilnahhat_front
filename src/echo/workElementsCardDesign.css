@@ -99,6 +99,15 @@
 
 .work-elements-admin .work-element-instrument-select{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--aw-muted)}
 
+/* Work Elements shares the edge-to-edge matte title bar used by the Recordings tab. */
+.admin-workspace .work-elements-admin>header{box-sizing:border-box;flex:none;min-height:64px;margin:0; padding:0 18px;display:flex;flex-direction:row;align-items:center;gap:14px 18px;flex-wrap:wrap;border:0;border-bottom:1px solid #7a7f9a4d;border-radius:0;background:#121216}
+.admin-workspace .work-elements-admin>header h1{margin:0;font-size:22px;font-weight:700;letter-spacing:-.01em;line-height:1.2;color:#f2f2f6}
+.admin-workspace .work-elements-admin>header p{margin:3px 0 0;font-size:12px;line-height:1.35;color:#c9cde4}
+.admin-workspace .work-elements-admin>header .work-element-search{flex:0 1 280px;width:min(100%,280px);min-width:190px;margin-inline-start:auto;color:#c9cde4}
+.admin-workspace .work-elements-admin>header .work-element-search input{min-height:36px;padding:6px 10px;border:1px solid #7a7f9a4d;border-radius:8px;background:#17171c;color:#f2f2f6}
+.work-elements-admin>.work-elements-sections{padding:16px 18px}
+@media(max-width:600px){.admin-workspace .work-elements-admin>header{gap:10px;padding:12px 14px}.admin-workspace .work-elements-admin>header .work-element-search{flex:1 1 100%;width:100%;margin:0}.work-elements-admin>.work-elements-sections{padding:14px}}
+
 /* A card's submit action follows all fields and dependencies in the same form. */
 .work-elements-admin .work-element-card>form.work-element-option-form--dependencies{grid-column:1;grid-row:2/-1;display:flex;flex-direction:column;gap:12px;min-height:0;height:100%;max-height:none;overflow:hidden;align-self:stretch}
 .work-element-option-form--dependencies>.work-element-entry{flex:0 0 auto}

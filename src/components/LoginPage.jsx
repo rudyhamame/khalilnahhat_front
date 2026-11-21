@@ -188,8 +188,6 @@ export default function LoginPage({ lang, isAuthenticated, username, loginError,
     {embedded || isAuthenticated ? <div className="access-content"><div className="access-form-wrap">
       {embedded && <header className="access-embedded-heading"><h2>{mode === 'signin' ? tr('Your next great event starts here.', 'فعاليتك القادمة تبدأ هنا.') : tr('Let’s make it yours.', 'لنصنع فعاليتك معاً.')}</h2><p>{mode === 'signin' ? tr('Sign in to plan with Echo AI.', 'سجّل الدخول للتخطيط مع إيكو AI.') : tr('Create an account to plan and keep your event details together.', 'أنشئ حساباً للتخطيط وحفظ تفاصيل فعاليتك في مكان واحد.')}</p></header>}
       {!embedded && <>
-        <h1 id="access-title">{tr('You’re in.', 'أهلاً بك.')}</h1>
-        <p className="access-intro">{tr('Everything you need for your next event is waiting for you.', 'كل ما تحتاجه لفعاليتك القادمة بانتظارك.')}</p>
       </>}
       {isAuthenticated ? <div className="access-signed-in"><span>{tr('SIGNED IN AS', 'تم تسجيل الدخول باسم')}</span><strong>{username}</strong><a className="access-submit" href="/dashboard">{lang.t.nav.dashboard}<ArrowUpRight size={18} /></a><button className="access-text-link" type="button" onClick={onLogout}>{tr('Sign out', 'تسجيل الخروج')}</button></div> : formBody(mode, true)}
     </div></div> : <><div className="access-pair"><h2 className="access-landscape-title">{tr('Your Backstage Pass', 'تذكرتك إلى الكواليس')}</h2>

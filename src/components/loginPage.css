@@ -451,7 +451,7 @@ html.echo-access-open body .echo-access:not(.echo-order-access) .access-pair{pos
 @keyframes access-vtear-breathe{0%,100%{clip-path:polygon(var(--vtear-a))}33%{clip-path:polygon(var(--vtear-b))}66%{clip-path:polygon(var(--vtear-c))}}
 @media(min-width:1001px) and (orientation:landscape){
  html.echo-access-open body .echo-access:not(.echo-order-access){--cw:min(46vw,calc(100svh * .66 + 4vw))}
- html.echo-access-open body .echo-access:not(.echo-order-access) .access-hero-photo{--photo-h:78svh;left:auto;right:0;transform:none;height:var(--photo-h);clip-path:polygon(var(--vtear));animation:access-photo-in 1s cubic-bezier(.2,.8,.2,1) both,access-vtear-breathe 3.4s ease-in-out infinite}
+ html.echo-access-open body .echo-access:not(.echo-order-access) .access-hero-photo{--photo-h:88svh;left:auto;right:0;transform:none;height:var(--photo-h);clip-path:polygon(var(--vtear));animation:access-photo-in 1s cubic-bezier(.2,.8,.2,1) both,access-vtear-breathe 3.4s ease-in-out infinite}
  html.echo-access-open body .echo-access:not(.echo-order-access) .access-sketches{clip-path:polygon(var(--vtear));animation:access-sketch-drift 38s linear infinite,access-sketch-pulse 5s ease-in-out infinite,access-vtear-breathe 3.4s ease-in-out infinite}
  html.echo-access-open body .echo-access:not(.echo-order-access) .access-hero-vignette{background:none;clip-path:polygon(var(--vtear));animation:access-vtear-breathe 3.4s ease-in-out infinite}
  html.echo-access-open body .echo-access:not(.echo-order-access) .access-hero-inset,.echo-access:not(.echo-order-access) .access-tear-lines{display:none}
@@ -533,8 +533,8 @@ html[dir=rtl].echo-login-leaving .echo-access.is-leaving :is(.access-hero-photo,
 
 /* Landscape: the darkening on the character's side hugs the tear (the right edge of the forms column) instead of the bottom edge. */
 @media(min-width:1001px) and (orientation:landscape){
- html.echo-access-open body .echo-access:not(.echo-order-access) .access-hero-vignette{box-shadow:none;background:linear-gradient(to right,#0000 calc(100% - var(--cw,45vw) - 4px),#000000b0 calc(100% - var(--cw,45vw)),#0000 calc(100% - var(--cw,45vw) + 150px))}
- html[dir=rtl].echo-access-open body .echo-access:not(.echo-order-access) .access-hero-vignette{background:linear-gradient(to right,#0000 calc(var(--cw,45vw) - 150px),#000000b0 var(--cw,45vw),#0000 calc(var(--cw,45vw) + 4px))}
+ html.echo-access-open body .echo-access:not(.echo-order-access) .access-hero-vignette{box-shadow:none;background:linear-gradient(to right,#0000 calc(100% - var(--cw,45vw) - 4px),#000000b0 calc(100% - var(--cw,45vw)),#0000 calc(100% - var(--cw,45vw) + 60px))}
+ html[dir=rtl].echo-access-open body .echo-access:not(.echo-order-access) .access-hero-vignette{background:linear-gradient(to right,#0000 calc(var(--cw,45vw) - 60px),#000000b0 var(--cw,45vw),#0000 calc(var(--cw,45vw) + 4px))}
 }
 
 /* Landscape: centre the DJ Khalil logo over the forms column and the character in his column (--cw = character column width). */
@@ -560,3 +560,11 @@ html body .echo-access:not(.echo-order-access) .access-pair .google-bridge-butto
 html body .echo-access:not(.echo-order-access) .access-pair .google-bridge-button:hover:not(:disabled){background:#f8f8f8!important;border-color:#fff!important;color:#1f1f1f!important;box-shadow:none!important;transform:rotate(0deg) translateY(-1px)!important}
 html body .echo-access:not(.echo-order-access) .access-pair .google-bridge-button:focus-visible{outline:2px solid #fff;outline-offset:6px}
 @media(prefers-reduced-motion:reduce){html body .echo-access:not(.echo-order-access) .access-pair .google-bridge-button{transition:none}}
+
+/* Desktop (wider than a tablet): the form elements are a little bigger. */
+@media(min-width:1367px) and (orientation:landscape){
+ html body .echo-access:not(.echo-order-access) .access-pair .access-input{min-height:54px}
+ html body .echo-access:not(.echo-order-access) .access-pair .access-input input{padding-block:12px;font-size:1.05rem}
+ html body .echo-access:not(.echo-order-access) .access-pair .access-submit{min-height:54px;padding-block:13px;font-size:1.05rem}
+ html body .echo-access:not(.echo-order-access) .access-pair .access-field>span:first-child{font-size:.85rem}
+}

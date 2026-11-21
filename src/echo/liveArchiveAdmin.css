@@ -1,5 +1,6 @@
 .admin-workspace:is([data-area="live-archive"],[data-area="video-editor"],[data-area="posting-studio"]) .aw-content { display:flex; min-height:0; overflow:hidden; }
 .admin-workspace:is([data-area="live-archive"],[data-area="video-editor"],[data-area="posting-studio"]) .aw-cms-panel { display:flex; flex:1; min-height:0; height:100%; padding:0 8px 12px; border:0; border-radius:0; background:none; box-shadow:none; overflow:hidden; }
+.admin-workspace[data-area="live-archive"] .aw-cms-panel{padding:0}
 .live-archive-admin { display:flex; flex:1; flex-direction:column; gap:18px; min-width:0; min-height:0; }
 .live-archive-workspace { display:grid; grid-template-columns:minmax(0,1.6fr) minmax(280px,1fr); gap:28px; flex:1; min-height:0; }
 .live-archive-list { min-width:0; min-height:0; overflow:auto; }
@@ -123,8 +124,6 @@
 .admin-workspace:is([data-area="live-archive"],[data-area="video-editor"],[data-area="posting-studio"]) .live-archive-list{display:flex;flex-direction:column;overflow:hidden}
 .admin-workspace:is([data-area="live-archive"],[data-area="video-editor"],[data-area="posting-studio"]) .live-archive-scroll{flex:1 1 auto;min-height:0;overflow:auto;scrollbar-width:thin}
 .admin-workspace:is([data-area="live-archive"],[data-area="video-editor"],[data-area="posting-studio"]) .live-archive-list thead{top:0}
-.admin-workspace:is([data-area="live-archive"],[data-area="video-editor"],[data-area="posting-studio"]) .live-archive-list-footer{flex:none;margin-top:auto;padding:6px 16px 6px 46px;border-top:1px solid var(--rule);font-size:12px;line-height:1.3;letter-spacing:.02em;color:var(--aw-muted)}
-.admin-workspace:is([data-area="live-archive"],[data-area="video-editor"],[data-area="posting-studio"]) .live-archive-list-footer{padding-inline-start:16px}
 .admin-workspace:is([data-area="live-archive"],[data-area="video-editor"],[data-area="posting-studio"]) .live-archive-notice{position:fixed;right:20px;bottom:20px;z-index:60;max-width:min(360px,calc(100vw - 40px));padding:9px 14px;border:1px solid #ffffff24;border-radius:999px;background:#17181af2;color:#f1f1f1;box-shadow:0 8px 28px #0007;backdrop-filter:blur(12px);font-size:12px;animation:live-archive-toast .18s ease-out}
 @keyframes live-archive-toast{from{opacity:0;transform:translateY(8px)}}
 
@@ -497,3 +496,14 @@ a.live-archive-row-action{display:grid;place-items:center;width:30px;height:30px
 .lrp .rsm-menu>button svg{width:18px;height:18px}
 .lrp .recording-session-metadata .rsm-menu>button{width:28px;height:26px}
 .lrp svg{display:block;flex:none;stroke:currentColor;stroke-width:2}
+
+/* Live recordings: the table box fills the full height. */
+.admin-workspace[data-area="live-archive"] .live-archive-list{height:100%;align-self:stretch;border-radius:0!important}
+/* Live recordings list: every wrapper above it fills the panel, so the list reaches the bottom. */
+.admin-workspace[data-area="live-archive"] .live-archive-admin.is-library{height:100%;min-height:0}
+.admin-workspace[data-area="live-archive"] .live-archive-admin.is-library .live-archive-workspace{flex:1 1 auto;height:100%;min-height:0;grid-template-rows:minmax(0,1fr)}
+.admin-workspace[data-area="live-archive"] .live-archive-list{height:100%;min-height:100%}
+
+/* Empty library: the hint sentence is centred in the table box. */
+.admin-workspace[data-area="live-archive"] .live-archive-list{position:relative}
+.admin-workspace[data-area="live-archive"] .live-archive-list .live-archive-hint{position:absolute;inset:0;display:grid;place-items:center;margin:0;padding:0 16px;text-align:center;font-size:13px;color:var(--aw-muted);pointer-events:none}

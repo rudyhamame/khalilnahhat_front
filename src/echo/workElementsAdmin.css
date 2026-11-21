@@ -1,4 +1,4 @@
-.work-elements-admin{display:flex;flex-direction:column;width:100%;min-height:100%;gap:20px;color:var(--aw-text)}
+.work-elements-admin{display:flex;flex-direction:column;width:100%;min-height:100%;gap:0;color:var(--aw-text)}
 .work-elements-admin>header{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
 .work-elements-admin h1{font-size:24px;margin:0 0 6px}.work-elements-admin>header p{margin:0;color:var(--aw-muted);font-size:12px}
 .work-elements-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,560px),1fr));align-items:stretch;gap:16px;width:100%;flex:1}

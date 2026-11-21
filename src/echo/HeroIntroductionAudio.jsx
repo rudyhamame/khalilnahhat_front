@@ -63,7 +63,7 @@ export default function HeroIntroductionAudio({lang,onSkip,onBegin,animationComp
  const audio=useRef(null),root=useRef(null),focus=useRef(null),request=useRef(0),id=useId();
  const [playing,setPlaying]=useState(false),[waiting,setWaiting]=useState(false),[position,setPosition]=useState(0),[duration,setDuration]=useState(narration.duration),[error,setError]=useState('');
  const transportPosition=Math.floor(position*20)/20;
- useEffect(()=>{onTransportState?.({playing:playing&&!waiting&&!staging,engaged:(phase==='started'&&!staging)||(frameOpen&&window.matchMedia('(orientation:portrait) and (max-width:760px)').matches),language:selectedLanguage});},[playing,waiting,staging,phase,selectedLanguage,onTransportState,frameOpen]);
+ useEffect(()=>{onTransportState?.({playing:playing&&!waiting&&!staging,engaged:phase==='started'||(frameOpen&&window.matchMedia('(orientation:portrait) and (max-width:760px)').matches),language:selectedLanguage});},[playing,waiting,staging,phase,selectedLanguage,onTransportState,frameOpen]);
  // Keep timeline ticks local to the showcase instead of re-rendering the whole homepage.
  useEffect(()=>{window.dispatchEvent(new CustomEvent(HERO_EQUIPMENT_TIMELINE,{detail:{playing:playing&&!waiting&&!staging,language:selectedLanguage,position:transportPosition,started:phase==='started'&&!staging}}));},[playing,waiting,staging,selectedLanguage,transportPosition,phase]);
  const tr=(en,arabic)=>ar?arabic:en;
@@ -239,7 +239,7 @@ export default function HeroIntroductionAudio({lang,onSkip,onBegin,animationComp
    </div>
    <input type="range" className="hero-intro-seek" aria-label={tr('Greeting position','موضع الترحيب')} min="0" max={duration||1} step="0.1" value={Math.min(position,duration||1)} disabled={staging||phase!=='started'} style={{'--seek':`${duration?Math.min(100,position/duration*100):0}%`}} onChange={event=>seek(Number(event.target.value))}/>
    <div className="hero-intro-controls hero-intro-controls-inline" role="group" aria-label={tr('Introduction playback','التحكم بالمقدّمة')} aria-busy={staging||waiting} dir="ltr">
-   <button type="button" className="hero-intro-launch hero-intro-transport-button" disabled={staging||waiting||!animationReady} aria-controls={`intro-audio-${id}`} aria-busy={staging||waiting||!animationReady} aria-label={chosenLanguage==='ar'?(playing&&chosenLanguage===selectedLanguage?'إيقاف المقدّمة مؤقتاً':'تشغيل المقدّمة بالعربية'):(playing&&chosenLanguage===selectedLanguage?'Pause introduction':'Play introduction in English')} onClick={togglePlay}>
+   <button type="button" className="hero-intro-launch hero-intro-transport-button" disabled={staging||waiting||!animationReady} aria-controls={`intro-audio-${id}`} aria-busy={staging||waiting||!animationReady} aria-label={chosenLanguage==='ar'?(playing&&chosenLanguage===selectedLanguage?'إيقاف المقدّمة مؤقتاً':'تشغيل المقدّمة بالعربية'):(playing&&chosenLanguage===selectedLanguage?'Pause introduction':'Play introduction in English')} onClick={()=>{if(!playing)setFrameOpen(true);togglePlay();}}>
     <span className="hero-intro-launch-face" aria-hidden="true">
      <svg viewBox="0 0 100 100" focusable="false">
       <defs><linearGradient id={`intro-gold-${id}`} x1="0" y1="0" x2=".8" y2="1" gradientUnits="objectBoundingBox"><stop stopColor="#fff0ba"/><stop offset=".35" stopColor="#d9b46e"/><stop offset=".7" stopColor="#ab7c3e"/><stop offset="1" stopColor="#e3c184"/></linearGradient></defs>

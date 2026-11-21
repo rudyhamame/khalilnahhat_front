@@ -533,3 +533,6 @@ html[dir=rtl] body .echo[data-page=home][data-theme] #echo-main .hero-introducti
 @media(min-width:601px) and (orientation:landscape){
 html:has(.echo[data-page=home] .hero-introduction),html:has(.echo[data-page=home] .hero-introduction) body{height:100svh!important;max-height:100svh!important;overflow:hidden!important;overscroll-behavior:none}
 html body .echo[data-page=home][data-theme] #echo-main .hero-introduction:not(#_):not(#__){max-height:100svh;overflow:hidden}}
+
+/* Greeting playing (landscape): the square grows to its engaged size (--sq); the 340px cap above only applies to the idle card. */
+@media(min-width:721px) and (orientation:landscape){html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group.is-engaged .hero-intro-player .hero-intro-frame:not(#_):not(#__){width:var(--sq)!important;height:var(--sq)!important}}
