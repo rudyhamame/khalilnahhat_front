@@ -66,9 +66,6 @@ export default function DjBookingForm({ar=false,ctx,djAdded,onClose,backLabel}){
  const cards=[];
  const section=(number,title,hint,children,action=null)=>{cards.push({number,title,hint,children,action});return null;};
  return <div className="djf" dir={ar?'rtl':'ltr'}>
-  <header className="djf-head">
-   <div className="djf-title"><p className="djf-kicker">{tr('DJ SERVICE','خدمة الدي جي')}</p><h2>{tr('Tell us about your music','حدّثنا عن موسيقاك')}</h2><p>{tr('These choices fill the DJ service section of your Booking summary.','تملأ هذه الاختيارات قسم خدمة الدي جي في ملخص الحجز.')}</p></div>
-  </header>
   {note&&<p className="djf-note" role="status">{note}</p>}
   <div className="djf-body"><fieldset className="djf-fields" disabled={!canEdit}>
    <div hidden className="djf-collect">

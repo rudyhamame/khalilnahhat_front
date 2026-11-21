@@ -438,3 +438,5 @@ html body dialog.gallery-picker>header{background-color:#0d0d11!important}
 html body dialog.gallery-picker .gallery-picker-albums{background:#0f0f14!important}
 html body dialog.gallery-picker .gallery-picker-body{background:#121217!important}
 html body dialog.gallery-picker::backdrop{background:rgba(6,6,10,.9)}
+.gallery-viewer .gallery-reel{display:inline-flex;align-items:center;gap:6px;border:1px solid #e3d3a3aa;background:#e3d3a31f;color:#e8d7a6;border-radius:999px;padding:0 14px;font-weight:700}
+.gallery-viewer .gallery-reel.is-on{background:#a6e3ce26;border-color:#a6e3ce;color:#c0efdc}

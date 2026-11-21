@@ -127,11 +127,11 @@ html body .echo[data-page=home][data-theme] #availability .personal-info-note a:
 
 /* Same texture on every step; only its colour changes (hue shifts of the original green backdrop), fading between steps. */
 .book-backdrop{transition:filter .8s ease,opacity .8s ease}
-.echo[data-booking-phase='1'] .book-backdrop{filter:hue-rotate(0deg)}
-.echo[data-booking-phase='2'] .book-backdrop{filter:hue-rotate(65deg) saturate(1.15)}
-.echo[data-booking-phase='3'] .book-backdrop{background:#0d1418!important}/* step 3: the Music page's plain dark colour; the backdrop's own film grain layer (::after) stays, like the Music page's grain */
-.echo[data-booking-phase='4'] .book-backdrop{filter:hue-rotate(125deg) saturate(1.1)}
-.echo[data-booking-phase='5'] .book-backdrop{filter:hue-rotate(185deg) saturate(1.15)}
+.echo[data-booking-phase='personal'] .book-backdrop{filter:hue-rotate(0deg)}
+.echo[data-booking-phase='event'] .book-backdrop{filter:hue-rotate(65deg) saturate(1.15)}
+.echo[data-booking-phase='dj'] .book-backdrop{background:#0d1418!important}/* step 3: the Music page's plain dark colour; the backdrop's own film grain layer (::after) stays, like the Music page's grain */
+.echo[data-booking-phase='rental'] .book-backdrop{filter:hue-rotate(125deg) saturate(1.1)}
+.echo[data-booking-phase='additional'] .book-backdrop{filter:hue-rotate(185deg) saturate(1.15)}
 @media(prefers-reduced-motion:reduce){.book-backdrop{transition:none}}
 /* MC row: no line under it; more room under the DJ SERVICE buttons. */
 html body .echo[data-page=home][data-theme] .mc-row>div{border-bottom:0}
