@@ -85,3 +85,5 @@ html body .echo .home-work-editorial h3{margin:0 0 24px;font:700 clamp(32px,3.1v
  animation:glow-wander 16s ease-in-out infinite alternate}
 .work-story.is-playing::before{opacity:1}
 @media(prefers-reduced-motion:reduce){.work-story::before{animation:none}}
+/* The page tint sits behind the content, header included: keep the header above it so it is never dimmed. */
+html body .echo:has(.home-work-tint) .echo-header:not(#_){position:relative;z-index:20}
