@@ -22,16 +22,16 @@ function weightedEnergyPerHop(data,fs,hop){
 const percentile=(sorted,p)=>sorted.length?sorted[Math.min(sorted.length-1,Math.floor(p*(sorted.length-1)))]:NaN;
 export function analyzeAudio(channels,fs){
  const left=channels[0],right=channels[1]||channels[0],length=left.length,step=Math.round(fs*.05),frames=Math.floor(length/step);
- const peakL=new Float32Array(frames),peakR=new Float32Array(frames),rmsL=new Float32Array(frames),rmsR=new Float32Array(frames);
+ const peakL=new Float32Array(frames),peakR=new Float32Array(frames),rmsL=new Float32Array(frames),rmsR=new Float32Array(frames),corrF=new Float32Array(frames),clipsF=new Uint32Array(frames);
  let peak=0,sumL=0,sumR=0,sqL=0,sqR=0,cross=0,clipped=0,events=0,run=0;
  for(let f=0;f<frames;f++){
-  let pl=0,pr=0,ql=0,qr=0;
+  let pl=0,pr=0,ql=0,qr=0,cr=0;
   for(let i=f*step,end=i+step;i<end;i++){
    const l=left[i],r=right[i],al=Math.abs(l),ar=Math.abs(r);
-   if(al>pl)pl=al;if(ar>pr)pr=ar;ql+=l*l;qr+=r*r;sumL+=l;sumR+=r;cross+=l*r;
+   if(al>pl)pl=al;if(ar>pr)pr=ar;ql+=l*l;qr+=r*r;sumL+=l;sumR+=r;cross+=l*r;cr+=l*r;
    if(al>=.9995||ar>=.9995){clipped++;if(++run===3)events++;}else run=0;
   }
-  peakL[f]=pl;peakR[f]=pr;rmsL[f]=Math.sqrt(ql/step);rmsR[f]=Math.sqrt(qr/step);sqL+=ql;sqR+=qr;peak=Math.max(peak,pl,pr);
+  peakL[f]=pl;peakR[f]=pr;rmsL[f]=Math.sqrt(ql/step);rmsR[f]=Math.sqrt(qr/step);corrF[f]=ql>0&&qr>0?cr/Math.sqrt(ql*qr):1;clipsF[f]=events;sqL+=ql;sqR+=qr;peak=Math.max(peak,pl,pr);
  }
  const n=frames*step||1,rms=Math.sqrt((sqL+sqR)/(2*n));
  // Integrated loudness: 400 ms blocks, 100 ms hop, absolute gate -70 LUFS then relative gate -10 LU.
@@ -58,7 +58,8 @@ export function analyzeAudio(channels,fs){
   duration:length/fs,peakDb:db(peak),rmsDb:db(rms),lufs:integrated,range,noiseDb:noise,clippedSamples:clipped,clipEvents:events,
   dcLeft:sumL/n,dcRight:sumR/n,correlation:corr,headSilence:head*step/fs,tailSilence:(frames-1-tail)*step/fs,
   plr:Number.isFinite(integrated)?db(peak)-integrated:NaN,
-  envelope:{step:step/fs,peakL,peakR,rmsL,rmsR},
+  // Per-frame (50 ms) data the footer reads at the playhead for live figures; momentary = 400 ms loudness every 100 ms.
+  envelope:{step:step/fs,peakL,peakR,rmsL,rmsR,corr:corrF,clips:clipsF,momentary:Float32Array.from(blocks,e=>loud(e)),momentaryStep:.1},
  };
 }
 export {db};

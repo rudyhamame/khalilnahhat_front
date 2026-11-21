@@ -30,15 +30,12 @@ export function windowAt(vw, vh, crop, t = 0) {
 // CSS that makes a video fill a 9:16 box showing only the window (the box must have overflow hidden).
 export const cropStyle = win => ({ position: 'absolute', display: 'block', objectFit: 'fill', maxWidth: 'none', width: `${100 / win.w}%`, height: `${100 / win.h}%`, left: `${-win.x / win.w * 100}%`, top: `${-win.y / win.h * 100}%` });
 
-// Smooth the tracker's raw positions: a small dead zone (no jitter) and an eased follow, so the window glides.
-export function smoothTrack(points, { dead = .006, ease = .35 } = {}) {
-  const out = [];
-  let x = points[0]?.x ?? .5, y = points[0]?.y ?? .5;
-  for (const p of points) {
-    if (Math.hypot(p.x - x, p.y - y) > dead) { x += (p.x - x) * ease; y += (p.y - y) * ease; }
-    out.push({ t: +p.t.toFixed(2), x: +x.toFixed(4), y: +y.toFixed(4) });
-  }
-  return out;
+// Smooth the tracker's raw positions without lag: a small dead zone (no jitter), then an eased pass forward and one backward, averaged, so the window glides and stays on the face.
+export function smoothTrack(points, { dead = .006, ease = .5 } = {}) {
+  if (!points.length) return [];
+  const pass = list => { const out = []; let x = list[0].x, y = list[0].y; for (const p of list) { if (Math.hypot(p.x - x, p.y - y) > dead) { x += (p.x - x) * ease; y += (p.y - y) * ease; } out.push({ x, y }); } return out; };
+  const forward = pass(points), backward = pass([...points].reverse()).reverse();
+  return points.map((p, i) => ({ t: +p.t.toFixed(2), x: +((forward[i].x + backward[i].x) / 2).toFixed(4), y: +((forward[i].y + backward[i].y) / 2).toFixed(4) }));
 }
 // Template tracking on a grayscale frame (Uint8Array, width gw x height gh): find the patch most like `template` (tw x th) near (cx, cy) in pixels. Returns the new centre and the match error (lower = better).
 export function bestMatch(gray, gw, gh, template, tw, th, cx, cy, radius) {

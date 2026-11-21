@@ -28,9 +28,9 @@ test('auto-follow interpolates between saved points', () => {
 });
 test('smoothing removes jitter and keeps real movement', () => {
   const still = smoothTrack([{ t: 0, x: .5, y: .5 }, { t: 1, x: .502, y: .5 }, { t: 2, x: .499, y: .5 }]);
-  assert.ok(still.every(p => p.x === .5));
+  assert.ok(still.every(p => Math.abs(p.x - .5) < .002));
   const moved = smoothTrack([{ t: 0, x: .2, y: .5 }, { t: 1, x: .8, y: .5 }, { t: 2, x: .8, y: .5 }]);
-  assert.ok(moved[2].x > moved[1].x && moved[2].x < .8);
+  assert.ok(moved[0].x < moved[1].x && moved[2].x > .5 && moved[2].x <= .8);
 });
 test('template matching finds the moved patch', () => {
   const gw = 40, gh = 30, gray = new Uint8Array(gw * gh).fill(20);

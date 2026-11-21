@@ -33,3 +33,18 @@
 /* The editor body has no row gap, so the footer sits directly under the content. */
 .admin-workspace .ontology-editor-page>fieldset.ontology-editor-body,.admin-workspace .ontology-editor-dialog.ontology-editor-page>fieldset{gap:0!important;row-gap:0!important}
 .admin-workspace .ontology-editor-page>fieldset>.recording-level-footer{margin:0!important}
+
+/* Chips that follow the playhead while the audio plays carry a small live dot. */
+.level-chip.is-live small::after{content:'';display:inline-block;width:6px;height:6px;margin-inline-start:6px;border-radius:50%;background:#5df29a;box-shadow:0 0 6px #5df29a;animation:level-live 1s ease-in-out infinite}
+@keyframes level-live{50%{opacity:.35}}
+@media(prefers-reduced-motion:reduce){.level-chip.is-live small::after{animation:none}}
+/* Fixed chip widths: the numbers change many times a second, so each chip keeps one width (tabular digits, width sized for the longest value it can show). */
+.level-chip{box-sizing:border-box;flex:0 0 auto}
+.level-chip strong{display:block;font-variant-numeric:tabular-nums;white-space:nowrap}
+.level-chip[data-chip=Peak]{width:calc(11ch + 28px)}
+.level-chip[data-chip=Loudness]{width:calc(11ch + 28px)}
+.level-chip[data-chip=RMS],.level-chip[data-chip=PLR],.level-chip[data-chip=Range],.level-chip[data-chip=Noise\ floor]{width:calc(9ch + 28px)}
+.level-chip[data-chip=Clips],.level-chip[data-chip=Stereo],.level-chip[data-chip="DC offset"]{width:calc(8ch + 28px)}
+.level-chip[data-chip=Silence]{width:calc(16ch + 28px)}
+/* Never spill out: the chips wrap onto more rows inside the footer instead of running past its edge. */
+.admin-workspace .recording-level-footer>.level-stats{min-width:0;max-width:100%;flex-wrap:wrap;overflow:visible;row-gap:6px}

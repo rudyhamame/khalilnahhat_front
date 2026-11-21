@@ -38,6 +38,8 @@ function OntologyArchiveWorkspace({token}){
  const [items,setItems]=useState([]),[allItems,setAllItems]=useState([]),[vocabulary,setVocabulary]=useState([]),[workTypes,setWorkTypes]=useState([]),[filters,setFilters]=useState(()=>{try{const saved=JSON.parse(localStorage.getItem('echo-recording-filters')||'{}');return saved&&typeof saved==='object'&&!Array.isArray(saved)?saved:{};}catch{return {};}}),[selected,setSelected]=useState(null);
   const activeFilters=Object.entries(filters).filter(([key,value])=>value!==''&&value!=null&&!(Array.isArray(value)&&!value.length)&&!(key==='bpmScope'&&value==='work')).length;
  useEffect(()=>{try{localStorage.setItem('echo-recording-filters',JSON.stringify(filters));}catch{/* the filter just resets on refresh */}},[filters]);// the Draft / Published filter survives a page refresh, so drafts stay in view
+ // Leaving the Recording panel clears the saved filter, so coming back starts from the full list (a page refresh while inside still keeps it).
+ useEffect(()=>()=>{try{localStorage.removeItem('echo-recording-filters');}catch{/* nothing saved */}},[]);
  const [error,setError]=useState(''),[notice,setNotice]=useState(''),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[unavailable,setUnavailable]=useState(false);
  const [editor,setEditor]=useState(null),[step,setStep]=useState(0),[workEditor,setWorkEditor]=useState(null),[vocabEditor,setVocabEditor]=useState(null);
  const [contentSelection,setContentSelection]=useState(null);

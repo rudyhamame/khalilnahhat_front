@@ -18,9 +18,11 @@ async function analyze(src,signal){
  cache.set(src,result);if(cache.size>4)cache.delete(cache.keys().next().value);return result;
 }
 // Footer for DJs: live L/R level meters (dBFS) that follow the playhead, plus the loudness, headroom, noise and stereo checks for the whole file.
+// Live figures: while the audio plays the chips below follow the playhead (last second for peak, RMS and stereo; 400 ms momentary loudness; clips so far). Paused: the whole-file figures.
+const readout=(root,name,text,live)=>{const node=root?.querySelector(`[data-chip="${name}"]`);if(!node)return;const strong=node.querySelector('strong');if(strong.textContent!==text)strong.textContent=text;node.classList.toggle('is-live',live);};
 export default function RecordingLevelFooter({src}){
  const [stats,setStats]=useState(null),[state,setState]=useState('Analyzing levels…');
- const bars=useRef({}),statsRef=useRef(null);statsRef.current=stats;
+ const bars=useRef({}),statsRef=useRef(null),statsBox=useRef(null),lastLive=useRef(0);statsRef.current=stats;
  useEffect(()=>{
   setStats(null);setState('Analyzing levels…');
   const controller=new AbortController();
@@ -28,10 +30,25 @@ export default function RecordingLevelFooter({src}){
   return()=>controller.abort();
  },[src]);
  useEffect(()=>{
+  const liveFigures=(time,data,now)=>{
+   const root=statsBox.current,total=statsRef.current;
+   if(!root||!total||now-lastLive.current<100)return;lastLive.current=now;
+   if(time===null){const was=root.querySelector('.is-live');if(was){readout(root,'Peak',show(total.peakDb,1,' dBFS'),false);readout(root,'Loudness',show(total.lufs,1,' LUFS'),false);readout(root,'RMS',show(total.rmsDb,1,' dB'),false);readout(root,'PLR',show(total.plr,1,' dB'),false);readout(root,'Clips',String(total.clipEvents),false);readout(root,'Stereo',show(total.correlation,2),false);}return;}
+   const now1=Math.min(data.peakL.length-1,Math.floor(time/data.step)),from=Math.max(0,now1-Math.round(1/data.step));
+   let peak=0,sq=0,cr=0,n=0;for(let i=from;i<=now1;i++){peak=Math.max(peak,data.peakL[i],data.peakR[i]);sq+=(data.rmsL[i]**2+data.rmsR[i]**2)/2;cr+=data.corr[i];n++;}
+   const rmsDb=dbOf(Math.sqrt(sq/Math.max(1,n))),mom=data.momentary[Math.min(data.momentary.length-1,Math.max(0,Math.floor(time/data.momentaryStep)-3))];
+   readout(root,'Peak',show(dbOf(peak),1,' dBFS'),true);
+   readout(root,'RMS',show(rmsDb,1,' dB'),true);
+   readout(root,'Loudness',show(mom,1,' LUFS'),true);
+   readout(root,'PLR',show(dbOf(peak)-mom,1,' dB'),true);
+   readout(root,'Clips',String(data.clips[now1]),true);
+   readout(root,'Stereo',show(cr/Math.max(1,n),2),true);
+  };
   let frame=0;const held={L:{value:FLOOR,until:0},R:{value:FLOOR,until:0}},shown={L:FLOOR,R:FLOOR};let last=performance.now();
   const loop=now=>{
    const audio=document.querySelector('.transcription-audio-tape audio'),data=statsRef.current?.envelope,dt=Math.min(.1,(now-last)/1000);last=now;
    const live=audio&&data&&!audio.paused;
+   liveFigures(live?audio.currentTime:null,data,now);
    for(const side of ['L','R']){
     let target=FLOOR;
     if(live){const index=Math.min(data.peakL.length-1,Math.floor(audio.currentTime/data.step));target=Math.max(FLOOR,dbOf((side==='L'?data.peakL:data.peakR)[index]));}
@@ -63,6 +80,6 @@ export default function RecordingLevelFooter({src}){
    {['L','R'].map(side=><div className="level-row" key={side}><b>{side}</b><div className="level-bar"><i ref={node=>{bars.current[side]={...bars.current[side],fill:node};}}/><u ref={node=>{bars.current[side]={...bars.current[side],hold:node};}}/></div><output ref={node=>{bars.current[side]={...bars.current[side],read:node};}}>–</output><span className="level-clip" data-on="false" ref={node=>{bars.current[side]={...bars.current[side],clip:node};}} title="Clip: lights above −0.1 dBFS">CLIP</span></div>)}
    <div className="level-scale" aria-hidden="true"><span/>{TICKS.map(tick=><em key={tick} style={{left:place(tick)}}>{tick}</em>)}<small>dBFS</small></div>
   </div>
-  <div className="level-stats" role="list">{stats?chips.map(([name,value,tone,hint])=><span key={name} role="listitem" className={`level-chip ${tone}`} title={hint}><small>{name}</small><strong>{value}</strong></span>):state==='Analyzing levels…'?<RecordingLoadingHint message={state}/>:<span className="level-note" role="status">{state}</span>}</div>
+  <div className="level-stats" role="list" ref={statsBox}>{stats?chips.map(([name,value,tone,hint])=><span key={name} role="listitem" data-chip={name} className={`level-chip ${tone}`} title={hint}><small>{name}</small><strong>{value}</strong></span>):state==='Analyzing levels…'?<RecordingLoadingHint message={state}/>:<span className="level-note" role="status">{state}</span>}</div>
  </footer>;
 }
