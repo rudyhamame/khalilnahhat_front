@@ -128,12 +128,12 @@ function Deck({dx,n,player,command=archivePlayerCommand,art,switchLayer,mediaTim
 
 // LOAD opens this drop list: work types first, then that type's collections, then its recordings.
 function LoadPicker({library,onPick}){
-  const [open,setOpen]=useState(0),[types,setTypes]=useState([]),[collections,setCollections]=useState([]),[type,setType]=useState(''),[collection,setCollection]=useState(null);
+  const [open,setOpen]=useState(0),[types,setTypes]=useState([]),[collections,setCollections]=useState([]),[type,setType]=useState(''),[collection,setCollection]=useState(null),[kinds,setKinds]=useState({});
   useEffect(()=>{const on=event=>{setOpen(event.detail?.deck||0);setType('');setCollection(null);};window.addEventListener('echo:ddj-pick',on);return()=>window.removeEventListener('echo:ddj-pick',on);},[]);
-  useEffect(()=>{if(!open||types.length)return;fetchDjWorkTypes().then(setTypes).catch(()=>{});fetchMusicArchiveCatalog().then(catalog=>setCollections(catalog.collections||[])).catch(()=>{});},[open,types.length]);
+  useEffect(()=>{if(!open||types.length)return;fetchDjWorkTypes().then(setTypes).catch(()=>{});fetchMusicArchiveCatalog().then(catalog=>{setCollections(catalog.collections||[]);setKinds(Object.fromEntries((catalog.recordings||[]).map(row=>[row.id,row.workType])));}).catch(()=>{});},[open,types.length]);
   if(!open)return null;
   const rows=collection?(collection.recordingIds||[]).map(id=>library.find(song=>song.id===id)).filter(Boolean):[];
-  const list=collection?rows.map(song=>({key:song.id,text:song.title,go:()=>{onPick(open,song.id);setOpen(0);}})):type?[...collections.filter(item=>item.workTypeId===type),{id:'__unclassified',title:'Unclassified recordings',recordingIds:library.filter(song=>(song.workType||song.workTypeId)===type&&!collections.some(item=>item.recordingIds?.includes(song.id))).map(song=>song.id)}].map(item=>({key:item.id,text:item.title,go:()=>setCollection(item)})):types.map(work=>({key:work.id,text:djWorkTypeText(work,false).name,go:()=>setType(work.id)}));
+  const list=collection?rows.map(song=>({key:song.id,text:song.title,go:()=>{onPick(open,song.id);setOpen(0);}})):type?[...collections.filter(item=>item.workTypeId===type),{id:'__unclassified',title:'Unclassified recordings',recordingIds:library.filter(song=>(kinds[song.id]||song.workType||song.workTypeId)===type&&!collections.some(item=>item.recordingIds?.includes(song.id))).map(song=>song.id)}].map(item=>({key:item.id,text:item.title,go:()=>setCollection(item)})):types.map(work=>({key:work.id,text:djWorkTypeText(work,false).name,go:()=>setType(work.id)}));
   const title=collection?collection.title:type?(types.find(work=>work.id===type)&&djWorkTypeText(types.find(work=>work.id===type),false).name):'Work types';
   return <div className="ddj-picker" role="dialog" aria-label={'Load deck '+open}>
     <header><button type="button" onClick={()=>collection?setCollection(null):type?setType(''):setOpen(0)} aria-label="Back">‹</button><strong>{title}</strong><span>Deck {open}</span></header>
