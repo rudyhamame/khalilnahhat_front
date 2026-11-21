@@ -1,3 +1,4 @@
+import {fieldCode} from './eventPageModel.js';
 export const atomReviewSignature=line=>JSON.stringify(Object.hasOwn(line,'reviewValue')?line.reviewValue??null:line.rawValue??line.value);
 export const atomReviewState=(reviews,line)=>!line.empty&&reviews[line.key]?.value===atomReviewSignature(line)?reviews[line.key].state:null;
 export function reviewBookingAtom(reviews,line,confirmed){
@@ -26,6 +27,7 @@ export function manualBookingFieldHref(path){
  return '/rentals'+field+'#rental-equipment';
 }
 export function bookingAtomCorrectionReply(path,label,ar=false){
+ const code=fieldCode(path);if(code)label=`${code} ${label}`;// the same index the Booking page and the review show
  const manualOnly=path.startsWith('customer.')||['references.photos','references.files'].includes(path);
  return {role:'assistant',content:ar
   ? manualOnly?`يمكنك استبدال «${label}» يدوياً باستخدام الرابط أدناه.`:`ما القيمة البديلة التي تريدها لـ«${label}»؟ أخبرني بها هنا أو استخدم الرابط للتعديل يدوياً.`

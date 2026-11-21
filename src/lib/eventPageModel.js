@@ -12,8 +12,30 @@ export const EVENT_PAGE_STEPS=Object.freeze({
 });
 export const VENUE_LOCATION_PATHS=['event.venue.address','event.venue.city','event.venue.postalCode','event.venue.country','event.venue.addressDetails','event.venue.latitude','event.venue.longitude','event.venue.source','event.venue.sourceId','event.venue.sourceAttribution'];
 export const VENUE_RESET_PATHS=[...new Set([...EVENT_PAGE_STEPS.venue,'event.venue.country',...VENUE_LOCATION_PATHS])];
-// STEP.SEC.ATOM label of a form field, e.g. event.type -> 02.01.01 (step 01 = Personal info, step 02 = Event info).
-export function fieldCode(key){const groups=Object.values(EVENT_PAGE_STEPS),group=groups.findIndex(paths=>paths.includes(key));return group<0?'':[group===0?1:2,group===0?1:group,groups[group].indexOf(key)+1].map(n=>String(n).padStart(2,'0')).join('.');}
+// STEP.SEC.ATOM index of every booking data atom. One table feeds the Booking page labels, the Booking review rows and the Echo conversation, so one number always means one atom.
+// Step 01 Personal info, 02 Event info, 03 DJ Khalil Service, 04 Services info, 05 Additional info. The atom number is the position inside its section.
+const ATOM_SECTIONS=[
+ ['01.01',['customer.fullName','customer.email','customer.phone','customer.contactMethod','customer.phoneContact','customer.company']],
+ ['02.01',['event.type','event.title']],
+ ['02.02',['event.date','event.startTime','event.endTime']],
+ ['02.03',['event.guestCount']],
+ ['02.04',['event.venue.name','event.venue.address','event.venue.addressDetails','event.venue.city','event.venue.postalCode','event.venue.country','event.venue.setting','event.venue.latitude','event.venue.longitude','event.venue.source','event.venue.sourceId','event.venue.sourceAttribution']],
+ ['03.01',['music.djRequested','music.mcRequested','music.djMc']],
+ ['03.02',['music.languagePairs']],
+ ['03.03',['music.genres']],
+ ['03.04',['music.suggestedSongs']],
+ ['03.05',['music.favouriteSongs']],
+ ['03.06',['music.favouriteArtists']],
+ ['04.01',['services','rental.requested','equipment']],
+ ['04.02',['event.setup.requirements']],
+ ['05.01',['references.photos','references.images','references.files']],
+ ['05.02',['additional.notes']],
+ ['05.03',['additional.voucherCode']],
+];
+const ATOM_CODES=Object.fromEntries(ATOM_SECTIONS.flatMap(([section,keys])=>keys.map((key,index)=>[key,`${section}.${String(index+1).padStart(2,'0')}`])));
+export const fieldCode=key=>ATOM_CODES[key]||'';
+// The same code for a whole section ("02.01") when only the section is known.
+export const sectionCode=key=>fieldCode(key).split('.').slice(0,2).join('.');
 export const eventPageField=key=>fields.find(field=>field.key===key);
 export function eventPageSummary(order,ar=false){
  return Object.values(EVENT_PAGE_STEPS).flatMap((paths,index)=>paths.filter(key=>(key!=='event.title'||order.event?.type==='other'||isAnswered(getPath(order,key)))&&(key!=='customer.phoneContact'||isAnswered(getPath(order,'customer.phone')))).map(key=>({key,step:index+1,label:fieldName(key,ar),value:bookingFieldValue(order,key,ar),empty:!isAnswered(getPath(order,key))})));

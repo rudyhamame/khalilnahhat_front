@@ -1,6 +1,7 @@
 import {useEffect,useRef,useState} from 'react';
 import DjBookingForm from './DjBookingForm';
 import BookingStep from './BookingStep';
+import McRow from './McChoice';
 import {FieldCode} from './BookingPhases';
 import {ArrowDown,Disc3} from 'lucide-react';
 import {djServiceChanges} from '../lib/bookingFlow.mjs';
@@ -19,12 +20,12 @@ export default function RentalsHero({ar=false}){
     setSkipped(false);setPrefs(true);
   };
   // Skip: go on to the other services without adding the DJ service.
-  const skip=()=>{setSkipped(true);setPrefs(false);scrollTo('booking-phase-4');};
+  const skip=()=>{if(order&&djAdded)order.removeService('dj');setSkipped(true);setPrefs(false);scrollTo('booking-phase-4');};
   const closeForm=()=>{setPrefs(false);scrollTo('booking-step-6');};
   const yesOn=prefs;// only selected when the client chooses it here, never because the DJ service was already in the booking
   return <>
     <img className="dj-service-hero" src="/echo/dj-service-hero.webp" width="1536" height="1024" alt={tr('A DJ at the decks, headphones on, mixing a live set','دي جي خلف الأجهزة يضع السماعات ويمزج مجموعة حيّة')} loading="lazy"/>
-  <BookingStep number={6} className={`dj-service-step${prefs&&order?' is-prefs-open':''}`} title={tr('Would you like DJ Khalil at your event?','هل تريد دي جي خليل في فعاليتك؟')} cardTitle={tr('Your choice','اختيارك')}
+  <BookingStep number={6} className="dj-service-step" title={tr('Would you like DJ Khalil at your event?','هل تريد دي جي خليل في فعاليتك؟')} cardTitle=""
     copy={tr('Music shaped around your event: a DJ who reads the room, MC hosting when you need a voice, and the sound, lighting and effects to match. Tell us if you want this service, or skip it and go straight to the other services.','موسيقى مصمّمة على قياس مناسبتك: دي جي يقرأ أجواء القاعة، وتقديم للحفل عند الحاجة، مع الصوت والإضاءة والمؤثرات التي تناسبها. أخبرنا إن كنت تريد هذه الخدمة، أو تجاوزها إلى بقية الخدمات.')}>
     <aside className="event-type-column dj-choice">
       <span className="avail-kicker"><FieldCode code="03.01"/>{tr('DJ SERVICE *','خدمة الدي جي *')}</span>
@@ -33,6 +34,10 @@ export default function RentalsHero({ar=false}){
         <button type="button" data-event-choice disabled={locked} aria-pressed={skipped&&!yesOn} onClick={skip}><ArrowDown size={17} strokeWidth={1.6} aria-hidden="true"/><span>{tr('Skip, show other services','تخطَّ، اعرض الخدمات الأخرى')}</span></button>
       </div>
     </aside>
-    {prefs&&order&&<section ref={form} id="dj-service-preferences" className="rentals-hero-form rentals-preferences" aria-label={tr('DJ music preferences','تفضيلات موسيقى الدي جي')}><DjBookingForm ar={ar} ctx={order} djAdded onClose={closeForm} backLabel={tr('Back','رجوع')}/></section>}
-  </BookingStep></>;
+    <McRow ar={ar}/>
+  </BookingStep>
+  {prefs&&order&&<section ref={form} id="dj-service-preferences" className="dj-prefs-section booking-services" aria-label={tr('DJ music preferences','تفضيلات موسيقى الدي جي')} dir={ar?'rtl':'ltr'}>
+    <div className="dj-prefs-card rentals-hero-form rentals-preferences"><DjBookingForm ar={ar} ctx={order} djAdded onClose={closeForm} backLabel={tr('Back','رجوع')}/></div>
+  </section>}
+  </>;
 }

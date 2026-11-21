@@ -1,5 +1,6 @@
+import BookingStep from './BookingStep';
 import {useState} from 'react';
-import {ArrowLeft,ArrowDown,ArrowUp,Check,Plus,Search,Trash2,X} from 'lucide-react';
+import {ArrowDown,ArrowUp,Check,Plus,Search,Trash2,X} from 'lucide-react';
 import {SONG_PHASES,optionLabel} from '../lib/djOptions';
 import {useWorkVocabulary} from '../lib/workVocabulary';
 import TagInput from './TagInput';
@@ -64,12 +65,9 @@ export default function DjBookingForm({ar=false,ctx,djAdded,onClose,backLabel}){
  // The sections are collected here, then shown as a left column (the list) and a main component (the open section).
  const cards=[];
  const section=(number,title,hint,children,action=null)=>{cards.push({number,title,hint,children,action});return null;};
- const [openCard,setOpenCard]=useState(1);
  return <div className="djf" dir={ar?'rtl':'ltr'}>
   <header className="djf-head">
-   <button type="button" className="djf-back" onClick={onClose} autoFocus={Boolean(backLabel)}><ArrowLeft size={16} aria-hidden="true"/>{backLabel||tr('Back to DJ Khalil’s work','العودة إلى أعمال دي جي خليل')}</button>
    <div className="djf-title"><p className="djf-kicker">{tr('DJ SERVICE','خدمة الدي جي')}</p><h2>{tr('Tell us about your music','حدّثنا عن موسيقاك')}</h2><p>{tr('These choices fill the DJ service section of your Booking summary.','تملأ هذه الاختيارات قسم خدمة الدي جي في ملخص الحجز.')}</p></div>
-   {djAdded&&<div className="djf-status"><span className="djf-badge"><Check size={14} aria-hidden="true"/>{tr('Added to your booking','أُضيفت إلى حجزك')}</span><button type="button" className="djf-remove" disabled={!canEdit} onClick={removeDj}>{tr('Remove','إزالة')}</button></div>}
   </header>
   {note&&<p className="djf-note" role="status">{note}</p>}
   <div className="djf-body"><fieldset className="djf-fields" disabled={!canEdit}>
@@ -114,15 +112,10 @@ export default function DjBookingForm({ar=false,ctx,djAdded,onClose,backLabel}){
   </div>
    {(()=>{
     const counts={1:chosenLanguages.length,2:genres.length,3:rows.length,4:favouriteSongEntries(music.favouriteSongs).length,5:asList(music.favouriteArtists).length};
-    const active=cards.find(card=>card.number===openCard)||cards[0];
-    return <>
-     <nav className="djf-nav" role="tablist" aria-label={tr('DJ service sections','أقسام خدمة الدي جي')}>
-      {cards.map(card=><button type="button" role="tab" key={card.number} className={card.number===active?.number?'is-open':''} aria-selected={card.number===active?.number} aria-controls="djf-section-panel" onClick={()=>setOpenCard(card.number)}>
-       <span className="djf-num" aria-hidden="true">{card.number}</span><span className="djf-nav-title">{card.title}</span>{counts[card.number]>0&&<b className="djf-nav-count">{counts[card.number]}</b>}
-      </button>)}
-     </nav>
-     {active&&<section id="djf-section-panel" role="tabpanel" className="djf-card djf-main-card" aria-labelledby="djf-main-title"><h3 id="djf-main-title"><span className="djf-num" aria-hidden="true">{active.number}</span><span className="djf-card-title">{active.title}</span>{active.action&&<span className="djf-card-action">{active.action}</span>}{active.hint&&<small className="djf-hint-inline">{active.hint}</small>}</h3>{active.children}</section>}
-    </>;
+    // Every section is its own card, one under the other (no tabs): language & dialect, genres, event moments, favourite songs, favourite artists.
+    return <div className="djf-cards">
+     {cards.map(card=><BookingStep key={card.number} number={9+card.number} className="djf-step" title={card.title} copy={card.hint||''} cardTitle=""><div id={`djf-section-${card.number}`} className="djf-card-body">{card.action&&<div className="djf-card-action">{card.action}</div>}{card.children}</div></BookingStep>)}
+    </div>;
    })()}
   </fieldset></div>
  </div>;

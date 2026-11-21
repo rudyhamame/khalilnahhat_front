@@ -29,7 +29,8 @@ export default function ServiceVinyl({lang}) {
   const cart=useCart(),order=useEventOrder();
   const [selectedServiceId,setSelected]=useState('');
   const {catalog,equipment:items,failed}=useRentalCatalog();
-  const services=useMemo(()=>rentalServices(catalog),[catalog]);
+  // MC hosting moved to its own step under DJ Khalil Service (a third-party host), so it is no longer a rental service in this list.
+  const services=useMemo(()=>rentalServices(catalog).filter(item=>item.id!=='mc'&&item.selectionField!=='music.mcRequested'),[catalog]);
   const selected=Math.max(0,services.findIndex(item=>item.id===selectedServiceId)),service=services[selected];
   const page=useRef(null);
   useEffect(()=>{order?.setRentalServiceId?.(service?.id||'');},[service?.id,order?.setRentalServiceId]);

@@ -84,3 +84,24 @@ html body .echo[data-page=home][data-theme] .dj-choice>.avail-kicker>.ysf-order{
 
 /* Room under the "DJ Khalil Service" step heading, before its hero image. */
 html body .echo #booking-phase-3.booking-phase{padding-bottom:clamp(18px,2.6vw,36px)}
+
+/* The STEP.SEC.ATOM index in the Booking review rows, the Echo conversation prompts and the draft-update list. */
+.ea-atom-code{display:inline-block;margin-inline-end:6px;padding:1px 6px;border-radius:6px;background:#e3d3a31a;color:#e3d3a3;font-style:normal;font-weight:700;font-size:11px;letter-spacing:.04em;font-variant-numeric:tabular-nums;white-space:nowrap}
+/* The DJ choice card has no title and no Reset button, so the empty title row takes no space. */
+html body .echo[data-page=home][data-theme] .dj-service-step .booking-card-title[aria-hidden=true]{display:none}
+/* Every avail-kicker: the badge and the label swap places (badge at the start, label at the end). */
+html body .echo[data-page=home][data-theme] .avail-kicker:has(>.ysf-order)>.ysf-order{order:-1;margin-inline:0 auto}
+/* The longer step names must not crowd the step bar: the inactive steps show only their number on narrow screens (already so below 560px), and the names wrap on medium ones. */
+@media(max-width:1100px){.phase-bar button:not(.is-active) span{display:none}}
+html body .echo[data-page=home][data-theme] .mc-step .booking-card-title[aria-hidden=true]{display:none}
+
+/* MC data row (badge, label, note, Yes/No) under the DJ choice. */
+.mc-row{margin-top:18px}
+.mc-row>div{display:grid;grid-template-columns:minmax(150px,.8fr) minmax(0,1.6fr) auto;align-items:center;gap:14px;padding:14px 0;border-top:1px dashed #ffffff1f}
+.mc-row dt{display:flex;align-items:baseline;gap:6px;color:#9fb5a8;font-size:13px}
+.mc-row dd{margin:0;color:#dfe9e2;font-size:13px;line-height:1.5}
+.mc-row-choice{display:inline-flex;gap:6px}
+html body .echo .mc-row-choice button{min-width:52px;height:34px;padding:0 14px;border:1px solid #ffffff2e;border-radius:999px;background:transparent;color:#9fb0a8;font:600 13px/1 'Manrope','Noto Sans Arabic',sans-serif;cursor:pointer}
+html body .echo .mc-row-choice button[aria-pressed=true]{border-color:#a6e3ce;background:#a6e3ce26;color:#eafcf3}
+html body .echo .mc-row-choice button:disabled{opacity:.5;cursor:default}
+@media(max-width:560px){.mc-row>div{grid-template-columns:1fr auto;grid-template-areas:'t c' 'n c'}.mc-row dt{grid-area:t}.mc-row dd{grid-area:n}.mc-row-choice{grid-area:c}}

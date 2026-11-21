@@ -3,7 +3,7 @@ import {fieldCode} from '../lib/eventPageModel';
 import './bookingPhases.css';
 
 // The Booking page has three steps. PhaseHeading opens each one; PhaseBar follows the client down the page and jumps between them.
-const PHASES=[['Personal info','المعلومات الشخصية'],['Event info','معلومات الفعالية'],['DJ Khalil Service','خدمة دي جي خليل'],['Services info','معلومات الخدمات'],['Additional info','معلومات إضافية']];
+const PHASES=[['Personal info','المعلومات الشخصية'],['Event info','معلومات الفعالية'],['DJ Khalil Service','خدمة دي جي خليل'],['Rental equipments for other services','معدات التأجير للخدمات الأخرى'],['Additional info','معلومات إضافية']];
 
 export function PhaseHeading({n,ar=false}){
  const [en,arabic]=PHASES[n-1];

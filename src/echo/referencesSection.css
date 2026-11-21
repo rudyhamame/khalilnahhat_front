@@ -37,3 +37,13 @@
 .ref-items.is-grid textarea{min-height:44px;padding:8px 10px;font-size:13px}
 .ref-items.is-grid .ref-x{position:absolute;top:8px;inset-inline-end:8px;width:28px;height:28px;border-color:#ffffff40;background:#0b1315cc;color:#eef4ef;backdrop-filter:blur(4px)}
 html body .echo[data-page=home][data-theme] .ref-items.is-grid textarea{font:400 13px/1.4 'Manrope','Noto Sans Arabic',sans-serif!important;min-height:40px}
+
+/* Index badge at the end of each attachment block title. */
+.ref-block h4>.ysf-order{margin-inline:auto 0;order:2}
+
+/* Same badge as everywhere else (gold pill, upright digits), at the end of the block / card title. */
+html body .echo[data-page=home][data-theme] :is(.ref-block h4,.booking-card-title)>.ysf-order{display:inline-block;flex:none;margin-inline:auto 0;order:2;padding:2px 6px;border-radius:6px;background:#e3d3a31a;color:#e3d3a3;font:700 11px/1.4 'Manrope',sans-serif;font-style:normal;letter-spacing:.04em;font-variant-numeric:tabular-nums}
+html body .echo[data-page=home][data-theme] #additional-notes .booking-card-title{display:flex;align-items:center;gap:10px}
+
+.setup-notes-card>label{display:flex;align-items:center;gap:6px}
+html body .echo[data-page=home][data-theme] .setup-notes-card>label>.ysf-order{display:inline-block;flex:none;margin-inline:auto 0;order:2;padding:2px 6px;border-radius:6px;background:#e3d3a31a;color:#e3d3a3;font:700 11px/1.4 'Manrope',sans-serif;font-style:normal;letter-spacing:.04em;font-variant-numeric:tabular-nums}

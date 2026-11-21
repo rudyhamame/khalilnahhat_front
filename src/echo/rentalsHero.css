@@ -1,6 +1,36 @@
 /* DJ Khalil service step (03.01): same step layout and card as the earlier steps (see BookingStep). Only the photo and the inline music preferences are specific to it. */
-.dj-service-step .rentals-hero-form{box-sizing:border-box;width:100%;height:min(720px,calc(100svh - 140px));min-height:460px;min-width:0;display:flex;margin-top:20px;padding:0}
-html body .dj-service-step .rentals-hero-form .djf{background:none!important;background-image:none!important;border:0!important;box-shadow:none!important;border-radius:0;padding:0!important;backdrop-filter:none}
+.dj-prefs-section .rentals-hero-form{height:min(760px,calc(100svh - 140px));min-height:480px;display:flex}
+html body .dj-prefs-section .rentals-hero-form .djf{background:none!important;background-image:none!important;border:0!important;box-shadow:none!important;border-radius:0;padding:0!important;backdrop-filter:none}
 .dj-service-step .dj-choice{margin-bottom:4px}
 /* Hero image of the DJ Khalil Service step: wide banner above the step, same width as the step. */
 .dj-service-hero{display:block;box-sizing:border-box;width:100%;max-width:1280px;height:clamp(220px,34vw,460px);margin:16px auto 0;border-radius:24px;object-fit:cover;object-position:50% 28%;background:#0b1315;box-shadow:0 16px 48px #0003;user-select:none;-webkit-user-drag:none}
+
+/* The music preferences are their own full-width section under the choice step: the data rows first, then the editor. */
+.dj-prefs-section{box-sizing:border-box;display:grid;gap:clamp(18px,2.4vw,32px);width:100%;max-width:1280px;margin:clamp(24px,3vw,40px) auto 0}
+/* Two separate cards: the data rows, then the editor. */
+.dj-prefs-card{box-sizing:border-box;min-width:0;padding:clamp(20px,2.4vw,32px);border:1px solid #c3dfcd26;border-radius:24px;background:linear-gradient(145deg,#182221b3,#0b1315b3);box-shadow:0 16px 48px #0002}
+.dj-prefs-section .dj-data-rows{margin:0}
+.dj-prefs-section .dj-data-rows>div{display:grid;grid-template-columns:minmax(190px,.8fr) minmax(0,1.6fr) auto;align-items:center;gap:16px;padding:12px 0;border-bottom:1px dashed #ffffff14}
+.dj-prefs-section .dj-data-rows>div:last-child{border-bottom:0}
+.dj-prefs-section .dj-data-rows dt{display:flex;align-items:baseline;gap:6px;min-width:0;color:#9fb5a8;font-size:13px}
+.dj-prefs-section .dj-data-rows dd{margin:0;color:#f3f8f4;font-size:15px;font-weight:600;overflow-wrap:anywhere}
+.dj-prefs-section .dj-data-rows>div[data-empty] dd{color:#7f9189;font-weight:400;font-style:italic}
+@media(max-width:560px){.dj-prefs-section .dj-data-rows>div{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"label edit" "value edit";row-gap:2px}.dj-prefs-section .dj-data-rows dt{grid-area:label}.dj-prefs-section .dj-data-rows dd{grid-area:value}.dj-prefs-section .dj-data-rows .booking-journey-edit{grid-area:edit}}
+
+/* No tabs: each section is its own card, stacked. The editor wrapper is no longer a card or a fixed-height box itself. */
+.dj-prefs-section .dj-prefs-card.rentals-hero-form{height:auto;min-height:0;display:block;padding:0;border:0;background:none;box-shadow:none}
+.djf-cards{display:grid;gap:clamp(18px,2.4vw,32px)}
+html body .dj-prefs-section .djf-cards>.djf-card{box-sizing:border-box;min-width:0;max-height:none;height:auto;overflow:visible;padding:clamp(20px,2.4vw,32px);border:1px solid #c3dfcd26;border-radius:24px;background:linear-gradient(145deg,#182221b3,#0b1315b3);box-shadow:0 16px 48px #0002;scroll-margin-top:calc(var(--echo-header-overlay-height,96px) + 56px)}
+/* Long lists scroll inside their card, so every card stays a sensible height. */
+html body .dj-prefs-section .djf-cards :is(.djf-genre-grid,.djf-influences-grid){max-height:min(520px,60svh);overflow-y:auto;padding-right:6px;scrollbar-width:thin;align-content:start}
+html body .dj-prefs-section .djf-cards .djf-scroll{max-height:min(320px,45svh);overflow-y:auto}
+html body .dj-prefs-section .rentals-hero-form .djf.djf{height:auto;min-height:0;overflow:visible}
+html body .dj-prefs-section .rentals-hero-form .djf.djf .djf-body{flex:none;height:auto;min-height:0;overflow:visible}
+html body .dj-prefs-section .rentals-hero-form .djf.djf .djf-main-card{flex:none;min-height:0}
+html body .dj-prefs-section .rentals-hero-form .djf.djf .djf-head{margin-bottom:clamp(16px,2vw,24px)}
+
+/* Each editor section is a standard step (number + title + paragraph beside its card), with no card of its own around the content. */
+.djf-cards{display:block}
+.dj-prefs-section .djf-step{padding-block:clamp(24px,3vw,44px)}
+.dj-prefs-section .djf-card-body{display:grid;gap:14px;min-width:0}
+.dj-prefs-section .djf-card-action{display:flex;flex-wrap:wrap;gap:8px}
