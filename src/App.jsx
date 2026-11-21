@@ -41,9 +41,14 @@ import SessionExpiredNotice from './echo/SessionExpiredNotice';
 import './echo/echo.css';
 import { archiveAssetMap, siteData } from './data/siteData';
 
-const AdminPage = lazy(() => import('./components/AdminPage'));
-const DashboardPage = lazy(() => import('./components/DashboardPage'));
-const LoginPage = lazy(() => import('./components/LoginPage'));
+const loadAdmin = () => import('./components/AdminPage');
+const loadDashboard = () => import('./components/DashboardPage');
+const loadLogin = () => import('./components/LoginPage');
+const AdminPage = lazy(loadAdmin);
+const DashboardPage = lazy(loadDashboard);
+const LoginPage = lazy(loadLogin);
+// A signed-in user's next page is one of these: fetch them in the browser's idle time so moving between pages never waits on (and blanks the screen for) a chunk download.
+const prefetchPages = () => { loadAdmin(); loadDashboard(); loadLogin(); };
 const BookingSignupPage = lazy(() => import('./components/BookingSignupPage'));
 
 const AUTH_TOKEN_STORAGE_KEY = 'khalil-auth-token';
@@ -125,6 +130,7 @@ function App() {
   const [servicePrices, setServicePrices] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [isSessionReady, setIsSessionReady] = useState(false);
+  useEffect(() => { const idle = window.requestIdleCallback || (callback => setTimeout(callback, 1500)); const handle = idle(prefetchPages); return () => (window.cancelIdleCallback || clearTimeout)(handle); }, []);
 
   useEffect(() => {
     document.documentElement.dataset.echoRoute=routePath;
