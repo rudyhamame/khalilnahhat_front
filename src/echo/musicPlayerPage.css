@@ -281,7 +281,6 @@ html body .echo.echo-public-page[data-page=home][data-theme] #echo-main>section.
 .wp-card>.wp-deck>.wp-top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center}
 .wp-card>.wp-deck>.wp-top>:first-child{justify-self:start}
 .wp-card>.wp-deck>.wp-top>.wp-badge{grid-column:2}
-.wp-card>.wp-deck>.wp-top>:is(.wp-icon,a.wp-icon):last-child{grid-column:3;justify-self:end}
 .wp-card>.wp-deck>.wp-top>.wp-badge-hint,.wp-card>.wp-deck>.wp-top>.wp-back-hint{grid-column:1/-1}
 
 /* The mixer layover sits over the live party lighting; the lights are its background and the controls stay above them. */
@@ -293,3 +292,4 @@ html body .echo.echo-public-page[data-page=home][data-theme] #echo-main>section.
 .wp-card>.wp-deck>.wp-top>.wp-badge{grid-column:3;grid-row:1;justify-self:end}
 .wp-card>.wp-deck>.wp-top>:is(.wp-icon,a.wp-icon){grid-column:1;justify-self:start;grid-row:1}
 .wp-card>.wp-deck>.wp-top>:is(.wp-badge-hint,.wp-back-hint){grid-row:2}
+.wp-transport .wp-stop{width:48px;height:48px;border-radius:50%;background:linear-gradient(160deg,#fff,#c9cdcb);color:#0b0d0e;box-shadow:0 6px 18px #0008}.wp-transport .wp-stop:disabled{opacity:.35}

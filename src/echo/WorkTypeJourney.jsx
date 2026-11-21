@@ -73,12 +73,12 @@ export default function WorkTypeJourney({ar,workTypes,renderCard:renderWorkCard,
    const {name,details}=djWorkTypeText(work,ar);
    return <section key={work.id} data-work={work.id} data-tone={index%6} id={index===0?'work-story-first':`work-story-${work.id.toLowerCase()}`} className={`work-story${index%2?' is-card-right':''}${(playing||reelPlaying)&&activeType===work.id?' is-playing':''}${entered.current.has(work.id)?' is-box-entered':''}`} aria-labelledby={`work-story-title-${work.id}`}>
     <div className="work-story-card-slot"><div className="work-story-card">{renderCard(work,index)}</div></div>
-    <a className="work-story-listen is-under-box" href="#work-journey-top">{ar?'العودة إلى الأعلى':'Back to top'}<ArrowUp size={18}/></a>
+    {activeType!==work.id&&<a className="work-story-listen is-under-box" href="#work-journey-top">{ar?'العودة إلى الأعلى':'Back to top'}<ArrowUp size={18}/></a>}
     <div className="work-story-copy" id={`work-story-copy-${work.id}`}><div className="work-story-copy-inner">
      <span className="work-story-number">{String(index+1).padStart(2,'0')} / {name}</span>
      <h3 id={`work-story-title-${work.id}`}>{name}</h3>
      {details&&<p id={`work-story-description-${work.id}`}>{details}</p>}
-     <a className="work-story-listen" href="#work-journey-top">{ar?'العودة إلى الأعلى':'Back to top'}<ArrowUp size={18}/></a>
+     {activeType!==work.id&&<a className="work-story-listen" href="#work-journey-top">{ar?'العودة إلى الأعلى':'Back to top'}<ArrowUp size={18}/></a>}
     </div></div>
    </section>;
   })}</div>

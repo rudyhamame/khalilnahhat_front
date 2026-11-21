@@ -2,7 +2,9 @@
 .booking-phase span{display:block;color:#d9b46e;font-size:12px;font-weight:700;letter-spacing:.18em}
 .booking-phase h2{margin:6px 0 0;color:#f4f7f3;font:700 clamp(30px,4.4vw,56px)/1.1 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:.04em}
 .phase-bar{position:fixed;z-index:30;inset-inline:0;top:10px;display:flex;justify-content:center;gap:6px;padding:0 12px;pointer-events:none;opacity:0;transform:translateY(-8px);transition:opacity .25s,transform .25s}
-.phase-bar.is-shown{opacity:1;transform:none}
+.phase-bar{visibility:hidden;transition:opacity .25s,transform .25s,visibility 0s .25s}
+.phase-bar:not(.is-shown) button{pointer-events:none}
+.phase-bar.is-shown{opacity:1;transform:none;visibility:visible;transition-delay:0s}
 .phase-bar button{pointer-events:auto;display:inline-flex;align-items:center;gap:7px;min-height:34px;padding:0 12px;border:1px solid #ffffff2e;border-radius:999px;background:#0c1417d9;color:#c9d3cd;font:600 13px/1 'Manrope','Noto Sans Arabic',sans-serif;cursor:pointer;backdrop-filter:blur(6px)}
 .phase-bar button b{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#ffffff1f;font-size:12px}
 .phase-bar button.is-active{border-color:#d9b46e;color:#fff;background:#d9b46e26}
