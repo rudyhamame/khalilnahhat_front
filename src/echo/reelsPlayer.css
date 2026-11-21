@@ -80,3 +80,5 @@
 .reels-controls .reels-controls-row .reels-play{width:38px!important;height:38px!important}
 .reels-controls .reels-sound{width:auto}
 .reels-player-caption{text-align:center!important;justify-items:center}.reels-player-caption strong{text-align:center}
+.reels-player-caption{inset:auto 0 0!important;padding:10px 14px 12px!important;background:linear-gradient(transparent,#000a)!important}
+.reels-player .reels-controls{inset:auto 10px 44px}

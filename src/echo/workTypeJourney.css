@@ -230,7 +230,7 @@ html body .echo .work-type-journey .work-journey-overview.home-work-showcase{hei
 }
 
 /* The cue is only an animated arrow, bottom right of the first screen. */
-.work-type-journey .work-journey-scroll{left:auto;right:max(16px,env(safe-area-inset-right,0px));bottom:max(12px,env(safe-area-inset-bottom,0px));margin:0;padding:20px}
+.work-type-journey .work-journey-scroll{left:0;right:0;margin-inline:auto;bottom:max(12px,env(safe-area-inset-bottom,0px));padding:20px}
 
 /* Native scrolling only: the browser scrolls the page (smoothly for anchors); no script moves or locks it. */
 html:has(.work-type-journey){scroll-behavior:smooth}
