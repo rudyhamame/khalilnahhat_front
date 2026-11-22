@@ -145,3 +145,75 @@
 .pp-field,.pp-lines legend,.pp-note,.pp-editor small{font-size:12px}
 .pp-fee,.pp-factor-name{font-size:13px}
 .pp .pp-actions button{font-size:14px}
+
+/* Set price is a pop-up opened by the button beside the search. */
+.pp{grid-template-columns:minmax(0,1fr)}
+.pp-dialog{width:min(560px,calc(100vw - 24px));max-height:calc(100dvh - 48px);padding:0;border:1px solid var(--aw-line);background:var(--aw-sidebar);color:var(--aw-text);overflow:auto}
+.pp-dialog::backdrop{background:#000a}
+.pp-dialog .pp-editor{border:0;padding:22px;max-height:none}
+.pp-dialog .pp-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:560px){.pp-dialog .pp-grid{grid-template-columns:1fr}}
+/* Equipment / Service tabs: centred, no line under them. */
+.pp-tabs{justify-content:center;border-bottom:0}
+/* Search prices: same height and radius as the Set price button, no native search chrome, clear icon that matches. */
+.pe-header .pp-search{flex:1 1 220px;max-width:340px}
+.pe-header .pp-search input[type=search]{appearance:none;-webkit-appearance:none;box-sizing:border-box;width:100%;min-height:38px;padding-block:0;padding-inline:36px 12px;border:1px solid var(--aw-line);border-radius:8px;background:var(--aw-sidebar);color:var(--aw-text);font:inherit;font-size:14px}
+.pe-header .pp-search input[type=search]:hover{border-color:color-mix(in srgb,var(--aw-text) 30%,transparent)}
+.pe-header .pp-search input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none;appearance:none;height:14px;width:14px;margin-inline-start:8px;cursor:pointer;background:currentColor;opacity:.6;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M5 5l14 14M19 5L5 19'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M5 5l14 14M19 5L5 19'/%3E%3C/svg%3E") center/contain no-repeat}
+.pe-header .pp-search input[type=search]::-webkit-search-cancel-button:hover{opacity:1}
+@media(max-width:700px){.pe-header .pp-search{max-width:none}}
+/* Centre the pop-up in the viewport, whatever resets other dialogs get. */
+.pp .pp-dialog[open]{position:fixed;inset:0;margin:auto;height:fit-content;max-width:calc(100vw - 24px)}
+
+/* Set price pop-up: header with close, segmented tabs, roomy labelled fields, actions pinned at the end. */
+.pp-dialog{border-radius:12px;box-shadow:0 24px 80px #000a}
+.pp-dialog .pp-editor{gap:18px;padding:0}
+.pp-editor-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:22px 24px 0}
+.pp-editor-head h3{margin:0;font-size:18px;font-weight:600}
+.pp-editor-head p{margin:4px 0 0;font-size:13px;color:var(--aw-muted)}
+.pp .pp-close{display:grid;place-items:center;flex:none;width:34px;height:34px;min-height:34px;padding:0;border:1px solid var(--aw-line);border-radius:50%;background:none;color:var(--aw-muted);cursor:pointer}
+.pp .pp-close:hover{background:var(--aw-hover);color:var(--aw-text)}
+.pp-dialog .pp-tabs{justify-self:center;gap:2px;padding:3px;border:1px solid var(--aw-line);border-radius:10px;background:var(--aw-main)}
+.pp .pp-dialog .pp-tabs button{min-height:32px;padding:0 20px;border:0;border-radius:7px;font-size:14px}
+.pp .pp-dialog .pp-tabs button[aria-selected=true]{background:var(--aw-raised);color:var(--aw-text);box-shadow:0 1px 3px #0003}
+.pp-dialog .pp-grid{padding:0 24px;gap:16px}
+.pp-dialog .pp-field{display:grid;gap:6px}
+.pp-dialog .pp-field>span{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--aw-muted)}
+.pp-dialog .pp-field :is(input,select){min-height:40px;width:100%;box-sizing:border-box;padding:0 12px;border:1px solid var(--aw-line);border-radius:8px;background:var(--aw-main);color:var(--aw-text);font:inherit;font-size:14px}
+.pp-dialog .pp-field :is(input,select):focus{outline:0;border-color:var(--aw-muted);box-shadow:0 0 0 3px color-mix(in srgb,var(--aw-text) 12%,transparent)}
+.pp-dialog .pp-note{margin:0 24px}
+.pp-dialog .pp-actions{display:flex;justify-content:flex-end;gap:10px;margin:0;padding:16px 24px;border-top:1px solid var(--aw-line);background:var(--aw-main)}
+.pp-dialog .pp-actions button{min-height:38px;padding:0 18px;border-radius:8px}
+.pp-dialog .pp-actions .pp-primary{order:2;font-weight:600}
+/* Row actions: a real table cell (not flex), two equal round icon buttons with hover and a red delete. */
+.pp td.pp-row-actions{display:table-cell;width:1%;white-space:nowrap;text-align:end;vertical-align:middle}
+.pp .pp-row-actions .pp-icon{display:inline-grid;place-items:center;box-sizing:border-box;width:32px;height:32px;min-height:32px;padding:0;margin-inline-start:6px;border:1px solid var(--aw-line);border-radius:50%;background:none;color:var(--aw-muted);cursor:pointer;vertical-align:middle;transition:background .15s,color .15s,border-color .15s}
+.pp .pp-row-actions .pp-icon:hover:not(:disabled){background:var(--aw-hover);color:var(--aw-text);border-color:var(--aw-muted)}
+.pp .pp-row-actions .pp-icon:last-child:hover:not(:disabled){background:#bf6a6214;color:#f0a49d;border-color:#bf6a62}
+.pp .pp-row-actions .pp-icon:focus-visible{outline:2px solid var(--aw-text);outline-offset:2px}
+.pp .pp-row-actions .pp-icon:disabled{opacity:.4;cursor:not-allowed}
+.pe-header .pp-tools .pp-primary{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;border:1px solid var(--aw-text);background:var(--aw-text);color:var(--aw-main);cursor:pointer}
+/* Set price: the page's main action, a bright accent button with a plus. */
+.pe-header .pp-tools .pp-primary{gap:8px;min-height:40px;padding:0 22px;border:0;border-radius:10px;background:linear-gradient(135deg,#f0d9a0,#e3c184 55%,#d4a85f);color:#2a1f0a;font-size:14px;font-weight:700;letter-spacing:.02em;box-shadow:0 4px 18px #e3c18455,inset 0 1px 0 #fff6;transition:transform .15s,box-shadow .15s,filter .15s}
+.pe-header .pp-tools .pp-primary::before{content:"+";font-size:20px;font-weight:500;line-height:1;margin-top:-2px}
+.pe-header .pp-tools .pp-primary:hover:not(:disabled){opacity:1;filter:brightness(1.06);transform:translateY(-1px);box-shadow:0 8px 24px #e3c18466,inset 0 1px 0 #fff6}
+.pe-header .pp-tools .pp-primary:active{transform:none}
+.pe-header .pp-tools .pp-primary:focus-visible{outline:2px solid #fff;outline-offset:3px}
+/* Settings: a labelled pill that stands out next to the Set price button. */
+.pe-header .pe-settings-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;box-sizing:border-box;width:auto;min-height:40px;padding:0 18px;border:1px solid color-mix(in srgb,var(--aw-text) 40%,transparent);border-radius:10px;background:color-mix(in srgb,var(--aw-text) 8%,transparent);color:var(--aw-text);font:600 14px/1 inherit;cursor:pointer;white-space:nowrap;transition:background .15s,border-color .15s,transform .15s}
+.pe-header .pe-settings-btn:hover{background:color-mix(in srgb,var(--aw-text) 16%,transparent);border-color:var(--aw-text);transform:translateY(-1px)}
+.pe-header .pe-settings-btn[aria-pressed=true]{background:var(--aw-text);color:var(--aw-main);border-color:var(--aw-text)}
+.pe-header .pe-settings-btn:focus-visible{outline:2px solid var(--aw-text);outline-offset:3px}
+@media(max-width:560px){.pe-header .pe-settings-btn span{display:none}.pe-header .pe-settings-btn{padding:0 12px}}
+
+/* Fee categories: any number of rows, each a category with its own price. */
+.pp-dialog .pp-fees{display:grid;gap:10px;margin:0 24px;padding:14px;border:1px solid var(--aw-line);border-radius:10px;min-width:0}
+.pp-fees legend{padding:0 6px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--aw-muted)}
+.pp-fees legend small{text-transform:none;letter-spacing:0;margin-inline-start:6px}
+.pp-fee-row{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(90px,.8fr) 34px;gap:8px;align-items:center}
+.pp-dialog .pp-fee-row :is(input,select){min-height:40px;width:100%;box-sizing:border-box;padding:0 12px;border:1px solid var(--aw-line);border-radius:8px;background:var(--aw-main);color:var(--aw-text);font:inherit;font-size:14px}
+.pp .pp-fee-remove,.pp-dialog .pp-fee-remove{display:grid;place-items:center;width:34px;height:34px;min-height:34px;padding:0;border:1px solid var(--aw-line);border-radius:50%;background:none;color:var(--aw-muted);cursor:pointer}
+.pp-dialog .pp-fee-remove:hover{background:#bf6a6214;color:#f0a49d;border-color:#bf6a62}
+.pp-dialog .pp-fee-add{justify-self:start;min-height:34px;padding:0 14px;border:1px dashed var(--aw-muted);border-radius:8px;background:none;color:var(--aw-text);font:inherit;font-size:13px;cursor:pointer}
+.pp-dialog .pp-fee-add:hover{border-style:solid;background:var(--aw-hover)}
+td.pp-fee-cell span{display:block;white-space:nowrap}td.pp-fee-cell b{font-weight:600;margin-inline-start:4px}

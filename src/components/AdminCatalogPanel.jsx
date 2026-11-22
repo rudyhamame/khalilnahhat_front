@@ -1,7 +1,7 @@
 import {notifyCatalogChanged} from '../lib/catalogChanges';
 import Equipment3DGenerator from './Equipment3DGenerator';
 import {equipmentSetMemberships,isEquipmentSet} from './equipmentSets';
-import {buildTreeNodes,withServiceIds,DJ_ID,MC_ID,equipmentInService} from '../lib/treeCore';
+import {withServiceIds,equipmentInService} from '../lib/treeCore';
 import CatalogEntryManager from './CatalogEntryManager';
 import NumberInput from './NumberInput';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -109,8 +109,6 @@ function EquipmentEditor({ item, services, token, reload, report, onSelect, onDr
 
 // What the booking expects to find: the DJ and MC services (matched by id). The booking does not need any specific equipment ids.
 // Anything of these that is not in the catalogue shows in the tree under "To add".
-const EXPECTED_SERVICES = [[DJ_ID, ''], [MC_ID, '']];
-const EXPECTED_EQUIPMENT = [];
 export default function AdminCatalogPanel({ token, mode = 'catalog' }) {
   const [equipment, setEquipment] = useState([]);
   const [prices, setPrices] = useState([]);
@@ -125,9 +123,6 @@ export default function AdminCatalogPanel({ token, mode = 'catalog' }) {
   const [selectedEvent,setSelectedEvent]=useState('');
   const [draft, setDraft] = useState(null);
   const [eqOpen,setEqOpen]=useState(false),[reading,setReading]=useState(null);
-  // Ids of removed services and equipment (they keep only an id marker), listed at the end of the tree.
-  const [removed,setRemoved]=useState({items:[],equipment:[]});
-  useEffect(()=>{if(mode==='events')return undefined;let alive=true;apiRequest('/admin/setup-catalog/deleted',{token}).then(data=>{if(alive)setRemoved({items:data.items||[],equipment:data.equipment||[]});}).catch(()=>{});return()=>{alive=false;};},[mode,token,catalog.length,equipment.length]);
   // Escape closes the read popup.
   useEffect(()=>{if(!reading)return undefined;const key=event=>{if(event.key==='Escape')setReading(null);};window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key);},[reading]);
   const selectEquipment=id=>{setSelectedEvent(id);setEqOpen(Boolean(id));};
@@ -197,16 +192,6 @@ export default function AdminCatalogPanel({ token, mode = 'catalog' }) {
     .flatMap((group) => group.items.filter((item) => !isEquipmentSet(item)).map((item) => ({ ...item, serviceName: group.name })))
     .filter((item) => (!needle || `${item.name} ${item.brandModel || ''} ${(setMemberships.get(item.id)||[]).map(set=>set.name).join(' ')}`.toLowerCase().includes(needle)));
   const eqSubtabs = <div className="cat-subtabs" aria-label="Equipment"><label className="cat-search"><Search size={15} aria-hidden="true" /><input type="search" placeholder="Search equipment" value={query} onChange={(event) => setQuery(event.target.value)} aria-label="Search equipment" /></label><span className="cat-subtab-actions"><button type="button" className="is-primary" onClick={() => {setSelectedEvent('');setEqOpen(true);}}><Plus size={15} />Add equipment</button></span></div>;
-  // Expected services/equipment that are missing, with their missing equipment under them.
-  const toAdd = (() => {
-    const haveService = new Set(catalog.filter((row) => row.kind === 'service').map((row) => row.id)), haveEquipment = new Set(equipment.map((row) => row.id));
-    const missingEq = EXPECTED_EQUIPMENT.filter(([id]) => !haveEquipment.has(id));
-    const rows = EXPECTED_SERVICES.filter(([id]) => !haveService.has(id)).map(([id, name]) => ({ id, name, equipment: missingEq.filter(([, , service]) => service === id).map(([eid, ename]) => ({ id: eid, name: ename })) }));
-    const orphans = missingEq.filter(([, , service]) => haveService.has(service));
-    return orphans.length ? [...rows, { id: 'equipment', equipment: orphans.map(([eid, ename]) => ({ id: eid, name: ename })) }] : rows;
-  })();
-  // The same tree the booking is built from (lib/treeCore.js): live services with their equipment, removed ids in their old place.
-  const { nodes: treeNodes, orphans: orphanRemoved } = buildTreeNodes({ services: groups.filter((group) => group.id !== '__new'), equipment: liveEquipment, removed, otherId: 'other' });
   const tabs = [['events', 'Events', CalendarDays, events.length], ['services', 'Services', Layers, serviceGroups.length], ['equipment', 'Equipment', Package, equipment.length]].filter(([id]) => (id === 'events') === (mode === 'events'));
 
   return <section ref={root} className={`admin-catalog${tab === 'pricing' ? '' : ' has-event-editor'}${mode !== 'events' ? ' is-service-tab' : ''}`} aria-label={mode === 'events' ? 'Events' : 'Services and equipment'}>
@@ -225,19 +210,6 @@ export default function AdminCatalogPanel({ token, mode = 'catalog' }) {
     {/* The event editor lives outside the page content: a full-height column that starts at the very top. */}
     {tab === 'events' || mode !== 'events' ? <CatalogEntryManager onDraft={setDraft} key={mode} ref={eventManager} inline startClosed={mode !== 'events'} kind={mode === 'events' ? 'event' : 'service'} hideList renderPrice={(entry) => <PriceEditor key={entry.priceId} label={entry.name} price={prices.find((price) => price.id === entry.priceId)} token={token} onSaved={load} report={report} />} items={catalog} equipment={equipment} token={token} onSaved={load} report={report} onSelectionChange={setSelectedEvent}/> : null}
     {tab === 'equipment' ? (eqOpen ? <EquipmentEditor onDraft={setDraft} key={selectedEvent || 'new'} item={equipment.find((entry) => entry.id === selectedEvent)} services={serviceGroups} token={token} reload={load} report={report} onSelect={() => { setSelectedEvent(''); setEqOpen(false); }} /> : null) : null}
-    {mode !== 'events' ? <aside className="cat-id-tree" aria-label="Services and equipment IDs">
-      <header><h3>Services &amp; equipment</h3><span>Services &amp; equipment IDs</span></header>
-      {/* A deleted service or equipment keeps its id and its place here as a "removed" node; the booking page hides it. */}
-      <ul>{treeNodes.map((node) => <li key={node.id} className={node.removed ? 'is-removed' : undefined}>
-        <div className="cat-tree-service">{node.removed ? null : <strong>{node.name}</strong>}<code>{node.id}</code>{node.removed ? <em>removed</em> : <b>{node.items.length}</b>}</div>
-        {node.items.length || node.removedItems.length ? <ul>{node.items.map((item) => <li key={item.id} className="cat-tree-item"><span>{item.name}</span><code>{item.id}</code></li>)}{node.removedItems.map((row) => <li key={'r' + row.id} className="cat-tree-item is-removed"><code>{row.id}</code><em>removed</em></li>)}</ul> : <p className="cat-tree-empty">No equipment</p>}
-      </li>)}</ul>
-      {toAdd.length ? <section className="cat-tree-toadd" aria-label="To add"><h4>To add <small>recognised by the booking</small></h4>
-        <ul>{toAdd.map((row) => <li key={row.id}><div className="cat-tree-service"><code>{row.id}</code></div>
-          {row.equipment.length ? <ul>{row.equipment.map((item) => <li key={item.id} className="cat-tree-item"><code>{item.id}</code></li>)}</ul> : null}</li>)}</ul></section> : null}
-      {orphanRemoved.length ? <section className="cat-tree-removed" aria-label="Removed equipment ids"><h4>Removed</h4>
-        <ul>{orphanRemoved.map((row) => <li key={'e' + row.id}><code>{row.id}</code></li>)}</ul></section> : null}
-    </aside> : null}
     <div className="cat-main">
 
     <div className="cat-bar">

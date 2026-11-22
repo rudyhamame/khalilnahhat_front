@@ -59,7 +59,7 @@ export default function ClientProfile({user,token,onSaved,onDeleted}){
     {!user?.isAdmin&&<div className="cw-danger-zone"><section className="cw-panel cw-account-delete" aria-labelledby="delete-account-title">
       <div><h2 id="delete-account-title">Delete account</h2><p>Permanently delete your profile, saved drafts and Echo conversations. Submitted bookings remain with the Echo team and are not cancelled.</p></div>
       {deletion.error&&<p role="alert" className="cw-profile-error">{deletion.error}</p>}
-      <button type="button" type="button" disabled={state.busy||emailBusy||deletion.busy} onClick={removeAccount}>{deletion.busy?'Deleting account…':'Delete account'}</button>
+      <button type="button" disabled={state.busy||emailBusy||deletion.busy} onClick={removeAccount}>{deletion.busy?'Deleting account…':'Delete account'}</button>
     </section></div>}
   </>;
 }
