@@ -30,10 +30,10 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  const {item:liveStream,loading,error,update}=useLiveStatus({token,admin:true,enabled,initial});
  const [previewAudioControlsTarget,setPreviewAudioControlsTarget]=useState(null);
  const [dismissedHint,setDismissedHint]=useState('');
- const [setListId,setSetListId]=useState('none');
+ const [setListId,setSetListId]=useState('');
  const [title,setTitle]=useState(''),[goalChoice,setGoalChoice]=useState(''),[detailsTried,setDetailsTried]=useState(false);
  const [cropSlot,setCropSlot]=useState(null),[hint,setHint]=useState('');
- const [audience,setAudience]=useState('all'),[audienceIds,setAudienceIds]=useState([]),[clientQuery,setClientQuery]=useState(''),[clientRows,setClientRows]=useState([]);
+ const [audience,setAudience]=useState('all'),priorAudience=useRef('all'),[audienceIds,setAudienceIds]=useState([]),[clientQuery,setClientQuery]=useState(''),[clientRows,setClientRows]=useState([]);
  useEffect(()=>{if(audience!=='specific')return undefined;const controller=new AbortController(),timer=setTimeout(()=>{apiRequest('/admin/clients?'+new URLSearchParams(clientQuery.trim()?{q:clientQuery.trim()}:{}),{token,signal:controller.signal}).then(data=>setClientRows((data.items||[]).filter(client=>!client.isAdmin))).catch(()=>{});},180);return()=>{clearTimeout(timer);controller.abort();};},[audience,clientQuery,token]);
  const ovhRecording=liveStream?.studio?.transport==='ovh';
  // Close the left (controls) and right (recording) columns to give the preview the whole width; remembered in this browser.
@@ -61,9 +61,9 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  const ready=async roomName=>{const result=await apiRequest('/live-stream/webrtc/ready',{method:'POST',token,body:{roomName}});apply(result.item);};
  const resume=()=>apiRequest('/live-stream/webrtc/resume',{method:'POST',token});
  const beforeGoLive=()=>{
-  if(!title.trim()||!goalChoice){
-   setDetailsTried(true);setSettingsTab('studio');setHint('Enter a session title and choose the live stream goal before going live.');
-   requestAnimationFrame(()=>document.querySelector(!title.trim()?'.studio-title input':'.live-goal-picker select')?.focus());
+  if(!title.trim()||!goalChoice||!setListId){
+   setDetailsTried(true);setSettingsTab('studio');setHint('Enter a session title, choose the live stream goal and select a set list before going live.');
+   requestAnimationFrame(()=>document.querySelector(!title.trim()?'.studio-title input':!goalChoice?'.live-goal-picker select':'.studio-set-list-picker select')?.focus());
    return false;
   }
   return true;
@@ -189,7 +189,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  <fieldset className="admin-live-settings studio-goal-fieldset" disabled={loading||Boolean(error)}>
   <LiveGoalPicker token={token} goal={goalChoice} onChange={apply} onPick={id=>{setGoalChoice(id);setDetailsTried(false);}} invalid={detailsTried&&!goalChoice}/>
  </fieldset>
- <LiveSetListPicker token={token} value={setListId} onChange={setSetListId} disabled={webrtc.isConnecting||reserved||isLiveOnAir}/>
+ <LiveSetListPicker invalid={detailsTried&&!setListId} token={token} value={setListId} onChange={setSetListId} disabled={webrtc.isConnecting||reserved||isLiveOnAir}/>
  </div></StudioControlSection>
  
 
@@ -197,12 +197,12 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
 
 
  <StudioControlSection step="02" title="Audience" description="Who can see and watch this live."><div className="aud">
-<label className="aud-row"><span className="aud-copy"><strong>This live session is test-only</strong><small>Hidden from guests and clients: no live badge, no playback, no live emails.</small></span><input className="aud-switch" type="checkbox" role="switch" aria-label="This live session is test-only" checked={(isLiveOnAir?(liveStream?.audience||'all'):audience)==='admins'} disabled={webrtc.isConnecting||reserved||isLiveOnAir} onChange={event=>setAudience(event.target.checked?'admins':'all')}/></label>
+<label className="aud-row"><span className="aud-copy"><strong>This live session is test-only</strong><small>Hidden from guests and clients: no live badge, no playback, no live emails.</small></span><input className="aud-switch" type="checkbox" role="switch" aria-label="This live session is test-only" checked={(isLiveOnAir?(liveStream?.audience||'all'):audience)==='admins'} disabled={webrtc.isConnecting||reserved||isLiveOnAir} onChange={event=>{if(event.target.checked){if(audience!=='admins')priorAudience.current=audience;setAudience('admins');}else setAudience(priorAudience.current);}}/></label>
    <div className="aud-row aud-select"><span className="aud-copy"><strong>Live session domain</strong><small>Who can see and watch this live.</small></span>
     <select className="aud-input" aria-label="Live session domain" value={isLiveOnAir?(liveStream?.audience||'all'):audience} disabled={webrtc.isConnecting||reserved||isLiveOnAir} onChange={event=>setAudience(event.target.value)}><option value="all">All (guests, clients, admins)</option><option value="admins">Admins only</option><option value="clients">Clients only (and admins)</option><option value="specific">Specific clients</option></select></div>
    {audience==='specific'&&!isLiveOnAir&&<div className="aud-clients"><input className="aud-input" type="search" placeholder="Search clients" aria-label="Search clients" value={clientQuery} onChange={event=>setClientQuery(event.target.value)}/>{audienceIds.length===0&&<small>Pick at least one client, or only admins will see this live.</small>}<ul>{clientRows.map(client=><li key={client.id}><label><input type="checkbox" checked={audienceIds.includes(client.id)} onChange={event=>setAudienceIds(ids=>event.target.checked?[...ids,client.id]:ids.filter(id=>id!==client.id))}/> {client.name||client.username} <small>{client.email}</small></label></li>)}</ul></div>}
  </div></StudioControlSection>
- <StudioControlSection step="03" title="OBS stream" description="Stream straight from OBS to the OVH relay. Prepare OBS, paste the server and token into OBS, then start streaming. No browser camera is used." className="studio-sources-card"><div className="studio-block"><ObsBroadcast token={token} title={title.trim()} item={liveStream} onUpdate={item=>{apply(item);}}/></div></StudioControlSection>
+ <StudioControlSection step="03" title="OBS stream" description="Stream straight from OBS to the OVH relay. Prepare OBS, paste the server and token into OBS, then start streaming. No browser camera is used." className="studio-sources-card"><div className="studio-block"><ObsBroadcast token={token} title={title.trim()} missing={[!title.trim()&&'a session title',!goalChoice&&'a live stream goal',!setListId&&'a set list'].filter(Boolean)} item={liveStream} onUpdate={item=>{apply(item);}}/></div></StudioControlSection>
  <fieldset className="admin-live-settings studio-source-settings" disabled={loading||Boolean(error)}>
   <div ref={setPreviewAudioControlsTarget} className="admin-preview-sound-slot"/>
  </fieldset>

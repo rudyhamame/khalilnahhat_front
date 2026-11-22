@@ -8,7 +8,7 @@ import {useEffect,useSyncExternalStore} from 'react';
 import {apiRequest,fetchEquipment} from './api.js';
 import {setTreeSteps,stepsOf,treeSteps,withServiceIds} from './treeCore.js';
 
-let tree={catalog:[],equipment:[],loading:true,failed:false,steps:treeSteps()},inFlight=null,queued=false;
+let tree={catalog:[],equipment:[],atomEidos:[],loading:true,failed:false,steps:treeSteps()},inFlight=null,queued=false;
 const listeners=new Set();
 
 const publish=next=>{tree=next;setTreeSteps(next.steps);listeners.forEach(listener=>listener());};
@@ -19,11 +19,11 @@ const publish=next=>{tree=next;setTreeSteps(next.steps);listeners.forEach(listen
 async function fetchTree(){
  try{
   const data=await apiRequest('/tree');
-  if(Array.isArray(data.catalog)&&Array.isArray(data.equipment)&&data.steps)return {catalog:data.catalog,equipment:data.equipment,steps:data.steps};
+  if(Array.isArray(data.catalog)&&Array.isArray(data.equipment)&&data.steps)return {catalog:data.catalog,equipment:data.equipment,steps:data.steps,atomEidos:data.atomEidos||[]};
  }catch{/* an older server: build the tree here */}
  const [catalog,equipment]=await Promise.all([apiRequest('/setup-catalog'),fetchEquipment()]);
  if(!Array.isArray(catalog.items)||!Array.isArray(equipment.items))throw new Error('Invalid rental catalog response');
- return {catalog:catalog.items,equipment:withServiceIds(catalog.items,equipment.items),steps:stepsOf(catalog.items)};
+ return {catalog:catalog.items,equipment:withServiceIds(catalog.items,equipment.items),steps:stepsOf(catalog.items),atomEidos:[]};
 }
 export function refreshTree(){
  if(inFlight){queued=true;return inFlight;}
@@ -57,4 +57,10 @@ export function useTreeService(id,ar=false){
 export function useTreeSteps(){
  const {loading,steps}=useTree();
  return {dj:!loading&&steps.dj,rental:!loading&&steps.rental};
+}
+
+// UI destinations read the atom's seed identity from Eden's snapshot.
+export function useTreeAtomIdentity(atomId){
+ const {atomEidos=[]}=useTree();
+ return atomEidos.find(link=>link.atomId===atomId)?.eidosId||null;
 }

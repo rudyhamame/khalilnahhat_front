@@ -1,5 +1,5 @@
 import {useEffect,useState} from 'react';
-import {useTreeService,useTreeSteps} from '../lib/tree';
+import {useTreeService,useTreeSteps,useTreeAtomIdentity} from '../lib/tree';
 import {fieldCode} from '../lib/eventPageModel';
 import './bookingPhases.css';
 
@@ -45,4 +45,4 @@ export function PhaseBar({ar=false}){
 }
 
 // The STEP.SEC.ATOM number in front of a form label (pass a field `k`, or a ready-made `code` for a whole section).
-export function FieldCode({k,code}){return <i className="ysf-order" aria-hidden="true">{code||fieldCode(k)}</i>;}
+export function FieldCode({k,code}){const eidosId=useTreeAtomIdentity(k);return <i className="ysf-order" aria-hidden="true" data-booking-atom={k} data-eidos-id={eidosId||undefined}>{code||fieldCode(k)}</i>;}

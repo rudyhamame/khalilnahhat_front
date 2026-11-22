@@ -4,6 +4,7 @@ import {apiRequest} from '../lib/api';
 import {buildTreeNodes,stepsOf,treeAtoms,withServiceIds} from '../lib/treeCore';
 import {loadWorkVocabulary} from '../lib/workVocabulary';
 import {fieldName} from '../lib/eventOrderCore.mjs';
+import {fieldCode} from '../lib/eventPageModel';
 import {useConceptMapNavigation} from '../echo/useConceptMapNavigation';
 import EidosAside from './EidosAside';
 import './adminTreeOfTruth.css';
@@ -18,7 +19,7 @@ function TreeNode({node,path,parent='root',branch,focus,selectedPath,onSelect}){
  return <div className={`tot-subtree${node.branch?' tot-branch tot-branch-'+node.branch:''}`}>
   <div className={`tot-node-card${node.branch?' tot-concept':''}${node.removed?' is-removed':''}${node.disabled?' is-off':''}${selectedPath===path?' is-selected':''}${(node.branch&&focus===node.branch)||(node.source&&focus===node.source)?' is-fed':''}`} data-node={path} data-parent={parent} data-branch={branch}>
    <button className="tot-node-select" type="button" onClick={()=>onSelect(path)} aria-pressed={selectedPath===path} aria-controls="tot-node-inspector">
-    {node.identityOnly?<code title={node.id}>{node.id}</code>:<><span className="tot-node-title">{Icon&&<Icon size={17}/>}<strong>{node.label}</strong></span>{node.id&&<code title={String(node.id)}>{node.id}</code>}{node.note&&<small>{node.note}</small>}</>}
+    {node.identityOnly?<code title={node.id}>{node.id}</code>:<><span className="tot-node-title">{Icon&&<Icon size={17}/>}<strong>{node.label}</strong></span>{node.id&&<code title={String(node.id)}>{node.id}</code>}{node.note&&<small>{node.note}</small>}{node.data?.eidosId&&<code className="tot-atom-seed" title={node.data.eidosId}>Eidos · {node.data.eidosId}</code>}</>}
    </button>
    {hasChildren&&<button type="button" className="tot-expand" aria-label={`${expanded?'Collapse':'Expand'} ${node.label}`} aria-expanded={expanded} onClick={()=>setExpanded(value=>!value)}>{node.children.length}<ChevronDown size={12}/></button>}
   </div>
@@ -117,7 +118,7 @@ function NodeInspector({selection,onSelect,onClear}){
 }
 
 export default function AdminTreeOfTruth({token}){
- const [data,setData]=useState(null),[vocab,setVocab]=useState(null),[error,setError]=useState(''),[focus,setFocus]=useState(''),[selectedPath,setSelectedPath]=useState(''),[eidos,setEidos]=useState([]),[mode,setMode]=useState('eidos');
+ const [data,setData]=useState(null),[vocab,setVocab]=useState(null),[error,setError]=useState(''),[focus,setFocus]=useState(''),[selectedPath,setSelectedPath]=useState(''),[eidos,setEidos]=useState([]),[bookingAtomSeeds,setBookingAtomSeeds]=useState([]),[mode,setMode]=useState('eidos');
  const load=useCallback(()=>Promise.all([
   apiRequest('/admin/setup-catalog',{token}),apiRequest('/equipment/admin',{token}),
   apiRequest('/admin/setup-catalog/deleted',{token}).catch(()=>({items:[],equipment:[]})),
@@ -126,6 +127,11 @@ export default function AdminTreeOfTruth({token}){
   .catch(failure=>setError(failure.message||'Could not load the tree.')),[token]);
  useEffect(()=>{if(mode!=='booking')return;load();loadWorkVocabulary().then(setVocab).catch(()=>setVocab({}));const changed=()=>load();window.addEventListener('echo:administrator-data-changed',changed);window.addEventListener('echo:setup-catalog-changed',changed);return()=>{window.removeEventListener('echo:administrator-data-changed',changed);window.removeEventListener('echo:setup-catalog-changed',changed);};},[load,mode]);
 
+ const atomBySeed=useMemo(()=>{
+  const active=new Set(eidos.map(item=>item.id));
+  return Object.fromEntries(bookingAtomSeeds.filter(link=>active.has(link.eidosId)).map(link=>[link.eidosId,{...link,label:fieldName(link.atomId)||link.atomId,code:fieldCode(link.atomId)}]));
+ },[bookingAtomSeeds,eidos]);
+ const seedByAtom=useMemo(()=>Object.fromEntries(Object.values(atomBySeed).map(link=>[link.atomId,link.eidosId])),[atomBySeed]);
  const view=useMemo(()=>{
   if(!data)return null;
   const services=data.catalog.filter(row=>row.kind==='service'),events=data.catalog.filter(row=>row.kind==='event'),equipment=withServiceIds(data.catalog,data.equipment),steps=stepsOf(data.catalog);
@@ -133,9 +139,9 @@ export default function AdminTreeOfTruth({token}){
   const priced=new Set(data.prices.map(price=>price.serviceId||price.id));
   const unpriced=services.filter(row=>!priced.has(row.priceId||'service-'+row.id)).map(row=>row.id);
   const atoms=new Map();
-  for(const atom of treeAtoms(steps)){if(!atoms.has(atom.step))atoms.set(atom.step,new Map());const bySection=atoms.get(atom.step);if(!bySection.has(atom.section))bySection.set(atom.section,[]);bySection.get(atom.section).push({...atom,name:fieldName(atom.id)||atom.id.split('.').pop()});}
+  for(const atom of treeAtoms(steps,{includeMetadata:true})){if(!atoms.has(atom.step))atoms.set(atom.step,new Map());const bySection=atoms.get(atom.step);if(!bySection.has(atom.section))bySection.set(atom.section,[]);bySection.get(atom.section).push({...atom,name:fieldName(atom.id)||atom.id.split('.').pop(),eidosId:seedByAtom[atom.id]||null});}
   return {services,events,equipment,steps,nodes,orphans,atoms,prices:data.prices,unpriced};
- },[data]);
+ },[data,seedByAtom]);
 
  const {steps,nodes,atoms,services,events,equipment,prices,unpriced}=view||{steps:stepsOf([]),nodes:[],atoms:new Map(),services:[],events:[],equipment:[],prices:[],unpriced:[]},music=vocab||{};
  const present=[true,true,steps.dj,steps.rental,true],allAtoms=[...atoms.values()].flatMap(sections=>[...sections.values()].flat());
@@ -144,7 +150,7 @@ export default function AdminTreeOfTruth({token}){
  const references=source=>allAtoms.filter(atom=>atom.branch===source).map(atom=>({id:atom.id,label:atom.name,note:`Step ${atom.step} · ${atom.code}`,source,data:atom}));
  const languageById=new Map((music.languages||[]).map(row=>[row.id,row.name]));
  const tree=[
-  {branch:'eidos',label:'Eidos',note:`${eidos.filter(item=>item.id!=='booking').length} identity seeds`,children:eidos.filter(item=>item.id!=='booking').map(item=>({key:item.id,id:item.id,label:'Eidos',data:{id:item.id,fourthGoal:item.fourthGoal||''}}))},
+  {branch:'eidos',label:'Eidos',note:`${eidos.filter(item=>item.id!=='booking').length} identity seeds`,children:eidos.filter(item=>item.id!=='booking').map(item=>({key:item.id,id:item.id,label:'Eidos',data:{id:item.id,fourthGoal:item.fourthGoal||'',...(atomBySeed[item.id]?{bookingAtom:atomBySeed[item.id]}:{})}}))},
   {branch:'services',label:'Services & equipment',note:`${services.length} services · ${equipment.length} equipment items`,children:[
    ...nodes.map(node=>({...leaf(node),data:data.catalog.find(row=>row.id===node.id)||node,removed:node.removed,note:node.removed?'Removed service':`${node.items.length} equipment items`,children:[...node.items.map(leaf),...node.removedItems.map(item=>({...leaf(item),removed:true,note:'Removed equipment'}))]})),
    ...(view?.orphans.length?[group('Removed equipment without a service',view.orphans.map(item=>({...leaf(item),removed:true})))]:[]),
@@ -162,7 +168,7 @@ export default function AdminTreeOfTruth({token}){
   {branch:'prices',label:'Prices',note:`${prices.length} price rows`,children:[group('Price rows',prices.map(price=>({...leaf(price),note:`${(Number(price.amountCents||0)/100).toFixed(2)} ${price.currency||'CAD'}`,children:[{label:'Linked catalogue ID',id:price.serviceId||price.equipmentId||price.id,data:data.catalog.find(row=>row.id===price.serviceId)||equipment.find(row=>row.id===price.equipmentId)}]}))),...(unpriced.length?[group('Services without a price row',unpriced.map(leaf))]:[]),{label:'Booking quotes',note:'Prices feed the quote'}]},
   {branch:'ai',label:'Echo AI',note:'Connected reader of the tree',children:[{label:'Available services',children:[{id:'dj',label:'DJ',note:steps.dj?'Offered':'Not offered'},{id:'rental',label:'Rental',note:steps.rental?'Offered':'Not offered'}]},group('Booking steps',STEP_NAMES.filter((_,index)=>present[index]).map(label=>({label}))),{label:'Client conversations',note:'Uses the tree to understand services and booking steps'}]},
  ];
- const displayTree=mode==='eidos'?eidos.filter(item=>item.id!=='booking').map(item=>({branch:item.id,key:item.id,id:item.id,label:item.id,identityOnly:true,data:{id:item.id,fourthGoal:item.fourthGoal||''}})):tree;
+ const displayTree=mode==='eidos'?eidos.filter(item=>item.id!=='booking').map(item=>({branch:item.id,key:item.id,id:item.id,label:item.id,identityOnly:true,data:{id:item.id,fourthGoal:item.fourthGoal||'',...(atomBySeed[item.id]?{bookingAtom:atomBySeed[item.id]}:{})}})):tree;
  const rootNode=mode==='eidos'?{label:'booking',id:'booking',data:{id:'booking',fourthGoal:eidos.find(item=>item.id==='booking')?.fourthGoal||''},children:displayTree}:{label:'Booking',id:'booking',data:{...eidos.find(item=>item.id==='booking'),services:services.length,equipment:equipment.length,eventTypes:events.length,priceRows:prices.length,dataAtoms:allAtoms.length,steps},children:tree};
  const resolveSelection=path=>{
   if(!path)return null;
@@ -184,7 +190,7 @@ export default function AdminTreeOfTruth({token}){
   if(next!==undefined){event.preventDefault();changeMode(MAP_MODES[next].id);document.getElementById(`tot-tab-${MAP_MODES[next].id}`)?.focus();}
  };
  return <section className="tot" aria-label="Eden of Eide concept map"><div className="tot-workbench">
-  <EidosAside onClear={()=>{setSelectedPath('');setFocus('');}} token={token} items={eidos} onItems={setEidos} selectedId={selectedPath==='root'?'booking':selection?.node.id} onSelect={item=>{setSelectedPath(item.id==='booking'?'root':mode==='eidos'?item.id:`eidos/${item.id}`);setFocus(item.id==='booking'?'':mode==='eidos'?item.id:'eidos');}}/>
+  <EidosAside atomBySeed={atomBySeed} onBookingAtoms={setBookingAtomSeeds} onClear={()=>{setSelectedPath('');setFocus('');}} token={token} items={eidos} onItems={setEidos} selectedId={selectedPath==='root'?'booking':selection?.node.id} onSelect={item=>{setSelectedPath(item.id==='booking'?'root':mode==='eidos'?item.id:`eidos/${item.id}`);setFocus(item.id==='booking'?'':mode==='eidos'?item.id:'eidos');}}/>
   <div className="tot-stage">
   <header className="tot-mode-header"><h1>Eden of Eide</h1><div role="tablist" aria-label="Concept map modes">{MAP_MODES.map((item,index)=><button key={item.id} id={`tot-tab-${item.id}`} type="button" role="tab" aria-selected={mode===item.id} aria-controls={`tot-panel-${item.id}`} tabIndex={mode===item.id?0:-1} onClick={()=>changeMode(item.id)} onKeyDown={event=>tabKeys(event,index)}>{item.label}</button>)}</div></header>
   <div className="tot-toolbar"><span>{selection?selection.node.label:'Select an item to view its data'}</span>{selection&&<button type="button" onClick={()=>{setFocus('');setSelectedPath('');}}><X size={13}/>Clear selection</button>}</div>

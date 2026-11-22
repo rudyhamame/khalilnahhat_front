@@ -58,8 +58,8 @@ export function atomSource(key){
 const stepOfAtom=key=>parseInt(fieldCode(key).slice(0,2),10);
 // A step is mounted only while its service id is in the tree; its atoms exist only then.
 export const stepMounted=(step,steps)=>(step!==3||steps.dj)&&(step!==4||steps.rental);
-export function treeAtoms(steps=treeSteps()){
- return ATOM_KEYS.filter(key=>!ATOM_SKIP.has(key)).map(key=>{
+export function treeAtoms(steps=treeSteps(),{includeMetadata=false}={}){
+ return ATOM_KEYS.filter(key=>includeMetadata||!ATOM_SKIP.has(key)).map(key=>{
   const code=fieldCode(key),step=stepOfAtom(key);
   return {id:key,code,step,section:code.split('.').slice(0,2).join('.'),...atomSource(key),mounted:stepMounted(step,steps)};
  });

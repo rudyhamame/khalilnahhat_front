@@ -4,21 +4,12 @@ import { apiRequest } from '../lib/api';
 import './obsBroadcast.css';
 import ObsQualityGuide from './ObsQualityGuide';
 
-export default function ObsBroadcast({ token, title, item, onUpdate }) {
+export default function ObsBroadcast({ token, title, item, onUpdate, missing = [] }) {
+  const detailsReady = !missing.length;
   const [busy, setBusy] = useState(false);
-  const [savingRecording, setSavingRecording] = useState(false);
   const [message, setMessage] = useState('');
   const [showKey, setShowKey] = useState(false);
   const obs = item?.obs;
-  const saveRecording = obs?.saveRecording !== false;
-  const changeRecording = async () => {
-    setSavingRecording(true); setMessage('');
-    try {
-      const result = await apiRequest('/live-stream/obs/recording', { token, method: 'PATCH', body: { saveRecording: !saveRecording } });
-      onUpdate(result.item);
-    } catch (error) { setMessage(error.message); }
-    finally { setSavingRecording(false); }
-  };
   const act = async () => {
     setBusy(true); setMessage(''); setShowKey(false);
     try {
@@ -48,11 +39,8 @@ export default function ObsBroadcast({ token, title, item, onUpdate }) {
   return <div className="obs-controls">
     <div className="obs-session-toolbar">
       {(obs?.roomName||obs?.state==='ending')&&<span className={`obs-status is-${obs?.state === 'live' ? 'live' : obs?.state === 'ending' ? 'waiting' : obs?.roomName ? 'waiting' : 'off'}`}><i aria-hidden="true" />{obs?.state === 'live' ? 'Receiving OBS · On air' : obs?.state === 'ending' ? 'Disconnecting OBS…' : obs?.roomName ? 'Waiting for OBS · Start within 2 minutes' : 'OBS disconnected'}</span>}
-      <div className="obs-recording-option">
-        <div><strong>Save recording</strong><p className="obs-help" id="obs-recording-help">{savingRecording ? 'Saving…' : saveRecording ? 'Keep in Live Recordings' : 'Live only'}{obs?.roomName ? ' · Set before next connection' : ''}</p></div>
-        <button type="button" role="switch" aria-label="Save recording" aria-checked={saveRecording} aria-describedby="obs-recording-help" className="obs-recording-switch" disabled={!item || busy || savingRecording || Boolean(obs?.roomName) || Boolean(item?.isLive)} onClick={changeRecording}><span /></button>
-      </div>
-      <button type="button" className="admin-live-control admin-live-control-start" disabled={busy || savingRecording || !item || (item.isLive && !obs?.roomName)} onClick={act}>{busy ? 'Working…' : obs?.roomName ? 'Disconnect OBS' : 'Prepare OBS'}</button>
+      <button type="button" className="admin-live-control admin-live-control-start" disabled={busy || !item || (item.isLive && !obs?.roomName) || (!obs?.roomName && !detailsReady)} title={!obs?.roomName && !detailsReady ? `Add ${missing.join(", ")} first` : undefined} onClick={act}>{busy ? 'Working…' : obs?.roomName ? 'Disconnect OBS' : 'Prepare OBS'}</button>
+      {!obs?.roomName && !detailsReady && <p className="obs-help" role="status">Prepare OBS unlocks once you add {missing.join(", ").replace(/, ([^,]*)$/, " and $1")} in Session details.</p>}
     </div>
     <div className="obs-disclosures">
     {obs?.streamKey && obs.state !== 'ending' ? <details className="obs-connection-details" open={obs.state !== 'live'}>

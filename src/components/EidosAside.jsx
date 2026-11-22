@@ -1,16 +1,16 @@
 import {useCallback,useEffect,useRef,useState} from 'react';
-import {Plus,Search,Sparkles,SquarePen,Trash2,Check,X} from 'lucide-react';
+import {Plus,Search,Sparkles,SquarePen,Trash2,Network,Check,X} from 'lucide-react';
 import {apiRequest} from '../lib/api';
 import {confirmDeletion} from '../lib/confirmDeletion';
 
-export default function EidosAside({token,items,onItems,selectedId,onSelect,onClear}){
- const [loading,setLoading]=useState(true),[error,setError]=useState(''),[busy,setBusy]=useState(false),[query,setQuery]=useState('');
+export default function EidosAside({token,items,onItems,selectedId,onSelect,onClear,onBookingAtoms,atomBySeed={}}){
+ const [loading,setLoading]=useState(true),[error,setError]=useState(''),[busy,setBusy]=useState(false),[query,setQuery]=useState(''),[notice,setNotice]=useState('');
  const [editor,setEditor]=useState(null),[fourthGoal,setFourthGoal]=useState(''),[saveError,setSaveError]=useState('');
- const onItemsRef=useRef(onItems),itemsRef=useRef(items),dialog=useRef(null),field=useRef(null);
- onItemsRef.current=onItems;itemsRef.current=items;
+ const onItemsRef=useRef(onItems),itemsRef=useRef(items),bindingsHandler=useRef(onBookingAtoms),dialog=useRef(null),field=useRef(null);
+ onItemsRef.current=onItems;itemsRef.current=items;bindingsHandler.current=onBookingAtoms;
  const load=useCallback(async()=>{
   setLoading(true);setError('');
-  try{const {items}=await apiRequest('/admin/eden/eidos',{token});onItemsRef.current(items||[]);}
+  try{const {items,bookingAtoms=[]}=await apiRequest('/admin/eden/eidos',{token});onItemsRef.current(items||[]);bindingsHandler.current?.(bookingAtoms);}
   catch(failure){setError(failure.message||'Eidos could not be loaded.');}
   finally{setLoading(false);}
  },[token]);
@@ -43,13 +43,23 @@ export default function EidosAside({token,items,onItems,selectedId,onSelect,onCl
   }catch(failure){if(!failure.cancelled)setError(failure.message||'The item could not be deleted.');}
   finally{setBusy(false);}
  };
- const shown=items.filter(item=>`${item.id} ${item.fourthGoal||''}`.toLowerCase().includes(query.trim().toLowerCase()));
+ const seedAtoms=async()=>{
+  if(busy)return;setBusy(true);setError('');setNotice('');
+  try{
+   const result=await apiRequest('/admin/eden/eidos/booking-atoms',{method:'POST',token,body:{}});
+   onItemsRef.current(result.items||[]);bindingsHandler.current?.(result.bookingAtoms||[]);
+   setNotice(result.created?`Added ${result.created} Booking atom seeds.`:'Every Booking atom already has a seed.');
+  }catch(failure){setError(failure.message||'Booking atoms could not be seeded.');}
+  finally{setBusy(false);}
+ };
+ const shown=items.filter(item=>`${item.id} ${item.fourthGoal||''} ${atomBySeed[item.id]?.label||''} ${atomBySeed[item.id]?.atomId||''}`.toLowerCase().includes(query.trim().toLowerCase()));
  return <aside className="tot-eidos-aside" aria-label="Eidos identity seeds">
   <header><span><Sparkles size={15}/>Eidos</span><b>{items.length}</b></header>
-  <div className="tot-eidos-actions"><span className="tot-eidos-scope">Identity seeds</span><button type="button" className="tot-eidos-add" disabled={loading||busy||(!items.length&&Boolean(error))} onClick={()=>openEditor(null)}><Plus size={16}/>Add Eidos</button></div>
+  <div className="tot-eidos-actions"><span className="tot-eidos-scope">Identity seeds</span><button type="button" className="tot-eidos-add" disabled={loading||busy||(!items.length&&Boolean(error))} onClick={()=>openEditor(null)}><Plus size={16}/>Add Eidos</button><button type="button" className="tot-eidos-seed-booking" disabled={loading||busy} onClick={seedAtoms}><Network size={16}/>Add Booking atoms</button></div>
+  {notice&&<p className="tot-eidos-notice" role="status">{notice}</p>}
   {error&&<div className="tot-eidos-error" role="alert"><p>{error}</p><button type="button" onClick={load} disabled={loading||busy}>Retry</button></div>}
   <label className="tot-eidos-search"><Search size={14}/><input type="search" aria-label="Search identity seeds" placeholder="Search seeds" value={query} onChange={event=>setQuery(event.target.value)}/></label>
-  <nav className="tot-eidos-list" aria-label="Identity seeds">{loading?<p role="status">Loading Eidos…</p>:shown.map(item=><article className={`tot-eidos-entry${selectedId===item.id?' is-selected':''}`} key={item.id}><button type="button" className="tot-eidos-select" aria-current={selectedId===item.id?'true':undefined} onClick={()=>onSelect(item)} title={item.id}><code>{item.id}</code><small>fourth goal</small><span>{item.fourthGoal||'Not set'}</span></button>
+  <nav className="tot-eidos-list" aria-label="Identity seeds">{loading?<p role="status">Loading Eidos…</p>:shown.map(item=><article className={`tot-eidos-entry${selectedId===item.id?' is-selected':''}`} key={item.id}><button type="button" className="tot-eidos-select" aria-current={selectedId===item.id?'true':undefined} onClick={()=>onSelect(item)} title={item.id}><code>{item.id}</code>{atomBySeed[item.id]&&<span className="tot-eidos-atom"><strong>{atomBySeed[item.id].label}</strong><code>{atomBySeed[item.id].atomId}</code></span>}<small>fourth goal</small><span>{item.fourthGoal||'Not set'}</span></button>
    <div className="tot-eidos-item-actions"><button type="button" aria-label={`Edit fourth goal for ${item.id}`} title="Edit fourth goal" disabled={busy} onClick={()=>openEditor(item)}><SquarePen size={16}/></button><button type="button" aria-label={`Permanently delete ${item.id}`} title="Delete item" disabled={busy} onClick={()=>remove(item)}><Trash2 size={16}/></button></div>
   </article>)}{!loading&&!error&&!shown.length&&<p>{query?'No seeds match.':'No seeds yet.'}</p>}</nav>
   <footer>Deleting an Eidos permanently removes its ID and fourth goal.</footer>
