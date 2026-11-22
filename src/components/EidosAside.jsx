@@ -36,7 +36,8 @@ export default function EidosAside({token,items,onItems,selectedId,onSelect,onCl
   if(busy)return;setBusy(true);setError('');
   try{
    if(!await confirmDeletion('Permanently delete this Eidos, its seed ID, and its fourth goal?',{title:'Permanently delete Eidos?',confirmLabel:'Delete permanently'}))return;
-   await apiRequest(`/admin/eden/eidos/${encodeURIComponent(item.id)}`,{method:'DELETE',token,confirmedDelete:true,body:{permanent:true,previousFourthGoal:item.fourthGoal||''}});
+   const result=await apiRequest(`/admin/eden/eidos/${encodeURIComponent(item.id)}`,{method:'DELETE',token,confirmedDelete:true,body:{permanent:true,previousFourthGoal:item.fourthGoal||''}});
+   if(result.deleted!==true||result.id!==item.id)throw new Error('Permanent deletion could not be confirmed. Please reload Eidos.');
    onItemsRef.current(itemsRef.current.filter(row=>row.id!==item.id));
    if(selectedId===item.id)onClear?.();
   }catch(failure){if(!failure.cancelled)setError(failure.message||'The item could not be deleted.');}
