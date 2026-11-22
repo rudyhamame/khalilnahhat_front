@@ -223,3 +223,26 @@
 .client-workspace .cw-event-row:hover{background:var(--aw-hover)}
 @media(max-width:700px){.client-workspace .cw-stats{border:0;background:none;gap:10px}.client-workspace .cw-stat,.client-workspace .cw-stat+.cw-stat{border:1px solid var(--aw-line);background:var(--aw-sidebar)}}
 .client-workspace .cw-heading{padding:20px}
+
+.client-workspace .dashboard-service-brief .bdr-atoms .ea-data-row[data-coded]{grid-template-columns:4.6em minmax(0,.8fr) minmax(0,1.2fr);align-items:center}
+@media(max-width:640px){.client-workspace .dashboard-service-brief .bdr-atoms .ea-data-row[data-coded]{grid-template-columns:4.6em minmax(0,1fr)}.client-workspace .dashboard-service-brief .bdr-atoms .ea-data-row[data-coded]>.ea-data-value{grid-column:1/-1}}
+/* Personal info restyle: flat, square, hairline-divided like the rest of the dashboard. */
+.client-workspace .cw-avatar{padding:22px 0;border:0;margin-bottom:12px;gap:24px}
+.client-workspace .cw-avatar-photo{width:88px;height:88px;border:1px solid var(--aw-line);background:var(--aw-sidebar);font-size:32px;font-weight:300}
+.client-workspace .cw-avatar-meta strong{font-size:15px;font-weight:500}
+.client-workspace form.cw-panel.cw-profile{max-width:none;padding:0;border:0;background:none;gap:20px 24px}
+.client-workspace .cw-profile label{font-size:11px;letter-spacing:.12em;text-transform:uppercase;gap:8px}
+.client-workspace .cw-profile label small{text-transform:none;letter-spacing:0}
+.client-workspace .cw-profile input:not([type=checkbox]):not([type=radio]),.client-workspace .cw-profile select{min-height:44px;border-radius:0;border:0;border-bottom:0;background:var(--aw-sidebar);padding:10px 12px;font-size:14px;text-transform:none;letter-spacing:0;color:var(--aw-text);transition:border-color .15s,background .15s}
+.client-workspace .cw-profile :is(input,select):hover{background:var(--aw-hover)}
+.client-workspace .cw-profile :is(input,select):focus{outline:0;background:var(--aw-hover)}
+.client-workspace .cw-phone-contact{border:0;border-radius:0;background:var(--aw-sidebar);padding:14px 16px}
+.client-workspace .cw-phone-contact legend{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--aw-muted);padding:0 6px 0 0}
+.client-workspace .cw-profile-toggle{border:0;border-radius:0;background:var(--aw-sidebar);padding:16px}
+.client-workspace .cw-profile-email{padding-top:8px}
+.client-workspace .cw-profile-actions{padding-top:4px}
+.client-workspace .cw-account-delete{border:0;border-radius:0;background:none;padding:24px 0 0}
+.client-workspace .cw-account-delete button{border-radius:0}
+/* Personal info: the content is one centred column. */
+.client-workspace .aw-main>:is(.cw-heading,.cw-avatar,form.cw-profile,.cw-account-delete){box-sizing:border-box;width:min(760px,calc(100% - 32px));margin-inline:auto}
+@media(max-width:700px){.client-workspace .aw-main>:is(.cw-heading,.cw-avatar,form.cw-profile,.cw-account-delete){width:calc(100% - 20px)}}

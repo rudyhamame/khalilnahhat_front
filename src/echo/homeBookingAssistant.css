@@ -414,9 +414,24 @@ html body #ai-booking-transcript#ai-booking-transcript{padding:14px;box-sizing:b
 html body #ai-booking-transcript .ai-booking-message.is-user{background:none;border-radius:0}
 html body #ai-booking-transcript .ai-booking-message.echo-chat-message:not(.is-user){background:#171717;border-radius:15px}
 html body #ai-booking-transcript .ai-booking-message.is-user{background:#ffffff09;border-radius:15px}
-/* Booking review rows: the atom name first, then its order badge (mono, same chip as in Echo's replies); a roomier row with a calm value column. */
-html body .echo .ea-review .ea-data-row>b{display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px;font-weight:500;line-height:1.4;color:#d7e4dc}
-html body .echo .ea-review .ea-data-row .ea-atom-code{order:2;margin:0;padding:1px 6px;border:1px solid #a3d9c033;border-radius:5px;background:#a3d9c01a;color:#a3d9c0;font:600 10.5px/1.5 ui-monospace,'SFMono-Regular','JetBrains Mono',Menlo,Consolas,monospace;letter-spacing:.04em;font-variant-numeric:tabular-nums}
+/* One shared grid for entered, empty, optional, and reviewed atoms. */
+html body .ea-data-row>.ea-atom-code{margin:0;justify-self:start;padding:1px 6px;border:1px solid #a3d9c033;border-radius:5px;background:#a3d9c01a;color:#a3d9c0;font:600 10.5px/1.5 ui-monospace,'SFMono-Regular','JetBrains Mono',Menlo,Consolas,monospace;letter-spacing:.04em;font-variant-numeric:tabular-nums;white-space:nowrap}
+html body .echo :is(.ea-step-text,.echo-map-values,.ea-review) .ea-data-row[data-coded]{display:grid;grid-template-columns:76px minmax(0,.85fr) minmax(0,1.35fr) 48px;column-gap:12px;row-gap:6px;align-items:start;justify-items:stretch;text-align:start;border-inline-start:2px solid transparent;padding-inline-start:6px}
+html body .echo :is(.ea-step-text,.echo-map-values,.ea-review) .ea-data-row[data-coded][data-music]{grid-template-columns:76px minmax(0,.85fr) minmax(0,1.35fr) 48px!important;column-gap:12px!important}
+html body .echo :is(.ea-step-text,.echo-map-values,.ea-review) .ea-data-row[data-coded]>.ea-atom-code{grid-column:1;grid-row:1}
+html body .echo :is(.ea-step-text,.echo-map-values,.ea-review) .ea-data-row[data-coded]>b{grid-column:2;grid-row:1;min-width:0;margin:0;justify-self:stretch;text-align:start;display:block;font-weight:500;line-height:1.5}
+html body .echo :is(.ea-step-text,.echo-map-values,.ea-review) .ea-data-row[data-coded]>.ea-data-value{grid-column:3;grid-row:1;min-width:0;max-width:100%;justify-self:stretch;text-align:start;display:block;overflow-wrap:anywhere;line-height:1.5}
+html body .echo :is(.ea-step-text,.echo-map-values,.ea-review) .ea-data-row[data-coded]>.ea-atom-controls{grid-column:4;grid-row:1;justify-self:end;align-self:start;min-height:22px}
 html body .echo .ea-review .ea-data-row{padding-block:8px}
-html body .echo .ea-review .ea-data-row .ea-data-value{color:#f4f7f5;font-size:13px;line-height:1.5;overflow-wrap:anywhere}
-html body .echo .ea-review .ea-data-row[data-empty] .ea-data-value{color:#8d9a93;font-style:italic}
+html body .echo .ea-review .ea-data-row>b{color:#d7e4dc}
+html body .echo .ea-review .ea-data-row>.ea-data-value{color:#f4f7f5;font-size:13px}
+html body .echo .ea-review .ea-data-row[data-empty]>.ea-data-value{color:#8d9a93;font-style:italic}
+html body .echo .ea-review .ea-data-row[data-coded][data-review=confirmed]{border-inline-start-color:#73d9ad}
+.ea-card--review{container-type:inline-size;container-name:booking-review}
+@container booking-review (max-width:420px){
+ html body .echo .ea-review .ea-data-row[data-coded],html body .echo .ea-review .ea-data-row[data-coded][data-music]{grid-template-columns:72px minmax(0,1fr) minmax(0,1fr) 48px!important;column-gap:8px!important}
+ html body .echo .ea-review .ea-data-row[data-coded]>b{grid-column:2/4}
+ html body .echo .ea-review .ea-data-row[data-coded]>.ea-data-value{grid-column:2/4;grid-row:2}
+}
+
+html body .echo .ea-review .ea-step-details{box-sizing:border-box;width:auto;max-width:100%;grid-template-columns:minmax(0,1fr)}

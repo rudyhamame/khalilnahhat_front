@@ -1,4 +1,4 @@
-import {applicableReviewAtoms} from '../lib/bookingAtomReview';
+import {applicableReviewAtoms,manualBookingFieldHref} from '../lib/bookingAtomReview';
 import {useTree} from '../lib/tree';
 import useBookingAtomReview from './useBookingAtomReview';
 import {useEffect,useLayoutEffect,useRef,useState} from 'react';
@@ -150,16 +150,17 @@ export default function HomeBookingAssistant({lang,user,token,auth,overlay=false
   atomReview.review(line,confirmed);
   if(!confirmed)askForAlternative(line);
  },onEdit:line=>{
-  if(busy||!ctx.draftEditable||line.empty)return;
+  if(busy||!ctx.draftEditable)return;
   atomReview.edit(line);
-  askForAlternative(line);
+  const path=line.reviewPath||line.key;
+  window.location.assign(path.startsWith('customer.')&&!ctx.signedIn?`/booking?field=${encodeURIComponent(path)}#booking-phase-1`:manualBookingFieldHref(path));
  }};
  const unconfirmed=applicableReviewAtoms(allAtoms).filter(line=>atomReview.stateFor(line)!=='confirmed').length;
  const atomsConfirmed=missing===0&&unconfirmed===0&&!catalogLoading;
  const done=sections.filter(section=>section.progress.complete).length;
  const saveText=ctx.saveState==='account-saved'?tr('Saved to your account','محفوظ في حسابك'):ctx.saveState==='pending'?tr('Saving changes…','جارٍ الحفظ…'):tr('Draft in progress','المسودة قيد الإعداد');
  return <section ref={overlayRoot} id="echo-ai" className={`echo-section home-booking-assistant ea${overlay?' ea-overlay':''}`} aria-label="Echo AI" dir={ar?'rtl':'ltr'} onKeyDown={event=>{if(overlay&&event.key==='Escape'&&!event.defaultPrevented){event.preventDefault();void closeOverlay();}}}>
-  <div className="ea-board" style={{gridTemplateColumns:[['chat','1.15fr'],['map','1.4fr'],['review','.95fr']].map(([key,size])=>min[key]?'minmax(56px,0fr)':`minmax(0,${size})`).join(' ')}}>
+  <div className="ea-board" style={{gridTemplateColumns:[['chat','1.15fr'],['map','1.1fr'],['review','1.4fr']].map(([key,size])=>min[key]?'minmax(56px,0fr)':`minmax(0,${size})`).join(' ')}}>
    {view==='details'&&<BookingDetailsDialog autoSubmit atomsConfirmed={atomsConfirmed} lang={lang} user={ctx.user} isSessionReady={ctx.isSessionReady} onCreateServiceRequest={ctx.onCreateServiceRequest} initialEvent={{eventDate:ctx.order.event?.date||'',startTime:ctx.order.event?.startTime||'',endTime:ctx.order.event?.endTime||''}} onClose={()=>setView('conversation')}/>}
    <article className="ea-card ea-card--toolbar" data-tone="0" aria-label={tr('Toolbar','شريط الأدوات')}>
     <div className="ea-brand"><span className="ea-vinyl" aria-hidden="true"/><strong>ECHO <span>AI</span></strong><small>{saveText}</small></div>
@@ -179,7 +180,6 @@ export default function HomeBookingAssistant({lang,user,token,auth,overlay=false
     <div className="ea-card-body ea-review">
      <div className="ea-summary-head">
       <div className="ea-progress" role="progressbar" aria-valuemin="0" aria-valuemax={goals.length} aria-valuenow={done} aria-label={tr('Sections complete','الأقسام المكتملة')}><i style={{width:`${done/goals.length*100}%`}}/></div>
-      <small>{tr(`${done} of ${goals.length} sections complete`,`اكتمل ${done} من ${goals.length} أقسام`)}</small>
      </div>
      <ol className="ea-steps" ref={steps}>{sections.map(({item,progress,lines},index)=>{const Icon=icons[goal.id]||ClipboardList;return <li key={item.id}>
       <button type="button" aria-current={goal===item.id?'step':undefined} disabled={busy} onClick={()=>select(item.id,true)}>

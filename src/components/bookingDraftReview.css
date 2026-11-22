@@ -20,3 +20,5 @@
 .bdr-atoms .ea-step-empty{color:#9aaba2;font-size:13px}
 
 .bdr-no{display:inline-block;margin-inline-end:8px;color:#d9b46e;font-style:normal;font-weight:700;font-size:.78em;letter-spacing:.06em;font-variant-numeric:tabular-nums}
+
+.bdr-atoms .ea-data-row[data-coded]{grid-template-columns:4.6em minmax(0,.9fr) minmax(0,1.1fr);align-items:center}
