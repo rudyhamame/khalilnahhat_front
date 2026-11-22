@@ -3,7 +3,7 @@ import {useTree} from '../lib/tree';
 import useBookingAtomReview from './useBookingAtomReview';
 import {useEffect,useLayoutEffect,useRef,useState} from 'react';
 import {eventTypeLabel} from '../lib/eventTypeLabel';
-import {Sparkles,MessageCircle,CalendarDays,Disc3,Boxes,UserRound,Images,StickyNote,Check,ArrowUpRight,ClipboardList,Trash2,X} from 'lucide-react';
+import {Sparkles,MessageCircle,CalendarDays,Disc3,Boxes,UserRound,Images,StickyNote,Check,ArrowUpRight,ClipboardList,Trash2,X,Minimize2,Maximize2} from 'lucide-react';
 import {EventOrderAside} from './EventOrderProvider';
 import {useEventOrder} from './eventOrderContext';
 import useEquipmentChanges from './useEquipmentChanges';
@@ -11,7 +11,7 @@ import useChangeHighlight from './useChangeHighlight';
 import BookingDetailsDialog from './BookingDetailsDialog';
 import {numberedRentalCatalog} from '../lib/numberedRentalCatalog';
 import {AtomGroups,sectionLines} from './bookingReview';
-import {MAP_OPTIONS,useConceptMapDefaults} from './conceptMapDefaults';
+import {useConceptMapDefaults} from './conceptMapDefaults';
 import {activeGoals} from '../lib/bookingGoals';
 import {missingOrderFields} from '../lib/eventOrderCore.mjs';
 import {useConceptMapNavigation} from './useConceptMapNavigation';
@@ -47,12 +47,12 @@ function mapLayout(layout,heights){
  return {width:1780,height,root:{x:cx-85,y:height/2-75},items};
 }
 const anchors=item=>item.side==='right'?{near:item.x,far:item.x+195,group:item.x+275}:{near:item.x+BRANCH_W,far:item.x+450,group:item.x+370};
-export function BookingConceptMap({order,ar,onSelect,review}){
+export function BookingConceptMap({order,ar,onSelect,review,toolbarExtra=null}){
  const changed=useEquipmentChanges();
  const tr=(en,arabic)=>ar?arabic:en,rentalData=useTree(),rentals=numberedRentalCatalog(rentalData.catalog,rentalData.equipment);
  const goals=activeGoals(); // only the sections whose service is in the catalogue
- const surface=useRef(null),viewport=useRef(null),frame=useRef(null),graph=useRef(null),[fit,setFit]=useState(1),[zoom,setZoom]=useState(null),[own,setOwn]=useState(()=>{try{return JSON.parse(localStorage.getItem('echo-map-toolbar')||'{}');}catch{return {};}}),[targets,setTargets]=useState([]),[rowHeights,setRowHeights]=useState(()=>goals.map(()=>112));
- const defaults=useConceptMapDefaults(),{layout,shape,format}={...defaults,...own},geometry=mapLayout(layout,rowHeights),graphHeight=geometry.height,graphWidth=geometry.width;
+ const surface=useRef(null),viewport=useRef(null),frame=useRef(null),graph=useRef(null),[fit,setFit]=useState(1),[zoom,setZoom]=useState(null),[targets,setTargets]=useState([]),[rowHeights,setRowHeights]=useState(()=>goals.map(()=>112));
+ const defaults=useConceptMapDefaults(),{layout,shape,format}=defaults,geometry=mapLayout(layout,rowHeights),graphHeight=geometry.height,graphWidth=geometry.width;
  useLayoutEffect(()=>{
   const nodes=[...graph.current.querySelectorAll('.echo-map-branch')];
   const update=()=>{const heights=nodes.map(node=>Math.max(112,node.offsetHeight));setRowHeights(previous=>heights.every((height,index)=>height===previous[index])?previous:heights);};
@@ -81,7 +81,7 @@ export function BookingConceptMap({order,ar,onSelect,review}){
    })));
   }});
  const {zoomTo,panning,onClickCapture}=useConceptMapNavigation({viewport,frame,scale,onZoom:setZoom,minScale:Math.min(.1,fit)});
- return <div className="echo-map-surface" ref={surface}><div className="echo-map-zoom" role="group" aria-label={tr('Concept map zoom','تكبير خريطة المفاهيم')}><button type="button" aria-label={tr('Zoom out','تصغير')} onClick={()=>zoomTo(scale/1.2)}>−</button><output>{Math.round(scale*100)}%</output><button type="button" aria-label={tr('Zoom in','تكبير')} onClick={()=>zoomTo(scale*1.2)}>+</button><button type="button" onClick={()=>{viewport.current.scrollTo(0,0);setZoom(null);}}>{tr('Fit','ملاءمة')}</button>{Object.entries(MAP_OPTIONS).map(([key,{label,values}])=><select key={key} className="echo-map-format" value={{layout,shape,format}[key]} aria-label={tr(...label)} onChange={event=>{const next={...own,[key]:event.target.value};setOwn(next);try{localStorage.setItem('echo-map-toolbar',JSON.stringify(next));}catch{/* Optional preference. */}}}>{values.map(([value,en,arabic])=><option key={value} value={value}>{tr(en,arabic)}</option>)}</select>)}</div><div ref={viewport} className={`echo-booking-map${panning?' is-panning':''}`} onClickCapture={onClickCapture} tabIndex={0} aria-label={tr('Booking concept map. Drag to pan, scroll to zoom, or pinch with two fingers. Select a concept to work on it.','خريطة مفاهيم الحجز. اسحب للتحريك واستخدم العجلة أو إصبعين للتكبير. اختر مفهوماً للعمل عليه.')}>
+ return <div className="echo-map-surface" ref={surface}><div className="echo-map-zoom" role="group" aria-label={tr('Concept map zoom','تكبير خريطة المفاهيم')}><button type="button" aria-label={tr('Zoom out','تصغير')} onClick={()=>zoomTo(scale/1.2)}>−</button><output>{Math.round(scale*100)}%</output><button type="button" aria-label={tr('Zoom in','تكبير')} onClick={()=>zoomTo(scale*1.2)}>+</button><button type="button" onClick={()=>{viewport.current.scrollTo(0,0);setZoom(null);}}>{tr('Fit','ملاءمة')}</button>{toolbarExtra}</div><div ref={viewport} className={`echo-booking-map${panning?' is-panning':''}`} onClickCapture={onClickCapture} tabIndex={0} aria-label={tr('Booking concept map. Drag to pan, scroll to zoom, or pinch with two fingers. Select a concept to work on it.','خريطة مفاهيم الحجز. اسحب للتحريك واستخدم العجلة أو إصبعين للتكبير. اختر مفهوماً للعمل عليه.')}>
   <div className="echo-map-canvas" style={{width:`max(100%, ${graphWidth*scale+48}px)`,height:`max(100%, ${graphHeight*scale+48}px)`}}><div ref={frame} className="echo-map-size" style={{width:graphWidth*scale,height:graphHeight*scale}}><div ref={graph} className="echo-booking-graph" style={{width:graphWidth,height:graphHeight,transform:`scale(${scale})`}} dir="ltr">
    <svg viewBox={`0 0 ${graphWidth} ${graphHeight}`} aria-hidden="true">{goals.map((goal,index)=>{
     const item=geometry.items[index];if(!item)return null;
@@ -110,7 +110,7 @@ export default function HomeBookingAssistant({lang,user,token,auth,overlay=false
  const ctx=useEventOrder(),ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en;
  const {catalog,equipment:catalogEquipment,loading:catalogLoading}=useTree();
  const goals=activeGoals();
- const [goal,setGoal]=useState('event'),[view,setView]=useState('conversation'),[busy,setBusy]=useState(false);
+ const [min,setMin]=useState({chat:false,map:false,review:false}),flip=key=>setMin(current=>({...current,[key]:!current[key]})),[goal,setGoal]=useState('event'),[view,setView]=useState('conversation'),[busy,setBusy]=useState(false);
  const overlayRoot=useRef(null),[closing,setClosing]=useState(false),[closeError,setCloseError]=useState('');
  useEffect(()=>{if(overlay)overlayRoot.current?.querySelector('.ea-overlay-close')?.focus({preventScroll:true});},[overlay]);
  const closeOverlay=async()=>{
@@ -159,7 +159,7 @@ export default function HomeBookingAssistant({lang,user,token,auth,overlay=false
  const done=sections.filter(section=>section.progress.complete).length;
  const saveText=ctx.saveState==='account-saved'?tr('Saved to your account','محفوظ في حسابك'):ctx.saveState==='pending'?tr('Saving changes…','جارٍ الحفظ…'):tr('Draft in progress','المسودة قيد الإعداد');
  return <section ref={overlayRoot} id="echo-ai" className={`echo-section home-booking-assistant ea${overlay?' ea-overlay':''}`} aria-label="Echo AI" dir={ar?'rtl':'ltr'} onKeyDown={event=>{if(overlay&&event.key==='Escape'&&!event.defaultPrevented){event.preventDefault();void closeOverlay();}}}>
-  <div className="ea-board">
+  <div className="ea-board" style={{gridTemplateColumns:[['chat','1.15fr'],['map','1.4fr'],['review','.95fr']].map(([key,size])=>min[key]?'minmax(56px,0fr)':`minmax(0,${size})`).join(' ')}}>
    {view==='details'&&<BookingDetailsDialog autoSubmit atomsConfirmed={atomsConfirmed} lang={lang} user={ctx.user} isSessionReady={ctx.isSessionReady} onCreateServiceRequest={ctx.onCreateServiceRequest} initialEvent={{eventDate:ctx.order.event?.date||'',startTime:ctx.order.event?.startTime||'',endTime:ctx.order.event?.endTime||''}} onClose={()=>setView('conversation')}/>}
    <article className="ea-card ea-card--toolbar" data-tone="0" aria-label={tr('Toolbar','شريط الأدوات')}>
     <div className="ea-brand"><span className="ea-vinyl" aria-hidden="true"/><strong>ECHO <span>AI</span></strong><small>{saveText}</small></div>
@@ -167,15 +167,15 @@ export default function HomeBookingAssistant({lang,user,token,auth,overlay=false
     {overlay&&<button type="button" className="ea-overlay-close" aria-label={tr('Close Echo AI','إغلاق إيكو AI')} title={tr('Close Echo AI','إغلاق إيكو AI')} disabled={closing} onClick={closeOverlay}><X size={20} aria-hidden="true"/></button>}
     {closeError&&<p className="ea-overlay-error" role="alert">{closeError}</p>}
    </article>
-   <article className="ea-card ea-card--chat" data-tone="3" aria-label={tr('Conversation','المحادثة')}>
-    <header className="ea-card-head"><MessageCircle className="ea-card-icon" aria-hidden="true"/><div><h3>{tr('Conversation','المحادثة')}</h3><p>{tr('Tell Echo about your event','أخبر إيكو عن فعاليتك')}</p></div></header>
+   <article className={`ea-card ea-card--chat${min.chat?' is-min':''}`} data-tone="3" aria-label={tr('Conversation','المحادثة')}>
+    <header className="ea-card-head"><MessageCircle className="ea-card-icon" aria-hidden="true"/><div><h3>{tr('Conversation','المحادثة')}</h3><p>{tr('Tell Echo about your event','أخبر إيكو عن فعاليتك')}</p></div><button type="button" className="ea-min" aria-expanded={!min.chat} aria-label={min.chat?tr('Expand Conversation','توسيع المحادثة'):tr('Minimize Conversation','تصغير المحادثة')} title={min.chat?tr('Expand','توسيع'):tr('Minimize','تصغير')} onClick={()=>flip('chat')}>{min.chat?<Maximize2 size={15} aria-hidden="true"/>:<Minimize2 size={15} aria-hidden="true"/>}</button></header>
     <div className="ea-card-body"><div className="echo-ai-conversation-host"><EventOrderAside ar={ar} user={user} token={token} auth={auth} workspace selectedGoal={goal} silentGoal={silent} view={view} onConversation={()=>setView('conversation')} onBusyChange={setBusy}/></div></div>
    </article>
-   <article className="ea-card ea-card--map" data-tone="2" aria-label={tr('Concept map','خريطة المفاهيم')}>
-    <div className="ea-card-body"><BookingConceptMap order={ctx.order} ar={ar} onSelect={select} review={{stateFor:atomReview.stateFor}}/></div>
+   <article className={`ea-card ea-card--map${min.map?' is-min':''}`} data-tone="2" aria-label={tr('Concept map','خريطة المفاهيم')}>
+    <div className="ea-card-body"><BookingConceptMap order={ctx.order} ar={ar} onSelect={select} review={{stateFor:atomReview.stateFor}} toolbarExtra={<button type="button" className="ea-min" aria-expanded={!min.map} aria-label={min.map?tr('Expand Concept map','توسيع خريطة المفاهيم'):tr('Minimize Concept map','تصغير خريطة المفاهيم')} title={min.map?tr('Expand','توسيع'):tr('Minimize','تصغير')} onClick={()=>flip('map')}>{min.map?<Maximize2 size={15} aria-hidden="true"/>:<Minimize2 size={15} aria-hidden="true"/>}</button>}/></div>
    </article>
-   <article className="ea-card ea-card--review" data-tone="4" aria-label={tr('Booking review','مراجعة الحجز')}>
-    <header className="ea-card-head"><ClipboardList className="ea-card-icon" aria-hidden="true"/><div><h3>{tr('Booking review','مراجعة الحجز')}</h3><p>{eventTypeLabel(ctx.order.event?.type,ar)||tr('Let’s plan your event','لنخطط لفعاليتك')}</p></div><button type="button" className="ea-delete" aria-label={tr('Delete draft','حذف المسودة')} title={tr('Delete draft','حذف المسودة')} disabled={ctx.clearing||(ctx.signedIn&&!ctx.cloudReady)} onClick={()=>{if(window.confirm(tr('Delete this draft? This cannot be undone.','حذف هذه المسودة؟ لا يمكن التراجع.')))void ctx.clear();}}><Trash2 size={16} aria-hidden="true"/></button></header>
+   <article className={`ea-card ea-card--review${min.review?' is-min':''}`} data-tone="4" aria-label={tr('Booking review','مراجعة الحجز')}>
+    <header className="ea-card-head"><ClipboardList className="ea-card-icon" aria-hidden="true"/><div><h3>{tr('Booking review','مراجعة الحجز')}</h3><p>{eventTypeLabel(ctx.order.event?.type,ar)||tr('Let’s plan your event','لنخطط لفعاليتك')}</p></div><button type="button" className="ea-delete" aria-label={tr('Delete draft','حذف المسودة')} title={tr('Delete draft','حذف المسودة')} disabled={ctx.clearing||(ctx.signedIn&&!ctx.cloudReady)} onClick={()=>{if(window.confirm(tr('Delete this draft? This cannot be undone.','حذف هذه المسودة؟ لا يمكن التراجع.')))void ctx.clear();}}><Trash2 size={16} aria-hidden="true"/></button><button type="button" className="ea-min" aria-expanded={!min.review} aria-label={min.review?tr('Expand Booking review','توسيع مراجعة الحجز'):tr('Minimize Booking review','تصغير مراجعة الحجز')} title={min.review?tr('Expand','توسيع'):tr('Minimize','تصغير')} onClick={()=>flip('review')}>{min.review?<Maximize2 size={15} aria-hidden="true"/>:<Minimize2 size={15} aria-hidden="true"/>}</button></header>
     <div className="ea-card-body ea-review">
      <div className="ea-summary-head">
       <div className="ea-progress" role="progressbar" aria-valuemin="0" aria-valuemax={goals.length} aria-valuenow={done} aria-label={tr('Sections complete','الأقسام المكتملة')}><i style={{width:`${done/goals.length*100}%`}}/></div>

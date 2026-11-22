@@ -47,7 +47,6 @@
 .ai-booking-message-source[data-mode=voice]{border-color:#80cbbf30;color:#99c9ba;background:#80cbbf08}
 .ai-booking-message p{font-size:13px;line-height:1.8;color:#e3e3e3;margin:5px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}
 .ai-booking-typing{font-size:12px;color:#777}
-.ai-booking-support{display:flex;flex-direction:column;gap:8px;padding:0}
 .ai-booking-consent{display:flex;align-items:flex-start;gap:9px;font-size:12px;line-height:1.6;color:#a8b4ac}
 .ai-booking-consent input{flex:none;margin-top:3px;accent-color:#efaf62}
 .ai-booking-signin{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:#e7c291;text-decoration:none}

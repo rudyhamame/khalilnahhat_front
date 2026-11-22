@@ -8,7 +8,6 @@
 .echo #echo-ai .ai-booking-heading{position:static;flex:none;padding:12px 22px;margin:0;min-height:44px;border:0}
 .echo #echo-ai .ai-booking-messages{flex:1;min-height:0;height:auto;max-height:none;padding:18px 0 0;overflow:auto;overscroll-behavior:contain}
 .echo #echo-ai .ai-booking-surface-bottom{flex:0 0 auto;height:auto;min-height:0;max-height:none;overflow:visible;border-top:0}
-.echo #echo-ai .ai-booking-support{font-size:12px;padding:4px 22px 14px;box-sizing:border-box}
 .echo #echo-ai .ai-booking-stage{min-height:0;flex:1}.echo #echo-ai .has-transcript .ai-booking-stage{display:none}
 .echo #echo-ai .egb-booking{height:100%;min-height:0}.echo #echo-ai .egb-body{overflow:auto;overscroll-behavior:contain;min-height:0}
 .echo #echo-ai .egb-draft-received{padding:28px}.echo #echo-ai .order-sign-in{margin:auto}
@@ -50,7 +49,7 @@
 .echo #echo-ai .echo-message-header>strong{font-size:13px}
 .echo #echo-ai .echo-message-source{font-size:12px}
 .echo #echo-ai .ai-booking-composer input{font-size:14px;line-height:1.5}
-.echo #echo-ai :is(.ai-booking-status,.ai-booking-notice,.ai-booking-consent,.ai-booking-voice-controls,.ai-booking-support){font-size:13px;line-height:1.7}
+.echo #echo-ai :is(.ai-booking-status,.ai-booking-notice,.ai-booking-consent,.ai-booking-voice-controls){font-size:13px;line-height:1.7}
 .echo #echo-ai :is(.echo-ai-map-footer>span,.echo-ai-map-footer>button,.echo-map-zoom button,.echo-map-zoom output,.echo-goal-venue-results){font-size:13px;line-height:1.6}
 .echo #echo-ai .echo-map-root>span{font-size:12px;letter-spacing:.03em}
 .echo #echo-ai .echo-map-root>small{font-size:14px}
@@ -310,8 +309,6 @@ html body .echo .ea-review .ea-primary{min-height:36px;padding:7px 12px;font-siz
 .echo .echo-map-groups>.echo-map-values[data-group=attention]{border-inline-start-color:#f0b04f}
 .echo .echo-map-groups>.echo-map-values[data-group=optional]{border-inline-start-color:#8d9a93}
 .echo #echo-ai .echo-map-groups .ea-group{margin-top:0}
-.echo .echo-map-zoom .echo-map-format{border:1px solid #ffffff17;border-radius:5px;background:#171b1d;color:#b9cbbf;padding:4px 6px;font:inherit;font-size:12px;cursor:pointer}
-.echo #echo-ai .echo-map-zoom .echo-map-format{font-size:13px}
 .echo :is(.ea-step-text,.echo-map-values) .ea-data-row[data-indent]{padding-inline-start:16px;position:relative}
 .echo :is(.ea-step-text,.echo-map-values) .ea-data-row[data-indent]::before{content:"";position:absolute;inset-inline-start:5px;top:50%;width:6px;height:1px;background:#ffffff40}
 /* Branches on the left of the root are mirrored: group boxes outside, section box next to the root. */
@@ -355,3 +352,64 @@ html body .echo .ea-review .ea-steps .ea-atom-controls button:first-child[aria-p
 @keyframes ea-atom-correction{50%{background:#ffc06a20;box-shadow:inset 0 0 0 1px #ffc06a66}}
 @media(prefers-reduced-motion:reduce){[data-review=correction]{animation:none;background:#ffc06a12}}
 html body .echo .ea-primary:disabled{opacity:.45;cursor:not-allowed;filter:saturate(.35)}
+
+/* The Echo AI Smart Cart is a true overlay over the whole app, like the 3D Room: above the header, footer player, side navigation and every page layer. */
+html body .echo.echo-public-page.echo-ai-overlay-page[data-page=home][data-theme]:has(#echo-ai){z-index:9990!important;isolation:isolate;background:radial-gradient(ellipse 40% 50% at 50% 48%,#b0642e44,transparent 72%),radial-gradient(ellipse 46% 52% at 6% 100%,#5b1f3dcc,transparent 74%),radial-gradient(ellipse 46% 52% at 96% 6%,#1f3a7acc,transparent 74%),radial-gradient(ellipse 50% 60% at 100% 100%,#6b3a1fa6,transparent 76%),linear-gradient(180deg,#15183a 0%,#1a1030 52%,#241018 100%)}
+body:has(.echo-ai-overlay-page #echo-ai) :is(.echo-header,.home-section-nav,.echo-footer,.header-mini-player,.echo-cart-launch,.echo-chat-launch,.echo-rotate){display:none!important}
+html body .echo.echo-ai-overlay-page:has(#echo-ai)>.echo-header{display:none!important}
+
+/* Concept map toolbar: one control height, readable hit areas, hover and focus states, tidy wrapping. */
+.echo .echo-map-zoom{gap:6px;padding:8px 14px;row-gap:6px}
+.echo .echo-map-zoom :is(button,.echo-map-format){box-sizing:border-box;min-height:32px;min-width:32px;display:inline-grid;place-items:center;padding:4px 10px;line-height:1;transition:background .15s,border-color .15s,color .15s}
+.echo .echo-map-zoom :is(button,.echo-map-format):hover{background:#ffffff12;border-color:#ffffff2e;color:#e5eee8}
+.echo .echo-map-zoom :is(button,.echo-map-format):focus-visible{outline:2px solid var(--ea-mint,#7fd4a8);outline-offset:2px}
+.echo .echo-map-zoom output{min-width:44px;font-variant-numeric:tabular-nums}
+
+/* Card head: icon, title block that truncates, actions pushed to the end, one hairline under it. */
+.ea-card-head{align-items:center;gap:12px;min-height:40px;padding-bottom:0;margin-bottom:12px}
+.ea-card-head>div{flex:1;min-width:0}
+.ea-card-head h3,.ea-card-head p{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Minimize a column: it collapses to a slim rail; the content stays mounted so the conversation keeps its state. */
+.ea-board{transition:grid-template-columns .35s cubic-bezier(.4,0,.2,1)}
+.ea-card{transition:padding .35s cubic-bezier(.4,0,.2,1)}.ea-card-body{transition:opacity .2s}
+.ea-min{flex:none;display:grid;place-items:center;width:30px;height:30px;padding:0;border:1px solid #ffffff26;border-radius:50%;background:transparent;color:#e5eee8;cursor:pointer;margin-inline-start:auto}
+.ea-min:hover{background:#ffffff1f}.ea-min:focus-visible{outline:2px solid var(--ea-mint,#7fd4a8);outline-offset:2px}
+.ea-card.is-min{padding:10px 0;align-items:center}
+.ea-card.is-min{overflow:hidden}.ea-card.is-min>.ea-card-body{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .15s,visibility 0s .15s}
+.ea-card.is-min .ea-card-head{flex-direction:column;gap:14px;margin:0;padding:0;border:0}
+.ea-card.is-min .ea-card-head>:not(.ea-card-icon):not(.ea-min){display:none}
+.ea-card.is-min .ea-card-head .ea-min{margin:0}
+@media(max-width:1000px){.ea-board{transition:none}.ea-card.is-min{flex:none!important;height:auto!important;padding:8px 14px;align-items:stretch}.ea-card.is-min .ea-card-head{flex-direction:row}.ea-card.is-min .ea-card-head>div{display:block}.ea-card.is-min .ea-card-head>div p{display:none}}
+/* Phones: no concept map. */
+@media(max-width:700px){.ea-card--map{display:none!important}}
+
+/* Map: its minimize button sits in the zoom toolbar; minimized, the toolbar shrinks to that button. */
+.ea-card--map.is-min{padding:10px 0}
+.ea-card--map .echo-map-zoom .ea-min{margin-inline-start:6px}
+.ea-card--map.is-min .ea-card-body{display:none}
+
+/* Map minimized: the card keeps only the toolbar's minimize button (it is what expands it again). */
+.ea-card--map.is-min .ea-card-body{display:flex;opacity:1;visibility:visible;pointer-events:auto}
+.ea-card--map.is-min :is(.echo-booking-map,.echo-map-zoom>:not(.ea-min)){display:none}
+.ea-card--map.is-min .echo-map-zoom{padding:0;border:0;justify-content:center}.ea-card--map.is-min .echo-map-zoom .ea-min{margin:0}
+/* Progress: thicker rounded track, soft inner shadow, glowing fill, count on the side. */
+.ea-progress{height:8px;border-radius:99px;background:#ffffff14;box-shadow:inset 0 1px 2px #0006}
+.ea-progress i{box-shadow:0 0 10px #e3c18466;min-width:8px}
+.ea-summary-head{display:grid;gap:8px}.ea-summary-head small{margin:0!important;font-variant-numeric:tabular-nums}
+/* Map toolbar: zoom controls centred; the minimize button stays at the end. */
+.echo .echo-map-zoom{position:relative;justify-content:center}
+.echo .echo-map-zoom .ea-min{position:absolute;inset-inline-end:14px;top:50%;translate:0 -50%;margin:0}
+.ea-card--map.is-min .echo-map-zoom{justify-content:center}.ea-card--map.is-min .echo-map-zoom .ea-min{position:static;translate:none}
+/* Same backdrop as the login page: its gradient and Khalil's transparent sketch pattern, still (no drift or pulse). */
+.ea-overlay::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.22;background:url(/echo/khalil-sketch-pattern.png) 0 0/260px 260px repeat,url(/echo/khalil-sketch-pattern.png) 110px 80px/360px 360px repeat}
+/* Conversation transcript: Khalil's still sketch pattern only, dimmed by a neutral black veil. */
+#ai-booking-transcript{background:linear-gradient(#000e,#000e),url(/echo/khalil-sketch-pattern.png) 0 0/260px 260px repeat,url(/echo/khalil-sketch-pattern.png) 110px 80px/360px 360px repeat;background-attachment:local}
+#ai-booking-transcript{box-shadow:inset 0 0 24px #000a,inset 0 0 0 1px #ffffff14}
+#ai-booking-transcript{border-radius:0 0 16px 16px}
+#ai-booking-transcript{color:#f3f4f6;text-shadow:0 1px 2px #000c}
+#ai-booking-transcript .ai-booking-typing{padding:10px 16px;margin:0}
+#ai-booking-transcript .ai-booking-message.echo-chat-message:not(.is-user){padding:10px 16px}
+html body #ai-booking-transcript#ai-booking-transcript{padding:14px;box-sizing:border-box}
+/* Swapped: the client's messages sit on the open transcript, Echo AI's replies get the card. */
+html body #ai-booking-transcript .ai-booking-message.is-user{background:none;border-radius:0}
+html body #ai-booking-transcript .ai-booking-message.echo-chat-message:not(.is-user){background:#171717;border-radius:15px}

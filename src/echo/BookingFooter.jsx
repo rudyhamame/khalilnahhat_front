@@ -28,17 +28,18 @@ const blink=el=>{el.classList.remove('is-blinking');void el.offsetWidth;el.class
 const go=event=>{const link=event.currentTarget,href=link.getAttribute('href'),hash=href.split('#')[1],target=document.querySelector(`[data-booking-field="${link.dataset.field}"]`)||(hash&&document.getElementById(hash));if(!target||href.startsWith('/dashboard'))return;event.preventDefault();let done=false;const run=()=>{if(done)return;done=true;blink(target);};target.scrollIntoView({behavior:'smooth',block:'center'});window.addEventListener('scrollend',run,{once:true});setTimeout(run,900);};
 
 // App-container footer of the Booking page: the booking status and the way into the Echo AI Smart Cart.
-// It appears once the first data atom of step 2 (the event type, 02.01.01) is filled.
+// It is always shown, even before any data atom is set.
 export default function BookingFooter({ar=false}){
   const ctx=useEventOrder(),tr=(en,arabic)=>ar?arabic:en,{equipment:catalogEquipment}=useTree(),avail=useTreeSteps();
   // Closed for this browser session; the floating cart icon comes back with it.
   const [closed,setClosed]=useState(()=>{try{return sessionStorage.getItem('echo-booking-footer')==='closed';}catch{return false;}});
   const close=()=>{setClosed(true);try{sessionStorage.setItem('echo-booking-footer','closed');}catch{/* private mode: closes for this view only */}};
   // Visible while scrolling down, hidden while scrolling up.
-  const [shown,setShown]=useState(true);
-  useEffect(()=>{let last=window.scrollY;const onScroll=()=>{const y=window.scrollY,delta=y-last;if(Math.abs(delta)<6)return;setShown(delta>0);last=y;};window.addEventListener('scroll',onScroll,{passive:true});return()=>window.removeEventListener('scroll',onScroll);},[]);
+  // It also stays hidden in the first viewport: it appears once step 1 has scrolled into view (no step 1 on the page = no wait).
+  const [shown,setShown]=useState(false);
+  useEffect(()=>{let last=window.scrollY,up=false;const reached=()=>{const top=document.getElementById('booking-phase-1')?.getBoundingClientRect().top;return top===undefined||top<window.innerHeight*.6;};const apply=()=>setShown(reached()&&!up);apply();const onScroll=()=>{const y=window.scrollY,delta=y-last;if(Math.abs(delta)>=6){up=delta<0;last=y;}apply();};window.addEventListener('scroll',onScroll,{passive:true});return()=>window.removeEventListener('scroll',onScroll);},[]);
   const open=()=>{setClosed(false);try{sessionStorage.removeItem('echo-booking-footer');}catch{/* ignore */}};
-  if(!ctx?.order?.event?.type)return null;
+  if(!ctx?.order)return null;
   if(closed)return <button type="button" className={`booking-footer-tab${shown?'':' is-hidden'}`} dir={ar?'rtl':'ltr'} onClick={open} aria-label={tr('Open booking status','فتح حالة الحجز')}><ChevronUp size={16} aria-hidden="true"/>{tr('Booking status','حالة الحجز')}</button>;
   const label=(key)=>{const code=fieldCode(key),name=NAMES[key]?NAMES[key][ar?1:0]:fieldName(key,ar)||key;return `${code?code+' ':''}${name}`;};
   // Page order = the STEP.SEC.ATOM code, so the link always starts from the earliest atom still missing.
@@ -49,7 +50,7 @@ export default function BookingFooter({ar=false}){
   const steps=STEPS.map(([en,arabic],index)=>{const n=index+1,optionalKeys=ATOM_KEYS.filter(key=>stepOfKey(key)===n&&!SKIP.has(key)&&!REQUIRED_ALL.has(key)),left=missingKeys.filter(key=>stepOf(key)===n).length,reqTotal=Math.max(REQUIRED_KEYS(n).length,left),reqDone=reqTotal-left,chosen=ctx.order.equipment?.length||0,rest=optionalKeys.filter(key=>key!=='equipment'),optDone=rest.filter(key=>answered(ctx.order,key)).length+(n===4?chosen:0),optTotal=n===4?Math.max(catalogEquipment.length,chosen):rest.length,all=reqTotal+optTotal,percent=all?Math.round((reqDone+optDone)/all*100):0;
    return {n,name:ar?arabic:en,left,reqDone,reqTotal,optDone,optTotal,percent,state:left>0?'todo':reqTotal>0||optDone>0?'done':'optional'};});
   const visible=steps.filter(step=>(step.n!==3||avail.dj)&&(step.n!==4||avail.rental)).map((step,at)=>({...step,pos:at+1})); // steps that exist in the catalogue, numbered as the page numbers them
-  const goStep=n=>document.getElementById(`booking-phase-${n}`)?.scrollIntoView({behavior:'smooth',block:'start'});
+  const goStep=n=>{const el=document.getElementById(`booking-phase-${n}`);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});else window.location.assign(`/booking#booking-phase-${n}`);}; // off the steps tab: open it at that step
   const {count,total}=bookingProgress(ctx.order),percent=Math.min(100,Math.round(count/total*100));
   return <><div className="booking-footer-spacer" aria-hidden="true"/><footer className={`booking-footer${shown?'':' is-hidden'}`} dir={ar?'rtl':'ltr'} aria-label={tr('Booking status','حالة الحجز')}>
     <button type="button" className="booking-footer-close" onClick={close} aria-label={tr('Close booking status','إغلاق حالة الحجز')} title={tr('Close','إغلاق')}><X size={16} aria-hidden="true"/></button>

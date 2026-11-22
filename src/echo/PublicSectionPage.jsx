@@ -31,7 +31,7 @@ function SectionContent({section,lang,user,token,liveStream,liveSessions,isSessi
  // The equipment explorer opens when the client answers yes to the rental question (or already chose equipment, or arrives from a link to a rental field).
  const rentalOpen=order.order?.rental?.requested===true||order.order?.equipment?.length>0||order.order?.services?.some(id=>!['dj','mc'].includes(id))||/^[?&]field=(equipment|services|rental)/.test(window.location.search.replace('?','&').replace(/^&/,'?'));
  // Event details and services are one continuous booking page (/booking and /rentals show the same page).
- const bookAndServices=()=> <><PhaseBar ar={ar}/><BookHero ar={ar}/><HomeAvailability lang={lang}/>{steps.dj&&<><PhaseHeading id="dj" ar={ar}/><div className="booking-services" dir={ar?'rtl':'ltr'}><RentalsHero ar={ar}/></div><MusicPreferencesStep ar={ar}/></>}{steps.rental&&<><PhaseHeading id="rental" ar={ar}/><RentalQuestion ar={ar}/>{rentalOpen&&<div className="booking-services rental-services-stack" dir={ar?'rtl':'ltr'}><Suspense fallback={null}><ServiceVinyl lang={lang} onPlan={onPlan}/></Suspense></div>}</>}<PhaseHeading id="additional" ar={ar}/><ReferencesSection ar={ar}/><AdditionalNotesSection ar={ar}/><BookingFooter ar={ar}/></>;
+ const bookAndServices=()=> <><PhaseBar ar={ar}/><BookHero ar={ar}/><HomeAvailability lang={lang}/>{steps.dj&&<><PhaseHeading id="dj" ar={ar}/><div className="booking-services" dir={ar?'rtl':'ltr'}><RentalsHero ar={ar}/></div><MusicPreferencesStep ar={ar}/></>}{steps.rental&&<><PhaseHeading id="rental" ar={ar}/><RentalQuestion ar={ar}/>{rentalOpen&&<div className="booking-services rental-services-stack" dir={ar?'rtl':'ltr'}><Suspense fallback={null}><ServiceVinyl lang={lang} onPlan={onPlan}/></Suspense></div>}</>}<PhaseHeading id="additional" ar={ar}/><ReferencesSection ar={ar}/><AdditionalNotesSection ar={ar}/></>;
  const content={
   live:()=> <HomeLiveConsole overlay lang={lang} user={user} token={token} liveStream={liveStream} liveSessions={liveSessions} isSessionReady={isSessionReady}/>,
   availability:()=>bookAndServices(),
@@ -43,7 +43,8 @@ function SectionContent({section,lang,user,token,liveStream,liveSessions,isSessi
   about:()=> <AboutPage lang={lang}/>,
   tree:()=> <SeasonalTree standalone ar={lang.lang==='ar'} reviews={[]} media={[]} loading={false} lights={theme.lights} audio={theme.audio} photoIds={theme.photoIds}/>,
  };
- return <Suspense fallback={null}>{content[section]?.()||null}</Suspense>;
+ // The booking footer belongs to the Booking page (/booking) only, not /rentals or /echo-ai.
+ return <Suspense fallback={null}>{content[section]?.()||null}{section==='availability'&&<BookingFooter ar={lang.lang==='ar'}/>}</Suspense>;
 }
 export default function PublicSectionPage(props){
  return <EventOrderProvider frameless user={props.user} token={props.token} lang={props.lang} auth={props.auth} isSessionReady={props.isSessionReady} onCreateServiceRequest={props.onCreateServiceRequest}><SectionContent {...props}/></EventOrderProvider>;
