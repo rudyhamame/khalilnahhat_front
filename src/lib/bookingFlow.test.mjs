@@ -12,7 +12,7 @@ test('draft steps follow VP02, VP03 and VP04 and cover every canonical field onc
  assert.equal(bookingStepForField('services'),'equipment');assert.equal(bookingStepForField('event.venue.address'),'event');
 });
 test('review follows actual missing field objects and completes the venue chapter',()=>{
- const order=createEventOrder();assert.equal(firstIncompleteStep(order),'customer');order.customer={fullName:'Client',email:'client@example.invalid',phone:'123456789',contactMethod:'email',phoneContact:'call'};
+ const order=createEventOrder();assert.equal(firstIncompleteStep(order),'customer');order.customer={firstName:'Test',lastName:'Client',email:'client@example.invalid',phone:'123456789',contactMethod:'email',phoneContact:'call'};
  assert.equal(firstIncompleteStep(order),'event');
  Object.assign(order.event,{type:'wedding',date:'2027-06-20',startTime:'18:00',endTime:'02:00',guestCount:100});
  Object.assign(order.event.venue,{name:'Venue',address:'1 Example St',city:'Toronto',postalCode:'M1A 1A1',country:'Canada',setting:'indoor'});

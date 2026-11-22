@@ -31,11 +31,11 @@ export function refreshTree(){
  return inFlight;
 }
 const refresh=()=>{refreshTree();};
-const storage=event=>{if(event.key==='echo:catalog-revision')refresh();};
+const storage=event=>{if(['echo:catalog-revision','echo:eden-eidos-revision'].includes(event.key))refresh();};
 function subscribe(listener){
- if(!listeners.size){window.addEventListener('focus',refresh);window.addEventListener('echo:setup-catalog-changed',refresh);window.addEventListener('storage',storage);}
+ if(!listeners.size){window.addEventListener('focus',refresh);window.addEventListener('echo:setup-catalog-changed',refresh);window.addEventListener('echo:eden-eidos-changed',refresh);window.addEventListener('storage',storage);}
  listeners.add(listener);
- return()=>{listeners.delete(listener);if(!listeners.size){window.removeEventListener('focus',refresh);window.removeEventListener('echo:setup-catalog-changed',refresh);window.removeEventListener('storage',storage);}};
+ return()=>{listeners.delete(listener);if(!listeners.size){window.removeEventListener('focus',refresh);window.removeEventListener('echo:setup-catalog-changed',refresh);window.removeEventListener('echo:eden-eidos-changed',refresh);window.removeEventListener('storage',storage);}};
 }
 
 export {treeSteps};
@@ -63,4 +63,9 @@ export function useTreeSteps(){
 export function useTreeAtomIdentity(atomId){
  const {atomEidos=[]}=useTree();
  return atomEidos.find(link=>link.atomId===atomId)?.eidosId||null;
+}
+
+export function notifyTreeIdentitiesChanged(){
+ window.dispatchEvent(new Event('echo:eden-eidos-changed'));
+ try{localStorage.setItem('echo:eden-eidos-revision',`${Date.now()}:${Math.random()}`);}catch{/* Optional cross-tab refresh. */}
 }

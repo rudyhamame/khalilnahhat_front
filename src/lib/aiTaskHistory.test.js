@@ -33,7 +33,7 @@ test('task summaries use concise field names and readable option values, includi
  assert.equal(formatAiDraftTask({path:'event.startTime',value:'18:00'}).label,'Start time: 6:00 PM');
  const old={id:'old',label:'What kind of event is it?: wedding',confirmed:false};
  assert.deepEqual(presentAiTask(old),{field:'Event',value:'Wedding',label:'Event: Wedding'});assert.equal(old.confirmed,false);assert.equal(old.label,'What kind of event is it?: wedding');
- assert.equal(formatAiDraftTask({path:'customer.fullName',value:'McDonald'}).valueText,'McDonald');
+ assert.equal(formatAiDraftTask({path:'customer.firstName',value:'McDonald'}).valueText,'McDonald');
  assert.equal(formatAiDraftTask({path:'customer.email',value:'Name@example.com'}).valueText,'Name@example.com');
 });
 

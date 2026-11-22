@@ -181,18 +181,14 @@ export default function HomeAvailability({lang}){
     </div>);
 
  // Account contact details are read-only in the booking.
- // The booking stores one full name; the form asks for first and last name. What is typed is kept as typed (spaces included) and joined for the draft.
- const fullName=ctx?.order.customer?.fullName??'';
- const [nameParts,setNameParts]=useState(()=>{const [first='',...rest]=fullName.split(' ');return {first,last:rest.join(' ')};});
- useEffect(()=>{setNameParts(current=>{if(`${current.first.trim()} ${current.last.trim()}`.trim()===fullName.trim())return current;const [first='',...rest]=fullName.split(' ');return {first,last:rest.join(' ')};});},[fullName]);
- const editName=(first,last)=>{setNameParts({first,last});ctx?.setField('customer.fullName',`${first.trim()} ${last.trim()}`.trim()||null);};
+ const nameParts={first:ctx?.order.customer?.firstName??'',last:ctx?.order.customer?.lastName??''};
  const personalFields=(<div className="avail-venue-fields" role="group" aria-label={tr(...stepLabel('customer'))}>
-  <span className="avail-kicker"><FieldCode code="01.01.01–06"/>{tr('CONTACT','التواصل')}</span>
+  <span className="avail-kicker"><FieldCode code="01.01.01–07"/>{tr('CONTACT','التواصل')}</span>
   {signedIn?<p className="booking-field-hint personal-info-note">{tr('Your name, email, phone and company must be edited in your dashboard under Personal info.','يجب تعديل الاسم والبريد الإلكتروني والهاتف والشركة في قسم المعلومات الشخصية بلوحة حسابك.')} <a className="echo-link" href="/dashboard/profile">{tr('Edit personal information →','تعديل المعلومات الشخصية ←')}</a></p>
    :<p className="booking-field-hint personal-info-note">{tr('Before your booking is sent you create your account and confirm your email with a code. Your details here are saved to it.','قبل إرسال حجزك تنشئ حسابك وتؤكد بريدك برمز. تُحفظ تفاصيلك هنا فيه.')}</p>}
   <div className="avail-venue-pair">
-   <input data-booking-field="customer.fullName" type="text" autoComplete="given-name" maxLength={60} required aria-required="true" disabled={!canEdit} placeholder={tr('First name *','الاسم الأول *')} aria-label={tr('First name (required)','الاسم الأول (مطلوب)')} value={nameParts.first} readOnly={signedIn} onChange={event=>editName(event.target.value,nameParts.last)}/>
-   <input data-booking-field="customer.lastName" type="text" autoComplete="family-name" maxLength={60} required aria-required="true" disabled={!canEdit} placeholder={tr('Last name *','اسم العائلة *')} aria-label={tr('Last name (required)','اسم العائلة (مطلوب)')} value={nameParts.last} readOnly={signedIn} onChange={event=>editName(nameParts.first,event.target.value)}/>
+   <input data-booking-field="customer.firstName" type="text" autoComplete="given-name" maxLength={60} required aria-required="true" disabled={!canEdit} placeholder={tr('First name *','الاسم الأول *')} aria-label={tr('First name (required)','الاسم الأول (مطلوب)')} value={nameParts.first} readOnly={signedIn} onChange={event=>ctx?.setField('customer.firstName',event.target.value||null)}/>
+   <input data-booking-field="customer.lastName" type="text" autoComplete="family-name" maxLength={60} required aria-required="true" disabled={!canEdit} placeholder={tr('Last name *','اسم العائلة *')} aria-label={tr('Last name (required)','اسم العائلة (مطلوب)')} value={nameParts.last} readOnly={signedIn} onChange={event=>ctx?.setField('customer.lastName',event.target.value||null)}/>
   </div>
   <div className="avail-venue-pair">
    <input data-booking-field="customer.email" type="email" autoComplete="email" maxLength={160} required aria-required="true" disabled={!canEdit} placeholder={tr('Email *','البريد الإلكتروني *')} aria-label={tr('Email (required)','البريد الإلكتروني (مطلوب)')} value={emailText??ctx?.order.customer?.email??''} readOnly={signedIn} onChange={event=>{const text=event.target.value.trim();setEmailText(text);/* the draft only accepts a complete address; typing continues meanwhile */if(!text||/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text))ctx?.setField('customer.email',text||null);}}/>
@@ -216,7 +212,7 @@ export default function HomeAvailability({lang}){
  // A phone contact option only exists while there is a phone number: clearing the number clears it too, so the order never keeps an answer to a question that is no longer asked.
  useEffect(()=>{if(canEdit&&!signedIn&&!choices.hasPhone&&ctx?.order.customer?.phoneContact)ctx?.setField('customer.phoneContact',null);},[canEdit,signedIn,choices.hasPhone,ctx?.order.customer?.phoneContact]);// eslint-disable-line react-hooks/exhaustive-deps
  useEffect(()=>{if(!canEdit||signedIn)return;const current=contactMethod_||null;if(choices.only&&current!==choices.only)ctx?.setField('customer.contactMethod',choices.only);else if(!choices.enabled.length&&current)ctx?.setField('customer.contactMethod',null);else if(current&&choices.enabled.length&&!choices.enabled.includes(current))ctx?.setField('customer.contactMethod',null);},[canEdit,signedIn,choices.only,choices.enabled.join(),contactMethod_]);// eslint-disable-line react-hooks/exhaustive-deps
- const updatePersonal={disabled:refreshing,run:async()=>{if(!signedIn){document.querySelector('[data-booking-field="customer.fullName"]')?.focus();return;}const refresh=ctx?.auth?.onRefreshAccount;if(!refresh)return;setRefreshing(true);try{await refresh();}catch{/* The form keeps what it shows. */}finally{setRefreshing(false);}}};
+ const updatePersonal={disabled:refreshing,run:async()=>{if(!signedIn){document.querySelector('[data-booking-field="customer.firstName"]')?.focus();return;}const refresh=ctx?.auth?.onRefreshAccount;if(!refresh)return;setRefreshing(true);try{await refresh();}catch{/* The form keeps what it shows. */}finally{setRefreshing(false);}}};
  const resetEvent=stepReset(tr('event type','نوع الفعالية'),EVENT_PAGE_STEPS.occasion);
  const resetGuests=stepReset(tr('guest count','عدد الضيوف'),EVENT_PAGE_STEPS.guests);
  const resetVenue=stepReset(tr('venue','المكان'),VENUE_RESET_PATHS,()=>{setMapShown(false);setManualAddress(false);setVenueSearch({open:false,busy:false,error:'',items:[],notFound:false});});

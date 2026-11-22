@@ -39,7 +39,7 @@ test('Echo Docs keeps its existing session and administrator gate',()=>{
 });
 test('the manual review editor uses the canonical questionnaire and does not request final dance planning',()=>{
   const html=renderToStaticMarkup(createElement(EventOrderProvider,{user:{firstName:'Example',lastName:'Client',email:'test@example.invalid'},lang:{lang:'en'}},createElement(QuotePage,{lang:{lang:'en',t:{}},user:{firstName:'Example'},isSessionReady:true})));
-  for(const id of ['order-customer-fullName','order-event-venue-address','order-event-setup-requirements','order-music-djMc','order-additional-notes'])assert.ok(html.includes(id),id);
+  for(const id of ['order-customer-firstName','order-event-venue-address','order-event-setup-requirements','order-music-djMc','order-additional-notes'])assert.ok(html.includes(id),id);
   assert.doesNotMatch(html,/name="firstDance"/);
   assert.match(html,/Submit quote request/);
 });
@@ -125,8 +125,8 @@ for(const [language,direction] of [['en','cw'],['ar','ccw']])test(`hero record s
 test('review shows all account contacts as read-only with account values',()=>{
  const user={id:'locked-contact',firstName:'Original',lastName:'Client',email:'original@example.invalid',phoneNumber:'4165550199',company:'Original Company'},lang={lang:'en',t:{}};
  const html=renderToStaticMarkup(createElement(EventOrderProvider,{user,token:'fixture',lang},createElement(QuotePage,{lang,user,isSessionReady:true})));
- for(const key of ['fullName','email','phone','company'])assert.match(html,new RegExp('<input[^>]*id="order-customer-'+key+'"[^>]*readOnly=""'));
- for(const value of ['Original Client','original@example.invalid','+1 (416) 555-0199','Original Company'])assert.ok(html.includes('value="'+value+'"'));
+ for(const key of ['firstName','lastName','email','phone','company'])assert.match(html,new RegExp('<input[^>]*id="order-customer-'+key+'"[^>]*readOnly=""'));
+ for(const value of ['Original','Client','original@example.invalid','+1 (416) 555-0199','Original Company'])assert.ok(html.includes('value="'+value+'"'));
 });
 
 test('the concept map and the Booking review have an icon for every booking section',()=>{

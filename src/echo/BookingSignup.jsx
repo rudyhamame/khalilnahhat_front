@@ -1,3 +1,4 @@
+import {customerNameParts} from '../lib/eventOrderCore.mjs';
 import {useEffect,useState} from 'react';
 import {Eye,EyeOff,MailCheck,UserPlus} from 'lucide-react';
 import {apiRequest} from '../lib/api';
@@ -8,8 +9,8 @@ import {useEventOrder} from './eventOrderContext';
 // (that signs them in and their draft moves into the account), 3. send the booking.
 export default function BookingSignup({ar=false,auth}){
  const ctx=useEventOrder(),tr=(en,arabic)=>ar?arabic:en;
- const customer=ctx?.order.customer||{},email=(customer.email||'').trim(),words=(customer.fullName||'').trim().split(/\s+/).filter(Boolean);
- const firstName=words[0]||'',lastName=words.slice(1).join(' ');
+ const customer=ctx?.order.customer||{},email=(customer.email||'').trim(),nameParts=customerNameParts(customer);
+ const firstName=(nameParts.firstName||'').trim(),lastName=(nameParts.lastName||'').trim();
  const [step,setStep]=useState('account'),[password,setPassword]=useState(''),[show,setShow]=useState(false),[code,setCode]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState(''),[wait,setWait]=useState(0),[exists,setExists]=useState(false);
  useEffect(()=>{if(wait<=0)return undefined;const timer=setTimeout(()=>setWait(value=>value-1),1000);return()=>clearTimeout(timer);},[wait]);
  const onVerified=auth?.onGuestVerified||ctx?.auth?.onGuestVerified;

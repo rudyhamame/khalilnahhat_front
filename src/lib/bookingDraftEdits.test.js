@@ -99,9 +99,9 @@ test('switching or deleting a draft discards queued work and late task receipts'
 });
 
 test('manual and AI edits reject every account contact including reset attempts',()=>{
- const before=createEventOrder();Object.assign(before.customer,{fullName:'Original Client',email:'original@example.invalid',phone:'4165550199',company:'Original Company'});
+ const before=createEventOrder();Object.assign(before.customer,{firstName:'Original',lastName:'Client',email:'original@example.invalid',phone:'4165550199',company:'Original Company'});
  for(const source of ['manual','ai'])for(const value of ['Changed',null]){
-  const paths=['customer.fullName','customer.email','customer.phone','customer.company'];
+  const paths=['customer.firstName','customer.lastName','customer.email','customer.phone','customer.company'];
   const result=prepareBookingDraftEdit(before,paths.map(path=>({path,value})),{source});
   assert.deepEqual(result.order.customer,before.customer);assert.deepEqual(result.rejectedFields,paths);assert.deepEqual(result.updatedFields,[]);assert.equal(result.draftUpdated,false);
  }

@@ -38,7 +38,7 @@ export const eventAtomAuditGuide={
      ],
      "rows": [
       [
-       "customer.fullName, .email, .phone, .contactMethod, .phoneContact, .company",
+       "customer.firstName, .lastName, .email, .phone, .contactMethod, .phoneContact, .company",
        "Personal info; signed-in values belong to Dashboard account settings. The contact method can be chosen only after an email or phone is entered (email only, phone only, or any of the two when both exist); a phone number needs one phone contact option (WhatsApp text, WhatsApp call, text message or phone call)",
        "Name, email and contact method; the phone contact option when a phone is entered",
        "Personal info branch; for a signed-in client the account-owned fields cannot be changed by AI or booking controls; a visitor fills them in and they become the new account"

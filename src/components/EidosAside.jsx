@@ -2,6 +2,7 @@ import {useCallback,useEffect,useRef,useState} from 'react';
 import {Plus,Search,Sparkles,SquarePen,Trash2,Network,Check,X} from 'lucide-react';
 import {apiRequest} from '../lib/api';
 import {confirmDeletion} from '../lib/confirmDeletion';
+import {notifyTreeIdentitiesChanged} from '../lib/tree';
 
 export default function EidosAside({token,items,onItems,selectedId,onSelect,onClear,onBookingAtoms,atomBySeed={}}){
  const [loading,setLoading]=useState(true),[error,setError]=useState(''),[busy,setBusy]=useState(false),[query,setQuery]=useState(''),[notice,setNotice]=useState('');
@@ -28,7 +29,7 @@ export default function EidosAside({token,items,onItems,selectedId,onSelect,onCl
    const {item}=await apiRequest(`/admin/eden/eidos${existing?`/${encodeURIComponent(existing.id)}`:''}`,{method:existing?'PUT':'POST',token,body:{fourthGoal:fourthGoal.trim(),...(existing?{previousFourthGoal:existing.fourthGoal||''}:{})}});
    const current=itemsRef.current;
    onItemsRef.current(existing?current.map(row=>row.id===item.id?item:row):[...current.filter(row=>row.id!==item.id),item]);
-   onSelect(item);setEditor(null);
+   onSelect(item);setEditor(null);notifyTreeIdentitiesChanged();
   }catch(failure){setSaveError(failure.message||'Eidos could not be saved.');}
   finally{setBusy(false);}
  };
@@ -39,7 +40,7 @@ export default function EidosAside({token,items,onItems,selectedId,onSelect,onCl
    const result=await apiRequest(`/admin/eden/eidos/${encodeURIComponent(item.id)}`,{method:'DELETE',token,confirmedDelete:true,body:{permanent:true,previousFourthGoal:item.fourthGoal||''}});
    if(result.deleted!==true||result.id!==item.id)throw new Error('Permanent deletion could not be confirmed. Please reload Eidos.');
    onItemsRef.current(itemsRef.current.filter(row=>row.id!==item.id));
-   if(selectedId===item.id)onClear?.();
+   if(selectedId===item.id)onClear?.();notifyTreeIdentitiesChanged();
   }catch(failure){if(!failure.cancelled)setError(failure.message||'The item could not be deleted.');}
   finally{setBusy(false);}
  };
@@ -47,7 +48,7 @@ export default function EidosAside({token,items,onItems,selectedId,onSelect,onCl
   if(busy)return;setBusy(true);setError('');setNotice('');
   try{
    const result=await apiRequest('/admin/eden/eidos/booking-atoms',{method:'POST',token,body:{}});
-   onItemsRef.current(result.items||[]);bindingsHandler.current?.(result.bookingAtoms||[]);
+   onItemsRef.current(result.items||[]);bindingsHandler.current?.(result.bookingAtoms||[]);notifyTreeIdentitiesChanged();
    setNotice(result.created?`Added ${result.created} Booking atom seeds.`:'Every Booking atom already has a seed.');
   }catch(failure){setError(failure.message||'Booking atoms could not be seeded.');}
   finally{setBusy(false);}

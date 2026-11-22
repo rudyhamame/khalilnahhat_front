@@ -4,7 +4,7 @@ import EchoShell from '../echo/EchoShell';
 import {useAccessViewport} from '../lib/useAccessViewport';
 import {usePageMeta} from '../echo/meta';
 import {apiRequest} from '../lib/api';
-import {normalizeEventOrder} from '../lib/eventOrderCore.mjs';
+import {normalizeEventOrder,customerNameParts} from '../lib/eventOrderCore.mjs';
 import './loginPage.css';
 import './bookingSignupPage.css';
 
@@ -21,7 +21,7 @@ export default function BookingSignupPage({lang,onVerified}){
  const ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en;
  useAccessViewport();
  usePageMeta(tr('Create your account to send your booking | DJ Khalil × Echo','أنشئ حسابك لإرسال حجزك | دي جي خليل × إيكو'),tr('Create your account and confirm your email to send your booking to DJ Khalil and Echo.','أنشئ حسابك وأكّد بريدك الإلكتروني لإرسال حجزك إلى دي جي خليل وإيكو.'));
- const [customer]=useState(readCustomer),email=(customer.email||'').trim(),words=(customer.fullName||'').trim().split(/\s+/).filter(Boolean),firstName=words[0]||'',lastName=words.slice(1).join(' ');
+ const [customer]=useState(readCustomer),email=(customer.email||'').trim(),nameParts=customerNameParts(customer),firstName=(nameParts.firstName||'').trim(),lastName=(nameParts.lastName||'').trim();
  const [pending]=useState(()=>readPending(email));
  const [step,setStep]=useState(pending?'code':'account'),[password,setPassword]=useState(''),[confirm,setConfirm]=useState(''),[show,setShow]=useState(false),[code,setCode]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState(''),[wait,setWait]=useState(pending?Math.max(0,Math.ceil((pending.resendAt-Date.now())/1000)):0),[exists,setExists]=useState(false);
  useEffect(()=>{if(wait<=0)return undefined;const timer=setTimeout(()=>setWait(value=>value-1),1000);return()=>clearTimeout(timer);},[wait]);

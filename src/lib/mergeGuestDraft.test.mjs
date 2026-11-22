@@ -4,10 +4,10 @@ import {createEventOrder} from './eventOrderCore.mjs';
 import {mergeGuestDraft} from './mergeGuestDraft.mjs';
 
 test('guest answers fill what the account left empty, and the account wins on a conflict',()=>{
- const account=createEventOrder();account.customer.fullName='Ada Client';account.event.type='birthday';account.event.venue.name='Account Hall';
- const guest=createEventOrder();guest.customer.fullName='Ignored';guest.event.type='wedding';guest.event.guestCount=80;guest.event.venue.name='Guest Hall';guest.event.venue.city='Toronto';guest.music.genres=['House'];guest.music.suggestedSongs=[{phase:'intro',song:'A'}];
+ const account=createEventOrder();account.customer.firstName='Ada';account.customer.lastName='Client';account.event.type='birthday';account.event.venue.name='Account Hall';
+ const guest=createEventOrder();guest.customer.firstName='Ignored';guest.customer.lastName='Name';guest.event.type='wedding';guest.event.guestCount=80;guest.event.venue.name='Guest Hall';guest.event.venue.city='Toronto';guest.music.genres=['House'];guest.music.suggestedSongs=[{phase:'intro',song:'A'}];
  const merged=mergeGuestDraft(account,guest);
- assert.equal(merged.customer.fullName,'Ada Client');
+ assert.equal(merged.customer.firstName,'Ada');
  assert.equal(merged.event.type,'birthday');assert.equal(merged.event.venue.name,'Account Hall');
  assert.equal(merged.event.guestCount,80);assert.equal(merged.event.venue.city,'Toronto');
  assert.deepEqual(merged.music.genres,['House']);assert.deepEqual(merged.music.suggestedSongs,[{phase:'intro',song:'A'}]);
