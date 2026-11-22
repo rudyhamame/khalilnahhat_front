@@ -1,16 +1,16 @@
 import {useCallback,useEffect,useRef,useState} from 'react';
-import {Plus,Search,Sparkles,SquarePen,Trash2,RotateCcw,X} from 'lucide-react';
+import {Plus,Search,Sparkles,SquarePen,Trash2,Check,X} from 'lucide-react';
 import {apiRequest} from '../lib/api';
 import {confirmDeletion} from '../lib/confirmDeletion';
 
 export default function EidosAside({token,items,onItems,selectedId,onSelect,onClear}){
- const [loading,setLoading]=useState(true),[error,setError]=useState(''),[busy,setBusy]=useState(false),[query,setQuery]=useState(''),[removed,setRemoved]=useState([]),[showRemoved,setShowRemoved]=useState(false);
+ const [loading,setLoading]=useState(true),[error,setError]=useState(''),[busy,setBusy]=useState(false),[query,setQuery]=useState('');
  const [editor,setEditor]=useState(null),[fourthGoal,setFourthGoal]=useState(''),[saveError,setSaveError]=useState('');
  const onItemsRef=useRef(onItems),itemsRef=useRef(items),dialog=useRef(null),field=useRef(null);
  onItemsRef.current=onItems;itemsRef.current=items;
  const load=useCallback(async()=>{
   setLoading(true);setError('');
-  try{const {items}=await apiRequest('/admin/eden/eidos?includeRemoved=1',{token});onItemsRef.current((items||[]).filter(item=>!item.removed));setRemoved((items||[]).filter(item=>item.removed));}
+  try{const {items}=await apiRequest('/admin/eden/eidos',{token});onItemsRef.current(items||[]);}
   catch(failure){setError(failure.message||'Eidos could not be loaded.');}
   finally{setLoading(false);}
  },[token]);
@@ -19,7 +19,7 @@ export default function EidosAside({token,items,onItems,selectedId,onSelect,onCl
   if(editor){if(!dialog.current.open)dialog.current.showModal();field.current?.focus();}
   else if(dialog.current.open)dialog.current.close();
  },[editor]);
- const openEditor=item=>{if(!item)setShowRemoved(false);setFourthGoal(item?.fourthGoal||'');setSaveError('');setEditor(item?{item}:{item:null});};
+ const openEditor=item=>{setFourthGoal(item?.fourthGoal||'');setSaveError('');setEditor(item?{item}:{item:null});};
  const save=async event=>{
   event.preventDefault();if(busy||!editor)return;
   setBusy(true);setSaveError('');
@@ -35,38 +35,29 @@ export default function EidosAside({token,items,onItems,selectedId,onSelect,onCl
  const remove=async item=>{
   if(busy)return;setBusy(true);setError('');
   try{
-   if(!await confirmDeletion('Remove this item from the active list and map? Its seed ID and fourth goal will be kept.',{title:'Delete item?',confirmLabel:'Delete item',irreversible:false}))return;
-   const {item:deleted}=await apiRequest(`/admin/eden/eidos/${encodeURIComponent(item.id)}`,{method:'DELETE',token,confirmedDelete:true,body:{previousFourthGoal:item.fourthGoal||''}});
-   onItemsRef.current(itemsRef.current.filter(row=>row.id!==item.id));setRemoved(current=>[...current.filter(row=>row.id!==item.id),deleted]);
+   if(!await confirmDeletion('Permanently delete this Eidos, its seed ID, and its fourth goal?',{title:'Permanently delete Eidos?',confirmLabel:'Delete permanently'}))return;
+   await apiRequest(`/admin/eden/eidos/${encodeURIComponent(item.id)}`,{method:'DELETE',token,confirmedDelete:true,body:{permanent:true,previousFourthGoal:item.fourthGoal||''}});
+   onItemsRef.current(itemsRef.current.filter(row=>row.id!==item.id));
    if(selectedId===item.id)onClear?.();
   }catch(failure){if(!failure.cancelled)setError(failure.message||'The item could not be deleted.');}
   finally{setBusy(false);}
  };
- const restore=async item=>{
-  if(busy)return;setBusy(true);setError('');
-  try{
-   const {item:restored}=await apiRequest(`/admin/eden/eidos/${encodeURIComponent(item.id)}/restore`,{method:'POST',token,body:{}});
-   setShowRemoved(false);setRemoved(current=>current.filter(row=>row.id!==item.id));onItemsRef.current([...itemsRef.current.filter(row=>row.id!==item.id),restored]);onSelect(restored);
-  }catch(failure){setError(failure.message||'The item could not be restored.');}
-  finally{setBusy(false);}
- };
- const shown=(showRemoved?removed:items).filter(item=>`${item.id} ${item.fourthGoal||''}`.toLowerCase().includes(query.trim().toLowerCase()));
+ const shown=items.filter(item=>`${item.id} ${item.fourthGoal||''}`.toLowerCase().includes(query.trim().toLowerCase()));
  return <aside className="tot-eidos-aside" aria-label="Eidos identity seeds">
   <header><span><Sparkles size={15}/>Eidos</span><b>{items.length}</b></header>
-  <div className="tot-eidos-actions"><span className="tot-eidos-scope">Identity seeds</span><button type="button" className="tot-eidos-add" disabled={loading||busy||(!items.length&&Boolean(error))} onClick={()=>openEditor(null)}><Plus size={14}/>Add Eidos</button></div>
+  <div className="tot-eidos-actions"><span className="tot-eidos-scope">Identity seeds</span><button type="button" className="tot-eidos-add" disabled={loading||busy||(!items.length&&Boolean(error))} onClick={()=>openEditor(null)}><Plus size={16}/>Add Eidos</button></div>
   {error&&<div className="tot-eidos-error" role="alert"><p>{error}</p><button type="button" onClick={load} disabled={loading||busy}>Retry</button></div>}
   <label className="tot-eidos-search"><Search size={14}/><input type="search" aria-label="Search identity seeds" placeholder="Search seeds" value={query} onChange={event=>setQuery(event.target.value)}/></label>
-  <button type="button" className="tot-eidos-removed-toggle" aria-pressed={showRemoved} disabled={loading||busy} onClick={()=>setShowRemoved(value=>!value)}>{showRemoved?'Show active seeds':`Deleted items (${removed.length})`}</button>
-  <nav className="tot-eidos-list" aria-label="Identity seeds">{loading?<p role="status">Loading Eidos…</p>:shown.map(item=><article className={`tot-eidos-entry${showRemoved?' is-removed':''}`} key={item.id}>{showRemoved?<div className="tot-eidos-removed-item"><code>{item.id}</code><small>fourth goal</small><span>{item.fourthGoal||'Not set'}</span></div>:<button type="button" className="tot-eidos-select" aria-current={selectedId===item.id?'true':undefined} onClick={()=>onSelect(item)} title={item.id}><code>{item.id}</code><small>fourth goal</small><span>{item.fourthGoal||'Not set'}</span></button>}
-   <div className="tot-eidos-item-actions">{showRemoved?<button type="button" aria-label={`Restore ${item.id}`} title="Restore item" disabled={busy} onClick={()=>restore(item)}><RotateCcw size={13}/></button>:<><button type="button" aria-label={`Edit fourth goal for ${item.id}`} title="Edit fourth goal" disabled={busy} onClick={()=>openEditor(item)}><SquarePen size={13}/></button><button type="button" aria-label={`Delete ${item.id}`} title="Delete item" disabled={busy} onClick={()=>remove(item)}><Trash2 size={13}/></button></>}</div>
-  </article>)}{!loading&&!error&&!shown.length&&<p>{query?'No seeds match.':showRemoved?'No deleted items.':'No seeds yet.'}</p>}</nav>
-  <footer>A seed keeps its identity when a view is removed.</footer>
+  <nav className="tot-eidos-list" aria-label="Identity seeds">{loading?<p role="status">Loading Eidos…</p>:shown.map(item=><article className={`tot-eidos-entry${selectedId===item.id?' is-selected':''}`} key={item.id}><button type="button" className="tot-eidos-select" aria-current={selectedId===item.id?'true':undefined} onClick={()=>onSelect(item)} title={item.id}><code>{item.id}</code><small>fourth goal</small><span>{item.fourthGoal||'Not set'}</span></button>
+   <div className="tot-eidos-item-actions"><button type="button" aria-label={`Edit fourth goal for ${item.id}`} title="Edit fourth goal" disabled={busy} onClick={()=>openEditor(item)}><SquarePen size={16}/></button><button type="button" aria-label={`Permanently delete ${item.id}`} title="Delete item" disabled={busy} onClick={()=>remove(item)}><Trash2 size={16}/></button></div>
+  </article>)}{!loading&&!error&&!shown.length&&<p>{query?'No seeds match.':'No seeds yet.'}</p>}</nav>
+  <footer>Deleting an Eidos permanently removes its ID and fourth goal.</footer>
   <dialog ref={dialog} className="tot-eidos-dialog" aria-labelledby="tot-eidos-dialog-title" onCancel={event=>{if(busy)event.preventDefault();else setEditor(null);}} onClose={()=>setEditor(null)}>
    {editor&&<form onSubmit={save}><header><h2 id="tot-eidos-dialog-title">{editor.item?'Edit fourth goal':'Add Eidos'}</h2><button type="button" aria-label="Close Eidos popup" disabled={busy} onClick={()=>setEditor(null)}><X size={18}/></button></header>
     {editor.item?<code className="tot-eidos-dialog-id">{editor.item.id}</code>:<p>A unique seed ID will be generated when you create this Eidos.</p>}
     <label>fourth goal<textarea ref={field} rows={4} maxLength={2000} value={fourthGoal} onChange={event=>setFourthGoal(event.target.value)} disabled={busy} placeholder="Enter fourth goal"/></label>
     {saveError&&<p className="tot-eidos-save-error" role="alert">{saveError}</p>}
-    <footer><button type="button" disabled={busy} onClick={()=>setEditor(null)}>Cancel</button><button type="submit" disabled={busy}>{busy?'Saving…':editor.item?'Save fourth goal':'Create Eidos'}</button></footer>
+    <footer><button type="button" disabled={busy} onClick={()=>setEditor(null)}>Cancel</button><button type="submit" disabled={busy}>{editor.item?<Check size={16}/>:<Plus size={16}/>}<span>{busy?'Saving…':editor.item?'Save fourth goal':'Create Eidos'}</span></button></footer>
    </form>}
   </dialog>
  </aside>;

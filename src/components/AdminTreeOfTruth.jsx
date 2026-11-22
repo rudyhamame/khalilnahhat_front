@@ -1,5 +1,5 @@
 import {useCallback,useEffect,useLayoutEffect,useMemo,useRef,useState} from 'react';
-import {AudioLines,Bot,CalendarDays,ChevronDown,DollarSign,Layers,Network,Sparkles,X} from 'lucide-react';
+import {AudioLines,Bot,CalendarDays,ChevronDown,DollarSign,Layers,Network,Sparkles,Minus,Plus,X} from 'lucide-react';
 import {apiRequest} from '../lib/api';
 import {buildTreeNodes,stepsOf,treeAtoms,withServiceIds} from '../lib/treeCore';
 import {loadWorkVocabulary} from '../lib/workVocabulary';
@@ -72,13 +72,13 @@ function TreeCanvas({nodes,focus,selectedPath,onSelect,identityOnly=false,rootVi
  };
  const fit=()=>{const view=viewport.current;zoomTo(Math.max(.02,Math.min(1,(view.clientWidth-64)/size.width,(view.clientHeight-64)/size.height)));requestAnimationFrame(()=>view.scrollTo(0,0));};
  return <div className="tot-map">
-  <div className="tot-map-controls"><span>Drag to pan · Scroll or pinch to zoom · Collapse any branch</span><div role="group" aria-label="Concept map zoom"><button type="button" aria-label="Zoom out" onClick={()=>zoomTo(scale/1.2)}>−</button><output>{Math.round(scale*100)}%</output><button type="button" aria-label="Zoom in" onClick={()=>zoomTo(scale*1.2)}>+</button><button type="button" onClick={fit}>Fit tree</button><button type="button" onClick={()=>zoomTo(1)}>100%</button></div></div>
+  <div className="tot-map-controls"><span>Drag to pan · Scroll or pinch to zoom · Collapse any branch</span><div role="group" aria-label="Concept map zoom"><button type="button" className="tot-map-icon-button" aria-label="Zoom out" onClick={()=>zoomTo(scale/1.2)}><Minus size={16}/></button><output>{Math.round(scale*100)}%</output><button type="button" className="tot-map-icon-button" aria-label="Zoom in" onClick={()=>zoomTo(scale*1.2)}><Plus size={16}/></button><button type="button" onClick={fit}>Fit tree</button><button type="button" onClick={()=>zoomTo(1)}>100%</button></div></div>
   <div className={`tot-viewport${panning?' is-panning':''}`} ref={viewport} onScroll={updateVisible} onClickCapture={onClickCapture} tabIndex={0} aria-label="Eden of Eide. Drag to pan, scroll or pinch to zoom.">
    <div className="tot-canvas" style={{width:Math.max(viewportSize.width,size.width*scale+64),height:Math.max(viewportSize.height,size.height*scale+64)}}><div ref={frame} className="tot-frame" style={{width:size.width*scale,height:size.height*scale}}>
     <div ref={graph} className="tot-graph" style={{transform:`scale(${scale})`}}>
      <svg className="tot-edges" width={size.width} height={size.height} aria-hidden="true">{edges.map(edge=>{const middle=(edge.x0+edge.x1)/2;return <g key={edge.id} className={`tot-branch-${edge.branch}`} style={{opacity:focus&&focus!==edge.branch? .35: .8}}><path d={`M ${edge.x0} ${edge.y0} C ${middle} ${edge.y0}, ${middle} ${edge.y1}, ${edge.x1} ${edge.y1}`}/><circle cx={edge.x1} cy={edge.y1} r="3"/></g>;})}</svg>
      {rootVisible&&<button type="button" className={`tot-tree-root${selectedPath==='root'?' is-selected':''}`} data-node="root" onClick={()=>onSelect('root')} aria-pressed={selectedPath==='root'} aria-controls="tot-node-inspector">{identityOnly?<code>booking</code>:<><Sparkles size={24}/><small>ECHO / SHARED SOURCE</small><strong>Booking</strong><span>Catalogue → booking → AI</span></>}</button>}
-     {!rootVisible&&!nodes.length&&<p className="tot-no-seeds">No active identity seeds. Add Eidos or restore a deleted item.</p>}
+     {!rootVisible&&!nodes.length&&<p className="tot-no-seeds">No identity seeds. Add Eidos to create one.</p>}
      <div className="tot-branches">{nodes.map(node=><TreeNode key={node.branch} node={node} path={node.branch} branch={node.branch} focus={focus} selectedPath={selectedPath} onSelect={onSelect}/>)}</div>
     </div>
    </div></div>
@@ -188,6 +188,6 @@ export default function AdminTreeOfTruth({token}){
   <div className="tot-stage">
   <header className="tot-mode-header"><h1>Eden of Eide</h1><div role="tablist" aria-label="Concept map modes">{MAP_MODES.map((item,index)=><button key={item.id} id={`tot-tab-${item.id}`} type="button" role="tab" aria-selected={mode===item.id} aria-controls={`tot-panel-${item.id}`} tabIndex={mode===item.id?0:-1} onClick={()=>changeMode(item.id)} onKeyDown={event=>tabKeys(event,index)}>{item.label}</button>)}</div></header>
   <div className="tot-toolbar"><span>{selection?selection.node.label:'Select an item to view its data'}</span>{selection&&<button type="button" onClick={()=>{setFocus('');setSelectedPath('');}}><X size={13}/>Clear selection</button>}</div>
-  <div className="tot-mode-panel" role="tabpanel" id={`tot-panel-${mode}`} aria-labelledby={`tot-tab-${mode}`}><>{mode==='booking'&&error?<p className="tot-error" role="alert">{error}</p>:mode==='booking'&&!view?<p className="tot-loading" role="status">Loading Booking…</p>:<TreeCanvas key={mode} nodes={displayTree} focus={focus} selectedPath={selectedPath} onSelect={selectNode} identityOnly={mode==='eidos'} rootVisible={mode!=='eidos'||eidos.some(item=>item.id==='booking')}/>}</></div>
+  <div className="tot-mode-panel" role="tabpanel" id={`tot-panel-${mode}`} aria-labelledby={`tot-tab-${mode}`}><>{mode==='booking'&&error?<p className="tot-error" role="alert">{error}</p>:mode==='booking'&&!view?<p className="tot-loading" role="status">Loading Booking…</p>:<TreeCanvas key={mode} nodes={displayTree} focus={focus} selectedPath={selectedPath} onSelect={selectNode} identityOnly={mode==='eidos'} rootVisible={eidos.some(item=>item.id==='booking')}/>}</></div>
  </div><NodeInspector selection={selection} onSelect={selectNode} onClear={()=>{setSelectedPath('');setFocus('');}}/></div></section>;
 }
