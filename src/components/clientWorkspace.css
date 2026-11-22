@@ -222,3 +222,4 @@
 .client-workspace .cw-panel.cw-empty{background:var(--aw-sidebar);border:1px solid var(--aw-line)}
 .client-workspace .cw-event-row:hover{background:var(--aw-hover)}
 @media(max-width:700px){.client-workspace .cw-stats{border:0;background:none;gap:10px}.client-workspace .cw-stat,.client-workspace .cw-stat+.cw-stat{border:1px solid var(--aw-line);background:var(--aw-sidebar)}}
+.client-workspace .cw-heading{padding:20px}

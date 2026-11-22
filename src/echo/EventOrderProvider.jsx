@@ -61,7 +61,7 @@ export function EventOrderProvider({user,token,lang,auth,children,isSessionReady
   const [cloudReady,setCloudReady]=useState(false);
   // A submitted booking that is still being handled: its values are shown on every page and locked.
   const [pending,setPending]=useState(null);
-  useEffect(()=>{setPending(null);if(!user||!token||user.isAdmin)return undefined;let alive=true;fetchMyServiceRequests(token).then(({items=[]})=>{if(alive)setPending(items.find(item=>item?.order&&item.journey?.holdsStock&&!item.journey.isBooked)||null);}).catch(()=>{});return()=>{alive=false;};},[user?.id,user?._id,token]);// eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(()=>{setPending(null);if(!user||!token||user.isAdmin)return undefined;let alive=true;fetchMyServiceRequests(token).then(({items=[]})=>{if(alive)setPending(items.find(item=>item?.order&&item.journey?.holdsStock)||null);}).catch(()=>{});return()=>{alive=false;};},[user?.id,user?._id,token]);// eslint-disable-line react-hooks/exhaustive-deps
   const [recentEdits,setRecentEdits]=useState([]);
   const [draftId,setDraftId]=useState(()=>initialDraftId(user));
   const [loadRetry,setLoadRetry]=useState(0);

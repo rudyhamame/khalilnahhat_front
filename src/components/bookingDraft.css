@@ -29,3 +29,18 @@
 .client-workspace .bd-equipment-list strong{flex-shrink:0;font-size:12px;color:var(--aw-muted)}
 .client-workspace .bd-error p{margin-top:0}
 @media(max-width:800px){.client-workspace .bd-details{grid-template-columns:1fr;gap:12px}.client-workspace .bd-section{padding:18px}.client-workspace .bd-summary h2{font-size:22px}}
+/* Restyle: flat and square like the overview; sections as numbered columns of atoms divided by hairlines. */
+.client-workspace .booking-draft{max-width:none;margin:0}
+.client-workspace .booking-draft .bd-summary{border:0;border-radius:0;background:none;border-bottom:1px solid var(--aw-line);padding:0 0 22px;margin-bottom:24px}
+.client-workspace .booking-draft .bd-status{border-radius:0;background:none;text-transform:uppercase;letter-spacing:.12em;font-size:11px}
+.client-workspace .booking-draft .bd-summary h2{font-size:30px;font-weight:400;letter-spacing:-.03em}
+.client-workspace .booking-draft .bd-progress{border-top:0;padding-top:6px}
+.client-workspace .booking-draft .bd-progress progress{height:3px;border-radius:0}
+.client-workspace .booking-draft .bd-progress progress::-webkit-progress-value,.client-workspace .booking-draft .bd-progress progress::-moz-progress-bar{border-radius:0;background:var(--aw-text)}
+.client-workspace .booking-draft .bdr{gap:0;counter-reset:bdr}
+.client-workspace .booking-draft .bdr-section{padding:22px 0;border:0;border-top:1px solid var(--aw-line);border-radius:0;background:none;color:var(--aw-text)}
+.client-workspace .booking-draft .bdr-section>header{align-items:center;margin-bottom:10px}
+.client-workspace .booking-draft .bdr-section h3{display:flex;align-items:center;gap:12px;font-size:13px;font-weight:500;letter-spacing:.12em;text-transform:uppercase}
+.client-workspace .booking-draft .bdr-section>header span{color:var(--aw-muted)}
+.client-workspace .booking-draft .bdr-atoms .ea-data-row{border-bottom:1px solid var(--aw-line);padding-block:9px}
+.client-workspace .booking-draft .bdr-atoms .ea-group>em::before{border-radius:0}

@@ -722,3 +722,10 @@ html.aw-no-page-scroll,html.aw-no-page-scroll body{overflow:hidden!important;ove
 .admin-workspace .aw-sidebar-heading .aw-collapse:hover{background:transparent!important;border-color:transparent!important;color:inherit!important}
 /* No padding around admin page content */
 .admin-workspace .aw-content,.admin-workspace[data-area] .aw-content{padding:0!important}
+/* Main area restyle: quiet scrollbar, flat divided breadcrumb, calm headings. */
+.admin-workspace .aw-main{scrollbar-color:var(--aw-raised) transparent;scroll-padding-top:16px}
+.admin-workspace .aw-main::-webkit-scrollbar{width:8px}
+.admin-workspace .aw-main::-webkit-scrollbar-thumb{background:var(--aw-raised);border-radius:0}
+.admin-workspace .aw-breadcrumb{padding:12px 20px;border-bottom:1px solid var(--aw-line);margin-bottom:16px;font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+.admin-workspace .aw-main :is(h1,h2){letter-spacing:-.02em}
+.admin-workspace .aw-main>:is(h1,header):first-of-type{margin-top:0}
