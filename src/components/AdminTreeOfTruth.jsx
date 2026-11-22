@@ -26,7 +26,7 @@ function TreeNode({node,path,parent='root',branch,focus,selectedPath,onSelect}){
  </div>;
 }
 
-function TreeCanvas({nodes,focus,selectedPath,onSelect,identityOnly=false}){
+function TreeCanvas({nodes,focus,selectedPath,onSelect,identityOnly=false,rootVisible=true}){
  const viewport=useRef(null),frame=useRef(null),graph=useRef(null),initialFit=useRef(false);
  const [scale,setScale]=useState(.75),[size,setSize]=useState({width:1600,height:1600}),[edges,setEdges]=useState([]),[viewportSize,setViewportSize]=useState({width:0,height:0}),[previewNodes,setPreviewNodes]=useState([]),[visible,setVisible]=useState({x:0,y:0,width:0,height:0});
  const {zoomTo,panning,onClickCapture}=useConceptMapNavigation({viewport,frame,scale,onZoom:setScale,minScale:.02,maxScale:1.75});
@@ -77,7 +77,8 @@ function TreeCanvas({nodes,focus,selectedPath,onSelect,identityOnly=false}){
    <div className="tot-canvas" style={{width:Math.max(viewportSize.width,size.width*scale+64),height:Math.max(viewportSize.height,size.height*scale+64)}}><div ref={frame} className="tot-frame" style={{width:size.width*scale,height:size.height*scale}}>
     <div ref={graph} className="tot-graph" style={{transform:`scale(${scale})`}}>
      <svg className="tot-edges" width={size.width} height={size.height} aria-hidden="true">{edges.map(edge=>{const middle=(edge.x0+edge.x1)/2;return <g key={edge.id} className={`tot-branch-${edge.branch}`} style={{opacity:focus&&focus!==edge.branch? .35: .8}}><path d={`M ${edge.x0} ${edge.y0} C ${middle} ${edge.y0}, ${middle} ${edge.y1}, ${edge.x1} ${edge.y1}`}/><circle cx={edge.x1} cy={edge.y1} r="3"/></g>;})}</svg>
-     <button type="button" className={`tot-tree-root${selectedPath==='root'?' is-selected':''}`} data-node="root" onClick={()=>onSelect('root')} aria-pressed={selectedPath==='root'} aria-controls="tot-node-inspector">{identityOnly?<code>booking</code>:<><Sparkles size={24}/><small>ECHO / SHARED SOURCE</small><strong>Booking</strong><span>Catalogue → booking → AI</span></>}</button>
+     {rootVisible&&<button type="button" className={`tot-tree-root${selectedPath==='root'?' is-selected':''}`} data-node="root" onClick={()=>onSelect('root')} aria-pressed={selectedPath==='root'} aria-controls="tot-node-inspector">{identityOnly?<code>booking</code>:<><Sparkles size={24}/><small>ECHO / SHARED SOURCE</small><strong>Booking</strong><span>Catalogue → booking → AI</span></>}</button>}
+     {!rootVisible&&!nodes.length&&<p className="tot-no-seeds">No active identity seeds. Add Eidos or restore a deleted item.</p>}
      <div className="tot-branches">{nodes.map(node=><TreeNode key={node.branch} node={node} path={node.branch} branch={node.branch} focus={focus} selectedPath={selectedPath} onSelect={onSelect}/>)}</div>
     </div>
    </div></div>
@@ -98,7 +99,7 @@ function DataValue({value}){
  if(typeof value!=='object')return <span>{String(value)||'—'}</span>;
  const entries=Object.entries(value);
  if(!entries.length)return <span className="tot-data-empty">{Array.isArray(value)?'No entries':'No properties'}</span>;
- return <dl className="tot-data-properties">{entries.map(([key,item])=><div key={key}><dt>{Array.isArray(value)?Number(key)+1:key}</dt><dd><DataValue value={item}/></dd></div>)}</dl>;
+ return <dl className="tot-data-properties">{entries.map(([key,item])=><div key={key}><dt>{Array.isArray(value)?Number(key)+1:key==='fourthGoal'?'fourth goal':key}</dt><dd><DataValue value={item}/></dd></div>)}</dl>;
 }
 
 function NodeInspector({selection,onSelect,onClear}){
@@ -143,7 +144,7 @@ export default function AdminTreeOfTruth({token}){
  const references=source=>allAtoms.filter(atom=>atom.branch===source).map(atom=>({id:atom.id,label:atom.name,note:`Step ${atom.step} · ${atom.code}`,source,data:atom}));
  const languageById=new Map((music.languages||[]).map(row=>[row.id,row.name]));
  const tree=[
-  {branch:'eidos',label:'Eidos',note:`${eidos.filter(item=>item.id!=='booking').length} identity seeds`,children:eidos.filter(item=>item.id!=='booking').map(item=>({key:item.id,id:item.id,label:'Eidos',data:{id:item.id}}))},
+  {branch:'eidos',label:'Eidos',note:`${eidos.filter(item=>item.id!=='booking').length} identity seeds`,children:eidos.filter(item=>item.id!=='booking').map(item=>({key:item.id,id:item.id,label:'Eidos',data:{id:item.id,fourthGoal:item.fourthGoal||''}}))},
   {branch:'services',label:'Services & equipment',note:`${services.length} services · ${equipment.length} equipment items`,children:[
    ...nodes.map(node=>({...leaf(node),data:data.catalog.find(row=>row.id===node.id)||node,removed:node.removed,note:node.removed?'Removed service':`${node.items.length} equipment items`,children:[...node.items.map(leaf),...node.removedItems.map(item=>({...leaf(item),removed:true,note:'Removed equipment'}))]})),
    ...(view?.orphans.length?[group('Removed equipment without a service',view.orphans.map(item=>({...leaf(item),removed:true})))]:[]),
@@ -161,8 +162,8 @@ export default function AdminTreeOfTruth({token}){
   {branch:'prices',label:'Prices',note:`${prices.length} price rows`,children:[group('Price rows',prices.map(price=>({...leaf(price),note:`${(Number(price.amountCents||0)/100).toFixed(2)} ${price.currency||'CAD'}`,children:[{label:'Linked catalogue ID',id:price.serviceId||price.equipmentId||price.id,data:data.catalog.find(row=>row.id===price.serviceId)||equipment.find(row=>row.id===price.equipmentId)}]}))),...(unpriced.length?[group('Services without a price row',unpriced.map(leaf))]:[]),{label:'Booking quotes',note:'Prices feed the quote'}]},
   {branch:'ai',label:'Echo AI',note:'Connected reader of the tree',children:[{label:'Available services',children:[{id:'dj',label:'DJ',note:steps.dj?'Offered':'Not offered'},{id:'rental',label:'Rental',note:steps.rental?'Offered':'Not offered'}]},group('Booking steps',STEP_NAMES.filter((_,index)=>present[index]).map(label=>({label}))),{label:'Client conversations',note:'Uses the tree to understand services and booking steps'}]},
  ];
- const displayTree=mode==='eidos'?eidos.filter(item=>item.id!=='booking').map(item=>({branch:item.id,key:item.id,id:item.id,label:item.id,identityOnly:true,data:{id:item.id}})):tree;
- const rootNode=mode==='eidos'?{label:'booking',id:'booking',data:{id:'booking'},children:displayTree}:{label:'Booking',id:'booking',data:{...eidos.find(item=>item.id==='booking'),services:services.length,equipment:equipment.length,eventTypes:events.length,priceRows:prices.length,dataAtoms:allAtoms.length,steps},children:tree};
+ const displayTree=mode==='eidos'?eidos.filter(item=>item.id!=='booking').map(item=>({branch:item.id,key:item.id,id:item.id,label:item.id,identityOnly:true,data:{id:item.id,fourthGoal:item.fourthGoal||''}})):tree;
+ const rootNode=mode==='eidos'?{label:'booking',id:'booking',data:{id:'booking',fourthGoal:eidos.find(item=>item.id==='booking')?.fourthGoal||''},children:displayTree}:{label:'Booking',id:'booking',data:{...eidos.find(item=>item.id==='booking'),services:services.length,equipment:equipment.length,eventTypes:events.length,priceRows:prices.length,dataAtoms:allAtoms.length,steps},children:tree};
  const resolveSelection=path=>{
   if(!path)return null;
   if(path==='root')return{node:rootNode,path,trail:[]};
@@ -183,10 +184,10 @@ export default function AdminTreeOfTruth({token}){
   if(next!==undefined){event.preventDefault();changeMode(MAP_MODES[next].id);document.getElementById(`tot-tab-${MAP_MODES[next].id}`)?.focus();}
  };
  return <section className="tot" aria-label="Eden of Eide concept map"><div className="tot-workbench">
-  <EidosAside token={token} items={eidos} onItems={setEidos} selectedId={selectedPath==='root'?'booking':selection?.node.id} onSelect={item=>{setSelectedPath(item.id==='booking'?'root':mode==='eidos'?item.id:`eidos/${item.id}`);setFocus(item.id==='booking'?'':mode==='eidos'?item.id:'eidos');}}/>
+  <EidosAside onClear={()=>{setSelectedPath('');setFocus('');}} token={token} items={eidos} onItems={setEidos} selectedId={selectedPath==='root'?'booking':selection?.node.id} onSelect={item=>{setSelectedPath(item.id==='booking'?'root':mode==='eidos'?item.id:`eidos/${item.id}`);setFocus(item.id==='booking'?'':mode==='eidos'?item.id:'eidos');}}/>
   <div className="tot-stage">
   <header className="tot-mode-header"><h1>Eden of Eide</h1><div role="tablist" aria-label="Concept map modes">{MAP_MODES.map((item,index)=><button key={item.id} id={`tot-tab-${item.id}`} type="button" role="tab" aria-selected={mode===item.id} aria-controls={`tot-panel-${item.id}`} tabIndex={mode===item.id?0:-1} onClick={()=>changeMode(item.id)} onKeyDown={event=>tabKeys(event,index)}>{item.label}</button>)}</div></header>
   <div className="tot-toolbar"><span>{selection?selection.node.label:'Select an item to view its data'}</span>{selection&&<button type="button" onClick={()=>{setFocus('');setSelectedPath('');}}><X size={13}/>Clear selection</button>}</div>
-  <div className="tot-mode-panel" role="tabpanel" id={`tot-panel-${mode}`} aria-labelledby={`tot-tab-${mode}`}><>{mode==='booking'&&error?<p className="tot-error" role="alert">{error}</p>:mode==='booking'&&!view?<p className="tot-loading" role="status">Loading Booking…</p>:<TreeCanvas key={mode} nodes={displayTree} focus={focus} selectedPath={selectedPath} onSelect={selectNode} identityOnly={mode==='eidos'}/>}</></div>
+  <div className="tot-mode-panel" role="tabpanel" id={`tot-panel-${mode}`} aria-labelledby={`tot-tab-${mode}`}><>{mode==='booking'&&error?<p className="tot-error" role="alert">{error}</p>:mode==='booking'&&!view?<p className="tot-loading" role="status">Loading Booking…</p>:<TreeCanvas key={mode} nodes={displayTree} focus={focus} selectedPath={selectedPath} onSelect={selectNode} identityOnly={mode==='eidos'} rootVisible={mode!=='eidos'||eidos.some(item=>item.id==='booking')}/>}</></div>
  </div><NodeInspector selection={selection} onSelect={selectNode} onClear={()=>{setSelectedPath('');setFocus('');}}/></div></section>;
 }
