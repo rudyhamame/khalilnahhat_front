@@ -210,3 +210,15 @@
 .client-workspace .aw-breadcrumb{display:none}
 .client-workspace .aw-main>.dashboard-services-view.is-split{margin:0}
 .dashboard-status-end.is-cancelled{display:none}
+/* Overview restyle: square, flat, one joined stat strip, borderless rows; matches the flush bookings view. */
+.client-workspace .cw-heading{margin:0 0 24px;padding-bottom:20px;border-bottom:1px solid var(--aw-line)}
+.client-workspace .cw-stats{gap:0;margin-bottom:24px;border:1px solid var(--aw-line);background:var(--aw-sidebar)}
+.client-workspace .cw-stat{border:0;border-radius:0;background:none;padding:22px 24px}
+.client-workspace .cw-stat+.cw-stat{border-inline-start:1px solid var(--aw-line)}
+.client-workspace .cw-stat:hover{background:var(--aw-hover)}
+.client-workspace .cw-stat span{font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+.client-workspace .cw-stat strong{font-size:40px;font-weight:300;letter-spacing:-.03em}
+.client-workspace .cw-panel{border:0;border-radius:0;border-top:1px solid var(--aw-line);background:none;padding:22px 0}
+.client-workspace .cw-panel.cw-empty{background:var(--aw-sidebar);border:1px solid var(--aw-line)}
+.client-workspace .cw-event-row:hover{background:var(--aw-hover)}
+@media(max-width:700px){.client-workspace .cw-stats{border:0;background:none;gap:10px}.client-workspace .cw-stat,.client-workspace .cw-stat+.cw-stat{border:1px solid var(--aw-line);background:var(--aw-sidebar)}}
