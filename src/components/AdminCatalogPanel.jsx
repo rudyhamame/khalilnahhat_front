@@ -225,8 +225,8 @@ export default function AdminCatalogPanel({ token, mode = 'catalog' }) {
     {/* The event editor lives outside the page content: a full-height column that starts at the very top. */}
     {tab === 'events' || mode !== 'events' ? <CatalogEntryManager onDraft={setDraft} key={mode} ref={eventManager} inline startClosed={mode !== 'events'} kind={mode === 'events' ? 'event' : 'service'} hideList renderPrice={(entry) => <PriceEditor key={entry.priceId} label={entry.name} price={prices.find((price) => price.id === entry.priceId)} token={token} onSaved={load} report={report} />} items={catalog} equipment={equipment} token={token} onSaved={load} report={report} onSelectionChange={setSelectedEvent}/> : null}
     {tab === 'equipment' ? (eqOpen ? <EquipmentEditor onDraft={setDraft} key={selectedEvent || 'new'} item={equipment.find((entry) => entry.id === selectedEvent)} services={serviceGroups} token={token} reload={load} report={report} onSelect={() => { setSelectedEvent(''); setEqOpen(false); }} /> : null) : null}
-    {mode !== 'events' ? <aside className="cat-id-tree" aria-label="Eden of Eide">
-      <header><h3>Eden of Eide</h3><span>Services &amp; equipment IDs</span></header>
+    {mode !== 'events' ? <aside className="cat-id-tree" aria-label="Services and equipment IDs">
+      <header><h3>Services &amp; equipment</h3><span>Services &amp; equipment IDs</span></header>
       {/* A deleted service or equipment keeps its id and its place here as a "removed" node; the booking page hides it. */}
       <ul>{treeNodes.map((node) => <li key={node.id} className={node.removed ? 'is-removed' : undefined}>
         <div className="cat-tree-service">{node.removed ? null : <strong>{node.name}</strong>}<code>{node.id}</code>{node.removed ? <em>removed</em> : <b>{node.items.length}</b>}</div>

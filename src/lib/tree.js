@@ -1,4 +1,4 @@
-// The Eden of Eide: the buffer (memory) between the catalogue tables (services and equipments) and the Booking page.
+// The services tree: the buffer (memory) between the catalogue tables (services and equipments) and the Booking page.
 // This is the ONLY booking-side reader of the catalogue. Steps, sections and data atoms read the tree; nothing in the booking
 // talks to the catalogue directly. The tree is rebuilt whenever the catalogue loads or changes, and it is keyed by ids:
 //  - a step or section exists only while its service id is in the tree (dj -> step 3, any rental service -> the Rental step),
@@ -8,7 +8,7 @@ import {useEffect,useSyncExternalStore} from 'react';
 import {apiRequest,fetchEquipment} from './api.js';
 import {setTreeSteps,stepsOf,treeSteps,withServiceIds} from './treeCore.js';
 
-let tree={catalog:[],equipment:[],atomEidos:[],loading:true,failed:false,steps:treeSteps()},inFlight=null,queued=false;
+let tree={catalog:[],equipment:[],loading:true,failed:false,steps:treeSteps()},inFlight=null,queued=false;
 const listeners=new Set();
 
 const publish=next=>{tree=next;setTreeSteps(next.steps);listeners.forEach(listener=>listener());};
@@ -19,11 +19,11 @@ const publish=next=>{tree=next;setTreeSteps(next.steps);listeners.forEach(listen
 async function fetchTree(){
  try{
   const data=await apiRequest('/tree');
-  if(Array.isArray(data.catalog)&&Array.isArray(data.equipment)&&data.steps)return {catalog:data.catalog,equipment:data.equipment,steps:data.steps,atomEidos:data.atomEidos||[]};
+  if(Array.isArray(data.catalog)&&Array.isArray(data.equipment)&&data.steps)return {catalog:data.catalog,equipment:data.equipment,steps:data.steps};
  }catch{/* an older server: build the tree here */}
  const [catalog,equipment]=await Promise.all([apiRequest('/setup-catalog'),fetchEquipment()]);
  if(!Array.isArray(catalog.items)||!Array.isArray(equipment.items))throw new Error('Invalid rental catalog response');
- return {catalog:catalog.items,equipment:withServiceIds(catalog.items,equipment.items),steps:stepsOf(catalog.items),atomEidos:[]};
+ return {catalog:catalog.items,equipment:withServiceIds(catalog.items,equipment.items),steps:stepsOf(catalog.items)};
 }
 export function refreshTree(){
  if(inFlight){queued=true;return inFlight;}
@@ -31,11 +31,11 @@ export function refreshTree(){
  return inFlight;
 }
 const refresh=()=>{refreshTree();};
-const storage=event=>{if(['echo:catalog-revision','echo:eden-eidos-revision'].includes(event.key))refresh();};
+const storage=event=>{if(event.key==='echo:catalog-revision')refresh();};
 function subscribe(listener){
- if(!listeners.size){window.addEventListener('focus',refresh);window.addEventListener('echo:setup-catalog-changed',refresh);window.addEventListener('echo:eden-eidos-changed',refresh);window.addEventListener('storage',storage);}
+ if(!listeners.size){window.addEventListener('focus',refresh);window.addEventListener('echo:setup-catalog-changed',refresh);window.addEventListener('storage',storage);}
  listeners.add(listener);
- return()=>{listeners.delete(listener);if(!listeners.size){window.removeEventListener('focus',refresh);window.removeEventListener('echo:setup-catalog-changed',refresh);window.removeEventListener('echo:eden-eidos-changed',refresh);window.removeEventListener('storage',storage);}};
+ return()=>{listeners.delete(listener);if(!listeners.size){window.removeEventListener('focus',refresh);window.removeEventListener('echo:setup-catalog-changed',refresh);window.removeEventListener('storage',storage);}};
 }
 
 export {treeSteps};
@@ -57,15 +57,4 @@ export function useTreeService(id,ar=false){
 export function useTreeSteps(){
  const {loading,steps}=useTree();
  return {dj:!loading&&steps.dj,rental:!loading&&steps.rental};
-}
-
-// UI destinations read the atom's seed identity from Eden's snapshot.
-export function useTreeAtomIdentity(atomId){
- const {atomEidos=[]}=useTree();
- return atomEidos.find(link=>link.atomId===atomId)?.eidosId||null;
-}
-
-export function notifyTreeIdentitiesChanged(){
- window.dispatchEvent(new Event('echo:eden-eidos-changed'));
- try{localStorage.setItem('echo:eden-eidos-revision',`${Date.now()}:${Math.random()}`);}catch{/* Optional cross-tab refresh. */}
 }

@@ -16,7 +16,7 @@ test('client overview shares the workspace shell but exposes no admin tools', ()
   const html = render('overview');
   assert.match(html, /Client Workspace/);
   assert.match(html, /Welcome, Test/);
-  for (const href of ['/dashboard/draft', '/dashboard/bookings', '/dashboard/conversations']) assert.ok(html.includes(`href="${href}"`));
+  for (const href of ['/dashboard/draft', '/dashboard/bookings']) assert.ok(html.includes(`href="${href}"`));
   assert.doesNotMatch(html, /href="\/admin/);
   assert.doesNotMatch(html, /AI Search|Reserve a working slot/);
 });

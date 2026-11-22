@@ -7,7 +7,6 @@ import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 const AdminLiveStudio = lazy(() => import('./AdminLiveStudio'));
 import AdminServicesPanel from './AdminServicesPanel';
 import AdminCatalogPanel from './AdminCatalogPanel';
-import AdminTreeOfTruth from './AdminTreeOfTruth';
 import AdminPricingEngine from './AdminPricingEngine';
 import { GalleryImageField } from '../echo/GalleryPicker';
 import AdminTransactionsPanel from './AdminTransactionsPanel';
@@ -1506,7 +1505,6 @@ function AdminPage({
           {activePanel === 'prices' ? (
             <AdminCatalogPanel token={token} />
           ) : null}
-          {activePanel === 'tree-of-truth' ? <AdminTreeOfTruth token={token} /> : null}
           {activePanel === 'pricing' ? <AdminPricingEngine token={token} /> : null}
           {activePanel === 'events' ? (
             <AdminCatalogPanel token={token} mode="events" />

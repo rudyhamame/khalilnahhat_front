@@ -1,4 +1,4 @@
-import { FileText, History, LayoutDashboard, MessageCircle, UserRound } from 'lucide-react';
+import { FileText, History, LayoutDashboard, UserRound } from 'lucide-react';
 import AdminWorkspace from './AdminWorkspace';
 import './clientWorkspace.css';
 
@@ -8,7 +8,6 @@ const GROUPS = [
     ['overview', 'Overview', '/dashboard', LayoutDashboard],
     ['draft', 'Booking draft', '/dashboard/draft', FileText],
     ['bookings', 'Requests & quotes', '/dashboard/bookings', History],
-    ['conversations', 'Conversation history', '/dashboard/conversations', MessageCircle],
     ['profile', 'Personal info', '/dashboard/profile', UserRound],
   ] },
 ];

@@ -1,4 +1,4 @@
-// The pure part of the Eden of Eide (no React, no network). It is the one place that knows the special ids, how equipment links to a
+// The pure part of the services tree (no React, no network). It is the one place that knows the special ids, how equipment links to a
 // service, which booking steps exist, and how the tree is laid out. Plain modules (next-step logic, section lists) and the admin read it
 // here; lib/tree.js feeds it whenever the catalogue loads or changes.
 import {contract} from './eventOrderCore.mjs';

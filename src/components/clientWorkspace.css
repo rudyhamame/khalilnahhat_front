@@ -115,7 +115,7 @@
 .client-workspace .cw-account-delete button:focus-visible{outline:2px solid #f0a49d;outline-offset:3px}
 
 /* Bookings: left aside lists every booking, right main shows the selected one. */
-.client-workspace .dashboard-services-view.is-split{display:grid;grid-template-columns:minmax(220px,300px) minmax(0,1fr);grid-template-rows:minmax(0,1fr);gap:0;align-items:stretch;background:var(--aw-sidebar);border:1px solid var(--aw-line);border-radius:12px;overflow:hidden}
+.client-workspace .dashboard-services-view.is-split{display:grid;grid-template-columns:minmax(220px,300px) minmax(0,1fr);grid-template-rows:minmax(0,1fr);gap:0;align-items:stretch;background:var(--aw-sidebar);border:0;border-radius:0;padding:0;overflow:hidden}
 .client-workspace .dashboard-services-view.is-split .dashboard-service-request{background:none;border:0;border-radius:0;padding:20px}
 .client-workspace .dashboard-bookings-aside{display:grid;align-content:start;gap:10px;padding:20px;min-height:0;overflow-y:auto;border-inline-end:1px solid var(--aw-line)}
 .client-workspace .dashboard-bookings-count{font-size:12px;letter-spacing:.12em;opacity:.7}
@@ -207,3 +207,6 @@
 .client-workspace .dashboard-service-head-side{flex:0 1 auto;flex-wrap:wrap;justify-content:flex-end}
 .client-workspace .dashboard-service-request-head h3{overflow-wrap:anywhere}
 .client-workspace .dashboard-service-table .dashboard-service-row>*{min-width:0;overflow-wrap:anywhere}
+.client-workspace .aw-breadcrumb{display:none}
+.client-workspace .aw-main>.dashboard-services-view.is-split{margin:0}
+.dashboard-status-end.is-cancelled{display:none}

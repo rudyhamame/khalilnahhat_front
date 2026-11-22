@@ -6,7 +6,7 @@ import {KNOWN_SERVICE_IDS,DJ_ID,MC_ID} from '../lib/treeCore';
 import {GalleryImageField,default as GalleryPicker} from '../echo/GalleryPicker';
 const slugify=value=>value.toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,80);
 // Core services the booking recognises by id: re-adding one by hand needs exactly these values.
-// Service ids the admin can pick (from the Eden of Eide core); the others are made from the name.
+// Service ids the admin can pick (from the services tree core); the others are made from the name.
 const BOOKING_IDS=KNOWN_SERVICE_IDS;
 const CORE_SETTINGS={[DJ_ID]:{category:DJ_ID,selectionField:''},[MC_ID]:{category:MC_ID,selectionField:'music.mcRequested',name:'MC hosting & announcements'}};
 // "Add service": the deleted services, so one can be revived instead of rebuilt. Built-in ones come back with their original content;

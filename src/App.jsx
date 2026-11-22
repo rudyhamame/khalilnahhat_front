@@ -593,8 +593,6 @@ function App() {
             ? 'services'
           : routePath === '/admin/prices'
               ? 'prices'
-          : routePath === '/admin/tree'
-              ? 'tree-of-truth'
           : routePath === '/admin/pricing'
               ? 'pricing'
           : routePath === '/admin/events'
