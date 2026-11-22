@@ -524,6 +524,13 @@
 .admin-workspace #admin-live-stream .studio-control-dock{height:100%}
 }
 
+/* Fill the available admin workspace after removing the Live / Echo Studio title strip. */
+.admin-workspace[data-area="live-stream"] .aw-content{min-height:0;height:100%;overflow:hidden}
+.admin-workspace[data-area="live-stream"] #admin-live-stream{display:flex;flex:1 1 auto;flex-direction:column;width:100%;height:100%;min-height:0;overflow:hidden}
+.admin-workspace[data-area="live-stream"] #admin-live-stream>.admin-live-sessions-layout{display:flex;flex:1 1 auto;flex-direction:column;width:100%;height:100%;min-height:0}
+.admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-sessions-page-panel{flex:1 1 auto;width:100%;height:100%;min-height:0}
+.admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-single.has-requests-aside{height:100%;min-height:0}
+
 .studio-controller-tools>.studio-live-elapsed{flex:none;font:500 12px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace;font-variant-numeric:tabular-nums;color:#ffb4a8;white-space:nowrap}
 
 /* Production controller --------------------------------------------------

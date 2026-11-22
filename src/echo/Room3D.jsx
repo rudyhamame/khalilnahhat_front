@@ -1,6 +1,6 @@
 import {lazy,Suspense,useEffect,useRef,useState} from 'react';
+import {useTree} from '../lib/tree';
 import {X} from 'lucide-react';
-import {useRentalCatalog} from '../lib/useRentalCatalog';
 import {useCart} from './cart';
 import {useEventOrder} from './eventOrderContext';
 import {SimulationBoundary} from './ServiceVinyl';
@@ -11,7 +11,7 @@ const SetupSimulation=lazy(()=>import('./SetupSimulation'));
 // The 3D Room is its own viewport, under Echo AI. The 3D scene loads only when the visitor is close to it.
 export default function Room3D({lang,overlay=false}){
   const ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en;
-  const cart=useCart(),order=useEventOrder(),{equipment:items}=useRentalCatalog();
+  const cart=useCart(),order=useEventOrder(),{equipment:items}=useTree();
   const section=useRef(null),[near,setNear]=useState(false),[visible,setVisible]=useState(false);
   useEffect(()=>{
     const node=section.current;if(!node||typeof IntersectionObserver==='undefined'){setNear(true);setVisible(true);return undefined;}

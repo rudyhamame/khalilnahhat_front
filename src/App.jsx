@@ -593,6 +593,8 @@ function App() {
             ? 'services'
           : routePath === '/admin/prices'
               ? 'prices'
+          : routePath === '/admin/tree'
+              ? 'tree-of-truth'
           : routePath === '/admin/pricing'
               ? 'pricing'
           : routePath === '/admin/events'
@@ -692,7 +694,7 @@ function App() {
 
   if (currentView === 'dashboard') {
     if (!isSessionReady && authToken) {
-      return <p role="status">Loading your account…</p>;
+      return null;
     }
 
     if (!authUser) {

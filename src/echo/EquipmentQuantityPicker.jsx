@@ -9,5 +9,5 @@ export default function EquipmentQuantityPicker({item,quantity=0,onChange,ar=fal
 export function RemoveFromBookingButton({item,quantity=0,onChange,ar=false}){
  if(quantity<=0)return null;
  const label=ar?'إزالة من الحجز':'Remove from booking';
- return <button type="button" className="setup-add-booking is-added" aria-label={`${label}: ${item.name}`} title={label} onClick={()=>onChange(item,0)}><Trash2 size={16} aria-hidden="true"/></button>;
+ return <button type="button" className="setup-add-booking is-added" aria-label={`${label}: ${item.name}`} title={label} onClick={()=>onChange(item,0)}><Trash2 size={15} aria-hidden="true"/><span className="setup-remove-text">{ar?'إزالة':'Remove'}</span></button>;
 }

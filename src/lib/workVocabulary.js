@@ -2,7 +2,7 @@ import {useCallback,useEffect,useState} from 'react';
 import {apiRequest} from './api';
 import {subscribeWorkElementsChanged} from '../echo/workElementsCatalog';
 
-// The DJ service form offers what the admin keeps in Work Elements: genres, languages and dialects (each tied to its languages).
+// The DJ service form offers what the admin keeps in Work Elements: independent genres, languages, and the dialects belonging to each language.
 let cached=null;
 const names=rows=>[...new Set((rows||[]).map(row=>String(row.name||row.value||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
 export function loadWorkVocabulary(force=false){
@@ -22,8 +22,8 @@ export function loadWorkVocabulary(force=false){
    dialects:(row.dialectIds||[]).map(id=>(dialects.items||[]).find(dialect=>dialect.id===id)?.name).filter(Boolean),
   })).filter(row=>row.name).sort((a,b)=>a.name.localeCompare(b.name)),
   genres:names(genres.items),
-  // The genre cards shown on the DJ service form: everything the Work Elements genre card holds (name, description, its languages).
-  genreCards:(genres.items||[]).map(row=>({id:row.id,name:String(row.name||'').trim(),description:String(row.description||'').trim(),languages:(row.languageIds||[]).map(id=>(languages.items||[]).find(language=>language.id===id)?.name).filter(Boolean)})).filter(row=>row.name).sort((x,y)=>x.name.localeCompare(y.name)),
+  // The genre cards shown on the DJ service form: everything the Work Elements genre card holds (name and description).
+  genreCards:(genres.items||[]).map(row=>({id:row.id,name:String(row.name||'').trim(),description:String(row.description||'').trim()})).filter(row=>row.name).sort((x,y)=>x.name.localeCompare(y.name)),
   languages:(languages.items||[]).map(row=>({id:row.id,name:String(row.name||'').trim()})).filter(row=>row.name).sort((a,b)=>a.name.localeCompare(b.name)),
   dialects:(dialects.items||[]).map(row=>({id:row.id,name:String(row.name||'').trim(),languageIds:[...(row.languageIds||[]),row.parentId].filter(Boolean)})).filter(row=>row.name).sort((a,b)=>a.name.localeCompare(b.name)),
  })).catch(error=>{cached=null;throw error;});

@@ -12,6 +12,7 @@ export default function ConceptMapAdmin({token}){
  const dirty=draft&&JSON.stringify(saved)!==JSON.stringify(draft);
  return <section className="seasonal-admin" aria-labelledby="concept-map-admin-title">
   <header><span><Network size={20}/>ECHO AI / CONCEPT MAP</span><h1 id="concept-map-admin-title">Concept map toolbar</h1><p>Choose how the concept map on the Echo AI page is arranged by default. Visitors can still change it for themselves.</p></header>
+  <a className="concept-map-open-tree" href="/admin/tree"><Network size={18}/>Open Eden of Eide<span aria-hidden="true">→</span></a>
   {error&&<p role="alert" className="seasonal-admin-error">{error}</p>}
   {notice&&<p role="status" className="seasonal-admin-success">{notice}</p>}
   {!draft&&!error&&<p role="status" className="admin-loading">Loading concept map settings…</p>}

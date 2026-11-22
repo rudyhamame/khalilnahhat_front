@@ -362,13 +362,20 @@ export default function LandscapeDjController({stems,mic,audioGraph,unlock:unloc
   // Artwork rotation, in degrees. One turn = 1.8 s of music at 1x (the same mapping the jog wheel uses to scrub), so the artwork turns at the music's speed while playing,
   // and while the record is held it follows the hand exactly (same direction, same speed) because the jog wheel adds its own angle changes here.
   const art=useRef({angle:0,held:false,el:null,playing:false,rate:1});
+  const visibleDeck2=layers[1]||2,deck2=decks[visibleDeck2]||{},jogArt2=deck2.track?.coverImage?displayImageUrl(deck2.track.coverImage):'';
+  const jogPosition2=Number(deck2.position)||0,jogRate2=Number(deck2.playbackRate)||1;
+  const jogBpm2=Number(deck2.track?.sound?.bpm||deck2.track?.bpm)||recordingBeatGrid({trackId:deck2.track?.id,audioUrl:deck2.track?.audioUrl,time:0})?.bpm;
+  const art2=useRef({angle:0,held:false,el:null,playing:false,rate:1});
   art.current.playing=Boolean(player.playing);art.current.rate=Number(player.playbackRate)||1;
+  art2.current.playing=Boolean(deck2.playing);art2.current.rate=Number(deck2.playbackRate)||1;
   useEffect(()=>{
     let frame=0,last=performance.now();
     const tick=now=>{
-      const state=art.current,dt=Math.max(0,Math.min(.1,(now-last)/1000));last=now;
-      if(!state.held&&state.playing)state.angle+=360/1.8*state.rate*dt;
-      if(state.el)state.el.style.transform=`translateZ(0) rotate(${state.angle}deg)`;
+      const dt=Math.max(0,Math.min(.1,(now-last)/1000));last=now;
+      for(const state of [art.current,art2.current]){
+        if(!state.held&&state.playing)state.angle+=360/1.8*state.rate*dt;
+        if(state.el)state.el.style.transform=`translateZ(0) rotate(${state.angle}deg)`;
+      }
       frame=requestAnimationFrame(tick);
     };
     frame=requestAnimationFrame(tick);
@@ -386,7 +393,7 @@ export default function LandscapeDjController({stems,mic,audioGraph,unlock:unloc
     </defs>
     <rect x="0" y="0" width={W} height={H} rx="9" fill="url(#body)" stroke="#2c3033" strokeWidth="1.4"/>
     <rect x="370" y="3" width="326" height={H-6} fill="#0b0c0d" stroke="#2a2d2f"/>
-    {layers.map(n=><g key={n}><Deck key={(n===1?player:decks[n])?.track?.id||n} mediaTime={()=>n===1?audioGraph.current?.element:media.current[n]} dx={n%2?0:DECK2} n={n} player={n===1?player:(decks[n]||{})} command={(type,value)=>command(n,type,value)} art={n===1?art:null} readout={!(n===1&&jogArt)} switchLayer={()=>setLayers(previous=>previous.map(value=>value===n?(n>2?n-2:n+2):value))}/></g>)}
+    {layers.map(n=><g key={n}><Deck key={(n===1?player:decks[n])?.track?.id||n} mediaTime={()=>n===1?audioGraph.current?.element:media.current[n]} dx={n%2?0:DECK2} n={n} player={n===1?player:(decks[n]||{})} command={(type,value)=>command(n,type,value)} art={n===1?art:n===visibleDeck2?art2:null} readout={!(n===1&&jogArt)} switchLayer={()=>setLayers(previous=>previous.map(value=>value===n?(n>2?n-2:n+2):value))}/></g>)}
     {/* mic column */}
     <g className="mixer">
       <rect x="373" y="9" width="44" height="9" fill="#17191b" stroke="#2a2d2f"/><T x={395} y={16} s={5.2} f="#e8ecee">MIC</T>{mic?.active&&mic.latency&&<T x={395} y={6.5} s={3.4} f="#7fd6b0" aria-label="Browser audio latency">{(()=>{const total=mic.latency.base==null&&mic.latency.output==null?null:(mic.latency.base||0)+(mic.latency.output||0);return total==null?'LAT n/a':`LAT ${(total*1000).toFixed(1)} ms`;})()}</T>}
@@ -437,6 +444,12 @@ export default function LandscapeDjController({stems,mic,audioGraph,unlock:unloc
     </g>
   </svg>
   {layers[0]===1&&jogArt&&<img ref={el=>{art.current.el=el;}} className="ddj-jog-art" src={jogArt} alt="" aria-hidden="true" draggable="false" style={{left:`${(JC.x-49)/view[2]*100}%`,top:`${(JC.y-49)/view[3]*100}%`,width:`${98/view[2]*100}%`,height:`${98/view[3]*100}%`}}/>}
+  {layers[1]===visibleDeck2&&jogArt2&&<img ref={el=>{art2.current.el=el;}} className="ddj-jog-art" src={jogArt2} alt="" aria-hidden="true" draggable="false" style={{left:`${(DECK2+JC.x-49)/view[2]*100}%`,top:`${(JC.y-49)/view[3]*100}%`,width:`${98/view[2]*100}%`,height:`${98/view[3]*100}%`}}/>}
+  {layers[1]===visibleDeck2&&jogArt2&&<svg className="ddj-jog-readout" viewBox={view.join(' ')} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+    <T x={DECK2+JC.x} y={JC.y-18} s={6} f="#91d5f7">DECK {visibleDeck2}</T>
+    <T x={DECK2+JC.x} y={JC.y+3} s={12} f="#f1f6f7">{Math.floor(jogPosition2/60)}:{String(Math.floor(jogPosition2%60)).padStart(2,'0')}</T>
+    <T x={DECK2+JC.x} y={JC.y+21} s={5.5} f="#a4c8ba">{jogBpm2?`${Math.round(jogBpm2*jogRate2)} BPM`:'TAP BPM'}</T>
+  </svg>}
   {layers[0]===1&&jogArt&&<svg className="ddj-jog-readout" viewBox={view.join(' ')} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
     <T x={JC.x} y={JC.y-18} s={6} f="#91d5f7">DECK 1</T>
     <T x={JC.x} y={JC.y+3} s={12} f="#f1f6f7">{jogTime}</T>

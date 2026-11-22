@@ -24,7 +24,6 @@ html body .djf .favourite-song-row-actions button:last-child{color:#f0a3a3;borde
 html body .djf .favourite-song-row-actions button:hover:not(:disabled){background:#ffffff1c}
 html body .djf .favourite-song-row-actions button:disabled{opacity:.4;cursor:default}
 html body .djf .favourite-song-row-actions svg{width:16px;height:16px}
-.youtube-song-search{display:grid;gap:10px}
 .youtube-search-form{display:flex;gap:8px;align-items:center}.youtube-search-form input{flex:1;min-width:0}
 .youtube-results{display:grid;gap:8px;margin:0;padding:0;list-style:none}
 .youtube-results li{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid #ffffff1f;border-radius:10px}
@@ -40,3 +39,103 @@ html body .djf .favourite-song-row-actions svg{width:16px;height:16px}
 .djf-songs>li>.djf-song-found{grid-column:3/5;min-width:0}
 .djf-song-found strong{overflow-wrap:anywhere}
 @media(max-width:900px){.djf-songs>li>.djf-song-found{grid-column:2/4;grid-row:2}}
+
+/* Restyle: Songs for event moments (add buttons, YouTube search, results, song rows). No dashed borders. */
+html body .djf .djf-song-adders{gap:10px}
+html body .djf .djf-song-adders .djf-add{min-height:42px;padding:0 18px;border:1px solid #e3d3a366;border-radius:12px;background:#e3d3a30f;color:#e3d3a3;font:600 13px/1 'Manrope','Noto Sans Arabic',sans-serif}
+html body .djf .djf-song-adders .djf-add:hover:not(:disabled){background:#e3d3a31f;border-color:#e3d3a3}
+html body .djf .djf-song-adders .djf-add[aria-pressed=true]{background:#e3d3a3;color:#0d1012;border-color:#e3d3a3}
+html body .djf .youtube-search-form .djf-input{min-height:44px;border-radius:12px}
+html body .djf .youtube-search-form .djf-add{min-height:44px;border:0;background:#e3d3a3;color:#0d1012;font-weight:700}
+html body .djf .youtube-search-form .djf-add:hover:not(:disabled){background:#f0e3b8}
+html body .djf .youtube-results{gap:8px}
+html body .djf .youtube-results li{gap:12px;padding:8px;border:1px solid #ffffff1a;border-radius:12px;background:#0b131588}
+html body .djf .youtube-results img{width:88px;height:50px;border-radius:8px}
+html body .djf .youtube-result-copy strong{color:#f4f7f3;font-size:13.5px;font-weight:600}
+html body .djf .youtube-result-copy small{font-size:12px;color:#9fb5a8;opacity:1}
+html body .djf .youtube-results .djf-add{flex:none;min-height:36px;padding:0 14px;border:1px solid #a6e3ce66;background:#a6e3ce14;color:#c0efdc;white-space:nowrap}
+html body .djf .youtube-results .djf-add:disabled{opacity:.7}
+html body .djf .djf-songs{gap:12px}
+html body .djf .djf-songs>li{padding:12px;border:1px solid #ffffff1a;border-radius:14px;background:#ffffff08;align-items:center}
+html body .djf .djf-song-found strong{color:#f4f7f3;font-size:14px}
+html body .djf .djf-song-found small{color:#9fb5a8;opacity:1}
+html body .djf .djf-song-found a{color:#e3d3a3;text-underline-offset:3px}
+html body .djf .djf-songs .djf-row-actions{gap:6px}
+html body .djf .djf-songs .djf-row-actions button{width:32px;height:32px;border:1px solid #ffffff2b;border-radius:9px;background:#ffffff0a}
+@media(max-width:560px){html body .djf .youtube-results li{flex-wrap:wrap}html body .djf .youtube-results .djf-add{width:100%;justify-content:center}}
+
+/* Song row inputs: smaller text, placeholders never cut with an ellipsis. */
+html body .djf .djf-songs :is(.djf-input,.djf-combo>input){min-height:40px;padding:0 10px;font-size:12px}
+html body .djf .djf-songs :is(.djf-input,.djf-combo>input)::placeholder{font-size:12px;text-overflow:clip;white-space:nowrap;overflow:visible}
+html body .djf .djf-songs>li{grid-template-columns:auto minmax(130px,24%) minmax(0,1fr) minmax(0,1fr) auto}
+
+/* Song rows live in a narrow column: stack the fields (moment on the first line, then song, artist, link at full width) so no placeholder is squeezed. */
+html body .djf .djf-songs.djf-songs>li{grid-template-columns:auto minmax(0,1fr) auto;gap:8px 10px}
+html body .djf .djf-songs.djf-songs>li>*{grid-row:auto;grid-column:2/4;min-width:0}
+html body .djf .djf-songs.djf-songs>li>.djf-num{grid-column:1;grid-row:1}
+html body .djf .djf-songs.djf-songs>li>:nth-child(2){grid-column:2;grid-row:1}
+html body .djf .djf-songs.djf-songs>li>.djf-row-actions{grid-column:3;grid-row:1}
+
+/* YouTube found list: each result is a card, thumbnail with a duration feel, two-line title, artist underneath, action at the end. */
+html body .djf .youtube-results{gap:10px;max-height:360px;overflow-y:auto;padding-inline-end:2px;scrollbar-width:thin}
+html body .djf .youtube-results li{display:grid;grid-template-columns:96px minmax(0,1fr) auto;gap:6px 12px;align-items:center;padding:10px;border:1px solid #ffffff1a;border-radius:14px;background:#ffffff08;transition:border-color .15s,background .15s}
+html body .djf .youtube-results li:hover{border-color:#e3d3a366;background:#e3d3a30d}
+html body .djf .youtube-results img{width:96px;height:54px;border-radius:10px;border:1px solid #ffffff1f}
+html body .djf .youtube-result-copy{gap:3px}
+html body .djf .youtube-result-copy strong{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;white-space:normal;color:#f4f7f3;font-size:13px;line-height:1.35}
+html body .djf .youtube-result-copy small{color:#e3d3a3;font-size:11.5px;letter-spacing:.02em}
+html body .djf .youtube-results .djf-add{min-height:34px;padding:0 14px;border:0;border-radius:999px;background:#e3d3a3;color:#0d1012;font-weight:700}
+html body .djf .youtube-results .djf-add:hover:not(:disabled){background:#f0e3b8}
+html body .djf .youtube-results .djf-add:disabled{background:#a6e3ce22;color:#c0efdc;opacity:1}
+@media(max-width:560px){html body .djf .youtube-results li{grid-template-columns:72px minmax(0,1fr)}html body .djf .youtube-results img{width:72px;height:41px}html body .djf .youtube-results .djf-add{grid-column:1/-1;width:100%;justify-content:center}}
+
+/* More songs for the same moment. */
+html body .djf .djf-same-moment{align-self:center;color:#9fb5a8;font-size:12px;font-style:italic}
+html body .djf .djf-songs.djf-songs>li>.djf-more-songs{display:flex;flex-wrap:wrap;gap:8px;grid-row:auto}
+html body .djf .djf-more-songs .djf-add{min-height:34px;padding:0 12px;border:1px solid #ffffff2b;border-radius:10px;background:#ffffff0a;color:#d9e2dc;font-size:12px}
+html body .djf .djf-more-songs .djf-add:hover:not(:disabled){border-color:#e3d3a3;color:#e3d3a3}
+
+/* One wrapper card per moment: header (number, moment, actions), its songs, then "another song". */
+html body .djf .djf-songs.djf-songs>li.djf-moment{display:flex;flex-direction:column;align-items:stretch;gap:12px;padding:14px}
+html body .djf .djf-songs.djf-songs>li.djf-moment>*{grid-column:auto;grid-row:auto}
+html body .djf .djf-moment-head{display:flex;align-items:center;gap:10px}
+html body .djf .djf-moment-head>.djf-input{flex:1;min-width:0}
+html body .djf .djf-moment-songs{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+html body .djf .djf-moment-song{position:relative;display:grid;gap:8px;padding:10px;border:1px solid #ffffff14;border-radius:12px;background:#0b131566}
+html body .djf .djf-moment-song:has(>.djf-song-x){padding-inline-end:44px}
+html body .djf .djf-song-x{position:absolute;top:8px;inset-inline-end:8px;display:grid;place-items:center;width:28px;height:28px;padding:0;border:1px solid #ffffff2b;border-radius:8px;background:#ffffff0a;color:#f0a3a3;cursor:pointer}
+html body .djf .djf-moment .djf-more-songs{display:flex;flex-wrap:wrap;gap:8px}
+
+/* Click the thumbnail to preview the video under the result. */
+html body .djf .yt-preview-btn{position:relative;display:block;width:96px;height:54px;padding:0;border:0;border-radius:10px;background:none;cursor:pointer;overflow:hidden}
+html body .djf .yt-preview-btn img{display:block;width:100%;height:100%;object-fit:cover}
+html body .djf .yt-preview-btn>span{position:absolute;inset:0;display:grid;place-items:center;background:#0b131566;color:#fff;transition:background .15s}
+html body .djf .yt-preview-btn:hover>span{background:#0b131599}
+html body .djf .yt-preview-btn:focus-visible{outline:2px solid #e3d3a3;outline-offset:2px}
+html body .djf .youtube-results .yt-preview{grid-column:1/-1;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#000}
+html body .djf .youtube-results .yt-preview iframe{display:block;width:100%;height:100%;border:0}
+@media(max-width:560px){html body .djf .yt-preview-btn{width:72px;height:41px}}
+
+/* Manual song: an "Add song" button confirms it into the same card the YouTube songs use. */
+html body .djf .djf-song-submit{justify-self:center;min-height:38px;padding:0 16px;border:0;border-radius:999px;background:#e3d3a3;color:#0d1012;font-weight:700}
+html body .djf .djf-song-submit:hover:not(:disabled){background:#f0e3b8}
+html body .djf .djf-song-submit:disabled{background:#ffffff14;color:#8d9a93}
+html body .djf .djf-song-edit{justify-self:start;margin-top:4px;padding:0;border:0;background:none;color:#9fb5a8;font:600 12px/1 'Manrope','Noto Sans Arabic',sans-serif;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+
+/* Moment: a select, plus a text box when "Other" is chosen. */
+html body .djf .djf-moment-pick{display:grid;flex:1;min-width:0;gap:8px}
+html body .djf .djf-moment-pick select.djf-input{appearance:auto;cursor:pointer}
+html body .djf .djf-unsaved{justify-self:center;color:#e3d3a3;font-size:12px;text-align:center}
+
+/* New moment: choose how to add its first song. */
+html body .djf .djf-choose{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+html body .djf .djf-choose>span{flex:1 1 100%;color:#9fb5a8;font-size:12px}
+html body .djf .djf-choose .djf-add{min-height:36px;padding:0 14px;border:1px solid #e3d3a366;border-radius:10px;background:#e3d3a30f;color:#e3d3a3;font-size:12.5px}
+
+/* Song picker of a new moment: centred title, two equal option cards. */
+html body .djf .djf-choose{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px;border:1px solid #ffffff14;border-radius:12px;background:#0b131566}
+html body .djf .djf-choose>span{grid-column:1/-1;text-align:center;color:#e9eee8;font:600 13px/1.3 'Manrope','Noto Sans Arabic',sans-serif}
+html body .djf .djf-choose .djf-add{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 12px;border:1px solid #e3d3a366;border-radius:12px;background:#e3d3a30f;color:#e3d3a3;font:600 13px/1.2 'Manrope','Noto Sans Arabic',sans-serif;text-align:center}
+html body .djf .djf-choose .djf-add:hover{background:#e3d3a31f;border-color:#e3d3a3}
+@media(max-width:420px){html body .djf .djf-choose{grid-template-columns:1fr}}
+html body .djf .djf-moment .djf-more-songs{justify-content:center}

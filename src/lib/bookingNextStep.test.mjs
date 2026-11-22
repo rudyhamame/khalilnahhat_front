@@ -1,7 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {bookingNextStep} from './bookingNextStep.js';
 import {createEventOrder} from './eventOrderCore.mjs';
-const complete=()=>{const o=createEventOrder();Object.assign(o.customer,{fullName:'A B',email:'a@b.co',contactMethod:'email'});Object.assign(o.event,{type:'wedding',date:'2099-06-20',startTime:'18:00',endTime:'23:00',guestCount:100});Object.assign(o.event.venue,{name:'Hall',address:'1 St',city:'Toronto',postalCode:'M1B 2K3',setting:'indoor'});o.music.djRequested=true;o.services=['dj'];return o;};
+const complete=()=>{const o=createEventOrder();Object.assign(o.customer,{fullName:'A B',email:'a@b.co',contactMethod:'email'});Object.assign(o.event,{type:'wedding',date:'2099-06-20',startTime:'18:00',endTime:'23:00',guestCount:100});Object.assign(o.event.venue,{name:'Hall',address:'1 St',city:'Toronto',postalCode:'M1B 2K3',country:'Canada',setting:'indoor'});o.music.djRequested=true;o.rental={...o.rental,requested:false};o.services=['dj'];return o;};
 test('the stages are explicit: required, then optional extras, then ready to submit',()=>{
  assert.ok(bookingNextStep(createEventOrder()).path);
  const optional=bookingNextStep(complete());
@@ -20,4 +20,10 @@ test('"Your event type" appears in the review only when the type is Other, and i
  assert.equal(line.label,'Your event type');assert.equal(line.required,true);
  assert.equal(bookingNextStep(other).path,'event.title');
  other.event.title='Quinceañera';assert.notEqual(bookingNextStep(other).path,'event.title');
+});
+
+test('the rental question must be answered, yes or no',()=>{
+ const order=complete();order.rental.requested=null;
+ assert.equal(bookingNextStep(order).path,'rental.requested');
+ order.rental.requested=true;assert.notEqual(bookingNextStep(order).path,'rental.requested');
 });

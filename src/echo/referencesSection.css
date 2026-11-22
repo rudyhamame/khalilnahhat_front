@@ -36,6 +36,26 @@
 .ref-items.is-grid strong{margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ref-items.is-grid textarea{min-height:44px;padding:8px 10px;font-size:13px}
 .ref-items.is-grid .ref-x{position:absolute;top:8px;inset-inline-end:8px;width:28px;height:28px;border-color:#ffffff40;background:#0b1315cc;color:#eef4ef;backdrop-filter:blur(4px)}
+.ref-photo-dropzone{box-sizing:border-box;padding:12px;border:1.5px dashed #a6e3ce66;border-radius:14px;background:#a6e3ce0d}
+.ref-photo-dropzone .ref-items.is-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.ref-photo-dropzone .ref-items.is-grid>li:not(.ref-photo-add-cell){border:1px solid #a6e3ce33;border-radius:10px;background:#0b131588}
+.ref-photo-dropzone .ref-items.is-grid>li>img{aspect-ratio:1/1;object-fit:contain;background:#0b1315}
+.ref-photo-add-cell{min-height:100%;padding:0!important;border:0!important;border-radius:10px!important;background:none!important}
+.ref-photo-add{position:relative;display:flex;box-sizing:border-box;min-height:100%;height:100%;aspect-ratio:1/1;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:14px;border:1.5px dashed #a6e3ce66;border-radius:10px;background:#a6e3ce08;color:#c0efdc;font:600 13px/1.3 'Manrope','Noto Sans Arabic',sans-serif;cursor:pointer;transition:background .2s,border-color .2s}
+.ref-photo-add:hover:not(.is-disabled){background:#a6e3ce1f;border-color:#a6e3cecc}
+.ref-photo-add.is-disabled{opacity:.45;cursor:default}
+.ref-photo-add input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.ref-photo-add:focus-within{outline:2px solid #a6e3ce;outline-offset:2px}
+.ref-file-dropzone{box-sizing:border-box;padding:12px;border:1.5px dashed #a6e3ce66;border-radius:14px;background:#a6e3ce0d}
+.ref-file-dropzone .ref-items{grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:12px}
+.ref-file-dropzone .ref-items>li:not(.ref-file-add-cell){align-items:start;border:1px solid #a6e3ce33;border-radius:10px;background:#0b131588}
+.ref-file-dropzone .ref-doc{width:48px;height:48px}
+.ref-file-add-cell{min-height:100%;padding:0!important;border:0!important;border-radius:10px!important;background:none!important}
+.ref-file-add{position:relative;display:flex;box-sizing:border-box;min-height:100%;height:100%;align-items:center;justify-content:center;gap:10px;padding:16px;border:1.5px dashed #a6e3ce66;border-radius:10px;background:#a6e3ce08;color:#c0efdc;font:600 13px/1.3 'Manrope','Noto Sans Arabic',sans-serif;cursor:pointer;transition:background .2s,border-color .2s}
+.ref-file-add:hover:not(.is-disabled){background:#a6e3ce1f;border-color:#a6e3cecc}
+.ref-file-add.is-disabled{opacity:.45;cursor:default}
+.ref-file-add input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.ref-file-add:focus-within{outline:2px solid #a6e3ce;outline-offset:2px}
 html body .echo[data-page=home][data-theme] .ref-items.is-grid textarea{font:400 13px/1.4 'Manrope','Noto Sans Arabic',sans-serif!important;min-height:40px}
 
 /* Index badge at the end of each attachment block title. */
@@ -47,3 +67,91 @@ html body .echo[data-page=home][data-theme] #additional-notes .booking-card-titl
 
 .setup-notes-card>label{display:flex;align-items:center;gap:6px}
 html body .echo[data-page=home][data-theme] .setup-notes-card>label>.ysf-order{display:inline-block;flex:none;margin-inline:auto 0;order:2;padding:2px 6px;border-radius:6px;background:#e3d3a31a;color:#e3d3a3;font:700 11px/1.4 'Manrope',sans-serif;font-style:normal;letter-spacing:.04em;font-variant-numeric:tabular-nums}
+
+/* UI pass: add tiles match their neighbours, the document add-button spans the row, link rows are compact and centred. */
+.ref-photo-dropzone .ref-items.is-grid{align-items:stretch}
+.ref-photo-add{aspect-ratio:auto;min-height:150px;text-align:center}
+.ref-file-dropzone .ref-items>.ref-file-add-cell{grid-column:1/-1;min-height:0}
+.ref-file-add{min-height:56px;white-space:nowrap}
+.ref-link-list li{align-items:center}
+.ref-link-list a{display:inline-flex;align-items:center;gap:6px;font-size:14px;line-height:1.4}
+.ref-link-list a svg{flex:none}
+.ref-link-form button{white-space:nowrap}
+@media(max-width:420px){.ref-link-form{flex-wrap:wrap}.ref-link-form input{flex-basis:100%}.ref-link-form button{width:100%;justify-content:center}}
+
+/* Photos: one row each, thumbnail at the start, comment textarea to its side, remove chip at the end (same as documents). */
+.ref-photo-dropzone .ref-items.is-grid{grid-template-columns:1fr;gap:12px}
+.ref-photo-dropzone .ref-items.is-grid>li:not(.ref-photo-add-cell){display:grid;grid-template-columns:72px minmax(0,1fr) 32px;gap:12px;align-items:start;padding:10px;overflow:visible}
+.ref-photo-dropzone .ref-items.is-grid>li>img{width:72px;height:72px;aspect-ratio:1/1;border-radius:10px;object-fit:cover}
+.ref-photo-dropzone .ref-items.is-grid>li>div{padding:0}
+.ref-photo-dropzone .ref-items.is-grid>li>.ref-x{position:static;width:32px;height:32px}
+.ref-photo-dropzone .ref-items.is-grid textarea{min-height:72px}
+.ref-photo-add{aspect-ratio:auto;min-height:56px;flex-direction:row;white-space:nowrap}
+@media(max-width:560px){.ref-photo-dropzone .ref-items.is-grid>li:not(.ref-photo-add-cell){grid-template-columns:56px minmax(0,1fr) 32px}.ref-photo-dropzone .ref-items.is-grid>li>img{width:56px;height:56px}.ref-photo-dropzone .ref-items.is-grid textarea{min-height:56px}}
+
+/* The add button sits at the opposite end of the line from the file-type hint. */
+.ref-hint-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.ref-hint-row>p{margin:0!important;flex:1 1 200px}
+.ref-hint-row .ref-photo-add,.ref-hint-row .ref-file-add{min-height:40px;height:auto;padding:0 14px;flex-direction:row;gap:8px;width:auto;border-radius:12px}
+
+/* No dashed borders. */
+.ref-photo-dropzone,.ref-file-dropzone{border:0;padding:0;background:none}
+.ref-photo-add,.ref-file-add,.ref-upload{border:1px solid #a6e3ce66}
+
+/* Photo comment box is exactly as tall as its thumbnail. */
+html body .echo .ref-photo-dropzone .ref-items.is-grid textarea{box-sizing:border-box;height:72px;min-height:72px;field-sizing:fixed;overflow:auto}
+@media(max-width:560px){html body .echo .ref-photo-dropzone .ref-items.is-grid textarea{height:56px;min-height:56px}}
+
+/* Edge-to-edge dividers between the three attachment blocks (card padding mirrors .booking-step-card). */
+.ref-stack{--ref-pad:clamp(24px,2.6vw,36px);gap:0}
+@media(max-width:520px){.ref-stack{--ref-pad:20px}}
+.ref-stack>.ref-block{position:relative;border-top:0;padding-block:var(--ref-pad)}
+.ref-stack>.ref-block:first-child{padding-top:0}
+html body .echo .ref-stack>.ref-block:last-child{padding-bottom:0!important}
+.ref-stack>.ref-block:not(:first-child)::before{content:"";position:absolute;top:0;inset-inline:calc(-1*var(--ref-pad));height:1px;background:#c3dfcd26}
+
+/* More space above and below each block, between the dividers and their content. */
+html body .echo .ref-stack>.ref-block{padding-bottom:calc(var(--ref-pad) + 12px)!important}
+html body .echo .ref-stack>.ref-block:first-child{padding-top:20px!important}
+html body .echo .ref-stack>.ref-block:last-child{padding-bottom:0!important}
+
+/* Gap under each divider line, before the block title. */
+html body .echo .ref-stack>.ref-block:not(:first-child){padding-top:calc(var(--ref-pad) + 24px)!important}
+
+/* Added links: a slim row, icon tile at the start, one-line link text, trash at the end. */
+html body .echo .ref-stack .ref-link-list{gap:10px}
+html body .echo .ref-stack .ref-link-list>li{grid-template-columns:40px minmax(0,1fr) 32px;align-items:center;gap:12px;padding:10px 12px;border:1px solid #a6e3ce33;border-radius:12px;background:#0b131588}
+html body .echo .ref-stack .ref-link-list .ref-doc{width:40px;height:40px;border-radius:10px;background:#a6e3ce14}
+html body .echo .ref-stack .ref-link-list a{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#c0efdc;font:600 14px/1.4 'Manrope',sans-serif;text-decoration:none;word-break:normal}
+html body .echo .ref-stack .ref-link-list a:hover{color:#fff;text-decoration:underline;text-underline-offset:3px}
+html body .echo .ref-stack .ref-link-list a svg{vertical-align:-1px;margin-inline-start:4px;opacity:.7}
+html body .echo .ref-stack .ref-link-list li>div{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Open-link button beside the delete button. */
+html body .echo .ref-stack .ref-link-list>li{grid-template-columns:40px minmax(0,1fr) 32px 32px}
+html body .echo .ref-stack .ref-link-list .ref-link-text{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#c0efdc;font:600 14px/1.4 'Manrope',sans-serif}
+html body .echo .ref-stack .ref-link-list a.ref-open{color:#c0efdc;text-decoration:none;border-color:#a6e3ce66}
+html body .echo .ref-stack .ref-link-list a.ref-open:hover{background:#a6e3ce;color:#0b1315;text-decoration:none}
+html body .echo .ref-stack .ref-link-list a.ref-open{display:grid;place-items:center;width:32px;height:32px;padding:0;overflow:visible}
+html body .echo .ref-stack .ref-link-list a.ref-open svg{display:block;margin:0;vertical-align:baseline;opacity:1}
+
+/* Event documents: same row as links (icon tile, content, open + delete buttons). */
+html body .echo .ref-stack .ref-file-dropzone .ref-items>li{grid-template-columns:40px minmax(0,1fr) 32px 32px;gap:12px;padding:10px 12px;border:1px solid #a6e3ce33;border-radius:12px;background:#0b131588}
+html body .echo .ref-stack .ref-file-dropzone .ref-doc{width:40px;height:40px;border-radius:10px;background:#a6e3ce14}
+html body .echo .ref-stack .ref-file-dropzone a.ref-open{display:grid;place-items:center;width:32px;height:32px;padding:0;color:#c0efdc;text-decoration:none;border-color:#a6e3ce66}
+html body .echo .ref-stack .ref-file-dropzone a.ref-open:hover{background:#a6e3ce;color:#0b1315}
+
+/* Document name reads as the row's header. */
+html body .echo .ref-stack .ref-file-dropzone .ref-items strong{margin:0 0 10px;color:#f4f7f3;font:700 16px/1.3 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:.01em}
+
+/* Document name: a small header spanning the top of the whole row. */
+html body .echo .ref-stack .ref-file-dropzone .ref-items strong.ref-doc-name{grid-column:1/-1;margin:0;color:#9fb5a8;font:700 12px/1.3 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:.04em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Tighter gaps: between list rows and between a row's header and its content. */
+html body .echo .ref-stack .ref-items,html body .echo .ref-stack .ref-photo-dropzone .ref-items.is-grid,html body .echo .ref-stack .ref-file-dropzone .ref-items,html body .echo .ref-stack .ref-link-list{gap:8px}
+html body .echo .ref-stack .ref-file-dropzone .ref-items>li{row-gap:6px}
+
+/* Tighter space between the three data atoms (above and below each divider line). */
+html body .echo .ref-stack>.ref-block{padding-bottom:20px!important}
+html body .echo .ref-stack>.ref-block:not(:first-child){padding-top:20px!important}
+html body .echo .ref-stack>.ref-block:last-child{padding-bottom:0!important}

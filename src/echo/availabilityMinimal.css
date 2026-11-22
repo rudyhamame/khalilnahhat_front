@@ -85,6 +85,8 @@ html body .echo[data-page=home][data-theme] #availability .avail-map-pane>.venue
 html body .echo[data-page=home][data-theme] #availability .avail-side>.avail-continue{position:sticky;bottom:0}
 html body .echo[data-page=home][data-theme] #availability .avail-venue-pair{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
 html body .echo[data-page=home][data-theme] #availability .avail-venue-fields :is(input:not([type=radio],[type=checkbox]),select){font-size:12px;padding:0 10px}
+html body .echo[data-page=home][data-theme] #availability .avail-venue-fields>.avail-venue-country{display:grid;gap:6px;margin:0;color:var(--a-mute);font:500 12px/1.4 'Manrope','Noto Sans Arabic',sans-serif}
+html body .echo[data-page=home][data-theme] #availability .avail-venue-country>span{display:flex;align-items:center;gap:6px}
 
 /* Completion note replaces the Continue button. */
 html body .echo[data-page=home][data-theme] #availability .avail-done{display:flex;align-items:flex-start;gap:10px;flex:none;margin:auto 0 0;padding:12px 14px;border:1px solid var(--a-gold-line);border-radius:12px;background:var(--a-gold-soft);color:var(--a-gold);font-size:13px;line-height:1.5}

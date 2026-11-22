@@ -23,7 +23,7 @@ export default function FavouriteSongsEditor({value=[],onChange,ar=false,disable
  const addFound=entry=>{if(!disabled&&entries.length<40)onChange([...source,entry]);};
  return <div className="favourite-songs-editor">
   <div className="song-entry-modes" role="group" aria-label={tr('How to add a song','طريقة إضافة الأغنية')}><button type="button" aria-pressed={mode==='youtube'} onClick={()=>setMode('youtube')}>{tr('Search YouTube','بحث يوتيوب')}</button><button type="button" aria-pressed={mode==='manual'} onClick={()=>setMode('manual')}>{tr('Add manually','إضافة يدوية')}</button></div>
-  {mode==='youtube'&&<><YouTubeSongSearch ar={ar} token={token} signedIn={signedIn} disabled={disabled||entries.length>=40} onPick={addFound}/><p className="djf-empty">{tr('Cannot find it on YouTube? Add it manually.','لم تجدها في يوتيوب؟ أضفها يدوياً.')} <button type="button" className="djf-back" onClick={()=>setMode('manual')}>{tr('Add manually','إضافة يدوية')}</button></p></>}
+  {mode==='youtube'&&<><YouTubeSongSearch ar={ar} token={token} signedIn={signedIn} disabled={disabled||entries.length>=40} onPick={addFound}/></>}
   {(mode==='manual'||editing!==null)&&<>
   <div className="favourite-song-fields" onKeyDown={event=>{if(event.key==='Enter'&&event.target.tagName==='INPUT'){event.preventDefault();save();}}}>
    <label><span>{tr('Song name','اسم الأغنية')}</span><input className="djf-input" type="text" maxLength={200} required value={song} disabled={disabled} onChange={event=>setSong(event.target.value)} placeholder={tr('Name of the song','اسم الأغنية')}/></label>

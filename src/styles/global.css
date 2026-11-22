@@ -2,6 +2,7 @@ html {
   background: var(--background);
   scroll-snap-type: none;
   scroll-behavior: auto;
+  overscroll-behavior-x: none;
   scrollbar-width: none !important;
 }
 
@@ -25,6 +26,7 @@ body {
   color: var(--text-primary);
   font-family: 'Manrope', sans-serif;
   overflow-x: hidden;
+  overscroll-behavior-x: none;
 }
 
 body::before {
@@ -7496,3 +7498,7 @@ html[data-echo-route^="/admin"]:not(.echo-studio-window){zoom:.9}
 /* Arabic: every placeholder reads right to left and sits at the right edge, even in fields that type left to right (email, phone, links). Typed text keeps its own direction. */
 html[dir=rtl] body :is(input,textarea):placeholder-shown:not([type=checkbox],[type=radio],[type=range],[type=file],[type=color],[type=hidden],[type=submit],[type=button]){direction:rtl!important;text-align:right!important}
 html[dir=rtl] body :is(input,textarea)::placeholder{direction:rtl;text-align:right;unicode-bidi:plaintext}
+
+/* No native browser back/forward swipe (sideways overscroll) on any page, dashboards included. */
+html,body{overscroll-behavior-x:none}
+:is(.client-workspace,.admin-workspace),:is(.client-workspace,.admin-workspace) *{overscroll-behavior-x:none}

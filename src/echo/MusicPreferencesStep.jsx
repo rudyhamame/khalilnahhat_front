@@ -1,4 +1,3 @@
-import {useEffect} from 'react';
 import DjBookingForm from './DjBookingForm';
 import {FieldCode} from './BookingPhases';
 import {useEventOrder} from './eventOrderContext';
@@ -8,7 +7,6 @@ import {Music2} from 'lucide-react';
 export default function MusicPreferencesStep({ar=false}){
  const order=useEventOrder(),dj=Boolean(order?.order?.services?.includes('dj')),tr=(en,arabic)=>ar?arabic:en;
  // Only the client pressing "Yes" brings the sub-step into view. A saved booking that already has the DJ service (it arrives after the page loads) must not scroll the page.
- useEffect(()=>{const show=()=>requestAnimationFrame(()=>requestAnimationFrame(()=>document.getElementById('dj-substep')?.scrollIntoView({behavior:'smooth',block:'start'})));window.addEventListener('echo:dj-service-chosen',show);return()=>window.removeEventListener('echo:dj-service-chosen',show);},[]);
  if(!dj||!order)return null;
  return <div className="dj-substep booking-services" id="dj-substep" dir={ar?'rtl':'ltr'}>
   <header className="dj-substep-head">

@@ -1,12 +1,12 @@
 import {notifyCatalogChanged} from '../lib/catalogChanges';
 import Equipment3DGenerator from './Equipment3DGenerator';
-import {equipmentSetMemberships,isEquipmentSet,setMembersFromItem} from './equipmentSets';
-import EquipmentSetEditor from './EquipmentSetEditor';
+import {equipmentSetMemberships,isEquipmentSet} from './equipmentSets';
+import {buildTreeNodes,withServiceIds,DJ_ID,MC_ID,equipmentInService} from '../lib/treeCore';
 import CatalogEntryManager from './CatalogEntryManager';
 import NumberInput from './NumberInput';
-import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { adminToast } from './adminToast';
-import { Boxes, Check, Languages, CalendarDays, Layers, Package, Pencil, Plus, Search, TriangleAlert, X, Trash2 } from 'lucide-react';
+import { Check, Languages, CalendarDays, Layers, Package, Pencil, Plus, Search, TriangleAlert, X, Trash2 } from 'lucide-react';
 import { apiRequest } from '../lib/api';
 import { GalleryImageField } from '../echo/GalleryPicker';
 import './adminCatalog.css';
@@ -53,8 +53,8 @@ const slugify = (value) => value.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-'
 function EquipmentEditor({ item, services, token, reload, report, onSelect, onDraft }) {
   const editing = Boolean(item);
   const [v, setV] = useState(() => item
-    ? { slug: item.id, name: item.name, brandModel: item.brandModel || '', brand: (item.brandModel || '').split(' ')[0], model: (item.brandModel || '').split(' ').slice(1).join(' '), category: item.category, description: item.description || '', price: money(item.priceCents), minQuantity: item.minQuantity || 1, stockTracked: Boolean(item.stockTracked), quantityOwned: String(item.quantityOwned ?? 1), isActive: item.isActive !== false,imageUrl:item.imageUrl||'',youtubeUrl:item.youtubeUrl||'',modelParts:(item.modelParts||[]).map(part=>({...part})),modelUrl:item.modelUrl||'',modelJobId:item.modelJobId||'',functionSummary:item.functionSummary||'',eventFit:{...(item.eventFit||{})} }
-    : { slug: '', name: '', brandModel: '', brand: '', model: '', category: services[0]?.category || '', description: '', price: '0.00', minQuantity: 1, stockTracked: true, quantityOwned: '1', isActive: true,imageUrl:'',youtubeUrl:'',modelParts:[],modelUrl:'',modelJobId:null,functionSummary:'',eventFit:{} });
+    ? { slug: item.id, name: item.name, brandModel: item.brandModel || '', brand: (item.brandModel || '').split(' ')[0], model: (item.brandModel || '').split(' ').slice(1).join(' '), category: item.category, serviceId: item.serviceId || services.find((service) => service.category === item.category)?.id || '', description: item.description || '', price: money(item.priceCents), minQuantity: item.minQuantity || 1, stockTracked: Boolean(item.stockTracked), quantityOwned: String(item.quantityOwned ?? 1), isActive: item.isActive !== false,imageUrl:item.imageUrl||'',youtubeUrl:item.youtubeUrl||'',modelParts:(item.modelParts||[]).map(part=>({...part})),modelUrl:item.modelUrl||'',modelJobId:item.modelJobId||'',functionSummary:item.functionSummary||'',eventFit:{...(item.eventFit||{})} }
+    : { slug: '', name: '', brandModel: '', brand: '', model: '', category: services[0]?.category || '', serviceId: services[0]?.id || '', description: '', price: '0.00', minQuantity: 1, stockTracked: true, quantityOwned: '1', isActive: true,imageUrl:'',youtubeUrl:'',modelParts:[],modelUrl:'',modelJobId:null,functionSummary:'',eventFit:{} });
   const [busy, setBusy] = useState(false),[modelBusy,setModelBusy]=useState(false);
   const set = (key, value) => setV((current) => ({ ...current, [key]: value }));
   useEffect(() => { onDraft({ ...v, id: item?.id || '__new' }); }, [v, item, onDraft]);
@@ -69,7 +69,7 @@ function EquipmentEditor({ item, services, token, reload, report, onSelect, onDr
     if(modelBusy)return;
     const priceCents = Math.round(Number(v.price) * 100);
     if (!Number.isFinite(priceCents) || priceCents < 0) { report('Enter a valid price.', true); return; }
-    const body = { ...(!editing||v.modelJobId!==item.modelJobId||v.modelUrl!==item.modelUrl?{modelJobId:v.modelJobId}:{}), modelParts: v.modelParts, category: v.category, name: v.name.trim(), brandModel: v.brandModel.trim(), description: v.description.trim(), priceCents, minQuantity: Math.max(1, Number(v.minQuantity) || 1), quantityOwned: Math.max(0, Math.round(Number(v.quantityOwned) || 0)), stockTracked: true, isActive: v.isActive, imageUrl: v.imageUrl, youtubeUrl: v.youtubeUrl.trim(), functionSummary: v.functionSummary.trim(), eventFit: Object.fromEntries(Object.entries(v.eventFit).map(([type, text]) => [type, String(text || '').trim()]).filter(([, text]) => text)) };
+    const body = { ...(!editing||v.modelJobId!==item.modelJobId||v.modelUrl!==item.modelUrl?{modelJobId:v.modelJobId}:{}), modelParts: v.modelParts, category: v.category, serviceId: v.serviceId, name: v.name.trim(), brandModel: v.brandModel.trim(), description: v.description.trim(), priceCents, minQuantity: Math.max(1, Number(v.minQuantity) || 1), quantityOwned: Math.max(0, Math.round(Number(v.quantityOwned) || 0)), stockTracked: true, isActive: v.isActive, imageUrl: v.imageUrl, youtubeUrl: v.youtubeUrl.trim(), functionSummary: v.functionSummary.trim(), eventFit: Object.fromEntries(Object.entries(v.eventFit).map(([type, text]) => [type, String(text || '').trim()]).filter(([, text]) => text)) };
     setBusy(true);
     const slug = v.slug || 'item-' + Date.now().toString(36);
     try {
@@ -85,7 +85,7 @@ function EquipmentEditor({ item, services, token, reload, report, onSelect, onDr
       <section className="equipment-editor-section" aria-labelledby="equipment-details-title">
         <h4 id="equipment-details-title"><span>01</span>Equipment details</h4>
         <label>Name <b className="req" aria-hidden="true">*</b><input autoFocus required maxLength={160} placeholder="Equipment name" value={v.name} onChange={event=>{const name=event.target.value;setV(current=>({...current,name,...(!editing?{slug:slugify(name)}:{})}));}}/></label>
-        <label>Service <b className="req" aria-hidden="true">*</b><select required value={v.category} onChange={event=>set('category',event.target.value)}><option value="" disabled>Select a service</option>{services.map(service=><option key={service.category} value={service.category}>{service.name}</option>)}{v.category&&!services.some(service=>service.category===v.category)&&<option value={v.category}>{v.category}</option>}</select></label>
+        <label>Service <b className="req" aria-hidden="true">*</b><select required value={v.serviceId} onChange={event=>{const service=services.find(row=>row.id===event.target.value);set('serviceId',event.target.value);set('category',service?.category||event.target.value);}}><option value="" disabled>Select a service</option>{services.filter(service=>service.id!=='__new').map(service=><option key={service.id} value={service.id}>{service.name}</option>)}</select></label>
         <div className="equipment-editor-pair"><label>Brand <b className="req" aria-hidden="true">*</b><input required maxLength={80} placeholder="Brand" value={v.brand} onChange={event=>setV(current=>({...current,brand:event.target.value,brandModel:[event.target.value.trim(),current.model.trim()].filter(Boolean).join(' ')}))}/></label><label>Model<input maxLength={80} placeholder="Model" value={v.model} onChange={event=>setV(current=>({...current,model:event.target.value,brandModel:[current.brand.trim(),event.target.value.trim()].filter(Boolean).join(' ')}))}/></label></div>
         <label>Description <b className="req" aria-hidden="true">*</b><textarea required rows={3} maxLength={2000} placeholder="Describe this equipment for your clients." value={v.description} onChange={event=>set('description',event.target.value)}/></label>
         <label>What it does <b className="req" aria-hidden="true">*</b><textarea required rows={2} maxLength={600} placeholder="A short explanation of what this equipment does." value={v.functionSummary} onChange={event=>set('functionSummary',event.target.value)}/></label>
@@ -107,6 +107,10 @@ function EquipmentEditor({ item, services, token, reload, report, onSelect, onDr
   </form></div>;
 }
 
+// What the booking expects to find: the DJ and MC services (matched by id). The booking does not need any specific equipment ids.
+// Anything of these that is not in the catalogue shows in the tree under "To add".
+const EXPECTED_SERVICES = [[DJ_ID, ''], [MC_ID, '']];
+const EXPECTED_EQUIPMENT = [];
 export default function AdminCatalogPanel({ token, mode = 'catalog' }) {
   const [equipment, setEquipment] = useState([]);
   const [prices, setPrices] = useState([]);
@@ -120,9 +124,13 @@ export default function AdminCatalogPanel({ token, mode = 'catalog' }) {
   const eventManager=useRef(null),root=useRef(null);
   const [selectedEvent,setSelectedEvent]=useState('');
   const [draft, setDraft] = useState(null);
-  const [eqView,setEqView]=useState('individual');
-  const [eqOpen,setEqOpen]=useState(false),[setEdit,setSetEdit]=useState(false);
-  const selectEquipment=id=>{if(isEquipmentSet(equipment.find(row=>row.id===id)))setEqView('sets');setSelectedEvent(id);setEqOpen(Boolean(id));};
+  const [eqOpen,setEqOpen]=useState(false),[reading,setReading]=useState(null);
+  // Ids of removed services and equipment (they keep only an id marker), listed at the end of the tree.
+  const [removed,setRemoved]=useState({items:[],equipment:[]});
+  useEffect(()=>{if(mode==='events')return undefined;let alive=true;apiRequest('/admin/setup-catalog/deleted',{token}).then(data=>{if(alive)setRemoved({items:data.items||[],equipment:data.equipment||[]});}).catch(()=>{});return()=>{alive=false;};},[mode,token,catalog.length,equipment.length]);
+  // Escape closes the read popup.
+  useEffect(()=>{if(!reading)return undefined;const key=event=>{if(event.key==='Escape')setReading(null);};window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key);},[reading]);
+  const selectEquipment=id=>{setSelectedEvent(id);setEqOpen(Boolean(id));};
   const openEvent = (item) => { if (item.id !== '__new') eventManager.current?.open('event', catalog.find((entry) => entry.id === item.id && entry.kind === 'event') || item); };
   const report = useCallback((text, error = false) => adminToast(text, error), []);
   const deleteService = async (service) => {
@@ -136,7 +144,7 @@ export default function AdminCatalogPanel({ token, mode = 'catalog' }) {
     finally { setDeletingService(''); }
   };
   const load = useCallback(() => Promise.all([apiRequest('/equipment/admin', { token }), apiRequest('/prices', { token }), apiRequest('/admin/setup-catalog', { token }).catch((error) => { if (error.status === 404) return { items: [] }; throw error; })])
-    .then(([equipmentResult, priceResult, catalogResult]) => { setCatalog(catalogResult.items || []); setEquipment(equipmentResult.items || []); setPrices(priceResult.items || []); })
+    .then(([equipmentResult, priceResult, catalogResult]) => { setCatalog(catalogResult.items || []); setEquipment(withServiceIds(catalogResult.items || [], equipmentResult.items || [])); setPrices(priceResult.items || []); })
     .catch((error) => report(error.message || 'Could not load services and equipment.', true)), [token, report]);
   useEffect(() => { load();
     const changed=event=>{if(event.type!=='storage'||event.key==='echo:catalog-revision')load();};
@@ -177,20 +185,28 @@ export default function AdminCatalogPanel({ token, mode = 'catalog' }) {
   const events = liveCatalog.filter((item) => item.kind === 'event');
   const groups = useMemo(() => {
     const services = liveCatalog.filter((item) => item.kind === 'service');
-    const known = new Set(services.map((service) => service.category));
-    const other = liveEquipment.filter((item) => !isEquipmentSet(item) && !known.has(item.category));
-    return [...services.map((service) => ({ ...service, items: liveEquipment.filter((item) => item.category === service.category || (service.equipmentIds || []).includes(item.id)), price: service.__new && service.newPrice ? { amountCents: Math.round(Number(service.newPrice) * 100), currency: service.newCurrency || 'CAD' } : prices.find((price) => price.id === service.priceId) })),
+    const other = liveEquipment.filter((item) => !isEquipmentSet(item) && !services.some((service) => equipmentInService(item, service)));
+    return [...services.map((service) => ({ ...service, items: liveEquipment.filter((item) => equipmentInService(item, service)), price: service.__new && service.newPrice ? { amountCents: Math.round(Number(service.newPrice) * 100), currency: service.newCurrency || 'CAD' } : prices.find((price) => price.id === service.priceId) })),
       ...(other.length ? [{ id: 'other', category: 'other', name: 'Other equipment', items: other, price: null, noPrice: true }] : [])];
   }, [liveEquipment, prices, liveCatalog]);
   const serviceGroups = groups.filter((group) => !group.noPrice);
-  useEffect(() => { if (scope !== 'all' && groups.length && !groups.some((group) => group.category === scope)) setScope('all'); }, [groups, scope]);
-  const selectedService = serviceGroups.find((group) => scope !== 'all' && group.category === scope && group.id !== '__new');
+  useEffect(() => { if (scope !== 'all' && groups.length && !groups.some((group) => group.id === scope)) setScope('all'); }, [groups, scope]);
+  const selectedService = serviceGroups.find((group) => scope !== 'all' && group.id === scope && group.id !== '__new');
   const needle = query.trim().toLowerCase();
-  const eqRows = groups.filter((group) => scope === 'all' || group.category === scope)
+  const eqRows = groups.filter((group) => scope === 'all' || group.id === scope)
     .flatMap((group) => group.items.filter((item) => !isEquipmentSet(item)).map((item) => ({ ...item, serviceName: group.name })))
     .filter((item) => (!needle || `${item.name} ${item.brandModel || ''} ${(setMemberships.get(item.id)||[]).map(set=>set.name).join(' ')}`.toLowerCase().includes(needle)));
-  const setRows = liveEquipment.filter(isEquipmentSet).map((row) => ({ ...row, serviceName: serviceGroups.find((group) => group.category === row.category)?.name || row.category, pieces: (setMembersFromItem(row, equipment).map((member) => `${equipment.find((entry) => entry.id === member.equipmentId)?.name || member.equipmentId}${member.quantity > 1 ? ` ×${member.quantity}` : ''}`)) }));
-  const eqSubtabs = <div className="cat-subtabs" role="tablist" aria-label="Equipment type">{[['individual', 'Individual', equipment.filter((row) => !isEquipmentSet(row)).length], ['sets', 'Packages', equipment.filter(isEquipmentSet).length]].map(([id, label, count]) => <button key={id} type="button" role="tab" aria-selected={eqView === id} onClick={() => { setEqView(id); setSelectedEvent(''); }}>{label}<b>{count}</b></button>)}{eqView === 'individual' ? <label className="cat-search"><Search size={15} aria-hidden="true" /><input type="search" placeholder="Search equipment" value={query} onChange={(event) => setQuery(event.target.value)} aria-label="Search equipment" /></label> : null}<span className="cat-subtab-actions"><button type="button" className="is-primary" onClick={() => {if(eqView==='sets'){setSetEdit('__new');}else{setSelectedEvent('');setEqView('individual');setEqOpen(true);}}}><Plus size={15} />{eqView === 'sets' ? 'New package' : 'Add equipment'}</button></span></div>;
+  const eqSubtabs = <div className="cat-subtabs" aria-label="Equipment"><label className="cat-search"><Search size={15} aria-hidden="true" /><input type="search" placeholder="Search equipment" value={query} onChange={(event) => setQuery(event.target.value)} aria-label="Search equipment" /></label><span className="cat-subtab-actions"><button type="button" className="is-primary" onClick={() => {setSelectedEvent('');setEqOpen(true);}}><Plus size={15} />Add equipment</button></span></div>;
+  // Expected services/equipment that are missing, with their missing equipment under them.
+  const toAdd = (() => {
+    const haveService = new Set(catalog.filter((row) => row.kind === 'service').map((row) => row.id)), haveEquipment = new Set(equipment.map((row) => row.id));
+    const missingEq = EXPECTED_EQUIPMENT.filter(([id]) => !haveEquipment.has(id));
+    const rows = EXPECTED_SERVICES.filter(([id]) => !haveService.has(id)).map(([id, name]) => ({ id, name, equipment: missingEq.filter(([, , service]) => service === id).map(([eid, ename]) => ({ id: eid, name: ename })) }));
+    const orphans = missingEq.filter(([, , service]) => haveService.has(service));
+    return orphans.length ? [...rows, { id: 'equipment', equipment: orphans.map(([eid, ename]) => ({ id: eid, name: ename })) }] : rows;
+  })();
+  // The same tree the booking is built from (lib/treeCore.js): live services with their equipment, removed ids in their old place.
+  const { nodes: treeNodes, orphans: orphanRemoved } = buildTreeNodes({ services: groups.filter((group) => group.id !== '__new'), equipment: liveEquipment, removed, otherId: 'other' });
   const tabs = [['events', 'Events', CalendarDays, events.length], ['services', 'Services', Layers, serviceGroups.length], ['equipment', 'Equipment', Package, equipment.length]].filter(([id]) => (id === 'events') === (mode === 'events'));
 
   return <section ref={root} className={`admin-catalog${tab === 'pricing' ? '' : ' has-event-editor'}${mode !== 'events' ? ' is-service-tab' : ''}`} aria-label={mode === 'events' ? 'Events' : 'Services and equipment'}>
@@ -199,8 +215,8 @@ export default function AdminCatalogPanel({ token, mode = 'catalog' }) {
       <ul>
         <li><button type="button" className={`cat-svc-item${scope === 'all' ? ' is-active' : ''}`} onClick={() => setScope('all')}><span>All equipment</span><b>{equipment.length}</b></button></li>
         {serviceGroups.filter((group) => group.id !== '__new').map((group) => { const entry = catalog.find((item) => item.kind === 'service' && item.id === group.id); return <li key={group.id || group.category}>
-          <button type="button" className={`cat-svc-item${scope === group.category ? ' is-active' : ''}${group.isActive === false ? ' is-hidden' : ''}`} onClick={() => setScope(group.category)} onDoubleClick={() => eventManager.current?.open('service', entry)}><span>{pick(group, 'name')}</span><b>{group.items.length}</b></button>
-          {pick(group, 'description') ? <div className="cat-svc-desc" data-open={scope === group.category} dir={ar ? 'rtl' : undefined}><p>{pick(group, 'description')}</p></div> : null}
+          <button type="button" className={`cat-svc-item${scope === group.id ? ' is-active' : ''}${group.isActive === false ? ' is-hidden' : ''}`} onClick={() => setScope(group.id)} onDoubleClick={() => eventManager.current?.open('service', entry)}><span>{pick(group, 'name')}</span><b>{group.items.length}</b></button>
+          {pick(group, 'description') ? <div className="cat-svc-desc" data-open={scope === group.id} dir={ar ? 'rtl' : undefined}><p>{pick(group, 'description')}</p></div> : null}
           
         </li>; })}
       </ul>
@@ -208,7 +224,20 @@ export default function AdminCatalogPanel({ token, mode = 'catalog' }) {
     </aside> : null}
     {/* The event editor lives outside the page content: a full-height column that starts at the very top. */}
     {tab === 'events' || mode !== 'events' ? <CatalogEntryManager onDraft={setDraft} key={mode} ref={eventManager} inline startClosed={mode !== 'events'} kind={mode === 'events' ? 'event' : 'service'} hideList renderPrice={(entry) => <PriceEditor key={entry.priceId} label={entry.name} price={prices.find((price) => price.id === entry.priceId)} token={token} onSaved={load} report={report} />} items={catalog} equipment={equipment} token={token} onSaved={load} report={report} onSelectionChange={setSelectedEvent}/> : null}
-    {tab === 'equipment' && eqView === 'individual' ? (eqOpen ? <EquipmentEditor onDraft={setDraft} key={selectedEvent || 'new'} item={equipment.find((entry) => entry.id === selectedEvent)} services={serviceGroups} token={token} reload={load} report={report} onSelect={() => { setSelectedEvent(''); setEqOpen(false); }} /> : null) : tab === 'equipment' && setEdit ? <EquipmentSetEditor key={setEdit} item={equipment.find(entry=>entry.id===setEdit)} equipment={equipment.filter(row=>row.id!=='__new')} services={serviceGroups} category={scope==='all'?undefined:scope} token={token} onDraft={setDraft} report={report} onSaved={async () => { await load(); setSetEdit(false); }} onCancel={() => setSetEdit(false)}/> : null}
+    {tab === 'equipment' ? (eqOpen ? <EquipmentEditor onDraft={setDraft} key={selectedEvent || 'new'} item={equipment.find((entry) => entry.id === selectedEvent)} services={serviceGroups} token={token} reload={load} report={report} onSelect={() => { setSelectedEvent(''); setEqOpen(false); }} /> : null) : null}
+    {mode !== 'events' ? <aside className="cat-id-tree" aria-label="Eden of Eide">
+      <header><h3>Eden of Eide</h3><span>Services &amp; equipment IDs</span></header>
+      {/* A deleted service or equipment keeps its id and its place here as a "removed" node; the booking page hides it. */}
+      <ul>{treeNodes.map((node) => <li key={node.id} className={node.removed ? 'is-removed' : undefined}>
+        <div className="cat-tree-service">{node.removed ? null : <strong>{node.name}</strong>}<code>{node.id}</code>{node.removed ? <em>removed</em> : <b>{node.items.length}</b>}</div>
+        {node.items.length || node.removedItems.length ? <ul>{node.items.map((item) => <li key={item.id} className="cat-tree-item"><span>{item.name}</span><code>{item.id}</code></li>)}{node.removedItems.map((row) => <li key={'r' + row.id} className="cat-tree-item is-removed"><code>{row.id}</code><em>removed</em></li>)}</ul> : <p className="cat-tree-empty">No equipment</p>}
+      </li>)}</ul>
+      {toAdd.length ? <section className="cat-tree-toadd" aria-label="To add"><h4>To add <small>recognised by the booking</small></h4>
+        <ul>{toAdd.map((row) => <li key={row.id}><div className="cat-tree-service"><code>{row.id}</code></div>
+          {row.equipment.length ? <ul>{row.equipment.map((item) => <li key={item.id} className="cat-tree-item"><code>{item.id}</code></li>)}</ul> : null}</li>)}</ul></section> : null}
+      {orphanRemoved.length ? <section className="cat-tree-removed" aria-label="Removed equipment ids"><h4>Removed</h4>
+        <ul>{orphanRemoved.map((row) => <li key={'e' + row.id}><code>{row.id}</code></li>)}</ul></section> : null}
+    </aside> : null}
     <div className="cat-main">
 
     <div className="cat-bar">
@@ -227,17 +256,17 @@ export default function AdminCatalogPanel({ token, mode = 'catalog' }) {
     </div> : null}
 
 
-    {tab === 'equipment' && eqView === 'individual' ? <div className="cat-events-workspace">
+    {tab === 'equipment' ? <div className="cat-events-workspace">
       <div className="cat-pane cat-events-main">
         {eqSubtabs}
-        <div className="cat-events-table-wrap cat-equipment-table-wrap"><table className="cat-events-table cat-equipment-table"><thead><tr><th>Equipment</th><th>Service</th><th>Brand</th><th>Model</th><th>Description</th><th>What it does</th><th>YouTube link</th><th>Available qty to rent</th><th>Min qty to rent</th><th>3D model</th></tr></thead><tbody>
+        <div className="cat-events-table-wrap cat-equipment-table-wrap"><table className="cat-events-table cat-equipment-table"><thead><tr><th>Rental Equipment</th><th>Rental Service</th><th>Brand</th><th>Model</th><th>Description</th><th>What it does</th><th>YouTube link</th><th>Available qty to rent</th><th>Min qty to rent</th><th>3D model</th></tr></thead><tbody>
           {eqRows.map((item) => <tr key={item.id} aria-selected={selectedEvent === item.id} onClick={() => item.id !== '__new' && selectEquipment(item.id)}>
             <th scope="row"><button type="button" className="cat-event-name" onClick={(e) => { e.stopPropagation(); if (item.id !== '__new') selectEquipment(item.id); }}><Thumb src={item.imageUrl} name={item.name} /><span>{item.name}</span></button></th>
             <td>{item.serviceName}</td>
             <td>{(item.brandModel || '').split(' ')[0] || '—'}</td>
             <td>{(item.brandModel || '').split(' ').slice(1).join(' ') || '—'}</td>
-            <td><span className="cat-cell-clamp" title={item.description}>{item.description || '—'}</span></td>
-            <td><span className="cat-cell-clamp" title={item.functionSummary}>{item.functionSummary || '—'}</span></td>
+            <td>{item.description ? <button type="button" className="cat-read-link" onClick={(e) => { e.stopPropagation(); setReading({ title: item.name, label: 'Description', text: item.description }); }} title="Opens a popup">Click to read</button> : '—'}</td>
+            <td>{item.functionSummary ? <button type="button" className="cat-read-link" onClick={(e) => { e.stopPropagation(); setReading({ title: item.name, label: 'What it does', text: item.functionSummary }); }} title="Opens a popup">Click to read</button> : '—'}</td>
             <td>{item.youtubeUrl ? <a href={item.youtubeUrl} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>Open video</a> : '—'}</td>
             <td>{item.quantityOwned ?? '—'}</td>
             <td>{item.minQuantity ?? '—'}</td>
@@ -247,26 +276,10 @@ export default function AdminCatalogPanel({ token, mode = 'catalog' }) {
       </div>
     </div> : null}
 
-    {tab === 'equipment' && eqView === 'sets' ? <div className="cat-events-workspace">
-      <div className="cat-pane cat-events-main">
-        {eqSubtabs}
-        <div className="cat-events-table-wrap cat-equipment-table-wrap"><table className="cat-events-table cat-equipment-table cat-sets-table"><thead><tr><th>Package</th><th>Service</th><th>Description</th><th>Pieces</th><th>Available qty to rent</th><th>Min qty to rent</th><th>3D model</th></tr></thead><tbody>
-          {setRows.map((row) => { const open = selectedEvent === row.id, toggle = () => { if (row.id !== '__new') setSelectedEvent(open ? '' : row.id); }, members = setMembersFromItem(row, equipment); return <Fragment key={row.id}>
-            <tr aria-selected={open} aria-expanded={open} onClick={toggle}>
-              <th scope="row"><button type="button" className="cat-event-name" onClick={(e) => { e.stopPropagation(); toggle(); }}><Thumb src={row.imageUrl} icon={Boxes} name={row.name} /><span>{row.name}</span></button></th>
-              <td>{row.serviceName}</td>
-              <td><span className="cat-cell-clamp" title={row.description}>{row.description || '—'}</span></td>
-              <td><span className="cat-cell-clamp" title={row.pieces.join(', ')}>{row.pieces.length ? row.pieces.join(', ') : `${row.modelParts?.length || 0} pieces`}</span></td>
-              <td>{row.quantityOwned ?? '—'}</td>
-              <td>{row.minQuantity ?? '—'}</td>
-              <td>{row.modelUrl || row.modelParts?.length ? 'Yes' : '—'}</td>
-            </tr>
-            <tr className="cat-set-detail" aria-hidden={!open}><td colSpan={7}><div className="cat-set-expand" data-open={open}><ul>{members.length ? members.map((member) => { const piece = equipment.find((entry) => entry.id === member.equipmentId); return <li key={member.equipmentId}><Thumb src={piece?.imageUrl} name={piece?.name || member.equipmentId} /><span>{piece?.name || member.equipmentId}</span>{member.quantity > 1 ? <b>×{member.quantity}</b> : null}</li>; }) : <li className="cat-set-none">No equipment in this package.</li>}</ul><button type="button" className="cat-set-edit" onClick={() => setSetEdit(row.id)}><Pencil size={14} />Edit package</button></div></td></tr>
-          </Fragment>; })}
-        </tbody></table>{!setRows.length && <p className="cat-empty">No packages yet. Use New package to make the first one.</p>}</div>
-      </div>
-    </div> : null}
-
     </div>
+    {reading ? <div className="catalog-popup cat-read-popup" role="dialog" aria-modal="true" aria-label={`${reading.title}: ${reading.label}`} onMouseDown={(event) => { if (event.target === event.currentTarget) setReading(null); }}><form onSubmit={(event) => event.preventDefault()}>
+      <header><h3>{reading.title} · {reading.label}</h3><button type="button" onClick={() => setReading(null)} aria-label="Close" title="Close" autoFocus><X size={18} /></button></header>
+      <p className="cat-read-text">{reading.text}</p>
+    </form></div> : null}
   </section>;
 }

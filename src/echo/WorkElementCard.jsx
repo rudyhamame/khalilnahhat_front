@@ -20,7 +20,7 @@ export default function WorkElementCard({element,elements,token,onUpdate}){
  const dialectOptions=elements.find(row=>row.id==='dialect')?.options||[];
  const availableDialects=dialectsForLanguages(dialectOptions,languageIds);
  const changeLanguages=ids=>{setLanguageIds(ids);if(element.kind==='artist'){const allowed=new Set(dialectsForLanguages(dialectOptions,ids).map(row=>row.id));setDialectIds(current=>current.filter(id=>allowed.has(id)));}};
- const filtered=element.options.filter(option=>(!languageFilter||(languageFilter==='__untagged'?!option.languageIds?.length:option.languageIds?.includes(languageFilter)))&&`${option.label||option.value} ${(option.languages||[]).map(language=>language.name).join(' ')}`.toLocaleLowerCase().includes((editing||element.id==='key'?'':value).trim().toLocaleLowerCase()));
+ const filtered=element.options.filter(option=>(!hasLanguageDependency(element)||!languageFilter||(languageFilter==='__untagged'?!option.languageIds?.length:option.languageIds?.includes(languageFilter)))&&`${option.label||option.value} ${hasLanguageDependency(element)?(option.languages||[]).map(language=>language.name).join(' '):''}`.toLocaleLowerCase().includes((editing||element.id==='key'?'':value).trim().toLocaleLowerCase()));
  const keyParts=/^([A-G](?:#|b)?) (.+)$/.exec(value);
  const keyLetter=keyParts?.[1]||'',keyMode=keyParts?.[2]||'';
  const hasDependencies=hasElementDependencies(element)&&element.id!=='rhythm';

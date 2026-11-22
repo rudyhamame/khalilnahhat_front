@@ -1,6 +1,5 @@
 import React, {Suspense} from 'react';
 import ReactDOM from 'react-dom/client';
-import SmartCartLauncher from './echo/SmartCartLauncher';
 import {prepareHeroHeadphoneFrames} from './echo/heroHeadphoneFrames';
 import AdministratorWorkView from './echo/AdministratorWorkView';
 import ArchiveFooter from './components/ArchiveFooter';
@@ -17,6 +16,7 @@ import './components/adminWorkspace.css';
 import './echo/navigation.css';
 import { installSmoothResize } from './lib/smoothResize';
 import { installNoAutofill } from './lib/noAutofill';
+import { disableSwipeNavigation } from './lib/noSwipeNavigation';
 import { apiBaseUrl } from './lib/api';
 
 const App = React.lazy(() => window.location.pathname === '/music'
@@ -32,6 +32,7 @@ try{if(sessionStorage.getItem('echo-fade-in')){sessionStorage.removeItem('echo-f
 
 installSmoothResize();
 installNoAutofill();
+disableSwipeNavigation();
 
 // One visit ping per browser session: recorded in Visit History (client if signed in, otherwise guest) and sent to admins as an optional phone alert.
 try{if(!sessionStorage.getItem('echo-visit')){sessionStorage.setItem('echo-visit','1');let token='';try{token=JSON.parse(localStorage.getItem('khalil-auth-token')||'""')||'';}catch{}
@@ -53,7 +54,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <App />
       </Suspense>
     </div>
-    <SmartCartLauncher />
     <AdministratorWorkView />
     <ArchiveFooter />
     </SeasonalPlayerHost>

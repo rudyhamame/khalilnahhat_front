@@ -27,13 +27,15 @@ const ATOM_SECTIONS=[
  ['03.05',['music.favouriteSongs']],
  ['03.06',['music.favouriteArtists']],
  ['04.01',['services','rental.requested','equipment']],
- ['04.02',['event.setup.requirements']],
+ ['04.05',['event.setup.requirements']],
  ['05.01',['references.photos','references.images','references.files']],
  ['05.02',['additional.notes']],
  ['05.03',['additional.voucherCode']],
 ];
 const ATOM_CODES=Object.fromEntries(ATOM_SECTIONS.flatMap(([section,keys])=>keys.map((key,index)=>[key,`${section}.${String(index+1).padStart(2,'0')}`])));
 export const fieldCode=key=>ATOM_CODES[key]||'';
+// Every numbered booking atom, in table order.
+export const ATOM_KEYS=Object.freeze(Object.keys(ATOM_CODES));
 // The same code for a whole section ("02.01") when only the section is known.
 export const sectionCode=key=>fieldCode(key).split('.').slice(0,2).join('.');
 export const eventPageField=key=>fields.find(field=>field.key===key);

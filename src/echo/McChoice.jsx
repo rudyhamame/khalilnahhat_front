@@ -1,16 +1,19 @@
+import {Check,X} from 'lucide-react';
+import {useTreeService} from '../lib/tree';
 import {FieldCode} from './BookingPhases';
 import {useEventOrder} from './eventOrderContext';
 
-// MC hosting & announcements as one data row under the DJ choice. The MC is NOT DJ Khalil: Echo arranges a third-party host, and the row says so.
+// MC hosting and announcements are separate from DJ Khalil's service.
 export default function McRow({ar=false}){
-  const tr=(en,arabic)=>ar?arabic:en,order=useEventOrder(),value=order?.order?.music?.mcRequested,locked=!order?.draftEditable;
+  const tr=(en,arabic)=>ar?arabic:en,svc=useTreeService('mc',ar),order=useEventOrder(),value=order?.order?.music?.mcRequested,locked=!order?.draftEditable;
   const set=next=>order?.setField('music.mcRequested',next);
-  return <dl className="booking-journey-summary mc-row"><div data-empty={value===true?undefined:''}>
-    <dt><span className="avail-kicker"><FieldCode k="music.mcRequested"/>{tr('MC HOSTING & ANNOUNCEMENTS *','التقديم والإعلانات *')}</span></dt>
-    <dd>{tr('A third-party MC host arranged by Echo, not DJ Khalil himself. The host and price are confirmed in your quote.','مقدّم من طرف ثالث ننسّقه نحن في إيكو، وليس دي جي خليل نفسه. نؤكد المقدّم والسعر في عرض السعر.')}</dd>
-    <span className="mc-row-choice" role="group" aria-label={tr('MC host','مقدّم الحفل')}>
-      <button type="button" disabled={locked} aria-pressed={value===true} onClick={()=>set(true)}>{tr('Yes','نعم')}</button>
-      <button type="button" disabled={locked} aria-pressed={value===false} onClick={()=>set(false)}>{tr('No','لا')}</button>
-    </span>
-  </div></dl>;
+  if(!svc.exists)return null; // the MC question exists only while an `mc` service is in the catalogue
+  return <aside className="event-type-column mc-choice">
+    <span className="avail-kicker"><FieldCode k="music.mcRequested"/>{svc.name.toUpperCase()} *</span>
+    {svc.description&&<p className="mc-choice-copy">{svc.description}</p>}
+    <div role="group" aria-label={svc.name}>
+      <button type="button" data-event-choice disabled={locked} aria-pressed={value===true} onClick={()=>set(true)}><Check size={17} aria-hidden="true"/><span>{tr(`Yes, add ${svc.name}`,`نعم، أضف ${svc.name}`)}</span></button>
+      <button type="button" data-event-choice disabled={locked} aria-pressed={value===false} onClick={()=>set(false)}><X size={17} aria-hidden="true"/><span>{tr('No, not this time','لا، ليس هذه المرة')}</span></button>
+    </div>
+  </aside>;
 }

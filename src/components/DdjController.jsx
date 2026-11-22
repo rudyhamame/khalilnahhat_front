@@ -90,14 +90,16 @@ function StandardController({stems,mic,masterMeter}){
   const TH=H+LABEL_H,JC={x:189,y:194};
   // Artwork rotation, in degrees. One turn = 1.8 s of music at 1x (the same mapping the jog wheel uses to scrub), so the artwork turns at the music's speed while playing,
   // and while the record is held it follows the hand exactly (same direction, same speed) because the jog wheel adds its own angle changes here.
-  const art=useRef({angle:0,held:false,el:null,playing:false,rate:1});
+  const art=useRef({angle:0,held:false,el:null,el2:null,playing:false,rate:1});
   art.current.playing=Boolean(player.playing);art.current.rate=Number(player.playbackRate)||1;
   useEffect(()=>{
     let frame=0,last=performance.now();
     const tick=now=>{
       const state=art.current,dt=Math.max(0,Math.min(.1,(now-last)/1000));last=now;
       if(!state.held&&state.playing)state.angle+=360/1.8*state.rate*dt;
-      if(state.el)state.el.style.transform=`translateZ(0) rotate(${state.angle}deg)`;
+      const transform=`translateZ(0) rotate(${state.angle}deg)`;
+      if(state.el)state.el.style.transform=transform;
+      if(state.el2)state.el2.style.transform=transform;
       frame=requestAnimationFrame(tick);
     };
     frame=requestAnimationFrame(tick);
@@ -168,6 +170,7 @@ function StandardController({stems,mic,masterMeter}){
     </g>
   </svg>
   {jogArt&&<img ref={el=>{art.current.el=el;}} className="ddj-jog-art" src={jogArt} alt="" aria-hidden="true" draggable="false" style={{left:`${(JC.x-49)/W*100}%`,top:`${(JC.y-49)/TH*100}%`,width:`${98/W*100}%`,height:`${98/TH*100}%`}}/>}
+  {jogArt&&<img ref={el=>{art.current.el2=el;}} className="ddj-jog-art" src={jogArt} alt="" aria-hidden="true" draggable="false" style={{left:`${(DECK2+JC.x-49)/W*100}%`,top:`${(JC.y-49)/TH*100}%`,width:`${98/W*100}%`,height:`${98/TH*100}%`}}/>}
   </div></div>
   {footerStatus&&createPortal(status,footerStatus)}</div>;
 }

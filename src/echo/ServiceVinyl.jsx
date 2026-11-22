@@ -1,5 +1,5 @@
 import SetupNotes from './SetupNotes';
-import {useRentalCatalog} from '../lib/useRentalCatalog';
+import {useTree} from '../lib/tree';
 import {rentalServices,rentalServiceEquipment} from '../lib/numberedRentalCatalog';
 import RentalWorkbench from './RentalWorkbench';
 import {isEquipmentSet} from '../components/equipmentSets';
@@ -28,7 +28,7 @@ export default function ServiceVinyl({lang}) {
   const ar=lang.lang==='ar';
   const cart=useCart(),order=useEventOrder();
   const [selectedServiceId,setSelected]=useState('');
-  const {catalog,equipment:items,failed}=useRentalCatalog();
+  const {catalog,equipment:items,failed}=useTree();
   // MC hosting moved to its own step under DJ Khalil Service (a third-party host), so it is no longer a rental service in this list.
   const services=useMemo(()=>rentalServices(catalog).filter(item=>item.id!=='mc'&&item.selectionField!=='music.mcRequested'),[catalog]);
   const selected=Math.max(0,services.findIndex(item=>item.id===selectedServiceId)),service=services[selected];
@@ -50,11 +50,11 @@ export default function ServiceVinyl({lang}) {
     if(added&&added!==service?.id&&!equipmentSelection){setSelected(added);setPreviewEquipment(null);}
   },[requestedServices,services,service?.id,equipmentSelection]);
   useEffect(()=>{if(previousEvent.current===eventType)return;previousEvent.current=eventType;setSelected('');setPreviewEquipment(null);},[eventType]);
-  // Sets belong to no service: they are listed under every service (and with none selected); individual equipment follows the chosen service.
-  const serviceItems=rentalServiceEquipment(service,items);
-  const suggested=(service?.selectionField?[...serviceItems.filter(row=>!isEquipmentSet(row)),...items.filter(isEquipmentSet)]:serviceItems);
-  const previewEquipment=equipmentSelection===undefined?(suggested.find(row=>!isEquipmentSet(row))||suggested[0]||null):equipmentSelection&&suggested.find(item=>item.id===equipmentSelection.id)||null;
-  return <><section ref={page} id="services" className="echo-section echo-service-vinyl setup-showcase rental-workbench rental-workbench--tabs" dir={ar?'rtl':'ltr'} aria-label={ar?'خدمات التأجير والمعدات':'Rental services and equipment'}>
-    <RentalWorkbench services={services} service={service} items={suggested} selectedItem={previewEquipment||suggested.find(row=>!isEquipmentSet(row))||suggested[0]||null} onService={item=>{setSelected(item.id);setPreviewEquipment(undefined);}} onEquipment={setPreviewEquipment} cart={cart} onQuantity={changeQuantity} ar={ar} failed={failed}/>
+  // Build an individual-equipment list for every service; packaged sets are excluded from the booking UI.
+  const serviceSections=useMemo(()=>services.map(service=>({service,items:rentalServiceEquipment(service,items).filter(row=>!isEquipmentSet(row))})),[services,items]);
+  const suggested=serviceSections.find(section=>section.service.id===service?.id)?.items||[];
+  const previewEquipment=equipmentSelection===undefined?(suggested[0]||null):equipmentSelection&&suggested.find(item=>item.id===equipmentSelection.id)||null;
+  return <><section ref={page} id="services" className="echo-section echo-service-vinyl setup-showcase rental-workbench" dir={ar?'rtl':'ltr'} aria-label={ar?'خدمات التأجير والمعدات':'Rental services and equipment'}>
+    <RentalWorkbench services={services} sections={serviceSections} service={service} items={suggested} selectedItem={previewEquipment||suggested[0]||null} onService={item=>{setSelected(item.id);setPreviewEquipment(undefined);}} onEquipment={setPreviewEquipment} cart={cart} onQuantity={changeQuantity} ar={ar} failed={failed}/>
   </section><SetupNotes ar={ar}/></>;
 }

@@ -1,5 +1,6 @@
 import {missingOrderFields} from './eventOrderCore.mjs';
 import {fieldQuestion} from './fieldQuestion.js';
+import {treeSteps} from './treeCore.js';
 
 const priority=['event.type','event.title','event.date','event.startTime','event.endTime','event.guestCount','event.venue.name','event.venue.address','event.venue.city','event.venue.postalCode','event.venue.setting','music.djRequested','music.mcRequested','rental.requested','services'];
 const questions={
@@ -24,12 +25,15 @@ const questions={
 export function effectiveMissing(order={}){
  const missing=missingOrderFields(order);
  const decisions=[['music.djRequested',order.music?.djRequested??(order.services?.includes('dj')?true:null)]];
- for(const [key,value] of decisions)if(typeof value!=='boolean')missing.push({key});
+ const present=treeSteps();
+ for(const [key,value] of decisions)if(typeof value!=='boolean'&&present.dj)missing.push({key}); // no DJ step without a `dj` service in the catalogue
  // Rental services & equipment: with DJ Khalil selected nothing is needed here; otherwise at least one rental service or item must be added.
  const rest=missing.filter(field=>!['services','rental.requested'].includes(field.key));
  const dj=order.music?.djRequested===true||order.services?.includes('dj');
  const rental=order.equipment?.length>0||order.services?.some(id=>!['dj','mc'].includes(id));
- if(!dj&&!rental)rest.push({key:'services'});
+ // The rental question (Rental step, first section) must be answered, like the DJ question.
+ if(present.rental&&typeof (order.rental?.requested??(rental?true:null))!=='boolean')rest.push({key:'rental.requested'});
+ if(!dj&&!rental&&(present.dj||present.rental))rest.push({key:'services'});
  return rest;
 }
 

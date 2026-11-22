@@ -1005,3 +1005,90 @@ html body .catalog-popup .num-field>button svg{display:block;width:16px;height:1
 html body .catalog-popup .set-equipment-choice>.num-field{flex:none;width:170px!important;height:40px!important;grid-template-columns:36px minmax(0,1fr) 36px!important}
 html body .catalog-popup .set-equipment-choice>.num-field>input[type=number]{height:40px!important;font-size:17px!important;line-height:40px!important}
 html body .catalog-popup .set-equipment-choice>.num-field>button{width:36px!important;height:40px!important}
+
+/* Description / What it does cells open a read popup. */
+.cat-read-link{display:inline-block;margin:0;padding:0;border:0;background:none;color:#8fc5ff;font:600 12px/1.2 inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.cat-read-link:hover{color:#fff}
+.catalog-popup .cat-read-text{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6;font-size:14px}
+/* The link must stay bare text: no background, border or padding from the admin button styles. */
+html body .cat-events-table .cat-read-link{padding:0!important;margin:0!important;border:0!important;background:none!important;box-shadow:none!important;min-height:0!important;height:auto!important;border-radius:0!important}
+
+/* Read popup: roomier padding, comfortable width, header separated from the text. */
+.catalog-popup.cat-read-popup>form{width:min(560px,100%);padding:24px 28px 28px;gap:16px;border-radius:14px}
+.catalog-popup.cat-read-popup>form>header{padding-bottom:14px;border-bottom:1px solid #ffffff1f}
+.catalog-popup.cat-read-popup .cat-read-text{padding:0;line-height:1.7}
+@media(max-width:480px){.catalog-popup.cat-read-popup>form{padding:18px 18px 22px}}
+
+/* The admin popup style zeroes the form padding with !important, so the read text carries its own padding. */
+.catalog-popup.cat-read-popup>form{width:min(560px,100%)!important}
+.catalog-popup.cat-read-popup>form>header{padding:0 0 0 24px!important;border-bottom:1px solid #2a2a33}
+.catalog-popup.cat-read-popup>form>.cat-read-text{padding:24px 28px 28px!important;margin:0;max-height:60vh;overflow:auto}
+@media(max-width:480px){.catalog-popup.cat-read-popup>form>.cat-read-text{padding:18px 18px 22px!important}}
+
+/* Empty equipment list: the message sits in the centre of the area, no dashed frame. */
+.admin-catalog .cat-equipment-table-wrap>.cat-empty{display:grid;place-items:center;min-height:min(320px,40vh);margin:0;padding:24px;border:0;text-align:center}
+/* The empty message grows to fill the rest of the equipment area. */
+.admin-catalog .cat-equipment-table-wrap{display:flex;flex-direction:column;min-height:0}
+.admin-catalog .cat-equipment-table-wrap>table{flex:none;width:100%}
+.admin-catalog .cat-equipment-table-wrap>.cat-empty{flex:1 1 auto;min-height:min(320px,40vh)}
+
+/* Add service: deleted services that can be revived. */
+.cat-deleted{display:grid;gap:8px;margin:0 0 4px;padding:12px;border:1px solid #ffffff1c;border-radius:10px;background:#ffffff08}
+.cat-deleted h4{margin:0;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#c9cbe0}
+.cat-deleted>p{margin:0;font-size:12px;color:#9a9db3}
+.cat-deleted ul{display:grid;gap:6px;margin:0;padding:0;list-style:none}
+.cat-deleted li{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;border-radius:8px;background:#0f0f14}
+.cat-deleted li>span{display:grid;gap:2px;min-width:0}
+.cat-deleted strong{font-size:13px;color:#f2f2f6;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cat-deleted small{font-size:11px;color:#8e92aa}
+.cat-deleted li>button{flex:none;min-height:30px;padding:0 12px;border:1px solid #8fc5ff88;border-radius:8px;background:#8fc5ff1a;color:#bcdcff;font:600 12px/1 inherit;cursor:pointer}
+.cat-deleted li>button:hover:not(:disabled){background:#8fc5ff33}
+.cat-deleted li>button:disabled{opacity:.5;cursor:default}
+.cat-id-note{margin:-4px 0 0;font-size:11.5px;color:#9a9db3}
+.cat-id-note code{padding:1px 6px;border-radius:5px;background:#0f0f14;color:#e3d3a3;font-size:11.5px}
+.cat-pick-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.catalog-popup select{width:100%;box-sizing:border-box;padding:9px 10px;border:0;border-radius:0;background:#0f0f14;color:#f2f2f6;font:inherit;text-transform:none;letter-spacing:0}
+.catalog-popup select:focus{outline:2px solid #a3a8c6;outline-offset:0}
+.catalog-popup select option:disabled{color:#6b6e82}
+@media(max-width:480px){.cat-pick-row{grid-template-columns:1fr}}
+.cat-pick-row.is-single{grid-template-columns:1fr}
+
+/* Right aside: every service with its equipment and their ids. */
+html body .admin-catalog.is-service-tab{grid-template-columns:minmax(220px,280px) minmax(0,1fr) minmax(240px,300px)}
+html body .admin-catalog.is-service-tab>.cat-id-tree{grid-column:3;grid-row:1}
+.cat-id-tree{display:flex;flex-direction:column;min-height:0;overflow:auto;padding:14px;border-inline-start:1px solid #ffffff14;background:#ffffff05;font-size:12.5px}
+.cat-id-tree>header{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:10px}
+.cat-id-tree>header h3{margin:0;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#c9cbe0}
+.cat-id-tree>header span{font-size:11px;color:#8e92aa}
+.cat-id-tree ul{display:grid;gap:4px;margin:0;padding:0;list-style:none}
+.cat-id-tree>ul{gap:12px}
+.cat-tree-service{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;background:#ffffff0d}
+.cat-tree-service strong{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#f2f2f6}
+.cat-tree-service b{flex:none;min-width:20px;padding:1px 6px;border-radius:999px;background:#0f0f14;color:#9a9db3;font-size:11px;text-align:center}
+.cat-id-tree code{flex:none;padding:1px 6px;border-radius:5px;background:#0f0f14;color:#e3d3a3;font:11px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace}
+.cat-id-tree li>ul{margin:4px 0 0 10px;padding-inline-start:12px;border-inline-start:1px solid #ffffff1f}
+.cat-tree-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:3px 4px;color:#c9cbe0}
+.cat-tree-item>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cat-tree-empty{margin:4px 0 0 22px;color:#6b6e82;font-size:11.5px}
+@media(max-width:1200px){html body .admin-catalog.is-service-tab{grid-template-columns:minmax(200px,260px) minmax(0,1fr)}html body .admin-catalog.is-service-tab>.cat-id-tree{display:none}}
+/* The tree fills the full height of the page area and scrolls inside. */
+html body .admin-catalog.is-service-tab>.cat-id-tree{align-self:stretch;height:100%;min-height:0;max-height:100%;box-sizing:border-box}
+/* IDs in the tree are plain text: no badge background or padding. */
+html body .cat-id-tree code{padding:0;border-radius:0;background:none;color:#e3d3a3}
+.cat-tree-removed{margin-top:14px;padding-top:12px;border-top:1px solid #ffffff1f}
+.cat-tree-removed h4{margin:0 0 8px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#a77;}
+.cat-tree-removed li{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:3px 4px;color:#8e92aa}
+.cat-tree-removed li>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+html body .cat-tree-removed code{color:#b98b8b;text-decoration:line-through}
+/* Tree: what the booking recognises but the catalogue lacks. */
+.cat-tree-toadd{margin-top:14px;padding-top:12px;border-top:1px solid #ffffff1f}
+.cat-tree-toadd h4{margin:0 0 8px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#8fd0a8}
+.cat-tree-toadd h4 small{margin-inline-start:6px;font-size:10.5px;letter-spacing:0;text-transform:none;color:#6b6e82}
+.cat-tree-toadd .cat-tree-service{background:#8fd0a812}
+.cat-tree-toadd .cat-tree-item{color:#8e92aa}
+/* To add / Removed list ids only. */
+.cat-tree-toadd .cat-tree-service,.cat-tree-toadd .cat-tree-item,.cat-tree-removed li{justify-content:flex-start}
+/* Removed nodes stay in their place in the tree, ids only. */
+.cat-id-tree .is-removed>.cat-tree-service,.cat-id-tree .cat-tree-item.is-removed{background:none;color:#8e92aa}
+.cat-id-tree .is-removed code{color:#b98b8b;text-decoration:line-through}
+.cat-id-tree em{margin-inline-start:auto;font-style:normal;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#a77}

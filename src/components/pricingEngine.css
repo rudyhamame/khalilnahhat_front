@@ -1,16 +1,147 @@
 .pe{width:100%;min-width:0;min-height:100%;}
-.pe{padding:20px 24px}
-.pe-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px;align-items:start}
-.pe-card{border:1px solid var(--aw-line);background:var(--aw-sidebar);padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
-.pe-card header h2{margin:0;font-size:15px}.pe-card header p{margin:4px 0 0;font-size:12px;color:var(--aw-muted)}
-.pe-card ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
-.pe-card li{display:grid;gap:8px;padding-bottom:10px;border-bottom:1px solid var(--aw-line)}
-.pe-row,.pe-add{display:flex;gap:8px;align-items:center}
-.pe-card input{flex:1;min-width:0;min-height:34px;padding:0 10px;border:1px solid var(--aw-line);border-radius:6px;background:var(--aw-main);color:var(--aw-text);font:inherit;font-size:13px}
-.pe-card button{min-height:32px;border:1px solid var(--aw-line);border-radius:6px;background:var(--aw-raised);color:var(--aw-text);font:inherit;font-size:12px;cursor:pointer}
-.pe-card button:disabled{opacity:.5;cursor:default}
-.pe-icon{display:grid;place-items:center;width:32px;flex:none;padding:0}
-.pe-add button{display:flex;align-items:center;gap:4px;padding:0 12px}
-.pe-chips{display:flex;flex-wrap:wrap;gap:6px}.pe-chips button{min-height:26px;padding:0 10px;border-radius:999px;color:var(--aw-muted)}
-.pe-chips button[aria-pressed=true]{background:var(--aw-text);border-color:var(--aw-text);color:var(--aw-main)}
+.pe{padding:0}
 .pe-empty,.pe-error{margin:0;font-size:12px;color:var(--aw-muted)}.pe-error{color:#e5484d}
+.pp{display:grid;gap:16px;min-width:0}
+.pp-head{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:flex-start}
+.pp-head h2{margin:0;font-size:16px}.pp-head p{margin:4px 0 0;font-size:12px;color:var(--aw-muted);max-width:60ch}
+.pp-tools{display:flex;gap:8px;align-items:center}
+.pp :is(input,select){min-height:34px;padding:0 10px;border:1px solid var(--aw-line);border-radius:6px;background:var(--aw-main);color:var(--aw-text);font:inherit;font-size:13px;min-width:0}
+.pp button{min-height:32px;border:1px solid var(--aw-line);border-radius:6px;background:var(--aw-raised);color:var(--aw-text);font:inherit;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;padding:0 12px}
+.pp button:disabled{opacity:.5;cursor:default}
+.pp .pp-primary{background:var(--aw-text);border-color:var(--aw-text);color:var(--aw-main)}
+.pp .pp-icon{width:30px;padding:0;justify-content:center}
+.pp-editor{display:grid;gap:14px;padding:18px;border:1px solid var(--aw-line);background:var(--aw-sidebar)}
+.pp-editor h3{margin:0;font-size:14px}
+.pp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.pp-field{display:grid;gap:4px;font-size:12px;color:var(--aw-muted)}
+.pp-lines{display:grid;gap:8px;margin:0;padding:0;border:0;justify-items:start}
+.pp-lines legend{padding:0;margin-bottom:6px;font-size:12px;color:var(--aw-muted)}
+.pp-line{display:flex;gap:8px;align-items:center}.pp-fee{min-width:140px;font-size:13px}
+.pp-note{margin:0;font-size:12px;color:var(--aw-muted)}
+.pp-actions{display:flex;gap:8px}
+.pp-table{overflow:auto;border:1px solid var(--aw-line)}
+.pp-table table{width:100%;border-collapse:collapse;font-size:13px;min-width:680px}
+.pp-table :is(th,td){padding:10px 12px;text-align:start;border-bottom:1px solid var(--aw-line);font-weight:400;vertical-align:middle}
+.pp-table thead th{font-size:12px;color:var(--aw-muted);background:var(--aw-sidebar)}.pp-table tbody th{font-weight:600}
+.pp-table small{color:var(--aw-muted)}
+.pp-status{font-size:12px;color:var(--aw-muted)}.pp-status[data-status=active]{color:#3fb950}
+.pp-row-actions{display:flex;gap:6px;justify-content:flex-end}
+.pp-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+.pe-settings{min-width:0}
+.pp-fee-block{display:grid;gap:8px;width:100%;padding:12px;border:1px solid var(--aw-line);background:var(--aw-main)}
+.pp-factor{display:grid;gap:6px;padding:10px 0 0 12px;border-inline-start:2px solid var(--aw-line);justify-items:start}
+.pp-factor-name{font-size:12px;font-weight:600;min-width:140px}
+/* Pricing tab: the grid fills the workspace height; the pricing content scrolls inside it. */
+.admin-workspace[data-area="pricing"] .admin-grid{display:flex;flex:1;min-height:0;overflow:hidden}
+.admin-workspace[data-area="pricing"] .admin-grid>.pe{flex:1;min-width:0;min-height:0;height:100%;overflow:auto;box-sizing:border-box}
+.admin-workspace[data-area="pricing"] .aw-content{display:flex;flex-direction:column;min-height:0;overflow:hidden;padding:0}
+/* Policy toolbar: one search field with an icon, and the primary action beside it. */
+.pp-tools{gap:10px;align-items:stretch}
+.pp-search{position:relative;display:flex;align-items:center;color:var(--aw-muted)}
+.pp-search>svg{position:absolute;inset-inline-start:11px;pointer-events:none}
+.pp .pp-search input{width:240px;min-height:38px;padding-inline:34px 12px;border-radius:8px;background:var(--aw-sidebar);transition:border-color .15s,box-shadow .15s}
+.pp .pp-search input::placeholder{color:var(--aw-muted)}
+.pp .pp-search input:focus{outline:0;border-color:var(--aw-muted);box-shadow:0 0 0 3px color-mix(in srgb,var(--aw-text) 12%,transparent)}
+.pp-tools .pp-primary{min-height:38px;padding:0 16px;border-radius:8px;font-weight:600;white-space:nowrap}
+.pp-tools .pp-primary:hover:not(:disabled){opacity:.88}
+@media(max-width:700px){.pp-tools{width:100%}.pp .pp-search{flex:1}.pp .pp-search input{width:100%}}
+/* Header (tabs + policy toolbar): same dark base, grain and falling shadow as the Recordings header; stays dark in the light theme. */
+.pe-header{position:sticky;top:0;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 20px;
+ --aw-main:#202123;--aw-sidebar:#17181a;--aw-raised:#303136;--aw-text:#e9e9ec;--aw-muted:#a6a6ad;--aw-line:rgba(255,255,255,.1);color:var(--aw-text);
+ background-color:#121216;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .88 0 0 0 0 .88 0 0 0 0 .92 0 0 0 .13 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:160px 160px;box-shadow:0 6px 14px #00000066}
+.pe-header-slot{flex:1;min-width:0}
+.pe-header .pp-head{align-items:center}
+.pe-settings-btn{display:grid;place-items:center;flex:none;width:38px;height:38px;padding:0;border:1px solid var(--aw-line);border-radius:8px;background:var(--aw-sidebar);color:var(--aw-text);cursor:pointer;transition:background .15s,border-color .15s}
+.pe-settings-btn:hover,.pe-settings-btn[aria-pressed=true]{background:var(--aw-raised);border-color:var(--aw-muted)}
+.pe-panel{padding:0}
+/* Policies: the add/edit form is the left column, the policy table the right. */
+.pp{grid-template-columns:minmax(300px,380px) minmax(0,1fr);align-items:start;gap:20px}
+.pp-side{position:sticky;top:76px;max-height:calc(100dvh - 140px);overflow:auto}
+.pp-main{min-width:0}
+.pp-side .pp-grid{grid-template-columns:1fr}
+@media(max-width:900px){.pp{grid-template-columns:1fr}.pp-side{position:static;max-height:none}}
+/* The policies view fills the workspace height: the form column and the table each scroll inside it. */
+.admin-workspace[data-area="pricing"] .admin-grid>.pe{display:flex;flex-direction:column;overflow:hidden}
+.pe-panel{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+.pe-panel>.pp{flex:1 1 auto;min-height:0;align-items:stretch}
+.pp-side{position:static;max-height:none;min-height:0;overflow:auto}
+.pp-main{display:flex;flex-direction:column;min-height:0}
+.pp-main>.pp-table{flex:1 1 auto;min-height:0;overflow:auto}
+.pe-panel>.pe-settings{flex:1 1 auto;min-height:0;overflow:auto}
+.pp{gap:0}
+/* The form fills its column's height; its buttons sit at the bottom. */
+.pp-side{display:flex;flex-direction:column}
+.pp-editor{flex:1 1 auto;align-content:start;border-width:0 1px 0 0}
+.pp-editor .pp-actions{margin-top:auto;padding-top:8px}
+/* Fewer borders: the table keeps only its row lines; fee blocks are set apart by their background. */
+.pp-table{border:0}
+.pp-table thead th{border-top:0}
+.pp-fee-block{border:0;background:var(--aw-sidebar)}
+.pp-fee-block .pp-factor{border-inline-start-color:var(--aw-line)}
+/* Priced data atoms grouped by service / equipment category. */
+.pp-table .pp-group th{padding:14px 12px 8px;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--aw-muted);background:var(--aw-sidebar);border-bottom:1px solid var(--aw-line)}
+.pp-table .pp-group small{letter-spacing:0;font-weight:400}
+.pp-table .pp-atom{padding-inline-start:26px}
+.pp-table .pp-more td,.pp-table .pp-more th{border-top:0}
+.pp-table .pp-unpriced{color:var(--aw-muted);font-size:12px}
+/* Empty table: the message is centred in the space under the column headers. */
+.pp-table{display:flex;flex-direction:column}
+.pp-table>table{flex:none}
+.pp-table>.pe-empty{flex:1 1 auto;display:grid;place-items:center;padding:24px;text-align:center;font-size:13px}
+/* Larger type across the Pricing tab. */
+.pp-head h2{font-size:19px}.pp-head p{font-size:14px}
+.pp :is(input,select){font-size:15px;min-height:38px}
+.pp button{font-size:14px;min-height:36px}
+.pp .pp-icon{width:34px}
+.pp-field{font-size:13.5px}.pp-lines legend{font-size:13.5px}.pp-note{font-size:13.5px}
+.pp-editor h3{font-size:16px}.pp-fee{font-size:15px}.pp-factor-name{font-size:14px}
+.pp-table table{font-size:15px}.pp-table thead th{font-size:13.5px}.pp-table .pp-group th{font-size:12.5px}
+.pp-status{font-size:14px}.pp-table small{font-size:13px}
+.pp-table>.pe-empty,.pe-empty{font-size:15px}
+/* New pricing policy: Equipment / Service tabs. */
+.pp-tabs{display:flex;gap:4px;border-bottom:1px solid var(--aw-line)}
+.pp .pp-tabs button{min-height:34px;padding:0 14px;border:0;border-bottom:2px solid transparent;border-radius:0;background:none;color:var(--aw-muted);font-size:14px}
+.pp .pp-tabs button[aria-selected=true]{color:var(--aw-text);border-bottom-color:var(--aw-text)}
+
+.pe-settings{padding:16px;box-sizing:border-box}
+/* Larger type again across the Pricing (Prices) tab, including the settings cards. */
+.pp-head h2{font-size:22px}.pp-head p{font-size:15.5px}
+.pp :is(input,select){font-size:17px;min-height:42px}
+.pp button{font-size:15.5px;min-height:40px}
+.pp-field,.pp-lines legend,.pp-note{font-size:15px}
+.pp-editor h3{font-size:18px}
+.pp-table table{font-size:17px}.pp-table thead th{font-size:15px}.pp-table .pp-group th{font-size:14px}
+.pp-table small,.pp-status{font-size:15px}.pp-table>.pe-empty,.pe-empty{font-size:17px}
+.pp .pp-tabs button{font-size:16px}
+.admin-workspace .pe-settings :is(input,select){font-size:16px;min-height:40px}
+.pe-settings .work-element-card h2{font-size:19px}.pe-settings .work-element-card>header>span{font-size:15px}
+.pe-settings .work-element-card li strong{font-size:16px}.pe-settings .work-element-card li small{font-size:14px}
+.pe-settings :is(.work-element-source,.work-element-empty){font-size:14px}
+.pe-settings .work-element-language-select,.pe-settings .work-element-language-select>span{font-size:14px}
+.pe-settings .work-element-language-chip{font-size:14px}
+.admin-workspace .pe-settings .work-element-submit{font-size:15px}
+/* Same type as the Recordings tab: 22px title, 14px controls, 13px table rows (56px high), 12px uppercase column heads. */
+.pp-head h2{font-size:22px}.pp-head p{font-size:13px}
+.pp :is(input,select){font-size:14px;min-height:40px}
+.pp button{font-size:14px;min-height:40px}
+.pp .pp-icon{width:36px}
+.pp-field,.pp-lines legend,.pp-note{font-size:12.5px}
+.pp-editor h3{font-size:15px}
+.pp-table table{font-size:13px}
+.pp-table thead th{padding:11px 14px;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#b9bfc4}
+.pp-table tbody :is(th,td){padding:0 14px;height:56px;font-size:13px;vertical-align:middle;border-bottom:1px solid #ffffff0d}
+.pp-table tbody th.pp-atom{font-weight:600;padding-inline-start:26px}
+.pp-table tbody .pp-group th{height:auto;padding:14px 14px 8px;font-size:12px}
+.pp-table small,.pp-status{font-size:12px}
+.pp-table>.pe-empty,.pe-empty{font-size:14px}
+.pp .pp-tabs button{font-size:14px}
+.admin-workspace .pe-settings :is(input,select){font-size:14px;min-height:38px}
+.pe-settings .work-element-card h2{font-size:15px}.pe-settings .work-element-card>header>span{font-size:13px}
+.pe-settings .work-element-card li strong{font-size:14px}.pe-settings .work-element-card li small{font-size:12px}
+.pe-settings :is(.work-element-source,.work-element-empty),.pe-settings .work-element-language-select,.pe-settings .work-element-language-select>span,.pe-settings .work-element-language-chip{font-size:12.5px}
+.admin-workspace .pe-settings .work-element-submit{font-size:13px}
+/* Left column (form) matches the Recordings filter column: 14.5px title, 12px labels. */
+.pp-editor h3{font-size:14.5px}
+.pp-field,.pp-lines legend,.pp-note,.pp-editor small{font-size:12px}
+.pp-fee,.pp-factor-name{font-size:13px}
+.pp .pp-actions button{font-size:14px}

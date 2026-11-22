@@ -131,6 +131,6 @@ test('review shows all account contacts as read-only with account values',()=>{
 
 test('the concept map and the Booking review have an icon for every booking section',()=>{
  const source=readFileSync(new URL('./HomeBookingAssistant.jsx',import.meta.url),'utf8');
- const icons=source.match(/const icons=\[([^\]]*)\]/)[1].split(',').filter(Boolean);
- assert.ok(icons.length>=BOOKING_GOALS.length,`${icons.length} icons for ${BOOKING_GOALS.length} sections`);
+ const icons=source.match(/const icons=\{([^}]*)\}/)[1];
+ for(const goal of BOOKING_GOALS)assert.match(icons,new RegExp(`\\b${goal.id}:`),`no icon for the ${goal.id} section`);
 });

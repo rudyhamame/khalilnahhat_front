@@ -1,8 +1,8 @@
 import BookingConfirmation,{BookingSendingState} from './BookingConfirmation';
+import {useTree} from '../lib/tree';
 import {formatCanadianPhone} from '../lib/canadianPhone';
 import {createVoucherOfferGate} from '../lib/bookingVoucher';
 import {bookingSteps,bookingStepForField,firstIncompleteStep,bookingIssueStep} from '../lib/bookingFlow.mjs';
-import {useRentalCatalog} from '../lib/useRentalCatalog';
 import {bookingServiceId} from '../lib/rentalCatalog';
 import {scrollToAppSection} from '../lib/bookingViewport';
 import EquipmentQuantityPicker from './EquipmentQuantityPicker';
@@ -61,7 +61,7 @@ export default function QuotePage({lang,user,isSessionReady,onCreateServiceReque
   const [state,setState]=useState({busy:false,error:'',done:null});
   useEffect(()=>{onSubmissionStateChange?.(state.done?'received':state.error?'error':state.busy||autoSubmit&&atomsConfirmed?'sending':'review');},[onSubmissionStateChange,state.done,state.error,state.busy,autoSubmit,atomsConfirmed]);
   const [tab,setTab]=useState(()=>firstIncompleteStep(ctx.order)),tabId=useId();
-  const {catalog,equipment,loading:catalogLoading,failed:catalogFailed}=useRentalCatalog();
+  const {catalog,equipment,loading:catalogLoading,failed:catalogFailed}=useTree();
   const sections=bookingSteps(ctx.order),tabs=sections.map(section=>({...section,label:ar?section.ar:section.title}));
   const activeEvents=catalog.filter(row=>row.kind==='event'&&row.isActive!==false&&row.bookingType);
   const serviceRows=[...new Map(catalog.filter(row=>row.kind==='service'&&row.isActive!==false&&row.id!=='dj').map(row=>[bookingServiceId(row),row])).values()];

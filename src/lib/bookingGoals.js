@@ -2,10 +2,17 @@ import {fields,getPath,isAnswered} from './eventOrderCore.mjs';
 import {bookingNextStep,effectiveMissing} from './bookingNextStep.js';
 import {bookingStepDefinition,bookingStepForField} from './bookingFlow.mjs';
 import {fieldQuestion} from './fieldQuestion.js';
+import {treeSteps} from './treeCore.js';
 
 // Goals are the flow's sections (lib/bookingFlow.mjs): same titles, same order, same field-to-section mapping.
 const GOAL_STEPS=[['contact','customer'],['event','event'],['music','music'],['rentals','equipment'],['references','references'],['notes','notes']];
 export const BOOKING_GOALS=GOAL_STEPS.map(([id,stepId])=>{const step=bookingStepDefinition(stepId);return {id,title:step.title,ar:step.ar,section:step.viewport||'booking',...(step.face?{face:step.face}:{}),matches:path=>bookingStepForField(path)===stepId};});
+// The sections of the Booking summary that exist in the catalogue: the DJ section needs a `dj` service (and takes its name), the
+// rental section needs a rental service. BOOKING_GOALS stays the full list for the AI and the tests.
+export function activeGoals(){
+ const present=treeSteps();
+ return BOOKING_GOALS.filter(goal=>(goal.id!=='music'||present.dj)&&(goal.id!=='rentals'||present.rental)).map(goal=>goal.id==='music'&&present.djName?{...goal,title:present.djName,ar:present.djNameAr||present.djName}:goal);
+}
 export const bookingGoal=id=>BOOKING_GOALS.find(goal=>goal.id===id)||null;
 // "Your event type" (event.title) exists only when the client chose the type Other and types their own.
 export const ownTypeApplies=(order,key)=>key!=='event.title'||order?.event?.type==='other';

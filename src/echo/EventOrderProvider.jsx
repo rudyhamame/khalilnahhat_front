@@ -1,10 +1,10 @@
 import BookingConfirmation from './BookingConfirmation';
+import {useTree} from '../lib/tree';
 import {createBookingConversationRecorder,bookingConversationKey} from '../lib/bookingConversationRecorder';
 import {confirmDeletion} from '../lib/confirmDeletion';
 import {scrollToAppSection} from '../lib/bookingViewport';
 import {prepareBookingDraftEdit} from '../lib/bookingDraftEdits';
 import {resolveDraftEquipment} from '../lib/draftEquipment';
-import {useRentalCatalog} from '../lib/useRentalCatalog';
 import {equipmentBookingServiceId,equipmentBelongsToService} from '../lib/rentalCatalog';
 import {equipmentQuantity} from './simulationLayout';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
@@ -76,7 +76,7 @@ export function EventOrderProvider({user,token,lang,auth,children,isSessionReady
   const setStored=update=>{const next=applyAccountProfile(typeof update==='function'?update(storedRef.current):update,user);storedRef.current=next;setStoredState(next);};
   const getOrder=()=>({...storedRef.current,equipment:Object.values(readCart()).map(({id,name,quantity})=>({id,name,quantity}))});
   const cart=useCart();
-  const {catalog,equipment}=useRentalCatalog();
+  const {catalog,equipment}=useTree();
   useLayoutEffect(()=>{restoreOrderCart(initial.order.equipment||[]);},[initial]);
   const order=useMemo(()=>pending?applyAccountProfile(normalizeEventOrder(pending.order),user):({...stored,equipment:Object.values(cart).map(item=>({id:item.id,name:item.name,quantity:item.quantity}))}),[stored,cart,pending,user]);
   // The header's Book an event button shows how many booking drafts still need completing (the account has one draft).

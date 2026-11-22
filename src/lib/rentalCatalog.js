@@ -1,12 +1,15 @@
 // Catalog display IDs may be custom; the event-order contract uses these stable
 // service keys. Custom service equipment is requested through equipment rental.
-const bookingServiceIds=new Set(['dj','sound','lighting','led','fx','rental','corporate','mc']);
+import {BOOKING_SERVICE_KEYS,MC_ID,equipmentInService as inService} from './treeCore.js';
+const bookingServiceIds=new Set(BOOKING_SERVICE_KEYS);
 export const isCatalogSet=item=>Boolean(item?.isSet||item?.setItems?.length||item?.modelParts?.length);
 export const bookingServiceId=service=>bookingServiceIds.has(service.id)?service.id:'rental';
 // Hosting decisions are explicit; their accessories are equipment rental.
-export const equipmentBookingServiceId=service=>(service.selectionField||service.id==='mc')?'rental':bookingServiceId(service);
+export const equipmentBookingServiceId=service=>(service.selectionField||service.id===MC_ID)?'rental':bookingServiceId(service);
+// An item belongs to the service it points to (serviceId); the tree fills serviceId for older items (treeCore.withServiceIds).
+export const equipmentInService=inService;
 export function equipmentBelongsToService(item,service,equipment){
- const direct=row=>row.category===service.category||(service.equipmentIds||[]).includes(row.id);
+ const direct=row=>equipmentInService(row,service);
  if(direct(item))return true;
  if(!isCatalogSet(item))return false;
  return (item.setItems||[]).some(member=>{const row=equipment.find(row=>row.id===member.equipmentId);return row&&direct(row);});

@@ -1,11 +1,11 @@
 import {musicPatchFields} from '../lib/musicMessageFields';
+import {useTree} from '../lib/tree';
 import {createAiTaskWriter,sameDraftValue} from '../lib/bookingDraftEdits';
 import {findVenues} from '../lib/venueSearch';
 import {venueResultReply} from '../lib/venueResultReply';
 import {bookingAtomCorrectionReply} from '../lib/bookingAtomReview';
 import {venueSelectionChanges} from '../lib/bookingFlow.mjs';
 import {speakBrowserText} from '../lib/browserSpeech';
-import {useRentalCatalog} from '../lib/useRentalCatalog';
 import {numberedRentalCatalog} from '../lib/numberedRentalCatalog';
 import {currentBookingSubject,fieldSubject,sameBookingSubject,subjectName,bookingTransitionIntent} from '../lib/bookingSubject';
 import {explicitEquipmentQuantities} from '../lib/equipmentQuantityIntent';
@@ -78,7 +78,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   const optionalDoneFor=order=>optionalReviewed.current||optionalExtrasAnswered(order);
   const stageOf=order=>bookingStage(order,{optionalReviewed:optionalReviewed.current,ar});
   const nextBookingStep=(order,arabic)=>{const global=bookingNextStep(order,arabic,{optionalDone:optionalDoneFor(order)});return goalRef.current&&global.path?goalNextStep(order,arabic,goalRef.current):global;};
-  const {equipment:activeEquipment,catalog:activeCatalog=[]}=useRentalCatalog();
+  const {equipment:activeEquipment,catalog:activeCatalog=[]}=useTree();
   const numberedCatalog=useMemo(()=>numberedRentalCatalog(activeCatalog,activeEquipment),[activeCatalog,activeEquipment]);
   const orderRef=useRef(orderDraft?.order);
   const draftContextRef=useRef(orderDraft);draftContextRef.current=orderDraft;

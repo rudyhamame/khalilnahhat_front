@@ -1,5 +1,5 @@
 import {BOOKING_GOALS} from '../lib/bookingGoals';
-import {useRentalCatalog} from '../lib/useRentalCatalog';
+import {useTree} from '../lib/tree';
 import {numberedRentalCatalog} from '../lib/numberedRentalCatalog';
 import {AtomGroups} from '../echo/bookingReview';
 import {sectionLines,submittedSectionLines} from '../lib/bookingReviewModel';
@@ -8,7 +8,7 @@ import './bookingDraftReview.css';
 // The client dashboard's Booking draft shows exactly what the Booking review in Echo Smart Cart shows:
 // the same sections, the same data atoms, grouped Entered / Needs attention / Optional, with each service's equipment in a table.
 export default function BookingDraftReview({order,snapshot=false}){
- const tr=en=>en,{catalog,equipment,loading}=useRentalCatalog(),rentals=numberedRentalCatalog(catalog,equipment);
+ const tr=en=>en,{catalog,equipment,loading}=useTree(),rentals=numberedRentalCatalog(catalog,equipment);
  return <div className="bdr">{BOOKING_GOALS.map((goal,index)=>{
   const {progress,lines}=snapshot?submittedSectionLines(order,goal):sectionLines(order,goal,false,rentals,loading);
   return <section className="bdr-section" key={goal.id} aria-label={goal.title}>

@@ -17,7 +17,7 @@ export const servicesAuditGuide={
  ['SetupNotes','Optional event.setup.requirements input.','Uses the canonical field name and limit; disables editing with the draft.'],
  ['ReferencesSection and AdditionalNotesSection','References: inspiration photos (upload or links) and event documents (upload), with comments. Additional notes: the one free-text atom, in a section of its own.','Use references.photos, references.images, references.files and additional.notes in the same draft; links #references and #additional-notes.'],
  ['RentalsSoFar','Services-page recap and continuation into booking review.','Separate presentation component, but it re-derives some selection state and currently misses standalone service choices.'],
- ['useRentalCatalog','Shared catalog and equipment snapshots.','Refreshes both together; preserves the last complete snapshot on failure and listens for catalog revision notices.'],
+ ['useTree (lib/tree.js)','The Eden of Eide: shared catalog and equipment snapshots.','Refreshes both together; preserves the last complete snapshot on failure and listens for catalog revision notices.'],
  ['EventOrderProvider / prepareBookingDraftEdit','Account-owned draft editing, validation, equipment/service reconciliation and persistence.','Existing shared mutation boundary should remain. Do not create a second Services cart or persistence layer.'],
  ['rentalCatalog, numberedRentalCatalog and draftEquipment','Stable service keys, set membership, item tags, quantity/stock checks.','Useful shared models already exist; remaining UI derivations should converge on these.'],
  ]),

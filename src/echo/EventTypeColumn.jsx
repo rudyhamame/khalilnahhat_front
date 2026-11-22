@@ -1,6 +1,6 @@
 import {FieldCode} from './BookingPhases';
+import {useTree} from '../lib/tree';
 import {useEffect,useRef} from 'react';
-import {useRentalCatalog} from '../lib/useRentalCatalog';
 import {Heart,Gem,Cake,Briefcase,PartyPopper,GraduationCap,CalendarHeart} from 'lucide-react';
 import {useEventOrder} from './eventOrderContext';
 import './eventTypeColumn.css';
@@ -9,7 +9,7 @@ const EVENT_ICONS={wedding:Heart,engagement:Gem,birthday:Cake,corporate:Briefcas
 // "What are you planning?": picks the event type of the booking draft. Lives beside the calendar; the setup section reads the same value.
 export default function EventTypeColumn({ar=false}){
   const order=useEventOrder(),tr=(en,arabic)=>ar?arabic:en;
-  const {catalog}=useRentalCatalog();
+  const {catalog}=useTree();
   const events=catalog.filter(item=>item.kind==='event'&&item.isActive),current=order?.order.event?.type||'';
   const choices=useRef(null),lastHint=useRef(0),cancelHint=useRef(()=>{});
   const eventIds=events.map(event=>event.id).join('|');

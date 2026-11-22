@@ -124,7 +124,7 @@ select.djb-name{min-width:0;max-width:100%;cursor:pointer}
 .djb-target{border-radius:6px;padding:6px 8px;font-size:11px}.djb-time{font-size:11px}.djb-icons button{width:26px;height:28px}
 .djb-tracks li{grid-template-columns:28px minmax(0,1fr) auto;gap:8px;padding:10px 7px;border:1px solid var(--line);border-radius:7px}.djb-tracks .djb-n,.djb-tracks em{display:none}.djb-meta strong{font-size:12px;font-weight:500}.djb-meta small{font-size:11px}.djb-play{width:28px;height:28px}
 .djb-tools{position:static;max-height:none;padding:16px;border:1px solid var(--line);border-radius:10px;gap:14px;grid-template-rows:none}
-.djb-dest{display:none}.djb-destination{display:grid;gap:4px;margin:0;padding:10px 12px;border-left:2px solid var(--acc);background:var(--acc2);font-size:12px}.djb-destination>span{color:var(--muted);font-size:11px}.djb-destination strong{font-weight:500}
+.djb-dest{display:none}
 .djb-tabs{border:0;padding:0;background:none;gap:2px;border-bottom:1px solid var(--line);border-radius:0}.djb-tabs button{flex-wrap:wrap;padding:10px 3px;border-radius:0;font-weight:500}.djb-tabs button.on{background:none;color:var(--acc);box-shadow:inset 0 -2px var(--acc)}.djb-tabs i{font-size:10px;background:var(--line);color:var(--muted)}
 .djb-panel{max-height:600px}.djb-lib li{gap:7px;padding:10px 0;border-bottom:1px solid var(--line);border-radius:0}.djb-add{padding:6px 9px;border-radius:6px;font-weight:500}.djb-chips button{font-size:10px;padding:4px 8px}.djb-add-section{margin-left:32px;border-radius:7px;padding:9px 12px}
 .djb-output{position:sticky;top:18px;min-width:0;overflow:hidden;border:1px solid var(--line2);border-radius:12px;background:var(--panel2)}
@@ -168,10 +168,6 @@ select.djb-name{min-width:0;max-width:100%;cursor:pointer}
 .djb .djb-tools .djb-panel-heading p{margin:4px 0 0;font-size:13px}
 .djb .djb-tools .djb-eyebrow{color:var(--acc)}
 
-.djb .djb-tools .djb-destination{display:flex;align-items:center;gap:12px;margin:0;padding:12px 14px;border:1px solid color-mix(in srgb,var(--acc) 32%,transparent);border-radius:14px;background:var(--acc2)}
-.djb .djb-tools .djb-destination>span{display:inline-flex;align-items:center;gap:9px;flex:none;color:var(--muted);font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
-.djb .djb-tools .djb-destination>span::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--acc);box-shadow:0 0 0 4px var(--acc2)}
-.djb .djb-tools .djb-destination strong{min-width:0;margin-left:auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);font-size:13px;font-weight:600;text-align:right}
 
 .djb .djb-tools .djb-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:4px;border:1px solid var(--line);border-radius:999px;background:var(--bg)}
 .djb .djb-tools .djb-tabs button{flex-wrap:nowrap;gap:7px;padding:10px 6px;border:0;border-radius:999px;background:none;box-shadow:none;color:var(--muted);font-size:12.5px;font-weight:600;white-space:nowrap;transition:background .18s,color .18s,box-shadow .18s}
@@ -229,6 +225,15 @@ select.djb-name{min-width:0;max-width:100%;cursor:pointer}
 .djb .djb-tools .djb-play svg{width:16px;height:16px}
 .djb .djb-tools .djb-add svg{width:14px;height:14px}
 .djb .djb-tools .djb-panel-heading>svg{width:44px;height:44px;stroke-width:2}
+.djb .djb-tools-backdrop>.djb-tools{position:relative!important;top:auto!important;width:min(760px,100%);max-height:90vh!important;overflow:auto!important;display:grid;align-content:start;gap:16px;padding:22px!important;border:1px solid var(--line2)!important;border-radius:16px!important;background:var(--panel2)!important;box-shadow:0 30px 90px -24px #000d}
+.djb-tools-trigger{display:inline-flex;align-items:center;justify-content:center;gap:8px;justify-self:start;padding:11px 16px;border:1px solid var(--line2);border-radius:8px;background:var(--panel2);color:var(--text);font-size:13px;font-weight:600}
+.djb-tools-trigger:hover{border-color:var(--acc);color:var(--acc)}
+.djb-tools-backdrop{position:fixed;inset:0;z-index:90;display:grid;justify-items:center;align-items:start;padding:5vh 16px 16px;background:rgba(5,8,10,.62);backdrop-filter:blur(4px);overflow:auto}
+.djb-tools-backdrop>.djb-tools{position:relative!important;top:auto!important;width:min(760px,100%);max-height:90vh!important;overflow:auto!important;display:grid;align-content:start;gap:16px;padding:22px!important;border:1px solid var(--line2)!important;border-radius:16px!important;background:var(--panel2)!important;box-shadow:0 30px 90px -24px #000d}
+.djb-tools-modal-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.djb-tools-modal-heading h2{margin:4px 0 0;font-size:20px}
+.djb-tools-backdrop .djb-tools .djb-moments{max-height:150px;overflow:auto}
+@media(max-width:600px){.djb-tools-backdrop{padding:12px}.djb-tools-backdrop>.djb-tools{max-height:calc(100vh - 24px)!important;padding:16px!important}}
 
 /* Booking list (replaces the Confirmed booking dropdown) */
 .djb-bookings{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin:0;padding:0;list-style:none}
@@ -337,3 +342,51 @@ select.djb-name{min-width:0;max-width:100%;cursor:pointer}
 .djb .djb-collection-chips{align-items:center}
 .djb .djb-chips-label{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted,#9aa3ad);margin-inline-end:4px}
 .djb .djb-collection-chips button small{margin-inline-start:6px;color:var(--muted,#9aa3ad)}
+/* Header strip (scenario switch + counters): same dark base, grain and falling shadow as the Recordings header; stays dark in the light theme. */
+.admin-workspace[data-area="dj-service-builder"] .djb{padding-top:0}
+.admin-workspace[data-area="dj-service-builder"] .djb-intro{position:relative;z-index:3;margin-inline:-28px;padding:14px 28px;
+ --aw-main:#202123;--aw-sidebar:#17181a;--aw-raised:#303136;--aw-text:#e9e9ec;--aw-muted:#a6a6ad;--aw-line:rgba(255,255,255,.1);--bg:#202123;--text:#e9e9ec;--muted:#a6a6ad;color:#e9e9ec;
+ background-color:#121216;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .88 0 0 0 0 .88 0 0 0 0 .92 0 0 0 .13 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:160px 160px;box-shadow:0 6px 14px #00000066}
+@media(max-width:1000px){.admin-workspace[data-area="dj-service-builder"] .djb-intro{margin-inline:-20px;padding-inline:20px}}
+@media(max-width:960px){.admin-workspace[data-area="dj-service-builder"] .djb-intro{margin-inline:-16px;padding-inline:16px}}
+.admin-workspace .djb .djb-main{padding:0}
+/* The header strip bleeds to the page's left edge only; on the right it ends at its own column (no spill into the preview column). */
+.admin-workspace[data-area="dj-service-builder"] .djb-intro{margin-inline:-28px 0;padding-inline:28px 20px}
+@media(max-width:1000px){.admin-workspace[data-area="dj-service-builder"] .djb-intro{margin-inline:-20px 0;padding-inline:20px}}
+@media(max-width:960px){.admin-workspace[data-area="dj-service-builder"] .djb-intro{margin-inline:-16px 0;padding-inline:16px}}
+/* No negative margins: the header strip stays exactly inside its column. */
+.admin-workspace[data-area="dj-service-builder"] .djb-intro{margin-inline:0}
+@media(max-width:1000px){.admin-workspace[data-area="dj-service-builder"] .djb-intro{margin-inline:0}}
+@media(max-width:960px){.admin-workspace[data-area="dj-service-builder"] .djb-intro{margin-inline:0}}
+/* The booking chip is only as wide as its content. */
+.admin-workspace .djb .djb-pick-chip{width:fit-content;min-width:0;max-width:100%;justify-self:start}
+
+/* Preview sits directly below the builder header; the workspace uses a single full-width column. */
+.djb .djb-workspace{display:block!important;width:100%;min-width:0}
+.djb .djb-main{width:100%;min-width:0}
+.djb .djb-main>.djb-output{position:static;top:auto;align-self:auto;width:100%;min-width:0;margin:0 0 18px;border:1px solid var(--line2);border-radius:10px;}
+.djb .djb-main>.djb-output .djb-preview-table-wrap{max-height:34vh;overflow:auto}
+.djb .djb-main>.djb-output .djb-preview-table{width:100%;border-collapse:collapse;text-align:left;font-size:13px}
+.djb .djb-main>.djb-output .djb-preview-table th,.djb .djb-main>.djb-output .djb-preview-table td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
+.djb .djb-main>.djb-output .djb-preview-table thead th{position:sticky;top:0;z-index:1;background:var(--panel2);color:var(--muted);font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.djb .djb-main>.djb-output .djb-preview-table .djb-preview-section th{background:color-mix(in srgb,var(--acc) 7%,var(--panel2));color:var(--text)}
+.djb .djb-main>.djb-output .djb-preview-section th>span{margin-right:12px}
+.djb .djb-main>.djb-output .djb-preview-section small{color:var(--muted);font-size:11px;font-weight:400}
+.djb .djb-main>.djb-output .djb-preview-table tbody th[scope=row]{font-weight:600}
+.djb-preview-track-index{display:inline-block;min-width:30px;color:var(--muted);font-size:11px;font-weight:400}
+.djb .djb-main>.djb-output .djb-preview-empty,.djb .djb-main>.djb-output .djb-preview-cue td{color:var(--muted);font-size:12px}
+.djb .djb-main>.djb-output .djb-preview-cue td{font-style:italic}
+@media(max-width:600px){.djb .djb-main>.djb-output .djb-preview-table th,.djb .djb-main>.djb-output .djb-preview-table td{padding:8px}.djb .djb-main>.djb-output .djb-preview-table thead th:nth-child(2),.djb .djb-main>.djb-output .djb-preview-table tbody td:nth-child(2){display:none}}
+
+/* Music items table in the Add music items popup. */
+.djb-music-table-wrap{max-width:100%;overflow:auto;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+.djb .djb-tools .djb-music-table{width:100%;border-collapse:collapse;text-align:left;font-size:13px}
+.djb .djb-tools .djb-music-table th,.djb .djb-tools .djb-music-table td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+.djb .djb-tools .djb-music-table thead th{position:sticky;top:0;background:var(--panel2);color:var(--muted);font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.djb .djb-tools .djb-music-table tbody tr:last-child>*{border-bottom:0}
+.djb .djb-tools .djb-music-table tbody tr:hover{background:color-mix(in srgb,var(--acc) 4%,var(--bg))}
+.djb .djb-tools .djb-music-table tbody th{min-width:180px;font-weight:400}
+.djb .djb-tools .djb-music-table .djb-meta strong{display:block}
+.djb .djb-tools .djb-music-table .djb-play{width:34px;height:34px}
+.djb .djb-tools .djb-music-table .djb-add{white-space:nowrap}
+@media(max-width:640px){.djb .djb-tools .djb-music-table thead th:nth-child(3),.djb .djb-tools .djb-music-table tbody td:nth-child(3){display:none}.djb .djb-tools .djb-music-table th,.djb .djb-tools .djb-music-table td{padding:8px}}

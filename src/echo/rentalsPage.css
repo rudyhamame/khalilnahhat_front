@@ -29,10 +29,8 @@ html[dir=rtl] .rw :is(h2,h3){letter-spacing:0}
 .rw-back:hover{border-color:#f0b25e99}
 .rw-count{padding:8px 14px;border:1px solid var(--rw-line);border-radius:999px;background:var(--rw-glass);color:var(--rw-mute);font-size:13px;font-weight:600}
 .rw-eq-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(200px,18vw,270px),1fr));gap:clamp(12px,1.4vw,20px);align-content:start}
-.rw-card{position:relative;display:flex;flex-direction:column;align-items:stretch;padding:0;border:1px solid var(--rw-line);border-radius:20px;background:var(--rw-glass);backdrop-filter:blur(10px);overflow:hidden;text-align:start;transition:transform .2s,border-color .2s}
-.rw-card:hover{transform:translateY(-4px);border-color:#f0b25e99}
-.rw-card.is-picked{border-color:#e3d3a3aa}
-.rw-card.is-open{border-color:var(--rw-accent);box-shadow:0 0 0 1px var(--rw-accent)}
+.rw-card{position:relative;display:flex;flex-direction:column;align-items:stretch;padding:0;border:0;border-radius:0;background:var(--rw-glass);backdrop-filter:blur(10px);overflow:hidden;text-align:start;transition:transform .2s,border-color .2s}
+.rw-card.is-picked,.rw-card.is-open{border:0;box-shadow:none}
 .rw-card-img{display:block;aspect-ratio:4/3;background:#0a0d0acc;overflow:hidden}
 .rw-card .rw-card-img .rental-equipment-thumbnail{display:grid;place-items:center;width:100%;height:100%;border:0;border-radius:0;background:transparent;color:var(--rw-mute)}
 .rw-card .rw-card-img img{width:100%;height:100%;object-fit:cover;display:block}
@@ -45,8 +43,9 @@ html[dir=rtl] .rw-card-copy{padding:14px 16px 14px 44px}
 .rw-card-go{position:absolute;bottom:16px;inset-inline-end:14px;color:var(--rw-mute)}
 .rw-empty{grid-column:1/-1;margin:0;padding:28px;border:1px dashed var(--rw-line);border-radius:18px;color:var(--rw-mute);text-align:center}
 /* Details drawer */
-.rw-scrim{position:fixed;inset:0;z-index:39;background:#000a;animation:rw-fade .25s both}
-.rw-drawer{position:fixed;inset-block:0;inset-inline-end:0;z-index:40;display:flex;flex-direction:column;width:min(540px,100%);background:linear-gradient(180deg,#17120a,#0d0f0a);border-inline-start:1px solid var(--rw-line);box-shadow:0 0 80px #000c;color:var(--rw-ink);animation:rw-slide .3s cubic-bezier(.2,.8,.2,1) both;font-family:'Manrope','Noto Sans Arabic',system-ui,sans-serif}
+.rw-scrim{position:fixed;inset:0;z-index:9998;background:#000a;animation:rw-fade .25s both}
+.rw-drawer{--rw-ink:#f6f1e4;--rw-mute:#cfc4aa;--rw-line:#ffffff24;--rw-glass:#0c110ccc;--rw-gold:#e3d3a3;--rw-accent:#f0b25e;position:fixed;inset-block:0;inset-inline-end:0;z-index:9999;display:flex;flex-direction:column;width:min(540px,100%);box-sizing:border-box;background:linear-gradient(180deg,#17120a,#0d0f0a);border-inline-start:1px solid var(--rw-line);box-shadow:0 0 80px #000c;color:var(--rw-ink);animation:rw-slide .3s cubic-bezier(.2,.8,.2,1) both;font-family:'Manrope','Noto Sans Arabic',system-ui,sans-serif}
+.rw-drawer *{box-sizing:border-box}
 html[dir=rtl] .rw-drawer{animation-name:rw-slide-rtl}
 @keyframes rw-fade{from{opacity:0}}
 @keyframes rw-slide{from{transform:translateX(40px);opacity:0}}
@@ -93,7 +92,7 @@ html body .rw-drawer .rw-drawer-stage :is(model-viewer,canvas){filter:brightness
 /* Quantity: padded footer, label and stock on one row, then a centred, evenly spaced stepper. */
 html body .rw-drawer .rental-booking{display:block;flex:none;box-sizing:border-box;margin:0;padding:18px 24px 24px!important;border-top:1px solid #ffffff24;background:#0b0d09}
 html body .rw-drawer .setup-quantity-picker{display:grid!important;grid-template-columns:1fr;gap:14px;width:100%;margin:0;padding:0;border:0;background:none}
-html body .rw-drawer .setup-quantity-picker>span{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#cfc4aa}
+html body .rw-drawer .setup-quantity-picker>span{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 8px;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#cfc4aa}
 html body .rw-drawer .rental-stock-actions{display:inline-flex;align-items:center;gap:8px;margin:0}
 html body .rw-drawer .rental-quantity-controls{display:grid;grid-template-columns:48px minmax(72px,1fr) 48px;align-items:stretch;gap:10px;width:100%;margin:0;padding:0}
 html body .rw-drawer .rental-quantity-controls button{display:grid;place-items:center;width:48px;height:48px;padding:0;margin:0;border:1px solid #ffffff3d;border-radius:14px;background:#ffffff12;color:#f6f1e4}
@@ -125,6 +124,8 @@ html body .rw-drawer .rental-booking{display:grid!important;grid-template-column
 html body .rw-drawer .rental-booking>*{min-width:0;max-width:100%}
 html body .rw-drawer .rental-booking .rental-quantity-note{margin:0!important;text-align:center;padding:10px 14px;border-radius:12px;background:#e3d3a31a;border:1px solid #e3d3a340;color:#e3d3a3;font-size:13px}
 html body .rw-drawer .rental-stock-actions{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+html body .rw-drawer .rental-stock-actions .rental-quantity-note{display:inline-flex;align-items:center;align-self:center;box-sizing:border-box;margin:0;padding:4px 9px;border:0;border-radius:999px;background:#d8c79912;color:#d8c799;font:500 12px/1.3 'Manrope','Noto Sans Arabic',sans-serif;white-space:nowrap}
+html body .rw-drawer .rental-stock-actions .setup-equipment-stock{align-self:center;box-sizing:border-box;padding:4px 9px;border:0;border-radius:999px;font:500 12px/1.3 'Manrope','Noto Sans Arabic',sans-serif}
 html body .rw-drawer .rental-stock-actions .setup-add-booking{display:grid!important;place-items:center;width:34px!important;height:34px!important;min-width:0!important;padding:0!important;border-radius:10px!important;background:#ffffff14!important;border:1px solid #ffffff3d!important;color:#f3a59b!important;box-shadow:none!important}
 html body .rw-drawer .rental-stock-actions .setup-add-booking:hover{background:#d65a4a!important;border-color:#d65a4a!important;color:#fff!important}
 
@@ -157,7 +158,7 @@ html body .rw-card .rw-card-img img{width:100%;height:100%;object-fit:cover;obje
 .rw-dj .djf-back{display:none}
 
 /* Equipment drawer: the header and the quantity bar stay put, and the picture plus the written details scroll together, so every line is reachable at any window height. */
-.rw-drawer-scroll{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:thin}
+.rw-drawer-scroll{flex:1 1 0;min-height:0;height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain;scrollbar-width:thin;-webkit-overflow-scrolling:touch;touch-action:pan-y}
 .rw-drawer-scroll .rw-drawer-body{flex:none;overflow:visible;padding-bottom:24px}
 .rw-drawer-stage{height:clamp(160px,34svh,340px)}
 /* The services screen starts at the top of its viewport (no centring, only a small top gap). */
@@ -200,3 +201,21 @@ html:has(.rentals-hero){scroll-snap-type:none}
 .rw-services :is(.rw-service-grid,#rental-packages)>:nth-child(n+9){animation-delay:.4s}
 .rw-modes>button{transition:background .25s,color .25s}
 @media(prefers-reduced-motion:reduce){.rw-services :is(.rw-service-grid,#rental-packages)>*{animation:none!important}}
+
+/* Stock / selected / remove sit under the "Quantity" title instead of beside it. */
+html body .rw-drawer .setup-quantity-picker>span{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+html body .rw-drawer .setup-quantity-picker>span .rental-stock-actions{justify-content:flex-start}
+
+/* Stock row: availability and selected note at the start, Remove pushed to the opposite end. */
+html body .rw-drawer .setup-quantity-picker>span .rental-stock-actions{display:flex;width:100%;justify-content:flex-start;flex-wrap:wrap;direction:inherit}
+html body .rw-drawer .rental-stock-actions .setup-add-booking.is-added{display:inline-flex!important;align-items:center;gap:6px;width:auto!important;height:32px!important;margin-inline-start:auto;padding:0 12px!important;border:1px solid #d99c8c66!important;border-radius:999px!important;background:#d99c8c14!important;color:#f0b7ac!important;font:600 12px/1 'Manrope','Noto Sans Arabic',sans-serif}
+html body .rw-drawer .rental-stock-actions .setup-add-booking.is-added:hover{background:#d65a4a!important;border-color:#d65a4a!important;color:#fff!important}
+
+/* YouTube illustration link in the equipment details drawer. */
+html body .rw-drawer .rental-youtube-link{display:flex;align-items:center;gap:12px;margin-top:14px;padding:12px 14px;border:1px solid #ff5a5a55;border-radius:12px;background:#ff5a5a12;text-decoration:none}
+html body .rw-drawer .rental-youtube-link>svg:first-child{flex:none;display:block;box-sizing:content-box;width:16px;height:16px;padding:8px;border-radius:50%;background:#ff3d3d;color:#fff}
+html body .rw-drawer .rental-youtube-link>span{display:grid;flex:1;min-width:0;gap:2px}
+html body .rw-drawer .rental-youtube-link strong{color:#f4f7f3;font:700 13px/1.3 'Manrope','Noto Sans Arabic',sans-serif}
+html body .rw-drawer .rental-youtube-link small{color:#c9b3b3;font:500 12px/1.3 'Manrope','Noto Sans Arabic',sans-serif}
+html body .rw-drawer .rental-youtube-link>svg:last-child{flex:none;color:#f0a3a3}
+html body .rw-drawer .rental-youtube-link:hover{background:#ff5a5a22;border-color:#ff5a5a99}

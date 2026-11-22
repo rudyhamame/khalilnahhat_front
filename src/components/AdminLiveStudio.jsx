@@ -149,17 +149,8 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
                     </>;})();
  return (
           <section id="admin-live-stream" className="admin-panel admin-live-stream-panel" aria-label="Live studio" data-hide-left={hidden.left?'1':undefined}>
-            <div><div className="section-label admin-panel-head">
-              <div className="admin-panel-head-copy">
-                <p className="section-number">
-                  <span className="section-number-mark">KN//</span>
-                  <span className="section-number-value">00</span>
-                </p>
-                <h2 className="admin-title-with-icon"><Radio size={18} aria-hidden="true" /><span className="admin-crumb">Live</span><span className="admin-crumb-sep" aria-hidden="true">/</span>Echo Studio</h2>
-              </div>
-            </div>
             {error&&<p role="alert" className="admin-request-feedback">{error}</p>}
-            </div><div className="admin-live-sessions-layout admin-live-tabs-shell admin-live-sessions-page-tabs">
+            <div className="admin-live-sessions-layout admin-live-tabs-shell admin-live-sessions-page-tabs">
               <div className="admin-live-tab-panel admin-live-sessions-page-panel" role="tabpanel">
               <div className="admin-live-single has-requests-aside">
               <div className={`admin-live-preview${previewFormat==='portrait'?' is-portrait-only':''}`}>
