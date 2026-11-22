@@ -1,25 +1,39 @@
 import MusicPreferenceValue from './MusicPreferenceValue';
 import {musicMessageFields} from '../lib/musicMessageFields';
 import {fieldName} from '../lib/eventOrderCore.mjs';
+import {ATOM_KEYS,fieldCode} from '../lib/eventPageModel';
 import {manualBookingFieldHref} from '../lib/bookingAtomReview';
 import {formatVenueAddress} from '../lib/venueAddressFormat';
 import {Sparkles,UserRound,Phone,MessageSquare} from 'lucide-react';
 import './echoChatMessage.css';
 
 const safeHttps=value=>{try{const url=new URL(value);return url.protocol==='https:'&&!url.username&&!url.password?url.href:null;}catch{return null;}};
+// A data atom the assistant names ("01.01.01 First name", or a bold atom name) is shown as the same name + code-badge chip as the Booking review.
+const KEY_BY_CODE=Object.fromEntries(ATOM_KEYS.map(key=>[fieldCode(key),key]));
+const Atom=({code,name})=><span className="echo-atom" data-field={KEY_BY_CODE[code]}><b>{name}</b><i>{code}</i></span>;
+function Atoms({text}){
+ return text.split(/\b(\d{2}\.\d{2}\.\d{2})\b/u).map((part,index,all)=>{
+  const key=index%2?KEY_BY_CODE[part]:null;
+  if(key){const next=all[index+1]||'',names=[fieldName(key),fieldName(key,true)].filter(Boolean),hit=names.find(name=>next.trimStart().toLowerCase().startsWith(name.toLowerCase()));
+   if(hit){all[index+1]=next.trimStart().slice(hit.length);return <Atom key={index} code={part} name={hit}/>;}
+   return <Atom key={index} code={part} name={names[0]||''}/>;}
+  return part;
+ });
+}
 // https links (uploaded files and photo links the assistant mentions) become hyperlinks that open in a new tab.
 function Linked({text}){
  // [name](https://…) shows the name as the link; a bare https link shows itself.
  return text.split(/(\[[^\]]{1,200}\]\(https:\/\/[^\s<>()]+\)|https:\/\/[^\s<>()]+)/gu).map((part,index)=>{
-  if(index%2===0)return part;
+  if(index%2===0)return <Atoms key={index} text={part}/>;
   const named=/^\[([^\]]+)\]\((https:\/\/[^\s<>()]+)\)$/u.exec(part);
   if(named){const href=safeHttps(named[2]);return href?<a key={index} href={href} target="_blank" rel="noopener noreferrer">{named[1]}</a>:named[1];}
   const trimmed=part.replace(/[.,;:!?]+$/u,''),href=safeHttps(trimmed);
   return href?<span key={index}><a href={href} target="_blank" rel="noopener noreferrer">{trimmed}</a>{part.slice(trimmed.length)}</span>:part;
  });
 }
+const atomOfName=name=>{const key=ATOM_KEYS.find(item=>[fieldName(item),fieldName(item,true)].some(label=>label&&label.toLowerCase()===name.trim().toLowerCase()));return key?<Atom code={fieldCode(key)} name={name.trim()}/>:null;};
 function InlineText({text}){
- return text.split(/\*\*([^*]+)\*\*/gu).map((part,index)=>index%2?<strong key={index}><Linked text={part}/></strong>:<Linked key={index} text={part}/>);
+ return text.split(/\*\*([^*]+)\*\*/gu).map((part,index)=>index%2?<strong key={index}>{atomOfName(part)||<Linked text={part}/>}</strong>:<Linked key={index} text={part}/>);
 }
 const tableRow=line=>/^\s*\|.*\|\s*$/u.test(line),tableCells=line=>line.trim().replace(/^\||\|$/gu,'').split('|').map(cell=>cell.trim());
 function TextBlock({text}){

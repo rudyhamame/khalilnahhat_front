@@ -413,3 +413,10 @@ html body #ai-booking-transcript#ai-booking-transcript{padding:14px;box-sizing:b
 /* Swapped: the client's messages sit on the open transcript, Echo AI's replies get the card. */
 html body #ai-booking-transcript .ai-booking-message.is-user{background:none;border-radius:0}
 html body #ai-booking-transcript .ai-booking-message.echo-chat-message:not(.is-user){background:#171717;border-radius:15px}
+html body #ai-booking-transcript .ai-booking-message.is-user{background:#ffffff09;border-radius:15px}
+/* Booking review rows: the atom name first, then its order badge (mono, same chip as in Echo's replies); a roomier row with a calm value column. */
+html body .echo .ea-review .ea-data-row>b{display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px;font-weight:500;line-height:1.4;color:#d7e4dc}
+html body .echo .ea-review .ea-data-row .ea-atom-code{order:2;margin:0;padding:1px 6px;border:1px solid #a3d9c033;border-radius:5px;background:#a3d9c01a;color:#a3d9c0;font:600 10.5px/1.5 ui-monospace,'SFMono-Regular','JetBrains Mono',Menlo,Consolas,monospace;letter-spacing:.04em;font-variant-numeric:tabular-nums}
+html body .echo .ea-review .ea-data-row{padding-block:8px}
+html body .echo .ea-review .ea-data-row .ea-data-value{color:#f4f7f5;font-size:13px;line-height:1.5;overflow-wrap:anywhere}
+html body .echo .ea-review .ea-data-row[data-empty] .ea-data-value{color:#8d9a93;font-style:italic}

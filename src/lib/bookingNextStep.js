@@ -39,10 +39,10 @@ export function effectiveMissing(order={}){
 
 // Only ask for values still missing after the draft has actually been updated.
 // optionalDone: the client has answered or declined the optional extras (inspiration links, notes, voucher). Then, and only then, the booking is announced as ready to submit.
-export function bookingNextStep(order={},ar=false,{optionalDone=false}={}){
+export function bookingNextStep(order={},ar=false,{optionalDone=false,firstKey=null}={}){
  const missing=effectiveMissing(order);
 
- const field=priority.map(path=>missing.find(field=>field.key===path)).find(Boolean)||missing[0];
+ const field=(firstKey&&missing.find(field=>field.key===firstKey))||priority.map(path=>missing.find(field=>field.key===path)).find(Boolean)||missing[0];
  if(!field)return optionalDone
   ?{path:null,ready:true,text:ar?'حجزك مكتمل وجاهز للإرسال. اضغط «إرسال الحجز» لإرساله إلى الفريق.':'Your booking is complete and ready to be submitted. Press Submit booking to send it to the team.'}
   :{path:null,text:ar?'تفاصيل الطلب الأساسية مكتملة. هل تريد إضافة صور ملهمة أو روابطها، أو ملاحظات إضافية، أو رمز قسيمة؟ أو أخبرني إن لم يكن هناك شيء آخر لإضافته.':'Your required details are complete. Would you like to add inspiration photo links, additional notes or a voucher code? Or tell me there is nothing more to add.'};

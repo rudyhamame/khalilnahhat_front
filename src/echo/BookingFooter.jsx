@@ -1,28 +1,22 @@
 import {useEffect,useState} from 'react';
 import {useTree,useTreeSteps} from '../lib/tree';
-import {stepMounted} from '../lib/treeCore';
 import {ChevronUp,X} from 'lucide-react';
 import {useEventOrder} from './eventOrderContext';
 import {bookingProgress} from './BookingCart';
 import {PUBLIC_PAGE_PATHS} from '../lib/publicPages';
 import {effectiveMissing} from '../lib/bookingNextStep';
-import {fields,fieldName,getPath,isAnswered} from '../lib/eventOrderCore.mjs';
+import {NAMES,SKIP,stepOfKey,REQUIRED_KEYS,REQUIRED_ALL,answered,nextRequiredKey,nextOptionalKey} from '../lib/footerAtoms';
+import {fieldName} from '../lib/eventOrderCore.mjs';
 import {ATOM_KEYS,fieldCode} from '../lib/eventPageModel';
 import {manualBookingFieldHref} from '../lib/bookingAtomReview';
 import SmartCartIcon from './SmartCartIcon';
 import './bookingFooter.css';
 
-const NAMES={'music.languagePairs':['Language & dialect','اللغة واللهجة'],'music.genres':['Music genres','الأنواع الموسيقية'],'music.suggestedSongs':['Songs for event moments','أغانٍ للحظات الفعالية'],'music.favouriteSongs':['Favourite songs','الأغاني المفضلة'],'music.favouriteArtists':['Favourite artists','الفنانون المفضلون'],'services':['Rental services','خدمات التأجير'],'equipment':['Rental equipment','معدات التأجير'],'references.photos':['Inspiration photos','صور ملهمة'],'references.images':['Inspiration photo links','روابط صور ملهمة'],'additional.notes':['Additional notes','ملاحظات إضافية'],'additional.voucherCode':['Voucher','القسيمة']};
 // The five steps. Required atoms come from the contract; every other atom of the step is optional.
 const STEPS=[['Personal','الشخصية'],['Event','الفعالية'],['DJ','دي جي'],['Rental','التأجير'],['Extras','إضافات']];
 // Not typed in by the client (map data) or not on this page (conditional title, room setup).
-const SKIP=new Set(['event.venue.latitude','event.venue.longitude','event.venue.source','event.venue.sourceId','event.venue.sourceAttribution','event.title','event.setup.requirements','services']);
-const stepOfKey=key=>parseInt(String(fieldCode(key)||'').slice(0,2),10);
 // Required atoms per step: the contract's required fields, the DJ decision (step 3) and .
-const REQUIRED_KEYS=n=>[...new Set([...fields.filter(field=>field.required&&parseInt(String(fieldCode(field.key)||'').slice(0,2),10)===n).map(field=>field.key).filter(key=>!['rental.requested','services'].includes(key)),...(n===3?['music.djRequested']:[]),...(n===4?['rental.requested']:[])])];
-const REQUIRED_ALL=new Set([1,2,3,4,5].flatMap(REQUIRED_KEYS));
 // Every piece of rental equipment is its own data atom (the Rental step counts the chosen items against all items); everything else is a plain answered check.
-const answered=(order,key)=>key==='equipment'?order?.equipment?.length>0:isAnswered(getPath(order,key));
 // Same-page links scroll; others (account fields) navigate.
 const blink=el=>{el.classList.remove('is-blinking');void el.offsetWidth;el.classList.add('is-blinking');setTimeout(()=>el.classList.remove('is-blinking'),2400);};
 const go=event=>{const link=event.currentTarget,href=link.getAttribute('href'),hash=href.split('#')[1],target=document.querySelector(`[data-booking-field="${link.dataset.field}"]`)||(hash&&document.getElementById(hash));if(!target||href.startsWith('/dashboard'))return;event.preventDefault();let done=false;const run=()=>{if(done)return;done=true;blink(target);};target.scrollIntoView({behavior:'smooth',block:'center'});window.addEventListener('scrollend',run,{once:true});setTimeout(run,900);};
@@ -42,9 +36,7 @@ export default function BookingFooter({ar=false}){
   if(!ctx?.order)return null;
   if(closed)return <button type="button" className={`booking-footer-tab${shown?'':' is-hidden'}`} dir={ar?'rtl':'ltr'} onClick={open} aria-label={tr('Open booking status','فتح حالة الحجز')}><ChevronUp size={16} aria-hidden="true"/>{tr('Booking status','حالة الحجز')}</button>;
   const label=(key)=>{const code=fieldCode(key),name=NAMES[key]?NAMES[key][ar?1:0]:fieldName(key,ar)||key;return `${code?code+' ':''}${name}`;};
-  // Page order = the STEP.SEC.ATOM code, so the link always starts from the earliest atom still missing.
-  const byPage=(a,b)=>(fieldCode(a)||'99').localeCompare(fieldCode(b)||'99');
-  const required=effectiveMissing(ctx.order).map(field=>field.key).filter(key=>key!=='services').sort(byPage)[0],optional=ATOM_KEYS.filter(key=>!SKIP.has(key)&&!REQUIRED_ALL.has(key)&&stepMounted(stepOfKey(key),avail)).sort(byPage).find(key=>!answered(ctx.order,key));
+  const required=nextRequiredKey(ctx.order),optional=nextOptionalKey(ctx.order);
   const link=key=>key?<a href={manualBookingFieldHref(key)} data-field={key} onClick={go}>{label(key)}</a>:<span className="booking-footer-done">{tr('All done','اكتمل')}</span>;
   const missingKeys=effectiveMissing(ctx.order).map(field=>field.key).filter(key=>key!=='services'),stepOf=key=>parseInt(String(fieldCode(key)||'').slice(0,2),10);
   const steps=STEPS.map(([en,arabic],index)=>{const n=index+1,optionalKeys=ATOM_KEYS.filter(key=>stepOfKey(key)===n&&!SKIP.has(key)&&!REQUIRED_ALL.has(key)),left=missingKeys.filter(key=>stepOf(key)===n).length,reqTotal=Math.max(REQUIRED_KEYS(n).length,left),reqDone=reqTotal-left,chosen=ctx.order.equipment?.length||0,rest=optionalKeys.filter(key=>key!=='equipment'),optDone=rest.filter(key=>answered(ctx.order,key)).length+(n===4?chosen:0),optTotal=n===4?Math.max(catalogEquipment.length,chosen):rest.length,all=reqTotal+optTotal,percent=all?Math.round((reqDone+optDone)/all*100):0;

@@ -1,3 +1,4 @@
+import {nextRequiredKey,nextOptionalKey,atomLabel} from '../lib/footerAtoms';
 import {musicPatchFields} from '../lib/musicMessageFields';
 import {useTree} from '../lib/tree';
 import {createAiTaskWriter,sameDraftValue} from '../lib/bookingDraftEdits';
@@ -77,7 +78,16 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   const markOptionalReviewed=()=>{optionalReviewed.current=true;try{if(optionalKey)localStorage.setItem(optionalKey,'1');}catch{/* Optional storage. */}};
   const optionalDoneFor=order=>optionalReviewed.current||optionalExtrasAnswered(order);
   const stageOf=order=>bookingStage(order,{optionalReviewed:optionalReviewed.current,ar});
-  const nextBookingStep=(order,arabic)=>{const global=bookingNextStep(order,arabic,{optionalDone:optionalDoneFor(order)});return goalRef.current&&global.path?goalNextStep(order,arabic,goalRef.current):global;};
+  // Same order as the Booking footer: every required atom first (earliest on the page), then the optional ones, each asked once.
+  const nextBookingStep=(order,arabic)=>{
+    const global=bookingNextStep(order,arabic,{optionalDone:optionalDoneFor(order),firstKey:nextRequiredKey(order)});
+    if(global.path)return goalRef.current?goalNextStep(order,arabic,goalRef.current):global;
+    if(global.ready)return global;
+    const optional=nextOptionalKey(order,key=>history.current.some(message=>message.role==='assistant'&&message.fieldPath===key));
+    if(!optional)return bookingNextStep(order,arabic,{optionalDone:true});
+    const name=atomLabel(optional,arabic);
+    return {path:optional,optional:true,text:arabic?`اختياري: هل تريد إضافة ${name}؟ يمكنك أيضاً أن تطلب مني تخطيه.`:`Optional: would you like to add ${name}? You can also tell me to skip it.`};
+  };
   const {equipment:activeEquipment,catalog:activeCatalog=[]}=useTree();
   const numberedCatalog=useMemo(()=>numberedRentalCatalog(activeCatalog,activeEquipment),[activeCatalog,activeEquipment]);
   const orderRef=useRef(orderDraft?.order);
@@ -411,6 +421,15 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     append({role:'assistant',content:question.text,mode:'chat',fieldPath:question.path,section:goal.section,face:goal.face});
     resources.current.focusBookingGoal?.(goal,question);
   },[workspace,selectedGoal,silentGoal,historyLoading,ar,append]);
+  // The conversation belongs to the booking: an empty one is greeted once, when the client opens the Echo Smart Cart.
+  const workspaceGreeted=useRef(null);
+  useEffect(()=>{
+    if(!workspace||mode!=='chat'||historyLoading||!orderDraft?.cloudReady||available!==true||aiPolicy?.chat?.enabled===false||busy)return;
+    if(history.current.length>0||workspaceGreeted.current===draftId)return;
+    workspaceGreeted.current=draftId;
+    const name=user?.firstName?.trim(),next=nextBookingStep(orderRef.current||{},ar);
+    append({role:'assistant',content:[tr(`Hi${name?' '+name:''}! I’m Echo’s AI booking assistant. I’ll help you plan your event.`,`مرحباً${name?' '+name:''}! أنا مساعد الحجز الآلي لإيكو. سأساعدك في التخطيط لفعاليتك.`),next.text].filter(Boolean).join('\n\n'),mode:'chat',fieldPath:next.path||undefined});
+  },[workspace,mode,historyLoading,orderDraft?.cloudReady,available,aiPolicy,busy,draftId,user,ar,append]);
   useEffect(()=>{
     const opening=assistantOpening.current;
     if(!opening.visible||!opening.needsGreeting||mode!=='chat'||historyLoading||draftChoicePending.current||draftChoiceOpen||!orderDraft?.cloudReady||available!==true||aiPolicy?.chat?.enabled===false||busy)return;
