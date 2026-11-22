@@ -70,10 +70,11 @@ test('confirmed atoms replace tick and reject controls with a single Edit button
  assert.match(html,/aria-label="Edit Event type"/);
  assert.doesNotMatch(html,/aria-label="Confirm |aria-label="Correct /);
 });
-test('blank required and optional atoms have no review controls',()=>{
+test('blank required and optional atoms only offer Edit (no confirm or correct)',()=>{
  const lines=[{key:'event.date',label:'Date',value:'Not set yet',empty:true,required:true},{key:'additional.notes',label:'Notes',value:'Not set yet',empty:true,required:false}];
  const html=renderToStaticMarkup(createElement(AtomGroups,{lines,progress:{missing:[lines[0]]},tr:en=>en,review:{stateFor:()=>null,onReview(){}}}));
- assert.doesNotMatch(html,/<button |class="ea-atom-controls"/);
+ assert.doesNotMatch(html,/aria-label="(Confirm|Correct) /);
+ assert.match(html,/aria-label="Edit Date"/);
  assert.match(html,/Needs attention/);
  assert.match(html,/Optional/);
 });

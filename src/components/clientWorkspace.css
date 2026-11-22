@@ -211,7 +211,7 @@
 .client-workspace .aw-main>.dashboard-services-view.is-split{margin:0}
 .dashboard-status-end.is-cancelled{display:none}
 /* Overview restyle: square, flat, one joined stat strip, borderless rows; matches the flush bookings view. */
-.client-workspace .cw-heading{margin:0 0 24px;padding-bottom:20px;border-bottom:1px solid var(--aw-line)}
+.client-workspace .cw-heading{margin:0 0 24px;border-bottom:1px solid var(--aw-line)}
 .client-workspace .cw-stats{gap:0;margin-bottom:24px;border:1px solid var(--aw-line);background:var(--aw-sidebar)}
 .client-workspace .cw-stat{border:0;border-radius:0;background:none;padding:22px 24px}
 .client-workspace .cw-stat+.cw-stat{border-inline-start:1px solid var(--aw-line)}
@@ -222,7 +222,7 @@
 .client-workspace .cw-panel.cw-empty{background:var(--aw-sidebar);border:1px solid var(--aw-line)}
 .client-workspace .cw-event-row:hover{background:var(--aw-hover)}
 @media(max-width:700px){.client-workspace .cw-stats{border:0;background:none;gap:10px}.client-workspace .cw-stat,.client-workspace .cw-stat+.cw-stat{border:1px solid var(--aw-line);background:var(--aw-sidebar)}}
-.client-workspace .cw-heading{padding:20px}
+.client-workspace .cw-heading{padding:0}
 
 .client-workspace .dashboard-service-brief .bdr-atoms .ea-data-row[data-coded]{grid-template-columns:4.6em minmax(0,.8fr) minmax(0,1.2fr);align-items:center}
 @media(max-width:640px){.client-workspace .dashboard-service-brief .bdr-atoms .ea-data-row[data-coded]{grid-template-columns:4.6em minmax(0,1fr)}.client-workspace .dashboard-service-brief .bdr-atoms .ea-data-row[data-coded]>.ea-data-value{grid-column:1/-1}}
@@ -244,5 +244,22 @@
 .client-workspace .cw-account-delete{border:0;border-radius:0;background:none;padding:24px 0 0}
 .client-workspace .cw-account-delete button{border-radius:0}
 /* Personal info: the content is one centred column. */
-.client-workspace .aw-main>:is(.cw-heading,.cw-avatar,form.cw-profile,.cw-account-delete){box-sizing:border-box;width:min(760px,calc(100% - 32px));margin-inline:auto}
-@media(max-width:700px){.client-workspace .aw-main>:is(.cw-heading,.cw-avatar,form.cw-profile,.cw-account-delete){width:calc(100% - 20px)}}
+.client-workspace .aw-main>:is(.cw-heading,.cw-avatar,form.cw-profile,.cw-profile-editor,.cw-danger-zone):not(.aw-breadcrumb):not(.aw-workspace-footer){box-sizing:border-box;width:min(760px,calc(100% - 32px));margin-inline:auto}
+@media(max-width:700px){.client-workspace .aw-main>:is(.cw-heading,.cw-avatar,form.cw-profile,.cw-profile-editor,.cw-danger-zone):not(.aw-breadcrumb):not(.aw-workspace-footer){width:calc(100% - 20px)}}
+.client-workspace .cw-danger-zone{margin-top:28px;padding:20px;border:1px solid #bf6a624d;background:#bf6a620a}.client-workspace .cw-danger-zone .cw-account-delete{margin:0;padding:0}
+.client-workspace .cw-avatar,.client-workspace form.cw-profile{padding-inline:20px}
+.client-workspace .cw-avatar{padding-block:12px}
+
+.client-workspace .cw-profile-editor{display:grid;gap:24px;min-width:0}
+.client-workspace .cw-profile-editor .cw-avatar{margin:0}
+.client-workspace .cw-profile-editor>.cw-profile-actions{padding:16px 20px;border-top:1px solid var(--aw-line);min-width:0;flex-wrap:wrap}
+.client-workspace .cw-profile-actions>.primary-button{flex:none;min-width:150px;min-height:42px;white-space:nowrap}
+.client-workspace .cw-email-editor{display:grid;gap:12px;margin:0;padding:20px;border:1px solid var(--aw-line);background:var(--aw-sidebar);min-width:0}
+.client-workspace .cw-email-editor label{display:grid;gap:8px;font-size:12px}
+.client-workspace .cw-email-editor input{box-sizing:border-box;min-width:0;width:100%;min-height:44px;padding:10px 12px;font:inherit;border:1px solid var(--aw-line);background:var(--aw-main);color:var(--aw-text)}
+.client-workspace .cw-email-editor p{margin:0;font-size:12px;line-height:1.6;color:var(--aw-muted)}
+.client-workspace .cw-email-editor .cw-profile-error{color:#ff8f8f}
+.client-workspace .cw-email-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.client-workspace .cw-email-actions button{min-height:38px;padding:8px 14px;font:inherit;cursor:pointer}
+.client-workspace .cw-email-actions button:disabled{opacity:.5;cursor:default}
+@media(max-width:640px){.client-workspace .cw-profile-editor>.cw-profile-actions{align-items:stretch;flex-direction:column}.client-workspace .cw-profile-actions>.primary-button{width:100%}}
