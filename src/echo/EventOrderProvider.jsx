@@ -21,6 +21,13 @@ import './eventOrderInline.css';
 import {EventOrderContext as Context,useEventOrder} from './eventOrderContext';
 import AIBookingPanel from './AIBookingPanel';
 
+// Everything a visitor's booking leaves in this browser: the draft, its draft id, the quote draft, the conversation and the AI task history.
+function purgeGuestBookingStorage(){
+  const prefixes=['echo-event-order:v1:guest','echo-quote-draft:guest','echo-booking-conversation:v1:guest:','echo-ai-tasks:v1:guest'];
+  for(const storage of [()=>window.localStorage,()=>window.sessionStorage]){
+    try{const area=storage();for(const key of Object.keys(area))if(prefixes.some(prefix=>key.startsWith(prefix)))area.removeItem(key);}catch{/* Optional storage. */}
+  }
+}
 const ownerKey=user=>`echo-event-order:v1:${user?.id||user?._id||user?.username||'guest'}`;
 const draftIdKey=user=>`${ownerKey(user)}:draft-id`;
 function createDraftId(){
@@ -189,7 +196,7 @@ export function EventOrderProvider({user,token,lang,auth,children,isSessionReady
       if(!confirmed&&!await confirmDeletion('Delete this booking draft permanently?'))return false;
       edited.current=true;setActive(false);setEditorOpen(false);setStored(blankProfile());restoreOrderCart([]);setDraftId(crypto.randomUUID());setRevision(value=>value+1);setRecentEdits([]);setSaveState('deleted');resetPageSelections();
       // The visitor's draft, its conversation and its task history all live in this browser; leaving any of them would bring the booking back on refresh.
-      try{localStorage.removeItem(ownerKey(user));localStorage.removeItem('echo-quote-draft:guest');localStorage.removeItem(bookingConversationKey('guest',draftId));const tasksKey=aiTaskHistoryKey(user?.id||user?._id,draftId);if(tasksKey)localStorage.removeItem(tasksKey);}catch{/* Optional storage. */}
+      purgeGuestBookingStorage();
       return true;
     }
     if(!cloudReady)return false;

@@ -220,7 +220,7 @@ export default function DashboardPage({ user, serviceRequests = [], onQuoteActio
       {serviceRequests.length ? <section className="cw-panel"><h2>Your latest events</h2><p>Follow each request from first idea to confirmed booking.</p>{serviceRequests.slice(0,5).map(request => <a className="cw-event-row" href="/dashboard/bookings" key={request.id}><div><strong>{request.requestNumber || 'Event request'}</strong><small>{request.event?.eventDate || request.eventDate || 'Date to be confirmed'}</small></div><span className="cw-status">{request.journey.label} ↗</span></a>)}</section> : <EmptyWorkspace title="Make room for something unforgettable.">Start with your date and your vision. Your submitted requests and quotations will appear here.</EmptyWorkspace>}
       <section className="cw-panel"><h2>From request to celebration</h2><p>Tell us your plans, review your custom quote, then accept and arrange your deposit. Your booking is confirmed only after our team confirms availability and records payment.</p></section>
     </>}
-    {activeView === 'draft' && <EventDraftCard token={authToken}/>}
+    {activeView === 'draft' && <EventDraftCard token={authToken} user={user}/>}
     {activeView === 'conversations' && <BookingConversationHistory token={authToken}/>}
     {activeView === 'bookings' && <RequestedServices requests={serviceRequests} onQuoteAction={onQuoteAction} authToken={authToken} />}
   </ClientWorkspace>;

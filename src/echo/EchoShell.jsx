@@ -88,13 +88,16 @@ export default function EchoShell({ lang, user, onLogout, children }) {
   },[]);
   const header = useRef(null);
   useEffect(() => {
+    const element = header.current;
+    if (!element) return undefined; // the header is not mounted on every page
     const observer = new ResizeObserver(() => {
+      if (!header.current) return;
       const zoom=parseFloat(getComputedStyle(document.documentElement).zoom)||1;
       const height=header.current.getBoundingClientRect().height/zoom;
       shell.current?.style.setProperty('--echo-header-overlay-height', `${height}px`);
       shell.current?.style.setProperty('--echo-header-height', `${height}px`);
     });
-    observer.observe(header.current);
+    observer.observe(element);
     return () => observer.disconnect();
   }, []);
   // About + footer share one viewport: expose the footer height so the About chapter can leave room for it.

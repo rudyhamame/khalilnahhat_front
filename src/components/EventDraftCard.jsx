@@ -1,5 +1,6 @@
 import {useEffect,useState} from 'react';
-import {ArrowUpRight,RefreshCw,FileText} from 'lucide-react';
+import {ArrowUpRight,RefreshCw,FileText,Trash2} from 'lucide-react';
+import {confirmDeletion} from '../lib/confirmDeletion';
 import {apiRequest} from '../lib/api';
 import {missingOrderFields,contract,getPath} from '../lib/eventOrderCore.mjs';
 import {eventTypeLabel} from '../lib/eventTypeLabel';
@@ -7,7 +8,7 @@ import BookingDraftReview from './BookingDraftReview';
 import './bookingDraft.css';
 
 const savedDate=value=>value&&!Number.isNaN(Date.parse(value))?new Date(value).toLocaleString('en-CA',{timeZone:'America/Toronto',dateStyle:'medium',timeStyle:'short'}):'';
-export default function EventDraftCard({token}){
+export default function EventDraftCard({token,user}){
  const [state,setState]=useState({token,loading:true,item:null,error:''}),[retry,setRetry]=useState(0);
  useEffect(()=>{
   if(!token)return;
@@ -21,13 +22,28 @@ export default function EventDraftCard({token}){
   window.addEventListener('focus',refresh);document.addEventListener('visibilitychange',refresh);
   return()=>{window.removeEventListener('focus',refresh);document.removeEventListener('visibilitychange',refresh);};
  },[]);
+ const [deleting,setDeleting]=useState(false);
  const current=state.token===token?state:{loading:true,item:null,error:''};
+ // Deleting the draft here removes it from the account, its conversation, and every copy this browser keeps (other tabs are told to reset too).
+ const removeDraft=async()=>{
+  const item=current.item;if(!item||deleting||!await confirmDeletion('Delete this booking draft and its conversation permanently?'))return;
+  setDeleting(true);
+  try{
+   await apiRequest(`/ai-booking/event-draft?version=${item.version||0}${item.draftId?`&draftId=${encodeURIComponent(item.draftId)}`:''}`,{method:'DELETE',token,confirmedDelete:true});
+   try{
+    for(const area of [window.localStorage,window.sessionStorage])for(const key of Object.keys(area))if(['echo-event-order:v1:','echo-quote-draft:','echo-booking-conversation:v1:','echo-ai-tasks:v1:'].some(prefix=>key.startsWith(prefix))&&!key.endsWith(':reset'))area.removeItem(key);
+    const owner=user?.id||user?._id||user?.username;if(owner)window.localStorage.setItem(`echo-event-order:v1:${owner}:reset`,crypto.randomUUID());
+   }catch{/* Optional storage. */}
+   setState({token,loading:false,item:null,error:''});
+  }catch(error){setState(previous=>({...previous,error:error.message||'The draft could not be deleted. Please retry.'}));}
+  finally{setDeleting(false);}
+ };
  const order=current.item?.order;
  const required=order?contract.sections.filter(section=>!section.gate||getPath(order,section.gate)===true).flatMap(section=>section.fields.filter(field=>field.required)).length:0;
  const completed=order?Math.max(0,required-missingOrderFields(order).length):0;
  const saved=savedDate(current.item?.updatedAt);
  return <section className="booking-draft" aria-labelledby="booking-draft-title" aria-busy={current.loading}>
-  <header className="cw-heading"><div><h1 id="booking-draft-title">Booking draft</h1><p>Your saved event plan, with every detail you have added so far.</p></div><button type="button" className="secondary-button bd-refresh" disabled={current.loading||!token} onClick={()=>setRetry(value=>value+1)}><RefreshCw size={15}/>{current.loading?'Refreshing…':'Refresh draft'}</button></header>
+  <header className="cw-heading"><div><h1 id="booking-draft-title">Booking draft</h1><p>Your saved event plan, with every detail you have added so far.</p></div><button type="button" className="secondary-button bd-refresh" disabled={current.loading||!token} onClick={()=>setRetry(value=>value+1)}><RefreshCw size={15}/>{current.loading?'Refreshing…':'Refresh draft'}</button>{order&&<button type="button" className="secondary-button bd-delete" disabled={deleting||current.loading} onClick={removeDraft}><Trash2 size={15}/>{deleting?'Deleting…':'Delete draft'}</button>}</header>
   {current.error&&<div className="cw-panel bd-error" role="alert"><p>{current.error}{order?' Showing your last loaded draft.':''}</p><button type="button" className="secondary-button" onClick={()=>setRetry(value=>value+1)}>Retry</button></div>}
   {order?<>
    <div className="cw-panel bd-summary"><div><span className="bd-status">Draft · not submitted</span><h2>{order.event?.title||order.event?.name||eventTypeLabel(order.event?.type)||'Your event, taking shape'}</h2><p>{[order.event?.date,order.event?.venue?.name,order.event?.venue?.city].filter(Boolean).join(' · ')||'Add your event details to get started.'}</p>{saved&&<small>Saved to your account · {saved} (Toronto time)</small>}</div><a className="primary-button" href="/#event-order">Continue your draft<ArrowUpRight size={15}/></a><div className="bd-progress"><span><strong>{completed} of {required}</strong> required details completed</span><progress value={completed} max={required||1} aria-label="Required booking details completed"/><small>This draft has not been sent as a booking request.</small></div></div>

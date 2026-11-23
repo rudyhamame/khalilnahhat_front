@@ -44,3 +44,5 @@
 .client-workspace .booking-draft .bdr-section>header span{color:var(--aw-muted)}
 .client-workspace .booking-draft .bdr-atoms .ea-data-row{border-bottom:1px solid var(--aw-line);padding-block:9px}
 .client-workspace .booking-draft .bdr-atoms .ea-group>em::before{border-radius:0}
+.client-workspace .bd-delete{display:inline-flex;gap:8px;align-items:center;flex-shrink:0;color:#f0a49d;border-color:#bf6a62}
+.client-workspace .bd-delete:hover:not(:disabled){background:#bf6a6214}
