@@ -390,3 +390,15 @@ select.djb-name{min-width:0;max-width:100%;cursor:pointer}
 .djb .djb-tools .djb-music-table .djb-play{width:34px;height:34px}
 .djb .djb-tools .djb-music-table .djb-add{white-space:nowrap}
 @media(max-width:640px){.djb .djb-tools .djb-music-table thead th:nth-child(3),.djb .djb-tools .djb-music-table tbody td:nth-child(3){display:none}.djb .djb-tools .djb-music-table th,.djb .djb-tools .djb-music-table td{padding:8px}}
+/* "Your set at a glance" is flat: no card box, no divider lines between its parts, no inner scroll box; only the track rows keep a hairline. */
+.djb .djb-output,.djb .djb-main>.djb-output{border:0;border-radius:0;background:transparent;overflow:visible;margin:0 0 12px}
+.djb .djb-output-heading,.djb .djb-output-actions{padding-inline:0;border-bottom:0}
+.djb .djb-output-title,.djb .djb-output-totals,.djb .djb-output-help,.djb .djb-output-notes{padding-inline:0}
+.djb .djb-main>.djb-output .djb-preview-table-wrap{max-height:none;overflow:visible}
+.djb .djb-main>.djb-output .djb-preview-table th,.djb .djb-main>.djb-output .djb-preview-table td{padding-inline:0}
+.djb .djb-main>.djb-output .djb-preview-table thead th,.djb .djb-main>.djb-output .djb-preview-table .djb-preview-section th{background:transparent}
+/* The booking picker and "Add music items" live in the builder's header bar, beside the scenario switch and the stats. */
+.djb .djb-intro{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px}
+.djb .djb-intro .djb-scenarios{flex:1 1 280px}
+.djb .djb-intro .djb-stats{margin:0}
+.djb-header-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-inline-start:auto;min-width:0}

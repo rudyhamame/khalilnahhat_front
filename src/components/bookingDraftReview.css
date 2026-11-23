@@ -22,3 +22,7 @@
 .bdr-no{display:inline-block;margin-inline-end:8px;color:#d9b46e;font-style:normal;font-weight:700;font-size:.78em;letter-spacing:.06em;font-variant-numeric:tabular-nums}
 
 .bdr-atoms .ea-data-row[data-coded]{grid-template-columns:4.6em minmax(0,.9fr) minmax(0,1.1fr);align-items:center}
+/* Step 03 rows (music preferences) use the same table columns as every other step: code | label | value, not a stacked column. */
+.bdr-atoms .ea-data-row[data-music]{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr)!important;column-gap:12px!important;row-gap:0!important;align-items:start!important}
+.bdr-atoms .ea-data-row[data-music][data-coded]{grid-template-columns:4.6em minmax(0,.9fr) minmax(0,1.1fr)!important}
+.bdr-atoms .ea-data-row[data-music]>.ea-data-value{width:auto}

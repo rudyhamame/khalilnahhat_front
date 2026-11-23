@@ -77,6 +77,10 @@ export default function DjServiceBuilder({token,onReviewLiveRequest,liveStream})
    </div>
   </section>
   <ul className="djb-stats" aria-label="Set summary">{!live&&<li><b>{segments.length}</b>moments</li>}<li><b>{trackCount}</b>tracks</li><li><b>{clockText(total)}</b>library runtime</li></ul>
+  <div className="djb-header-actions">
+   {mode==='booking'&&allBookings.length>0&&<button type="button" className="djb-pick-chip" aria-haspopup="dialog" onClick={()=>setPickOpen(true)}><CalendarDays size={16}/><span><small>Booking</small><b>{booking?`${booking.customerName||'Client event'} · ${dateOf(booking)||'Date not set'}`:'Choose a booking'}</b></span><ChevronDown size={16}/></button>}
+   <button type="button" className="djb-tools-trigger" aria-haspopup="dialog" aria-expanded={toolsOpen} onClick={()=>setToolsOpen(true)}><Plus size={16}/>Add music items</button>
+  </div>
 
   </div>
   <aside className="djb-output" aria-label="Live set preview">
@@ -93,7 +97,6 @@ export default function DjServiceBuilder({token,onReviewLiveRequest,liveStream})
    {draft?.notes&&<div className="djb-output-notes"><strong>Music notes</strong><p>{draft.notes}</p></div>}
   </aside>
   {live&&<div className="djb-live"><Radio size={16}/><b>{liveStream?.title||'Livestream set'}</b><small>{liveStream?.isLive?'Live now':'Ready for the next livestream'}</small></div>}
-  {mode==='booking'&&allBookings.length>0&&<button type="button" className="djb-pick-chip" aria-haspopup="dialog" onClick={()=>setPickOpen(true)}><CalendarDays size={16}/><span><small>Booking</small><b>{booking?`${booking.customerName||'Client event'} · ${dateOf(booking)||'Date not set'}`:'Choose a booking'}</b></span><ChevronDown size={16}/></button>}
   {mode==='booking'&&pickOpen&&<div className="djb-float-backdrop" onClick={()=>setPickOpen(false)}><div className="djb-float" role="dialog" aria-label="Choose a booking" onClick={e=>e.stopPropagation()}>
    <header><div><span className="djb-eyebrow">Booking</span><h2>Choose a booking</h2></div><button type="button" className="djb-ghost" onClick={()=>setPickOpen(false)} aria-label="Close booking list"><X size={16}/></button></header>
    {allBookings.length?<ul className="djb-bookings" aria-label="Choose a booking">{[...allBookings].sort((a,b)=>b.journey.isBooked-a.journey.isBooked).map(x=>{const ok=x.journey.isBooked,on=x.id===bookingId,xe=eventOf(x),g=xe.guestCount||xe.guests;return <li key={x.id}><button type="button" disabled={!ok} aria-pressed={on} className={on?'on':''} onClick={()=>{if(on)setBookingId('');else{setBookingId(x.id);setPickOpen(false);}}}>
@@ -106,7 +109,6 @@ export default function DjServiceBuilder({token,onReviewLiveRequest,liveStream})
   {error&&<p className="djb-msg is-error" role="alert">{error}</p>}{notice&&<p className="djb-msg" role="status">{notice}</p>}
 
   <div className="djb-grid">
-   <button type="button" className="djb-tools-trigger" aria-haspopup="dialog" aria-expanded={toolsOpen} onClick={()=>setToolsOpen(true)}><Plus size={16}/>Add music items</button>
    {toolsOpen&&<div className="djb-tools-backdrop" onClick={()=>setToolsOpen(false)}><aside className="djb-tools" role="dialog" aria-modal="true" aria-label="Add music items" onClick={e=>e.stopPropagation()}>
     <header className="djb-tools-modal-heading"><div><span className="djb-eyebrow">Set editor</span><h2>Add music items</h2></div><button type="button" className="djb-ghost" onClick={()=>setToolsOpen(false)} aria-label="Close Add music items"><X size={16}/></button></header>
 

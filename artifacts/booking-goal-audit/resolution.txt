@@ -45,3 +45,43 @@ Frontend OVH run succeeded:
 https://github.com/rudyhamame/khalilnahhat_front/actions/runs/45116377533
 Backend OVH run succeeded, including public health check:
 https://github.com/rudyhamame/khalilnahhat_back/actions/runs/45116065223
+
+
+FOLLOW-UP — REMAINING CONSISTENCY GAPS — 2026-11-23
+Frontend: 14650fd. Backend: e9cc39d.
+
+- New Google account names now use the 60-character limits read directly from
+  the shared booking contract. Existing account names are not mass-edited.
+- Account import rejects invalid older profile values with a bilingual message
+  directing the client to Personal info, before changing the draft.
+- Review/map no longer replace the bible's DJ heading with a catalogue name.
+  All surfaces use the same five section titles. Rental equipment uses the
+  bible's singular English heading.
+- Client booking navigation, draft/request controls, quotation status, profile
+  labels, meeting/negotiation controls and admin request controls support Arabic.
+  User-entered notes, catalogue names, transcripts and instructions are retained.
+- The printable summary accepts the selected language, renders Arabic/RTL,
+  localizes statuses/dates/currency/totals and uses the shared section labels.
+- Submitted snapshots continue to preserve captured values and HTML escaping.
+
+Verification: 60 frontend booking tests passed in the shared workspace; an
+isolated checkout containing only this change passed 59 tests with one contract
+comparison skipped because the backend was not checked out beside it. The
+shared-workspace run includes that comparison. Production builds passed in
+both checkouts. 76 backend signup, canonical-order, submission and booking
+lifecycle tests passed. Older assisted-flow fixtures were completed with the
+now-required phone/country fields; the inventory fixture now tests repeated
+individual equipment demand instead of the retired bundle format.
+
+Real authenticated browser and provider text/voice smoke tests remain
+UNVERIFIED: the browser access host is unavailable. Simulated English/chat and
+Arabic/voice transcripts were exercised through save, correction, submission,
+admin receipt and draft retirement locally; no real booking or email was sent.
+No claim of a complete real-browser/provider end-to-end audit is made.
+
+Backend OVH deployment succeeded:
+https://github.com/rudyhamame/khalilnahhat_back/actions/runs/45124175464
+Frontend OVH deployment:
+https://github.com/rudyhamame/khalilnahhat_front/actions/runs/45124374728
+
+Frontend follow-up OVH run succeeded; public site serves the new build.

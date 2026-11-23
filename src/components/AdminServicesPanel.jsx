@@ -3,6 +3,8 @@ import {bookingText,bookingLocale,bookingMoney} from '../lib/bookingUiText';
 import BookingDraftReview from './BookingDraftReview';
 import {OfferReview} from './BookingNegotiation';
 import {quoteTotals} from '../lib/quoteTotals.mjs';
+import {sortQuoteLines} from '../lib/quoteAtoms';
+import {useTree} from '../lib/tree';
 import {fieldName as bookingFieldName,optionName,customerNameParts} from '../lib/eventOrderCore.mjs';
 import {musicAtoms} from '../lib/musicAtoms.mjs';
 import './adminBookingRequests.css';
@@ -65,6 +67,7 @@ function buildDraft(request, currentDraft) {
 }
 
 function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmedBookings = [], token, ar=false }) {
+  const {catalog:treeCatalog,equipment:treeEquipment}=useTree(); // the same live catalogue the Booking page numbers its equipment from
   const tr=text=>bookingText(text,ar),money=value=>bookingMoney(value,ar);
   const [selectedId,setSelectedId]=useState(null);
   const selectedRequest=requests.find(request=>request.id===selectedId)||requests[0];
@@ -212,7 +215,21 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
           </nav>
         </aside>
       <section id="admin-booking-detail" className="admin-booking-detail-column" aria-labelledby="admin-booking-detail-title">
-        <header className="admin-booking-detail-heading"><h2 id="admin-booking-detail-title">{tr("Booking details")}</h2>{selectedRequest&&<span>{selectedRequest.requestNumber||selectedRequest.id}</span>}</header>
+        <header className="admin-booking-detail-heading"><h2 id="admin-booking-detail-title">{tr("Booking details")}</h2>{selectedRequest&&<span>{selectedRequest.requestNumber||selectedRequest.id}</span>}
+          {selectedRequest&&<div className="booking-publish-action">                  <button
+                    type="button"
+                    className="primary-button"
+                    onClick={() => publishQuote(selectedRequest)}
+                    disabled={Boolean(publishingId)||!selectedRequest.journey.repriceable}
+                  >
+                    <Send size={15} />
+                    {publishingId === selectedRequest.id
+                      ? tr("Publishing...")
+                      : selectedRequest.journey.awaitingClient
+                        ? tr("Update Published Quote")
+                        : tr("Publish to Customer")}
+                  </button>
+                  {selectedRequest.journey.cancellable ? <button type="button" className="secondary-button" onClick={() => window.confirm(tr("Cancel this request?")) && runAction(selectedRequest, 'cancel')}>{tr("Cancel request")}</button> : null}</div>}</header>
         {requests.length ? (
           [selectedRequest].map((request) => {
             const draft = drafts[request.id] || buildDraft(request);
@@ -221,11 +238,19 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
             return (
               <div key={request.id} className="admin-booking-detail-body">
               <article className="admin-service-request-card" aria-busy={publishingId===request.id}>
-                <header className="booking-brief-heading">
-                  <span className={`admin-service-request-status is-${request.status}`}>{bookingStatusLabel(request,ar)}</span>
-                  <h3>{request.customerName}</h3>
-                  <a href={`mailto:${request.customerEmail}`}>{request.customerEmail}</a>
-                  <p>{readable((request.order?.event?.type==='other'?request.order.event.title:request.order?.event?.type)||request.event?.eventType)} · {eventDate(request.order?.event?.date||request.event?.eventDate,ar)}</p>
+                <header className="booking-brief-heading booking-summary" aria-label={tr("Booking summary")}>
+                  <div className="booking-summary-who">
+                    <h3>{request.customerName}</h3>
+                    <span className={`admin-service-request-status is-${request.status}`}>{bookingStatusLabel(request,ar)}</span>
+                    <a href={`mailto:${request.customerEmail}`}>{request.customerEmail}</a>
+                  </div>
+                  <dl className="booking-summary-facts">
+                    <div><dt>{tr("Event")}</dt><dd>{readable((request.order?.event?.type==='other'?request.order.event.title:request.order?.event?.type)||request.event?.eventType)||'—'}</dd></div>
+                    <div><dt>{tr("Date")}</dt><dd>{eventDate(request.order?.event?.date||request.event?.eventDate,ar)}</dd></div>
+                    <div><dt>{tr("Guests")}</dt><dd>{request.order?.event?.guestCount??request.event?.guests??'—'}</dd></div>
+                    <div><dt>{tr("Venue")}</dt><dd>{request.order?.event?.venue?.name||request.event?.venueName||'—'}</dd></div>
+                    <div><dt>{tr("Quote total")}</dt><dd>{money(totals.total)}</dd></div>
+                  </dl>
                 </header>
                 <div className="booking-detail-sections">
                   {request.order&&<BookingDraftReview order={request.order} snapshot ar={ar}/>}
@@ -240,6 +265,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                 <div className="booking-quote-layout">
                 <section className="booking-pricing-column" aria-label={tr("Services and pricing")}>
                 <h4 className="booking-section-title">{tr("Services & pricing")}<span>CAD</span></h4>
+                {draft.items.length>0&&<button type="button" className="booking-pricing-hint" onClick={()=>fillFromEngine(request,draft)}>{tr("Fill rates from the pricing engine")}</button>}
                 <div className="admin-service-quote-table">
                   <div className="admin-service-quote-row admin-service-quote-row-head">
                     <span>{tr("Priced item")}</span>
@@ -247,13 +273,13 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                     <span>{tr("Amount per unit (CAD)")}</span>
                     <span>{tr("Line total")}</span>
                   </div>
-                  {draft.items.map((item) => {
+                  {sortQuoteLines(draft.items,treeCatalog,treeEquipment).map(({line:item,code}) => {
                     const value = draft.prices?.[item.serviceId] ?? '';
                     const lineTotal = Number(value || 0) * item.quantity;
 
                     return (
                       <div key={item.serviceId} className="admin-service-quote-row">
-                        <strong>{item.name}</strong>
+                        <strong>{code&&<i className="quote-atom-code">{code}</i>}{item.name}</strong>
                         <span>{item.quantity}</span>
                         <label>
                           <span className="sr-only">Amount per unit for {item.name}</span>
@@ -299,7 +325,6 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                   <div><dt>{tr("Deposit")}</dt><dd>{money(totals.deposit)}</dd></div>
                   <div><dt>{tr("Balance after deposit")}</dt><dd>{money(totals.balance)}</dd></div>
                 </dl>
-                {draft.items.length>0&&<button type="button" className="booking-pricing-hint" onClick={()=>fillFromEngine(request,draft)}>{tr("Fill rates from the pricing engine")}</button>}
                 <p className="booking-pricing-hint">{tr("Equipment prices are prefilled from the equipment table. Edit any rate for this quote. The booking discount applies to the subtotal before tax.")}</p>
                 </section>
                 <aside className="booking-quote-terms" aria-label={tr("Quote terms")}>
@@ -314,19 +339,6 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                 </label>
                 </aside>
                 </div>
-                <div className="booking-publish-action">                  <button
-                    type="button"
-                    className="primary-button"
-                    onClick={() => publishQuote(request)}
-                    disabled={Boolean(publishingId)||!request.journey.repriceable}
-                  >
-                    <Send size={15} />
-                    {publishingId === request.id
-                      ? tr("Publishing...")
-                      : request.journey.awaitingClient
-                        ? tr("Update Published Quote")
-                        : tr("Publish to Customer")}
-                  </button><small>{tr("The customer reviews the quote before accepting.")}</small></div>
                 {(request.journey.canRecordDeposit||request.journey.isBooked||(request.payments||[]).length>0)&&<h4 className="booking-section-title">{tr("Payments")}</h4>}
                 {request.journey.canRecordDeposit||request.journey.isBooked ? (
                   <form className="admin-service-request-terms" onSubmit={(e) => {
@@ -356,16 +368,12 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                     ))}
                   </ul>
                 ) : null}
-                <h4 className="booking-section-title">{tr("Booking actions")}</h4>
                 {request.journey.extendable && request.quotedAt ? (
                   <div className="admin-service-request-terms">
                     <button type="button" className="secondary-button" onClick={() => runAction(request, 'extend', { days: Number(draft.validDays) || 7 })}>
                       {request.journey.adminNext === 'reactivate_or_close' ? tr("Reactivate") : tr("Extend")} {Number(draft.validDays) || 7} {ar?'أيام':'days'}
                     </button>
                   </div>
-                ) : null}
-                {request.journey.cancellable ? (
-                  <button type="button" className="secondary-button" onClick={() => window.confirm(tr("Cancel this request?")) && runAction(request, 'cancel')}>{tr("Cancel request")}</button>
                 ) : null}
                 {statuses[request.id] ? (
                   <p className="admin-service-request-feedback" role="status">

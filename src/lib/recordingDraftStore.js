@@ -15,8 +15,16 @@ const queue=(key,operation)=>{
  queues.set(key,pending);pending.finally(()=>{if(queues.get(key)===pending)queues.delete(key);}).catch(()=>{});return pending;
 };
 function transactionDone(transaction){return new Promise((resolve,reject)=>{transaction.oncomplete=resolve;transaction.onerror=()=>reject(transaction.error);transaction.onabort=()=>reject(transaction.error||new Error('Browser draft save was interrupted.'));});}
+// Only a localStorage cache key for the signed-in owner, not a security boundary. crypto.subtle exists only on https and localhost, so a LAN address
+// over http (for example http://192.168.x.x during development) falls back to a plain 2x32-bit FNV-1a hash.
+async function tokenHash(token){
+ const bytes=new TextEncoder().encode(token);
+ if(globalThis.crypto?.subtle)return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),value=>value.toString(16).padStart(2,'0')).join('');
+ let a=0x811c9dc5,b=0x01000193;for(const byte of bytes){a=Math.imul(a^byte,0x01000193)>>>0;b=Math.imul(b^byte,0x811c9dc5)>>>0;}
+ return a.toString(16).padStart(8,'0')+b.toString(16).padStart(8,'0');
+}
 export async function recordingDraftOwner(token){
- const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(token)))).map(value=>value.toString(16).padStart(2,'0')).join('');
+ const hash=await tokenHash(token);
  const cacheKey=`echo-recording-owner:${hash}`;
  try{const cached=localStorage.getItem(cacheKey);if(cached)return cached;}catch{}
  const {user}=await apiRequest('/auth/me',{token});const owner=user?.id||user?._id||user?.externalId;

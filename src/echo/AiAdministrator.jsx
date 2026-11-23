@@ -29,7 +29,7 @@ function Reply({text}){
 const currentTab=()=>{const {pathname,search}=window.location;if(!pathname.startsWith('/admin/echo'))return undefined;const tab=new URLSearchParams(search).get('tab')?.replaceAll('-',' ')||'music archive';return tab==='emails'?'notifications':tab;};
 // Where the administrator is right now: page, breadcrumb, selected recording / client / booking ids from the URL, and the recording's title when it is on screen.
 const pageContext=()=>{const {pathname,search}=window.location;if(!pathname.startsWith('/admin'))return undefined;const q=new URLSearchParams(search),parts=[`path ${pathname}`];
- const crumb=[...document.querySelectorAll('.aw-breadcrumb span:not([aria-hidden]),.aw-breadcrumb strong')].map(n=>n.textContent.trim()).filter(Boolean).join(' / ');if(crumb)parts.push(`page "${crumb}"`);
+ const crumb=document.querySelector('.aw-main')?.dataset.page||'';if(crumb)parts.push(`page "${crumb}"`);
  for(const [key,value] of q)if(key!=='tab'&&/^[\w.-]{1,64}$/.test(value))parts.push(`${key} ${value}`);
  const title=document.querySelector('.live-archive-recording-title')?.textContent?.trim();if(title)parts.push(`open recording title "${title.slice(0,60)}"`);
  return parts.join('; ').slice(0,400);};
