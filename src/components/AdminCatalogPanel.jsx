@@ -1,7 +1,7 @@
 import {notifyCatalogChanged} from '../lib/catalogChanges';
 import Equipment3DGenerator from './Equipment3DGenerator';
 import {equipmentSetMemberships,isEquipmentSet} from './equipmentSets';
-import {withServiceIds,equipmentInService} from '../lib/treeCore';
+import {withEquipmentCategoryIds,equipmentInService} from '../lib/treeCore';
 import CatalogEntryManager from './CatalogEntryManager';
 import RentalCategorySettings from './RentalCategorySettings';
 import NumberInput from './NumberInput';
@@ -56,8 +56,8 @@ const slugify = (value) => value.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-'
 function EquipmentEditor({ item, services, token, reload, report, onSelect, onDraft }) {
   const editing = Boolean(item);
   const [v, setV] = useState(() => item
-    ? { slug: item.id, name: item.name, brandModel: item.brandModel || '', brand: (item.brandModel || '').split(' ')[0], model: (item.brandModel || '').split(' ').slice(1).join(' '), category: item.category, serviceId: item.serviceId || services.find((service) => service.category === item.category)?.id || '', description: item.description || '', price: money(item.priceCents), minQuantity: item.minQuantity || 1, stockTracked: Boolean(item.stockTracked), quantityOwned: String(item.quantityOwned ?? 1), isActive: item.isActive !== false,imageUrl:item.imageUrl||'',youtubeUrl:item.youtubeUrl||'',modelParts:(item.modelParts||[]).map(part=>({...part})),modelUrl:item.modelUrl||'',modelJobId:item.modelJobId||'',functionSummary:item.functionSummary||'',eventFit:{...(item.eventFit||{})} }
-    : { slug: '', name: '', brandModel: '', brand: '', model: '', category: services[0]?.category || '', serviceId: services[0]?.id || '', description: '', price: '0.00', minQuantity: 1, stockTracked: true, quantityOwned: '1', isActive: true,imageUrl:'',youtubeUrl:'',modelParts:[],modelUrl:'',modelJobId:null,functionSummary:'',eventFit:{} });
+    ? { slug: item.id, name: item.name, brandModel: item.brandModel || '', brand: (item.brandModel || '').split(' ')[0], model: (item.brandModel || '').split(' ').slice(1).join(' '), category: item.category, equipmentCategoryId: item.equipmentCategoryId || item.serviceId || services.find((service) => service.category === item.category)?.id || '', description: item.description || '', price: money(item.priceCents), minQuantity: item.minQuantity || 1, stockTracked: Boolean(item.stockTracked), quantityOwned: String(item.quantityOwned ?? 1), isActive: item.isActive !== false,imageUrl:item.imageUrl||'',youtubeUrl:item.youtubeUrl||'',modelParts:(item.modelParts||[]).map(part=>({...part})),modelUrl:item.modelUrl||'',modelJobId:item.modelJobId||'',functionSummary:item.functionSummary||'',eventFit:{...(item.eventFit||{})} }
+    : { slug: '', name: '', brandModel: '', brand: '', model: '', category: services[0]?.category || '', equipmentCategoryId: services[0]?.id || '', description: '', price: '0.00', minQuantity: 1, stockTracked: true, quantityOwned: '1', isActive: true,imageUrl:'',youtubeUrl:'',modelParts:[],modelUrl:'',modelJobId:null,functionSummary:'',eventFit:{} });
   const [busy, setBusy] = useState(false),[modelBusy,setModelBusy]=useState(false);
   const set = (key, value) => setV((current) => ({ ...current, [key]: value }));
   useEffect(() => { onDraft({ ...v, id: item?.id || '__new' }); }, [v, item, onDraft]);
@@ -72,7 +72,7 @@ function EquipmentEditor({ item, services, token, reload, report, onSelect, onDr
     if(modelBusy)return;
     const priceCents = Math.round(Number(v.price) * 100);
     if (!Number.isFinite(priceCents) || priceCents < 0) { report('Enter a valid price.', true); return; }
-    const body = { ...(!editing||v.modelJobId!==item.modelJobId||v.modelUrl!==item.modelUrl?{modelJobId:v.modelJobId}:{}), modelParts: v.modelParts, category: v.category, serviceId: v.serviceId, name: v.name.trim(), brandModel: v.brandModel.trim(), description: v.description.trim(), priceCents, minQuantity: Math.max(1, Number(v.minQuantity) || 1), quantityOwned: Math.max(0, Math.round(Number(v.quantityOwned) || 0)), stockTracked: true, isActive: v.isActive, imageUrl: v.imageUrl, youtubeUrl: v.youtubeUrl.trim(), functionSummary: v.functionSummary.trim(), eventFit: Object.fromEntries(Object.entries(v.eventFit).map(([type, text]) => [type, String(text || '').trim()]).filter(([, text]) => text)) };
+    const body = { ...(!editing||v.modelJobId!==item.modelJobId||v.modelUrl!==item.modelUrl?{modelJobId:v.modelJobId}:{}), modelParts: v.modelParts, category: v.category, equipmentCategoryId: v.equipmentCategoryId, name: v.name.trim(), brandModel: v.brandModel.trim(), description: v.description.trim(), priceCents, minQuantity: Math.max(1, Number(v.minQuantity) || 1), quantityOwned: Math.max(0, Math.round(Number(v.quantityOwned) || 0)), stockTracked: true, isActive: v.isActive, imageUrl: v.imageUrl, youtubeUrl: v.youtubeUrl.trim(), functionSummary: v.functionSummary.trim(), eventFit: Object.fromEntries(Object.entries(v.eventFit).map(([type, text]) => [type, String(text || '').trim()]).filter(([, text]) => text)) };
     setBusy(true);
     const slug = v.slug || 'item-' + Date.now().toString(36);
     try {
@@ -88,7 +88,7 @@ function EquipmentEditor({ item, services, token, reload, report, onSelect, onDr
       <section className="equipment-editor-section" aria-labelledby="equipment-details-title">
         <h4 id="equipment-details-title"><span>01</span>Equipment details</h4>
         <label>Name <b className="req" aria-hidden="true">*</b><input autoFocus required maxLength={160} placeholder="Equipment name" value={v.name} onChange={event=>{const name=event.target.value;setV(current=>({...current,name,...(!editing?{slug:slugify(name)}:{})}));}}/></label>
-        <label>Rental Equipment Category <b className="req" aria-hidden="true">*</b><select required value={v.serviceId} onChange={event=>{const service=services.find(row=>row.id===event.target.value);set('serviceId',event.target.value);set('category',service?.category||event.target.value);}}><option value="" disabled>Select a category</option>{services.filter(service=>service.id!=='__new'&&!CORE_SERVICES.includes(service.id)).map(service=><option key={service.id} value={service.id}>{service.name}</option>)}</select></label>
+        <label>Rental Equipment Category <b className="req" aria-hidden="true">*</b><select required value={v.equipmentCategoryId} onChange={event=>{const service=services.find(row=>row.id===event.target.value);set('equipmentCategoryId',event.target.value);set('category',service?.category||event.target.value);}}><option value="" disabled>Select a category</option>{services.filter(service=>service.id!=='__new'&&!CORE_SERVICES.includes(service.id)).map(service=><option key={service.id} value={service.id}>{service.name}</option>)}</select></label>
         <div className="equipment-editor-pair"><label>Brand <b className="req" aria-hidden="true">*</b><input required maxLength={80} placeholder="Brand" value={v.brand} onChange={event=>setV(current=>({...current,brand:event.target.value,brandModel:[event.target.value.trim(),current.model.trim()].filter(Boolean).join(' ')}))}/></label><label>Model<input maxLength={80} placeholder="Model" value={v.model} onChange={event=>setV(current=>({...current,model:event.target.value,brandModel:[current.brand.trim(),event.target.value.trim()].filter(Boolean).join(' ')}))}/></label></div>
         <label>Description <b className="req" aria-hidden="true">*</b><textarea required rows={3} maxLength={2000} placeholder="Describe this equipment for your clients." value={v.description} onChange={event=>set('description',event.target.value)}/></label>
         <label>What it does <b className="req" aria-hidden="true">*</b><textarea required rows={2} maxLength={600} placeholder="A short explanation of what this equipment does." value={v.functionSummary} onChange={event=>set('functionSummary',event.target.value)}/></label>
@@ -143,7 +143,7 @@ export default function AdminCatalogPanel({ token, mode = 'catalog' }) {
     finally { setDeletingService(''); }
   };
   const load = useCallback(() => Promise.all([apiRequest('/equipment/admin', { token }), apiRequest('/prices', { token }), apiRequest('/admin/setup-catalog', { token }).catch((error) => { if (error.status === 404) return { items: [] }; throw error; })])
-    .then(([equipmentResult, priceResult, catalogResult]) => { setCatalog(catalogResult.items || []); setEquipment(withServiceIds(catalogResult.items || [], equipmentResult.items || [])); setPrices(priceResult.items || []); })
+    .then(([equipmentResult, priceResult, catalogResult]) => { setCatalog(catalogResult.items || []); setEquipment(withEquipmentCategoryIds(catalogResult.items || [], equipmentResult.items || [])); setPrices(priceResult.items || []); })
     .catch((error) => report(error.message || 'Could not load services and equipment.', true)), [token, report]);
   useEffect(() => { load();
     const changed=event=>{if(event.type!=='storage'||event.key==='echo:catalog-revision')load();};

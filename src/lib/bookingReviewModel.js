@@ -2,6 +2,10 @@ import {bookingFieldValue} from './bookingPresentation.js';
 import {getPath,isAnswered,fieldName} from './eventOrderCore.mjs';
 import {bookingSections} from './bookingSections.js';
 import {goalFields,goalProgress,goalValue,ownTypeApplies} from './bookingGoals.js';
+import {ATOM_KEYS} from './eventPageModel.js';
+
+// Review lines follow the booking contract order (its codes 01.01.01 → 05.03.01); the rental tree sits where the `equipment` atom is.
+const atomRank=key=>{const i=ATOM_KEYS.indexOf(key.startsWith('service:')?'equipment':key);return i<0?1e6:i;};
 
 export const draftValue=(order,key)=>key==='services'?(order.services||[]).filter(id=>id!=='dj'):getPath(order,key);
 // Short "label: value" lines shown for a section in the live summary (answered fields first, then what is still missing).
@@ -18,7 +22,7 @@ export function sectionLines(order,goal,ar,rentals=[],catalogLoading=false){
  const tree=goal.id==='rentals'&&rentals.length>0,loading=goal.id==='rentals'&&catalogLoading&&!rentals.length;
  if(loading)return {progress,lines:[{key:'services',label:ar?'خدمات التأجير':'Rental services',value:ar?'جارٍ التحميل…':'Loading…',empty:true,required:false,group:2}]};
  // Rental services & equipment is listed as a tree: every service (MC included) with all of its equipment under it.
- const all=goalFields(goal).filter(field=>ownTypeApplies(order,field.key)&&(!field.gate||getPath(order,field.gate)===true)&&!(tree&&['services','music.mcRequested','rental.requested'].includes(field.key)));
+ const all=goalFields(goal).filter(field=>ownTypeApplies(order,field.key)&&(!field.gate||getPath(order,field.gate)===true)&&!(tree&&['music.mcRequested','rental.requested'].includes(field.key))&&field.key!=='services'); // services is internal logic, not a booking atom: DJ and MC have their own lines
  // Every field of the section is listed with its value; fields not answered yet read "Not set yet".
  const lines=all.map(field=>({key:field.key,reviewValue:draftValue(order,field.key),label:(fieldName(field.key,ar)||(ar?field.ar||field.label:field.label)).replace(/\s*[(（](?:optional|only if|اختياري)[^)）]*[)）]/i,''),value:bookingFieldValue(order,field.key,ar,draftValue(order,field.key)),...(field.key.startsWith('music.')||field.key.startsWith('references.')?{rawValue:draftValue(order,field.key)}:{}),empty:!isAnswered(draftValue(order,field.key)),required:progress.missing.some(item=>item.key===field.key)}));
  if(tree){
@@ -28,7 +32,7 @@ export function sectionLines(order,goal,ar,rentals=[],catalogLoading=false){
    lines.push({key:`service:${service.id}`,reviewValue:service.on,reviewPath:service.selectionField||'services',label:name(service),value:service.on?tr('Added','مضاف'):goalValue(null,ar),empty:!service.on,required:false,group,items:service.equipment.map(item=>({key:`equipment:${service.id}:${item.id}`,reviewValue:item.quantity||null,reviewPath:'equipment',label:name(item),value:item.quantity?`× ${item.quantity}`:'—',stock:stockLabel(item,ar),empty:!item.quantity}))});
   }
  }else if(goal.id==='rentals'&&order.equipment?.length)lines.push({key:'equipment',reviewValue:order.equipment,reviewPath:'equipment',label:ar?'المعدات':'Equipment',value:bookingFieldValue(order,'equipment',ar)});
- return {progress,lines};
+ return {progress,lines:lines.map((line,index)=>({line,index})).sort((a,b)=>atomRank(a.line.key)-atomRank(b.line.key)||a.index-b.index).map(row=>row.line)};
 }
 
 // A submitted brief is immutable: only captured values, independent of today's

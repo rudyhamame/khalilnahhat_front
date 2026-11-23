@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {treeAtoms,stepMounted,atomSource,stepsOf,withServiceIds,buildTreeNodes} from './treeCore.js';
+import {treeAtoms,stepMounted,atomSource,stepsOf,withEquipmentCategoryIds,buildTreeNodes} from './treeCore.js';
 
 test('every data atom is a node of the tree: an id, a step, a section and a source',()=>{
  const atoms=treeAtoms({dj:true,rental:true});
@@ -17,11 +17,11 @@ test('atoms of a step exist only while the tree has that step',()=>{
  assert.equal(stepMounted(3,{dj:false,rental:true}),false);assert.equal(stepMounted(2,{dj:false,rental:false}),true);
 });
 
-test('steps follow the service ids, equipment follows serviceId, removed ids keep their place',()=>{
+test('steps follow the service ids, equipment follows equipmentCategoryId, removed ids keep their place',()=>{
  const catalog=[{kind:'service',id:'dj',name:'DJ'},{kind:'service',id:'sound',name:'Sound',category:'sound',sortOrder:1}];
  assert.deepEqual(stepsOf(catalog),{dj:true,mc:false,rental:true,djName:'DJ',djNameAr:''});
- const equipment=withServiceIds(catalog,[{id:'a',category:'sound'},{id:'b',category:'x',serviceId:'dj'}]);
- assert.deepEqual(equipment.map(row=>row.serviceId),['sound','dj']);
- const {nodes}=buildTreeNodes({services:catalog.filter(row=>row.id==='sound'),equipment,removed:{items:[{id:'mc',sortOrder:0}],equipment:[{id:'lectern',serviceId:'mc'}]}});
+ const equipment=withEquipmentCategoryIds(catalog,[{id:'a',category:'sound'},{id:'b',category:'x',equipmentCategoryId:'dj'}]);
+ assert.deepEqual(equipment.map(row=>row.equipmentCategoryId),['sound','dj']);
+ const {nodes}=buildTreeNodes({services:catalog.filter(row=>row.id==='sound'),equipment,removed:{items:[{id:'mc',sortOrder:0}],equipment:[{id:'lectern',equipmentCategoryId:'mc'}]}});
  assert.deepEqual(nodes.map(node=>node.id),['mc','sound']);assert.deepEqual(nodes[0].removedItems.map(row=>row.id),['lectern']);assert.equal(nodes[0].removed,true);
 });

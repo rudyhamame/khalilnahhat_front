@@ -3,10 +3,10 @@
 // talks to the catalogue directly. The tree is rebuilt whenever the catalogue loads or changes, and it is keyed by ids:
 //  - a step or section exists only while its service id is in the tree (dj -> step 3, any rental service -> the Rental step),
 //  - names and descriptions come from the tree, never from the page,
-//  - equipment belongs to a service through its `serviceId` (see rentalCatalog.js).
+//  - equipment belongs to a service through its `equipmentCategoryId` (see rentalCatalog.js).
 import {useEffect,useSyncExternalStore} from 'react';
 import {apiRequest,fetchEquipment} from './api.js';
-import {setTreeSteps,stepsOf,treeSteps,withServiceIds} from './treeCore.js';
+import {setTreeSteps,stepsOf,treeSteps,withEquipmentCategoryIds} from './treeCore.js';
 
 let tree={catalog:[],equipment:[],loading:true,failed:false,steps:treeSteps()},inFlight=null,queued=false;
 const listeners=new Set();
@@ -23,7 +23,7 @@ async function fetchTree(){
  }catch{/* an older server: build the tree here */}
  const [catalog,equipment]=await Promise.all([apiRequest('/setup-catalog'),fetchEquipment()]);
  if(!Array.isArray(catalog.items)||!Array.isArray(equipment.items))throw new Error('Invalid rental catalog response');
- return {catalog:catalog.items,equipment:withServiceIds(catalog.items,equipment.items),steps:stepsOf(catalog.items)};
+ return {catalog:catalog.items,equipment:withEquipmentCategoryIds(catalog.items,equipment.items),steps:stepsOf(catalog.items)};
 }
 export function refreshTree(){
  if(inFlight){queued=true;return inFlight;}

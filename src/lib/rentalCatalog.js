@@ -6,7 +6,7 @@ export const isCatalogSet=item=>Boolean(item?.isSet||item?.setItems?.length||ite
 export const bookingServiceId=service=>bookingServiceIds.has(service.id)?service.id:'rental';
 // Hosting decisions are explicit; their accessories are equipment rental.
 export const equipmentBookingServiceId=service=>(service.selectionField||service.id===MC_ID)?'rental':bookingServiceId(service);
-// An item belongs to the service it points to (serviceId); the tree fills serviceId for older items (treeCore.withServiceIds).
+// An item belongs to the service it points to (equipmentCategoryId); the tree fills it for older items (treeCore.withEquipmentCategoryIds).
 export const equipmentInService=inService;
 export function equipmentBelongsToService(item,service,equipment){
  const direct=row=>equipmentInService(row,service);

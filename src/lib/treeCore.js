@@ -11,23 +11,24 @@ export const KNOWN_SERVICE_IDS=Object.freeze([DJ_ID,MC_ID,'sound','lighting','vi
 // The service keys the saved booking (the order contract) accepts. A catalogue service whose id is one of them keeps it; the rest save as 'rental'.
 export const BOOKING_SERVICE_KEYS=Object.freeze(contract.sections.flatMap(section=>section.fields).find(field=>field.key==='services').options);
 
-// Equipment belongs to the service it points at (serviceId). Items saved before serviceId existed are matched once here, by their old
-// category or the service's equipment list, so nothing else in the app has to know about those.
-export function withServiceIds(catalog,equipment){
+// Equipment belongs to the equipment category it points at (equipmentCategoryId; serviceId is its legacy name, still sent by the server).
+// Items saved before either existed are matched once here, by their old category or the category's equipment list, so nothing else has to know.
+export const categoryIdOf=row=>row.equipmentCategoryId||row.serviceId||'';
+export function withEquipmentCategoryIds(catalog,equipment){
  const services=catalog.filter(row=>row.kind==='service');
- return equipment.map(row=>row.serviceId?row:{...row,serviceId:services.find(service=>service.category===row.category||(service.equipmentIds||[]).includes(row.id))?.id||''});
+ return equipment.map(row=>categoryIdOf(row)?{...row,equipmentCategoryId:categoryIdOf(row)}:{...row,equipmentCategoryId:services.find(service=>service.category===row.category||(service.equipmentIds||[]).includes(row.id))?.id||''});
 }
-export const equipmentInService=(row,service)=>row.serviceId===service.id;
+export const equipmentInService=(row,service)=>categoryIdOf(row)===service.id;
 
 // The tree as the admin aside shows it: live services in order with their equipment, removed services where they were, removed equipment
 // under their service, plus ids that belong to nothing.
 export function buildTreeNodes({services,equipment,removed={items:[],equipment:[]},otherId='other'}){
  const liveIds=new Set(services.map(service=>service.id));
  const nodes=[
-  ...services.map(service=>({id:service.id,name:service.name,removed:false,order:service.id===otherId?1e9:(service.sortOrder??1e6),items:service.items??equipment.filter(row=>equipmentInService(row,service)),removedItems:removed.equipment.filter(row=>row.serviceId===service.id)})),
-  ...removed.items.filter(row=>!liveIds.has(row.id)).map(row=>({id:row.id,name:'',removed:true,order:row.sortOrder??1e6+1,items:[],removedItems:removed.equipment.filter(item=>item.serviceId===row.id)})),
+  ...services.map(service=>({id:service.id,name:service.name,removed:false,order:service.id===otherId?1e9:(service.sortOrder??1e6),items:service.items??equipment.filter(row=>equipmentInService(row,service)),removedItems:removed.equipment.filter(row=>categoryIdOf(row)===service.id)})),
+  ...removed.items.filter(row=>!liveIds.has(row.id)).map(row=>({id:row.id,name:'',removed:true,order:row.sortOrder??1e6+1,items:[],removedItems:removed.equipment.filter(item=>categoryIdOf(item)===row.id)})),
  ];
- const orphans=removed.equipment.filter(row=>!liveIds.has(row.serviceId)&&!removed.items.some(item=>item.id===row.serviceId));
+ const orphans=removed.equipment.filter(row=>!liveIds.has(categoryIdOf(row))&&!removed.items.some(item=>item.id===categoryIdOf(row)));
  return {nodes:nodes.map((node,at)=>({node,at})).sort((a,b)=>a.node.order-b.node.order||a.at-b.at).map(({node})=>node),orphans};
 }
 const EMPTY={dj:true,mc:true,rental:true,djName:'',djNameAr:''};
