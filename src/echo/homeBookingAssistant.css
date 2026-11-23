@@ -436,13 +436,13 @@ html body .echo .ea-review .ea-data-row[data-coded][data-review=confirmed]{borde
 
 html body .echo .ea-review .ea-step-details{box-sizing:border-box;width:auto;max-width:100%;grid-template-columns:minmax(0,1fr)}
 
-.echo .ea-review .ea-account-import{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:6px 8px 14px 43px;padding:14px;border:1px solid #a6e3ce2e;border-radius:12px;background:linear-gradient(135deg,#a6e3ce0c,#a6e3ce03)}
-.echo .ea-account-import-copy{display:flex;align-items:flex-start;gap:10px;flex:1 1 180px;min-width:0}
-.echo .ea-account-import-icon{display:grid;place-items:center;flex:none;width:34px;height:34px;border-radius:10px;background:#a6e3ce12;color:#a6e3ce}
-.echo .ea-account-import-copy>div{display:grid;gap:4px;min-width:0}
-html body .echo .ea-review .ea-account-import-copy strong{font-size:13px;line-height:1.4;font-weight:600;color:#e8f3ec}
-html body .echo .ea-review .ea-account-import-copy small{display:block;font-size:11px;line-height:1.5;font-weight:400;color:#a8b9ae;white-space:normal}
-html body .echo .ea-review .ea-steps .ea-account-import>button{display:inline-flex;align-items:center;justify-content:center;flex:none;gap:7px;min-height:40px;padding:9px 12px;border:1px solid #b7d6b960;border-radius:8px;background:#b7d6b9;color:#17251b;font:600 12px/1.4 inherit;cursor:pointer;transition:background .15s,border-color .15s}
+.echo .ea-review .ea-account-import{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:4px 8px 10px 43px;padding:8px 10px;border:1px solid #a6e3ce2e;border-radius:10px;background:linear-gradient(135deg,#a6e3ce0c,#a6e3ce03)}
+.echo .ea-account-import-copy{display:flex;align-items:flex-start;gap:8px;flex:1 1 180px;min-width:0}
+.echo .ea-account-import-icon{display:grid;place-items:center;flex:none;width:26px;height:26px;border-radius:8px;background:#a6e3ce12;color:#a6e3ce}
+.echo .ea-account-import-copy>div{display:grid;gap:1px;min-width:0}
+html body .echo .ea-review .ea-account-import-copy strong{font-size:12px;line-height:1.3;font-weight:600;color:#e8f3ec}
+html body .echo .ea-review .ea-account-import-copy small{display:block;font-size:11px;line-height:1.35;font-weight:400;color:#a8b9ae;white-space:normal}
+html body .echo .ea-review .ea-steps .ea-account-import>button{display:inline-flex;align-items:center;justify-content:center;flex:none;gap:5px;min-height:26px;padding:3px 8px;border:1px solid #b7d6b960;border-radius:8px;background:#b7d6b9;color:#17251b;font:600 11px/1.3 inherit;cursor:pointer;transition:background .15s,border-color .15s}
 html body .echo .ea-review .ea-steps .ea-account-import>button:hover:not(:disabled){background:#d1e7d2;border-color:#d1e7d2}
 html body .echo .ea-review .ea-steps .ea-account-import>button:disabled{opacity:.5;cursor:default}
 html body .echo .ea-review .ea-steps .ea-account-import>button:focus-visible{outline:2px solid #d1e7d2;outline-offset:3px}
@@ -450,8 +450,13 @@ html body .echo .ea-review .ea-account-import[data-imported]>button{background:t
 .echo .ea-account-import p{flex-basis:100%;margin:0;font-size:12px;line-height:1.5;color:#efaa9e}
 .ea-account-import-spinner{animation:ea-account-import-spin .8s linear infinite}
 @keyframes ea-account-import-spin{to{transform:rotate(360deg)}}
-@container booking-review (max-width:420px){.echo .ea-review .ea-account-import{margin-inline:8px;padding:12px}.echo .ea-account-import-copy{flex-basis:100%}html body .echo .ea-review .ea-steps .ea-account-import>button{width:100%;min-height:44px}}
+@container booking-review (max-width:420px){.echo .ea-review .ea-account-import{margin-inline:8px;padding:8px 10px}.echo .ea-account-import-copy{flex-basis:100%}html body .echo .ea-review .ea-steps .ea-account-import>button{width:100%;min-height:30px}}
 @media(prefers-reduced-motion:reduce){.ea-account-import-spinner{animation:none}}
 html body .echo #echo-ai .ea-review .ea-steps .ea-account-import>button{width:auto;background:#b7d6b9!important;color:#17251b!important}
 html body .echo #echo-ai .ea-review .ea-steps .ea-account-import[data-imported]>button{background:#a6e3ce0c!important;color:#c8e3cd!important;border-color:#a6e3ce55}
 @container booking-review (max-width:420px){html body .echo #echo-ai .ea-review .ea-steps .ea-account-import>button{width:100%}}
+/* No padding on the step text and details (booking review). */
+html body .echo :is(.ea-step-text,.ea-step-details),html body .echo .ea-review :is(.ea-step-text,.ea-step-details){padding:0}
+/* An equipment category is a group heading in the review, not a data atom: no code, no value. */
+html body .echo .ea-review .ea-data-row[data-category]{display:block;padding:8px 0 2px;border-bottom:0}
+html body .echo .ea-review .ea-data-row[data-category]>b{font-weight:700;color:#c9d8cf}
