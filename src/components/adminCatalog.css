@@ -1052,3 +1052,26 @@ html body .cat-events-table .cat-read-link{padding:0!important;margin:0!importan
 .catalog-popup select option:disabled{color:#6b6e82}
 @media(max-width:480px){.cat-pick-row{grid-template-columns:1fr}}
 .cat-pick-row.is-single{grid-template-columns:1fr}
+/* Aside: a label above the first Rental Equipment category (everything that is not DJ or MC). */
+.cat-service-list li[data-divider]::before{content:attr(data-divider);display:block;margin:14px 0 6px;padding-inline:12px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--aw-muted,#a6a6ad)}
+/* Settings button: a labelled pill, same as on the Prices page. */
+.cat-settings-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;box-sizing:border-box;min-height:36px;padding:0 16px;border:1px solid color-mix(in srgb,currentColor 40%,transparent);border-radius:10px;background:color-mix(in srgb,currentColor 8%,transparent);color:inherit;font:600 14px/1 inherit;cursor:pointer;white-space:nowrap;margin-inline-end:auto;transition:background .15s,border-color .15s}
+.cat-settings-btn:hover{background:color-mix(in srgb,currentColor 16%,transparent);border-color:currentColor}
+.cat-settings-btn[aria-pressed=true]{background:currentColor}.cat-settings-btn[aria-pressed=true]>*{color:var(--aw-main,#202123)}
+.cat-settings-btn:focus-visible{outline:2px solid currentColor;outline-offset:3px}
+/* Settings view: cards. */
+.cat-settings{display:grid;gap:16px;padding:8px 0}
+.cat-settings-card{display:grid;gap:14px;padding:20px;border:1px solid var(--aw-line,rgba(255,255,255,.1));border-radius:12px;background:var(--aw-sidebar,#17181a);max-width:760px}
+.cat-settings-card h3{margin:0;font-size:16px}.cat-settings-card header p{margin:4px 0 0;font-size:13px;color:var(--aw-muted,#a6a6ad)}
+.cat-settings-add{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:8px;align-items:center}
+.cat-settings :is(input){min-height:38px;box-sizing:border-box;padding:0 12px;border:1px solid var(--aw-line,rgba(255,255,255,.1));border-radius:8px;background:var(--aw-main,#202123);color:inherit;font:inherit;min-width:0}
+.cat-settings-list{list-style:none;margin:0;padding:0;display:grid}
+.cat-settings-list li{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--aw-line,rgba(255,255,255,.1))}
+.cat-settings-list li:has(input){grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto}
+.cat-settings-name{display:grid;gap:2px;min-width:0}.cat-settings-name small{color:var(--aw-muted,#a6a6ad)}
+.cat-settings-count{font-size:12px;color:var(--aw-muted,#a6a6ad);white-space:nowrap}
+.cat-settings-actions{display:flex;gap:6px}
+@media(max-width:700px){.cat-settings-add{grid-template-columns:1fr}}
+.cat-settings-title{margin:0;font-size:16px}
+.admin-catalog .cat-subtab-actions .cat-settings-btn{margin:0 8px 0 0}
+.cat-settings-btn[aria-pressed=true]{background:var(--aw-text,#e9e9ec);border-color:var(--aw-text,#e9e9ec)}.cat-settings-btn[aria-pressed=true],.cat-settings-btn[aria-pressed=true]>*{color:var(--aw-main,#202123)}

@@ -10,7 +10,6 @@ import { DollarSign, Archive, CalendarDays, ClipboardList, ExternalLink, Images,
 const GROUPS = [
   { name: 'Live', items: [
     ['live-stream', 'Live stream', '/admin/live-stream', Radio],
-    ['live-archive', 'Live Recordings', '/admin/echo?tab=live-archive', Archive],
   ] },
   { name: 'Work', items: [
     ['music-archive', 'Recordings', '/admin/archive', Archive],

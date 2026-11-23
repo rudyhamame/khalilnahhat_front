@@ -48,7 +48,7 @@
 /* Header (tabs + policy toolbar): same dark base, grain and falling shadow as the Recordings header; stays dark in the light theme. */
 .pe-header{position:sticky;top:0;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 20px;
  --aw-main:#202123;--aw-sidebar:#17181a;--aw-raised:#303136;--aw-text:#e9e9ec;--aw-muted:#a6a6ad;--aw-line:rgba(255,255,255,.1);color:var(--aw-text);
- background-color:#121216;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .88 0 0 0 0 .88 0 0 0 0 .92 0 0 0 .13 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:160px 160px;box-shadow:0 6px 14px #00000066}
+ background-color:#121216;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .88 0 0 0 0 .88 0 0 0 0 .92 0 0 0 .13 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:160px 160px;box-shadow:0 2px 6px #00000033}
 .pe-header-slot{flex:1;min-width:0}
 .pe-header .pp-head{align-items:center}
 .pe-settings-btn{display:grid;place-items:center;flex:none;width:38px;height:38px;padding:0;border:1px solid var(--aw-line);border-radius:8px;background:var(--aw-sidebar);color:var(--aw-text);cursor:pointer;transition:background .15s,border-color .15s}
@@ -217,3 +217,42 @@
 .pp-dialog .pp-fee-add{justify-self:start;min-height:34px;padding:0 14px;border:1px dashed var(--aw-muted);border-radius:8px;background:none;color:var(--aw-text);font:inherit;font-size:13px;cursor:pointer}
 .pp-dialog .pp-fee-add:hover{border-style:solid;background:var(--aw-hover)}
 td.pp-fee-cell span{display:block;white-space:nowrap}td.pp-fee-cell b{font-weight:600;margin-inline-start:4px}
+
+/* Fee column: each category is its own sub-row inside the cell: name left, its price right, hairlines between. */
+td.pp-fee-cell{padding-block:0;min-width:0;max-width:none;width:1%;white-space:nowrap}
+td.pp-fee-cell .pp-fee-sub{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:34px;padding:6px 0;white-space:nowrap}
+td.pp-fee-cell .pp-fee-sub+.pp-fee-sub{border-top:1px solid var(--aw-line)}
+td.pp-fee-cell .pp-fee-sub>b{font-weight:600;font-variant-numeric:tabular-nums;margin:0}
+td.pp-total{font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* Fee column header: the title over two sub-columns that line up with the sub-rows below. */
+th.pp-fee-head{min-width:0;max-width:none;width:1%;white-space:nowrap;vertical-align:bottom}
+th.pp-fee-head>span:first-child{display:block;text-align:center}
+th.pp-fee-head .pp-fee-subhead{display:flex;justify-content:space-between;gap:16px;margin-top:4px;padding-top:4px;border-top:1px solid var(--aw-line);font-weight:400;text-transform:none;letter-spacing:0;color:var(--aw-muted)}
+th.pp-fee-head .pp-fee-subhead i{font-style:normal}
+td.pp-fee-cell .pp-fee-sub{gap:8px;font-size:13px}td.pp-fee-cell .pp-fee-sub>span{overflow:visible;text-overflow:clip}th.pp-fee-head .pp-fee-subhead{gap:8px;font-size:12px}
+/* Every column except the atom name fits its content; the name takes the leftover width. */
+.pp-table table :is(th,td):not(.pp-atom):not([colspan]){width:1%;white-space:nowrap}
+.pp-table table th.pp-atom{width:auto}
+/* Vertical lines between the columns (not on group header rows). */
+.pp-table table :is(th,td):not([colspan]):not(:first-child){border-inline-start:1px solid var(--aw-line)}
+
+/* Fee category card: category + remove on top, then mode, currency, amount and quantity. */
+.pp-dialog .pp-fee-row{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;padding:12px;border:1px solid var(--aw-line);border-radius:10px;background:color-mix(in srgb,var(--aw-main) 60%,transparent)}
+.pp-dialog .pp-fee-top{display:grid;grid-template-columns:minmax(0,1fr) 34px;gap:8px;align-items:center}
+.pp-dialog .pp-fee-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.pp-dialog .pp-fee-fields label{display:grid;gap:4px;min-width:0}
+.pp-dialog .pp-fee-fields label>span{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--aw-muted)}
+.pp-dialog .pp-fee-fields :is(input,select){min-height:38px;width:100%;box-sizing:border-box;padding:0 10px;border:1px solid var(--aw-line);border-radius:8px;background:var(--aw-main);color:var(--aw-text);font:inherit;font-size:14px}
+@media(max-width:560px){.pp-dialog .pp-fee-fields{grid-template-columns:1fr}}
+td.pp-fee-cell .pp-fee-sub>span{display:grid;gap:1px}td.pp-fee-cell .pp-fee-sub small{font-size:11px;color:var(--aw-muted)}
+
+/* Prices | Offers tabs in the page header. */
+.pe-header .pe-tabs{display:flex;gap:2px;padding:3px;border:1px solid var(--aw-line);border-radius:10px;background:var(--aw-main)}
+.pe-header .pe-tabs button{min-height:34px;padding:0 18px;border:0;border-radius:7px;background:none;color:var(--aw-muted);font:600 14px/1 inherit;cursor:pointer}
+.pe-header .pe-tabs button[aria-selected=true]{background:var(--aw-raised);color:var(--aw-text);box-shadow:0 1px 3px #0003}
+.pe-header .pe-tabs button:focus-visible{outline:2px solid var(--aw-text);outline-offset:2px}
+/* Offer: the data atoms bundled in it. */
+.pp-dialog .pp-bundle-row{display:grid;grid-template-columns:minmax(0,1fr) 84px 34px;gap:8px;align-items:center}
+.pp-dialog .pp-bundle-row :is(input,select){min-height:40px;width:100%;box-sizing:border-box;padding:0 12px;border:1px solid var(--aw-line);border-radius:8px;background:var(--aw-main);color:var(--aw-text);font:inherit;font-size:14px}
+.pp-offer-atoms{display:block;margin-top:2px;font-size:11px;font-weight:400;color:var(--aw-muted);white-space:normal;max-width:36ch}

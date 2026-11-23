@@ -3,10 +3,11 @@ import Equipment3DGenerator from './Equipment3DGenerator';
 import {equipmentSetMemberships,isEquipmentSet} from './equipmentSets';
 import {withServiceIds,equipmentInService} from '../lib/treeCore';
 import CatalogEntryManager from './CatalogEntryManager';
+import RentalCategorySettings from './RentalCategorySettings';
 import NumberInput from './NumberInput';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { adminToast } from './adminToast';
-import { Check, Languages, CalendarDays, Layers, Package, Pencil, Plus, Search, TriangleAlert, X, Trash2 } from 'lucide-react';
+import { ArrowLeft, Check, Languages, CalendarDays, Layers, Package, Pencil, Plus, Search, Settings, TriangleAlert, X, Trash2 } from 'lucide-react';
 import { apiRequest } from '../lib/api';
 import { GalleryImageField } from '../echo/GalleryPicker';
 import './adminCatalog.css';
@@ -14,6 +15,8 @@ import './equipmentEditor.css';
 
 // Three focused views: Events (what you celebrate), Services (what you sell, with its price) and Equipment (what each service uses).
 
+// Only DJ Khalil Nahhat and MC host are services; every other entry is a Rental Equipment category (managed in Settings).
+const CORE_SERVICES = ['dj', 'mc'];
 const money = (cents) => (Number(cents || 0) / 100).toFixed(2);
 
 function Switch({ checked, onChange, label }) {
@@ -85,7 +88,7 @@ function EquipmentEditor({ item, services, token, reload, report, onSelect, onDr
       <section className="equipment-editor-section" aria-labelledby="equipment-details-title">
         <h4 id="equipment-details-title"><span>01</span>Equipment details</h4>
         <label>Name <b className="req" aria-hidden="true">*</b><input autoFocus required maxLength={160} placeholder="Equipment name" value={v.name} onChange={event=>{const name=event.target.value;setV(current=>({...current,name,...(!editing?{slug:slugify(name)}:{})}));}}/></label>
-        <label>Service <b className="req" aria-hidden="true">*</b><select required value={v.serviceId} onChange={event=>{const service=services.find(row=>row.id===event.target.value);set('serviceId',event.target.value);set('category',service?.category||event.target.value);}}><option value="" disabled>Select a service</option>{services.filter(service=>service.id!=='__new').map(service=><option key={service.id} value={service.id}>{service.name}</option>)}</select></label>
+        <label>Rental Equipment Category <b className="req" aria-hidden="true">*</b><select required value={v.serviceId} onChange={event=>{const service=services.find(row=>row.id===event.target.value);set('serviceId',event.target.value);set('category',service?.category||event.target.value);}}><option value="" disabled>Select a category</option>{services.filter(service=>service.id!=='__new'&&!CORE_SERVICES.includes(service.id)).map(service=><option key={service.id} value={service.id}>{service.name}</option>)}</select></label>
         <div className="equipment-editor-pair"><label>Brand <b className="req" aria-hidden="true">*</b><input required maxLength={80} placeholder="Brand" value={v.brand} onChange={event=>setV(current=>({...current,brand:event.target.value,brandModel:[event.target.value.trim(),current.model.trim()].filter(Boolean).join(' ')}))}/></label><label>Model<input maxLength={80} placeholder="Model" value={v.model} onChange={event=>setV(current=>({...current,model:event.target.value,brandModel:[current.brand.trim(),event.target.value.trim()].filter(Boolean).join(' ')}))}/></label></div>
         <label>Description <b className="req" aria-hidden="true">*</b><textarea required rows={3} maxLength={2000} placeholder="Describe this equipment for your clients." value={v.description} onChange={event=>set('description',event.target.value)}/></label>
         <label>What it does <b className="req" aria-hidden="true">*</b><textarea required rows={2} maxLength={600} placeholder="A short explanation of what this equipment does." value={v.functionSummary} onChange={event=>set('functionSummary',event.target.value)}/></label>
@@ -115,6 +118,7 @@ export default function AdminCatalogPanel({ token, mode = 'catalog' }) {
   const [catalog, setCatalog] = useState([]);
   const [tab, setTab] = useState(mode === 'events' ? 'events' : 'equipment');
   const [ar, setAr] = useState(false);
+  const [settings, setSettings] = useState(false);
   const pick = (row, key) => (ar && row[key + 'Ar']) || row[key];
   const [query, setQuery] = useState('');
   const [scope, setScope] = useState('all');
@@ -191,15 +195,15 @@ export default function AdminCatalogPanel({ token, mode = 'catalog' }) {
   const eqRows = groups.filter((group) => scope === 'all' || group.id === scope)
     .flatMap((group) => group.items.filter((item) => !isEquipmentSet(item)).map((item) => ({ ...item, serviceName: group.name })))
     .filter((item) => (!needle || `${item.name} ${item.brandModel || ''} ${(setMemberships.get(item.id)||[]).map(set=>set.name).join(' ')}`.toLowerCase().includes(needle)));
-  const eqSubtabs = <div className="cat-subtabs" aria-label="Equipment"><label className="cat-search"><Search size={15} aria-hidden="true" /><input type="search" placeholder="Search equipment" value={query} onChange={(event) => setQuery(event.target.value)} aria-label="Search equipment" /></label><span className="cat-subtab-actions"><button type="button" className="is-primary" onClick={() => {setSelectedEvent('');setEqOpen(true);}}><Plus size={15} />Add equipment</button></span></div>;
+  const eqSubtabs = <div className="cat-subtabs" aria-label="Equipment"><label className="cat-search"><Search size={15} aria-hidden="true" /><input type="search" placeholder="Search equipment" value={query} onChange={(event) => setQuery(event.target.value)} aria-label="Search equipment" /></label><span className="cat-subtab-actions"><button type="button" className="cat-settings-btn" aria-pressed={settings} aria-label={settings ? 'Back to services and equipment' : 'Settings'} title={settings ? 'Back to services and equipment' : 'Settings'} onClick={() => setSettings((value) => !value)}>{settings ? <ArrowLeft size={18} aria-hidden="true" /> : <Settings size={18} aria-hidden="true" />}<span>{settings ? 'Back' : 'Settings'}</span></button><button type="button" className="is-primary" onClick={() => {setSelectedEvent('');setEqOpen(true);}}><Plus size={15} />Add equipment</button></span></div>;
   const tabs = [['events', 'Events', CalendarDays, events.length], ['services', 'Services', Layers, serviceGroups.length], ['equipment', 'Equipment', Package, equipment.length]].filter(([id]) => (id === 'events') === (mode === 'events'));
 
   return <section ref={root} className={`admin-catalog${tab === 'pricing' ? '' : ' has-event-editor'}${mode !== 'events' ? ' is-service-tab' : ''}`} aria-label={mode === 'events' ? 'Events' : 'Services and equipment'}>
     {mode !== 'events' ? <aside className="cat-service-list" aria-label="Services">
-      <header><h3>Services</h3><span className="cat-svc-head-actions">{selectedService ? <><button type="button" className="cat-svc-act" aria-label="Edit service" title="Edit service" onClick={() => eventManager.current?.open('service', catalog.find((item) => item.kind === 'service' && item.id === selectedService.id))}><Pencil size={15} /></button><button type="button" className="cat-svc-act is-danger" aria-label="Delete service" title="Delete service" disabled={deletingService === selectedService.id} onClick={() => deleteService(selectedService)}><Trash2 size={15} /></button></> : null}<button type="button" className="cat-svc-add" onClick={() => eventManager.current?.open('service')} aria-label="Add service" title="Add service"><Plus size={16} /></button></span></header>
+      <header><h3>Services</h3><span className="cat-svc-head-actions">{selectedService ? <><button type="button" className="cat-svc-act" aria-label="Edit service" title="Edit service" onClick={() => eventManager.current?.open('service', catalog.find((item) => item.kind === 'service' && item.id === selectedService.id))}><Pencil size={15} /></button><button type="button" className="cat-svc-act is-danger" aria-label="Delete service" title="Delete service" disabled={deletingService === selectedService.id} onClick={() => deleteService(selectedService)}><Trash2 size={15} /></button></> : null}</span></header>
       <ul>
         <li><button type="button" className={`cat-svc-item${scope === 'all' ? ' is-active' : ''}`} onClick={() => setScope('all')}><span>All equipment</span><b>{equipment.length}</b></button></li>
-        {serviceGroups.filter((group) => group.id !== '__new').map((group) => { const entry = catalog.find((item) => item.kind === 'service' && item.id === group.id); return <li key={group.id || group.category}>
+        {serviceGroups.filter((group) => group.id !== '__new').map((group, index, all) => { const entry = catalog.find((item) => item.kind === 'service' && item.id === group.id); return <li key={group.id || group.category} className={!CORE_SERVICES.includes(group.id) && (index === 0 || CORE_SERVICES.includes(all[index - 1].id)) ? 'has-divider' : undefined} data-divider={!CORE_SERVICES.includes(group.id) && (index === 0 || CORE_SERVICES.includes(all[index - 1].id)) ? 'Rental Equipment Categories' : undefined}>
           <button type="button" className={`cat-svc-item${scope === group.id ? ' is-active' : ''}${group.isActive === false ? ' is-hidden' : ''}`} onClick={() => setScope(group.id)} onDoubleClick={() => eventManager.current?.open('service', entry)}><span>{pick(group, 'name')}</span><b>{group.items.length}</b></button>
           {pick(group, 'description') ? <div className="cat-svc-desc" data-open={scope === group.id} dir={ar ? 'rtl' : undefined}><p>{pick(group, 'description')}</p></div> : null}
           
@@ -209,7 +213,7 @@ export default function AdminCatalogPanel({ token, mode = 'catalog' }) {
     </aside> : null}
     {/* The event editor lives outside the page content: a full-height column that starts at the very top. */}
     {tab === 'events' || mode !== 'events' ? <CatalogEntryManager onDraft={setDraft} key={mode} ref={eventManager} inline startClosed={mode !== 'events'} kind={mode === 'events' ? 'event' : 'service'} hideList renderPrice={(entry) => <PriceEditor key={entry.priceId} label={entry.name} price={prices.find((price) => price.id === entry.priceId)} token={token} onSaved={load} report={report} />} items={catalog} equipment={equipment} token={token} onSaved={load} report={report} onSelectionChange={setSelectedEvent}/> : null}
-    {tab === 'equipment' ? (eqOpen ? <EquipmentEditor onDraft={setDraft} key={selectedEvent || 'new'} item={equipment.find((entry) => entry.id === selectedEvent)} services={serviceGroups} token={token} reload={load} report={report} onSelect={() => { setSelectedEvent(''); setEqOpen(false); }} /> : null) : null}
+    {tab === 'equipment' && !settings ? (eqOpen ? <EquipmentEditor onDraft={setDraft} key={selectedEvent || 'new'} item={equipment.find((entry) => entry.id === selectedEvent)} services={serviceGroups} token={token} reload={load} report={report} onSelect={() => { setSelectedEvent(''); setEqOpen(false); }} /> : null) : null}
     <div className="cat-main">
 
     <div className="cat-bar">
@@ -228,10 +232,11 @@ export default function AdminCatalogPanel({ token, mode = 'catalog' }) {
     </div> : null}
 
 
-    {tab === 'equipment' ? <div className="cat-events-workspace">
+    {mode !== 'events' && settings ? <div className="cat-events-workspace"><div className="cat-pane cat-events-main"><div className="cat-subtabs" aria-label="Settings"><h3 className="cat-settings-title">Settings</h3><span className="cat-subtab-actions"><button type="button" className="cat-settings-btn" aria-pressed={settings} aria-label={settings ? 'Back to services and equipment' : 'Settings'} title={settings ? 'Back to services and equipment' : 'Settings'} onClick={() => setSettings((value) => !value)}>{settings ? <ArrowLeft size={18} aria-hidden="true" /> : <Settings size={18} aria-hidden="true" />}<span>{settings ? 'Back' : 'Settings'}</span></button></span></div><RentalCategorySettings token={token} onChanged={load} /></div></div> : null}
+    {tab === 'equipment' && !settings ? <div className="cat-events-workspace">
       <div className="cat-pane cat-events-main">
         {eqSubtabs}
-        <div className="cat-events-table-wrap cat-equipment-table-wrap"><table className="cat-events-table cat-equipment-table"><thead><tr><th>Rental Equipment</th><th>Rental Service</th><th>Brand</th><th>Model</th><th>Description</th><th>What it does</th><th>YouTube link</th><th>Available qty to rent</th><th>Min qty to rent</th><th>3D model</th></tr></thead><tbody>
+        <div className="cat-events-table-wrap cat-equipment-table-wrap"><table className="cat-events-table cat-equipment-table"><thead><tr><th>Rental Equipment</th><th>Rental Equipment Category</th><th>Brand</th><th>Model</th><th>Description</th><th>What it does</th><th>YouTube link</th><th>Available qty to rent</th><th>Min qty to rent</th><th>3D model</th></tr></thead><tbody>
           {eqRows.map((item) => <tr key={item.id} aria-selected={selectedEvent === item.id} onClick={() => item.id !== '__new' && selectEquipment(item.id)}>
             <th scope="row"><button type="button" className="cat-event-name" onClick={(e) => { e.stopPropagation(); if (item.id !== '__new') selectEquipment(item.id); }}><Thumb src={item.imageUrl} name={item.name} /><span>{item.name}</span></button></th>
             <td>{item.serviceName}</td>
