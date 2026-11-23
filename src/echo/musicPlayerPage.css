@@ -293,3 +293,12 @@ html body .echo.echo-public-page[data-page=home][data-theme] #echo-main>section.
 .wp-card>.wp-deck>.wp-top>:is(.wp-icon,a.wp-icon){grid-column:1;justify-self:start;grid-row:1}
 .wp-card>.wp-deck>.wp-top>:is(.wp-badge-hint,.wp-back-hint){grid-row:2}
 .wp-transport .wp-stop{width:48px;height:48px;border-radius:50%;background:linear-gradient(160deg,#fff,#c9cdcb);color:#0b0d0e;box-shadow:0 6px 18px #0008}.wp-transport .wp-stop:disabled{opacity:.35}
+
+/* A phone player is in the browser's top layer, independent of its story's transforms and scroll. */
+.work-player-modal{position:fixed;inset:auto;top:calc(var(--work-visible-top,0px) + var(--work-visible-height,100dvh)/2);left:calc(var(--work-visible-left,0px) + var(--work-visible-width,100vw)/2);transform:translate(-50%,-50%);margin:0;padding:0;border:0;border-radius:34px;background:#0e1114;color:#fff;width:min(var(--player-width),calc(var(--work-visible-width,100vw) - 24px));height:min(var(--player-height),calc(var(--work-visible-height,100dvh) - 24px));max-width:none;max-height:none;overflow:visible;box-sizing:border-box}
+.work-player-modal::backdrop{background:#071014cc;backdrop-filter:blur(8px)}
+.work-player-modal>.work-player-box.is-open{position:relative;left:auto;top:auto;translate:none;width:100%;height:100%;animation:none}
+.work-player-modal .work-player-turn{--player-turn-delay:0s;--player-reveal-delay:.6s}
+.work-player-modal .work-player-box.is-closing{animation:work-player-modal-close .25s .8s ease both}
+@keyframes work-player-modal-close{to{opacity:0;scale:.94}}
+@media(prefers-reduced-motion:reduce){.work-player-modal .work-player-box.is-closing{animation:none}}

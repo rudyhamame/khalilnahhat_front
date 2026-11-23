@@ -1511,7 +1511,7 @@ function AdminPage({
           ) : null}
           {activePanel === 'transactions' ? (
             <AdminTransactionsPanel
-              transactions={transactions}
+              requests={serviceRequests}
               onRefresh={onRefreshTransactions}
             />
           ) : null}

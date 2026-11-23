@@ -21,10 +21,6 @@
 .reels-player-message button{border-radius:12px;padding:8px 20px}
 /* Opening the portrait player must not shrink its full-viewport story. */
 .work-type-journey .work-story[data-work="LIVE"]:has(.work-player-box.is-open){height:100svh;min-height:100svh;padding-block:14px}
-@media(max-width:900px){
- /* Like every other sound, Reels keeps its text visible while its player is open; the player is sized to fit under the text. */
- .work-type-journey .work-story[data-work="LIVE"]{--player-height:min(760px,calc(var(--echo-page-height,100svh) - 28px - 340px),calc((100vw - 48px)*16/9))}
-}
 
 /* Reels with a saved 9:16 crop: a centred 9:16 frame full height; the video inside is positioned to show only the crop window. */
 .reels-cropbox{position:absolute;inset:0;margin:auto;height:100%;max-width:100%;aspect-ratio:9/16;overflow:hidden;background:#050607;cursor:pointer}
@@ -82,3 +78,9 @@
 .reels-player-caption{text-align:center!important;justify-items:center}.reels-player-caption strong{text-align:center}
 .reels-player-caption{inset:auto 0 0!important;padding:10px 14px 12px!important;background:linear-gradient(transparent,#000a)!important}
 .reels-player .reels-controls{inset:auto 10px 44px}
+
+/* The opened phone Reel gets the whole popup's available space, not the text section's leftover height. */
+.work-player-modal.is-reels{
+ --player-height:min(760px,calc(var(--work-visible-height,100dvh) - 24px),calc((var(--work-visible-width,100vw) - 24px)*16/9));
+ --player-width:calc(var(--player-height)*9/16);
+}

@@ -1,4 +1,3 @@
-import {musicBoxScrollTarget} from '../lib/musicBoxPosition';
 import {djWorkTypeText} from '../lib/djWorkTypeText';
 import {useEffect,useLayoutEffect,useRef,useState} from 'react';
 import {readArchivePlayerState,subscribeArchivePlayerState} from '../lib/archivePlayerBridge';
@@ -48,21 +47,13 @@ export default function WorkTypeJourney({ar,workTypes,renderCard:renderWorkCard,
   const target=root.current?.querySelector(`.work-story[data-work="${before}"]`);
   if(target)target.scrollIntoView({behavior:'instant',block:'start'});
  },[activeType]);
- // Center the opened box, rather than the story's text and padding above it.
+ // Phone players use a centered top-layer dialog; desktop keeps its story alignment.
  useEffect(()=>{
-  if(!activeType)return undefined;
+  if(!activeType||window.matchMedia('(max-width:760px), (max-width:1100px) and (orientation:portrait)').matches)return undefined;
   const story=()=>[...(root.current?.querySelectorAll('.work-story')||[])].find(node=>node.dataset.work===activeType);
   const centre=(smooth=false)=>{
    const target=story();if(!target)return false;
-   const phone=window.matchMedia('(max-width:1100px) and (orientation:portrait)').matches;
-   const box=target.querySelector('.work-player-box.is-open');
-   if(phone&&box){
-    const viewport=window.visualViewport;
-    if(viewport&&Math.abs(viewport.scale-1)>.01)return true;
-    const header=document.querySelector('.echo-header')?.getBoundingClientRect();
-    const top=musicBoxScrollTarget({box:box.getBoundingClientRect(),scrollY:window.scrollY,viewportTop:viewport?.offsetTop||0,viewportHeight:viewport?.height||window.innerHeight,headerBottom:header?.bottom||0});
-    if(Math.abs(top-window.scrollY)>.5)window.scrollTo({top,behavior:smooth&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches?'smooth':'instant'});
-   }else target.scrollIntoView({behavior:smooth&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches?'smooth':'instant',block:'start',inline:'nearest'});
+   target.scrollIntoView({behavior:smooth&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches?'smooth':'instant',block:'start',inline:'nearest'});
    return true;
   };
   // The card and its story grow during opening. Align again once their geometry settles.

@@ -214,7 +214,7 @@ export default function AdminCatalogPanel({ token, mode = 'catalog' }) {
     </aside> : null}
     {/* The event editor lives outside the page content: a full-height column that starts at the very top. */}
     {tab === 'events' || mode !== 'events' ? <CatalogEntryManager onDraft={setDraft} key={mode} ref={eventManager} inline startClosed={mode !== 'events'} kind={mode === 'events' ? 'event' : 'service'} hideList renderPrice={(entry) => <PriceEditor key={entry.priceId} label={entry.name} price={prices.find((price) => price.id === entry.priceId)} token={token} onSaved={load} report={report} />} items={catalog} equipment={equipment} token={token} onSaved={load} report={report} onSelectionChange={setSelectedEvent}/> : null}
-    {tab === 'equipment' && !settings ? (eqOpen ? <EquipmentEditor onDraft={setDraft} key={selectedEvent || 'new'} item={equipment.find((entry) => entry.id === selectedEvent)} services={serviceGroups} token={token} reload={load} report={report} onSelect={() => { setSelectedEvent(''); setEqOpen(false); }} /> : null) : null}
+    {tab === 'equipment' && !settings && !CORE_SERVICES.includes(scope) ? (eqOpen ? <EquipmentEditor onDraft={setDraft} key={selectedEvent || 'new'} item={equipment.find((entry) => entry.id === selectedEvent)} services={serviceGroups} token={token} reload={load} report={report} onSelect={() => { setSelectedEvent(''); setEqOpen(false); }} /> : null) : null}
     <div className="cat-main">
 
     <div className="cat-bar">
@@ -234,7 +234,7 @@ export default function AdminCatalogPanel({ token, mode = 'catalog' }) {
 
 
     {mode !== 'events' && settings ? <div className="cat-events-workspace"><div className="cat-pane cat-events-main"><div className="cat-subtabs" aria-label="Settings"><h3 className="cat-settings-title">Settings</h3><span className="cat-subtab-actions"><button type="button" className="cat-settings-btn" aria-pressed={settings} aria-label={settings ? 'Back to services and equipment' : 'Settings'} title={settings ? 'Back to services and equipment' : 'Settings'} onClick={() => setSettings((value) => !value)}>{settings ? <ArrowLeft size={18} aria-hidden="true" /> : <Settings size={18} aria-hidden="true" />}<span>{settings ? 'Back' : 'Settings'}</span></button></span></div><RentalCategorySettings token={token} onChanged={load} /></div></div> : null}
-    {tab === 'equipment' && !settings ? <div className="cat-events-workspace">
+    {tab === 'equipment' && !settings && !CORE_SERVICES.includes(scope) ? <div className="cat-events-workspace">
       <div className="cat-pane cat-events-main">
         {eqSubtabs}
         <div className="cat-events-table-wrap cat-equipment-table-wrap"><table className="cat-events-table cat-equipment-table"><thead><tr><th>Rental Equipment</th><th>Rental Equipment Category</th><th>Brand</th><th>Model</th><th>Description</th><th>What it does</th><th>YouTube link</th><th>Available qty to rent</th><th>Min qty to rent</th><th>3D model</th></tr></thead><tbody>

@@ -314,7 +314,3 @@ html body .echo .work-type-journey .work-story:first-child{padding-top:clamp(16p
 html body .echo .work-type-journey .work-story:has(.work-player-box.is-open){min-height:100svh!important;align-content:center;padding-block:clamp(24px,5svh,56px)!important;transition:min-height .6s cubic-bezier(.22,1,.36,1),padding-block .6s cubic-bezier(.22,1,.36,1),grid-template-columns .48s cubic-bezier(.22,1,.36,1)}
 
 @media(prefers-reduced-motion:reduce){html body .echo .work-type-journey .work-story{transition:none!important}}
-/* Leave enough room to center even the last music box above the phone's bottom edge. */
-@media(max-width:1100px) and (orientation:portrait){
- html body .echo .work-type-journey .work-story:has(.work-player-box.is-open){padding-block-end:max(24px,calc((100dvh - var(--player-height))/2))!important}
-}
