@@ -19,7 +19,7 @@ import './glowCards.css';
 import './homeBookingAssistant.css';
 
 // One icon per booking section id.
-const icons={contact:UserRound,event:CalendarDays,music:Disc3,rentals:Boxes,references:Images,notes:StickyNote};
+const icons={contact:UserRound,event:CalendarDays,music:Disc3,rentals:Boxes,additional:StickyNote};
 // Line shape between a section box and its group/atom boxes: from x0 to x1.
 function branchLines(shape,x0,y,x1,ys){
  const xm=(x0+x1)/2;

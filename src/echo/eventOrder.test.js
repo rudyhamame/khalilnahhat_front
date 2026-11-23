@@ -96,7 +96,7 @@ for(const ar of [false,true])test(`guided review keeps canonical fields and prov
  const html=renderToStaticMarkup(createElement(EventOrderProvider,{user,token:'fixture',lang},createElement(QuotePage,{lang,user,isSessionReady:true,guided:true})));
  assert.ok(html.includes(ar?'تفاصيل الحجز':'Booking details'));
  assert.match(html,/role="tablist"/);
- for(const section of ['customer','event','music','references','equipment'])assert.ok(html.includes(`data-draft-section="${section}"`),section);
+ for(const section of ['customer','event','music','additional','equipment'])assert.ok(html.includes(`data-draft-section="${section}"`),section);
  assert.ok(html.includes('id="order-event-venue-address"'));
  assert.ok(html.includes(ar?'أرسل طلب عرض السعر':'Submit quote request'));
  assert.doesNotMatch(html,/id="event-order-panel"|ai-booking-panel/);

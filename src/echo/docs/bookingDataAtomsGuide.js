@@ -9,7 +9,7 @@ const p=text=>({type:'paragraph',text});
 const list=items=>({type:'list',items});
 const table=(headers,rows)=>({type:'table',headers,rows});
 const SUPPORT=new Set(['event.venue.latitude','event.venue.longitude','event.venue.source','event.venue.sourceId','event.venue.sourceAttribution']); // map provenance, not client atoms
-const STEPS=['customer','event','music','equipment','references','notes'];
+const STEPS=['customer','event','music','equipment','additional'];
 // Internal documentation taxonomy only; it does not change the booking contract or client review.
 const PRICED=new Set(['services','music.djRequested','music.mcRequested','rental.requested']);
 const reviewAtoms=fields.filter(field=>!SUPPORT.has(field.key));

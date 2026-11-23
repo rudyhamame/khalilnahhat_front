@@ -10,7 +10,7 @@ test('selecting a goal asks within its scope, even when earlier event details ar
  for(const goal of BOOKING_GOALS){const next=goalNextStep(order,false,goal.id);if(next.path)assert.ok(goal.matches(next.path),`${goal.id}: ${next.path}`);}
  assert.equal(goalNextStep(order,false,'contact').path?.startsWith('customer.'),true);
  assert.equal(goalNextStep(order,false,'event').path,'event.type');
- assert.deepEqual(BOOKING_GOALS.map(goal=>goal.title),['Personal info','Event info','DJ service','Rental services & equipment','References & voucher','Additional notes']);
+ assert.deepEqual(BOOKING_GOALS.map(goal=>goal.title),['Personal info','Event info','DJ Khalil Service','Rental equipments for other services','Additional info']); // exactly the Booking page's steps
  assert.equal(goalNextStep(order,false,'music').path,'music.djRequested');
  assert.equal(bookingGoal('unknown'),null);
 });
@@ -54,4 +54,8 @@ test('goal progress and the next question read one missing list, so they can nev
   const next=bookingNextStep(sample).path;
   if(next)assert.ok(everything.includes(next),next);
  }
+});
+test('the Booking page steps, the Booking review and the Booking draft are one list: same count, names and order',async()=>{
+ const {PHASE_TITLES}=await import('./bookingPhaseTitles.mjs');
+ assert.deepEqual(BOOKING_GOALS.map(goal=>goal.title),PHASE_TITLES);
 });
