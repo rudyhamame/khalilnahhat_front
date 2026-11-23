@@ -1,3 +1,4 @@
+import {musicBoxScrollTarget} from '../lib/musicBoxPosition';
 import {djWorkTypeText} from '../lib/djWorkTypeText';
 import {useEffect,useLayoutEffect,useRef,useState} from 'react';
 import {readArchivePlayerState,subscribeArchivePlayerState} from '../lib/archivePlayerBridge';
@@ -47,16 +48,35 @@ export default function WorkTypeJourney({ar,workTypes,renderCard:renderWorkCard,
   const target=root.current?.querySelector(`.work-story[data-work="${before}"]`);
   if(target)target.scrollIntoView({behavior:'instant',block:'start'});
  },[activeType]);
- // Opening a box makes its whole section one full screen and scrolls that section to the very top of the screen (the page's own smooth scrolling does the movement). The section grows while it opens, so it is aligned again once it has its final size.
+ // Center the opened box, rather than the story's text and padding above it.
  useEffect(()=>{
   if(!activeType)return undefined;
-  const slot=()=>root.current?.querySelector(`.work-story[data-work="${activeType}"]`);
-  const centre=()=>{const target=slot();if(!target)return false;target.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start',inline:'nearest'});return true;};
-  // A link straight to a recording sets the type before the boxes have loaded: keep looking for the box (up to about 8 seconds), centre it once it exists, then centre again after it has grown.
-  let later=0,tries=0;
-  const poll=setInterval(()=>{if(centre()){clearInterval(poll);later=setTimeout(centre,750);}else if(++tries>40)clearInterval(poll);},200);
-  if(centre()){clearInterval(poll);later=setTimeout(centre,750);}
-  return()=>{clearInterval(poll);clearTimeout(later);};
+  const story=()=>[...(root.current?.querySelectorAll('.work-story')||[])].find(node=>node.dataset.work===activeType);
+  const centre=(smooth=false)=>{
+   const target=story();if(!target)return false;
+   const phone=window.matchMedia('(max-width:1100px) and (orientation:portrait)').matches;
+   const box=target.querySelector('.work-player-box.is-open');
+   if(phone&&box){
+    const viewport=window.visualViewport;
+    if(viewport&&Math.abs(viewport.scale-1)>.01)return true;
+    const header=document.querySelector('.echo-header')?.getBoundingClientRect();
+    const top=musicBoxScrollTarget({box:box.getBoundingClientRect(),scrollY:window.scrollY,viewportTop:viewport?.offsetTop||0,viewportHeight:viewport?.height||window.innerHeight,headerBottom:header?.bottom||0});
+    if(Math.abs(top-window.scrollY)>.5)window.scrollTo({top,behavior:smooth&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches?'smooth':'instant'});
+   }else target.scrollIntoView({behavior:smooth&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches?'smooth':'instant',block:'start',inline:'nearest'});
+   return true;
+  };
+  // The card and its story grow during opening. Align again once their geometry settles.
+  let settled=0,resizeTimer=0,tries=0;
+  const opening=()=>{if(!centre(true))return false;settled=setTimeout(()=>centre(),850);return true;};
+  const poll=setInterval(()=>{if(opening()||++tries>40)clearInterval(poll);},200);
+  if(opening())clearInterval(poll);
+  const resize=()=>{
+   if(document.activeElement?.matches('input,textarea,select,[contenteditable]'))return;
+   clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>centre(),120);
+  };
+  const observer=new ResizeObserver(resize);const target=story()?.querySelector('.work-story-card-slot');if(target)observer.observe(target);
+  window.addEventListener('resize',resize);window.visualViewport?.addEventListener('resize',resize);
+  return()=>{clearInterval(poll);clearTimeout(settled);clearTimeout(resizeTimer);observer.disconnect();window.removeEventListener('resize',resize);window.visualViewport?.removeEventListener('resize',resize);};
  },[activeType]);
 
  return <div className="work-type-journey" id="work-journey-top" ref={root}>

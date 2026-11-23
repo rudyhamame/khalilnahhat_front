@@ -1059,19 +1059,12 @@ html body .cat-events-table .cat-read-link{padding:0!important;margin:0!importan
 .cat-settings-btn:hover{background:color-mix(in srgb,currentColor 16%,transparent);border-color:currentColor}
 .cat-settings-btn[aria-pressed=true]{background:currentColor}.cat-settings-btn[aria-pressed=true]>*{color:var(--aw-main,#202123)}
 .cat-settings-btn:focus-visible{outline:2px solid currentColor;outline-offset:3px}
-/* Settings view: cards. */
-.cat-settings{display:grid;gap:16px;padding:8px 0}
-.cat-settings-card{display:grid;gap:14px;padding:20px;border:1px solid var(--aw-line,rgba(255,255,255,.1));border-radius:12px;background:var(--aw-sidebar,#17181a);max-width:760px}
-.cat-settings-card h3{margin:0;font-size:16px}.cat-settings-card header p{margin:4px 0 0;font-size:13px;color:var(--aw-muted,#a6a6ad)}
-.cat-settings-add{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:8px;align-items:center}
-.cat-settings :is(input){min-height:38px;box-sizing:border-box;padding:0 12px;border:1px solid var(--aw-line,rgba(255,255,255,.1));border-radius:8px;background:var(--aw-main,#202123);color:inherit;font:inherit;min-width:0}
-.cat-settings-list{list-style:none;margin:0;padding:0;display:grid}
-.cat-settings-list li{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--aw-line,rgba(255,255,255,.1))}
-.cat-settings-list li:has(input){grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto}
-.cat-settings-name{display:grid;gap:2px;min-width:0}.cat-settings-name small{color:var(--aw-muted,#a6a6ad)}
-.cat-settings-count{font-size:12px;color:var(--aw-muted,#a6a6ad);white-space:nowrap}
-.cat-settings-actions{display:flex;gap:6px}
-@media(max-width:700px){.cat-settings-add{grid-template-columns:1fr}}
 .cat-settings-title{margin:0;font-size:16px}
 .admin-catalog .cat-subtab-actions .cat-settings-btn{margin:0 8px 0 0}
 .cat-settings-btn[aria-pressed=true]{background:var(--aw-text,#e9e9ec);border-color:var(--aw-text,#e9e9ec)}.cat-settings-btn[aria-pressed=true],.cat-settings-btn[aria-pressed=true]>*{color:var(--aw-main,#202123)}
+/* Settings tab header: the same dark bar as the equipment toolbar: title on the left, Settings/Back as a flat action on the right. */
+.admin-catalog.is-service-tab .cat-subtabs .cat-settings-title{display:flex;align-items:center;height:100%;margin:0 0 0 0;padding:0 20px;font:700 12.5px/1 inherit;letter-spacing:.1em;text-transform:uppercase;color:#e6e7ee}
+.admin-catalog.is-service-tab .cat-subtabs .cat-subtab-actions .cat-settings-btn,.admin-catalog.is-service-tab .cat-subtabs .cat-subtab-actions .cat-settings-btn[aria-pressed=true]{margin:0;min-height:0;border-radius:0!important;border:0!important;border-inline-start:1px solid #24242d!important;background:transparent!important;color:#c9cbdb!important;font:600 12.5px/1 inherit!important}
+.admin-catalog.is-service-tab .cat-subtabs .cat-subtab-actions .cat-settings-btn>*{color:inherit!important}
+.admin-catalog.is-service-tab .cat-subtabs .cat-subtab-actions .cat-settings-btn:hover{background:#1d1d25!important;color:#fff!important}
+.admin-catalog.is-service-tab .cat-subtabs:has(.cat-settings-title){justify-content:flex-start}
