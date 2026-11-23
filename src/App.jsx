@@ -574,6 +574,7 @@ function App() {
     return () => {document.documentElement.classList.remove('echo-studio-window');document.documentElement.classList.remove('echo-builder-window');};
   }, [routePath, routeSearch]);
   const adminPage = <AdminPage
+        lang={echoLang}
         studioWindow={routePath === '/admin/live-studio'}
         user={authUser}
         activePanel={routePath === '/admin/audience-requests'
@@ -715,6 +716,7 @@ function App() {
     return (
       <>
       <DashboardPage
+        lang={echoLang}
         user={authUser}
         serviceRequests={serviceRequests}
         onQuoteAction={quoteAction}

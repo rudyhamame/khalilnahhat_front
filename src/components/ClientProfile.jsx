@@ -45,8 +45,8 @@ export default function ClientProfile({user,token,onSaved,onDeleted}){
     <AvatarEditor user={user} token={token} onChanged={onSaved}/>
     <AccountEmailEditor user={user} token={token} onSaved={onSaved} onBusyChange={setEmailBusy} disabled={state.busy||deletion.busy}/>
     <form id={formId} className="cw-panel cw-profile" onSubmit={submit} inert={deletion.busy}>
-      <label>First name *<input required maxLength={80} autoComplete="given-name" value={form.firstName} onChange={e=>set('firstName')(e.target.value)}/></label>
-      <label>Last name *<input required maxLength={80} autoComplete="family-name" value={form.lastName} onChange={e=>set('lastName')(e.target.value)}/></label>
+      <label>First name *<input required maxLength={60} autoComplete="given-name" value={form.firstName} onChange={e=>set('firstName')(e.target.value)}/></label>
+      <label>Last name *<input required maxLength={60} autoComplete="family-name" value={form.lastName} onChange={e=>set('lastName')(e.target.value)}/></label>
       <label>Phone number *<CanadianPhoneInput required maxLength={30} autoComplete="tel" value={form.phoneNumber} placeholder="+1 (416) 555-0123" onChange={set('phoneNumber')}/></label>
       <label>Preferred contact *<select required value={form.preferredContact} onChange={e=>set('preferredContact')(e.target.value)}>{['any','email','phone'].map(option=><option key={option} value={option} disabled={!choices.enabled.includes(option)}>{optionName('customer.contactMethod',option)}</option>)}</select></label>
       {choices.hasPhone&&<fieldset className="cw-profile-wide cw-phone-contact"><legend>How may we reach you on your phone? *</legend>{PHONE_CONTACTS.map(option=><label key={option}><input type="radio" name="phoneContact" required value={option} checked={form.phoneContact===option} onChange={()=>set('phoneContact')(option)}/><span>{optionName('customer.phoneContact',option)}</span></label>)}</fieldset>}

@@ -1,4 +1,4 @@
-import {missingOrderFields} from './eventOrderCore.mjs';
+import {missingOrderFields,getPath} from './eventOrderCore.mjs';
 import {fieldQuestion} from './fieldQuestion.js';
 import {treeSteps} from './treeCore.js';
 
@@ -24,13 +24,7 @@ const questions={
 // The ONE answer to "what is still missing from this draft?". The next question, each goal's progress and the review all read it.
 export function effectiveMissing(order={}){
  const missing=missingOrderFields(order);
- // Step 3 is Services: the DJ Khalil Nahhat decision and the MC hosting decision must both be answered, yes or no.
- const present=treeSteps();
- const decisions=[['music.djRequested',order.music?.djRequested??(order.services?.includes('dj')?true:null),present.dj],['music.mcRequested',order.music?.mcRequested??(order.services?.includes('mc')?true:null),present.mc!==false]];
- for(const [key,value,exists] of decisions)if(typeof value!=='boolean'&&exists)missing.push({key}); // no decision for a service the catalogue does not have
- // Step 4 (Services info: the rental question, the services and equipment, the room setup notes) is entirely optional: nothing here is ever required.
- const rest=missing.filter(field=>!['services','rental.requested'].includes(field.key));
- return rest;
+ return missing;
 }
 
 // Only ask for values still missing after the draft has actually been updated.
@@ -39,6 +33,9 @@ export function bookingNextStep(order={},ar=false,{optionalDone=false,firstKey=n
  const missing=effectiveMissing(order);
 
  const field=(firstKey&&missing.find(field=>field.key===firstKey))||priority.map(path=>missing.find(field=>field.key===path)).find(Boolean)||missing[0];
+ const present=treeSteps();
+ const optional=[['music.djRequested',present.dj],['music.mcRequested',present.mc!==false]].find(([key,exists])=>exists&&getPath(order,key)==null);
+ if(!field&&optional)return {path:optional[0],optional:true,text:questions[optional[0]][ar?1:0]};
  if(!field)return optionalDone
   ?{path:null,ready:true,text:ar?'حجزك مكتمل وجاهز للإرسال. اضغط «إرسال الحجز» لإرساله إلى الفريق.':'Your booking is complete and ready to be submitted. Press Submit booking to send it to the team.'}
   :{path:null,text:ar?'تفاصيل الطلب الأساسية مكتملة. هل تريد إضافة صور ملهمة أو روابطها، أو ملاحظات إضافية، أو رمز قسيمة؟ أو أخبرني إن لم يكن هناك شيء آخر لإضافته.':'Your required details are complete. Would you like to add inspiration photo links, additional notes or a voucher code? Or tell me there is nothing more to add.'};

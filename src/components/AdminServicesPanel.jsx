@@ -1,3 +1,4 @@
+import BookingDraftReview from './BookingDraftReview';
 import {OfferReview} from './BookingNegotiation';
 import {quoteTotals} from '../lib/quoteTotals.mjs';
 import {fieldName,optionName,customerNameParts} from '../lib/eventOrderCore.mjs';
@@ -63,7 +64,7 @@ function buildDraft(request, currentDraft) {
   };
 }
 
-function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmedBookings = [], token }) {
+function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmedBookings = [], token, ar=false }) {
   const [selectedId,setSelectedId]=useState(null);
   const selectedRequest=requests.find(request=>request.id===selectedId)||requests[0];
   const [drafts, setDrafts] = useState({});
@@ -203,7 +204,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
           <nav aria-label="Choose a booking request">
             {requests.map(request=><button key={request.id} type="button" className="admin-booking-list-item" aria-current={selectedRequest?.id===request.id?'true':undefined} aria-controls="admin-booking-detail" onClick={()=>setSelectedId(request.id)}>
               <span className="admin-booking-list-top"><strong>{request.customerName}</strong><span className={`admin-service-request-status is-${request.status}`}>{request.journey.label}</span></span>
-              <span className="admin-booking-list-event">{[request.order?.event?.type||request.event?.eventType,request.order?.event?.date||request.event?.eventDate].filter(Boolean).join(' · ')||'Event details pending'}</span>
+              <span className="admin-booking-list-event">{[(request.order?.event?.type==='other'?request.order.event.title:request.order?.event?.type)||request.event?.eventType,request.order?.event?.date||request.event?.eventDate].filter(Boolean).join(' · ')||'Event details pending'}</span>
               <small>{request.requestNumber||request.id}</small>
             </button>)}
             {!requests.length&&<p className="admin-booking-list-empty">No booking requests yet.</p>}
@@ -223,10 +224,11 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                   <span className={`admin-service-request-status is-${request.status}`}>{request.journey.label}</span>
                   <h3>{request.customerName}</h3>
                   <a href={`mailto:${request.customerEmail}`}>{request.customerEmail}</a>
-                  <p>{readable(request.order?.event?.type||request.event?.eventType)} · {eventDate(request.order?.event?.date||request.event?.eventDate)}</p>
+                  <p>{readable((request.order?.event?.type==='other'?request.order.event.title:request.order?.event?.type)||request.event?.eventType)} · {eventDate(request.order?.event?.date||request.event?.eventDate)}</p>
                 </header>
                 <div className="booking-detail-sections">
-                  {bookingSections(request).map((section,index)=><section key={section.title} className={`booking-detail-section${section.wide?' is-wide':''}`} aria-label={section.title}>
+                  {request.order&&<BookingDraftReview order={request.order} snapshot ar={ar}/>}
+                  {bookingSections(request).filter(section=>!request.order||section.title==='Event planning').map((section,index)=><section key={section.title} className={`booking-detail-section${section.wide?' is-wide':''}`} aria-label={section.title}>
                     <h4><span aria-hidden="true">{String(index+1).padStart(2,'0')}</span>{section.title}</h4>
                     <dl>{section.rows.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{detailText(value)}</dd></div>)}</dl>
                     {!section.rows.length&&<p className="booking-detail-empty">No details provided.</p>}

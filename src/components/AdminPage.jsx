@@ -617,6 +617,7 @@ function AdminSongMetadataFields({
 }
 
 function AdminPage({
+  lang,
   user,
   activePanel = 'live-stream',
   studioWindow = false,
@@ -1517,6 +1518,7 @@ function AdminPage({
           ) : null}
           {activePanel === 'services' ? (
             <AdminServicesPanel
+              ar={lang?.lang==='ar'}
               requests={serviceRequests}
               onPublishQuote={onPublishServiceQuote}
               onQuoteAction={onQuoteAction}

@@ -8,7 +8,7 @@ import BookingDraftReview from './BookingDraftReview';
 import './bookingDraft.css';
 
 const savedDate=value=>value&&!Number.isNaN(Date.parse(value))?new Date(value).toLocaleString('en-CA',{timeZone:'America/Toronto',dateStyle:'medium',timeStyle:'short'}):'';
-export default function EventDraftCard({token,user}){
+export default function EventDraftCard({token,user,ar=false}){
  const [state,setState]=useState({token,loading:true,item:null,error:''}),[retry,setRetry]=useState(0);
  useEffect(()=>{
   if(!token)return;
@@ -48,7 +48,7 @@ export default function EventDraftCard({token,user}){
   {order?<>
    <div className="cw-panel bd-summary"><div><span className="bd-status">Draft · not submitted</span><h2>{order.event?.title||order.event?.name||eventTypeLabel(order.event?.type)||'Your event, taking shape'}</h2><p>{[order.event?.date,order.event?.venue?.name,order.event?.venue?.city].filter(Boolean).join(' · ')||'Add your event details to get started.'}</p>{saved&&<small>Saved to your account · {saved} (Toronto time)</small>}</div><a className="primary-button" href="/#event-order">Continue your draft<ArrowUpRight size={15}/></a><div className="bd-progress"><span><strong>{completed} of {required}</strong> required details completed</span><progress value={completed} max={required||1} aria-label="Required booking details completed"/><small>This draft has not been sent as a booking request.</small></div></div>
    <h2 className="bd-steps-title" id="booking-draft-steps">Booking steps</h2>
-   <BookingDraftReview order={order} tabbed/>
+   <BookingDraftReview order={order} tabbed ar={ar}/>
   </>:current.loading?<div className="cw-panel" role="status">Loading your account draft…</div>:!current.error&&<div className="cw-panel cw-empty"><FileText size={30}/><h2>No booking draft yet</h2><p>Start planning your event. Your draft will be saved to your account and appear here.</p><a className="primary-button" href="/#event-order">Start your booking draft<ArrowUpRight size={15}/></a></div>}
  </section>;
 }

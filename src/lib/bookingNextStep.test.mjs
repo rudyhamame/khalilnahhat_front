@@ -28,7 +28,7 @@ test('step 4 (rental question, services, equipment) is entirely optional: nothin
  order.services=[];order.music.djRequested=false;order.equipment=[];
  assert.notEqual(bookingNextStep(order).path,'services');
 });
-test('MC hosting must be answered, yes or no, like the DJ question (step 3 is Services)',()=>{
+test('MC hosting is offered as an optional question without becoming required',()=>{
  const order=complete();order.music.mcRequested=null;
  assert.equal(bookingNextStep(order).path,'music.mcRequested');
  order.music.mcRequested=true;assert.notEqual(bookingNextStep(order).path,'music.mcRequested');

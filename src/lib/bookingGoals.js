@@ -25,7 +25,11 @@ export function goalProgress(order,goal){
 export function goalNextStep(order,ar,id){
  const goal=bookingGoal(id);if(!goal)return bookingNextStep(order,ar);
  const {missing}=goalProgress(order,goal),global=bookingNextStep(order,ar);
- const field=missing.find(field=>field.key===global.path)||missing[0];
+ const present=treeSteps();
+ const candidate=goal.id==='music'?['music.djRequested',...(present.mc!==false?['music.mcRequested']:[])]:goal.id==='rentals'?['rental.requested']:[];
+ const optionalKey=candidate.find(key=>getPath(order,key)==null);
+ const optional=optionalKey?{key:optionalKey}:null;
+ const field=optional||missing.find(field=>field.key===global.path)||missing[0];
  if(field){const definition=fields.find(item=>item.key===field.key);return {path:field.key,section:goal.section,face:goal.face,text:field.key===global.path?global.text:fieldQuestion(definition||field,ar)};}
  return {path:null,section:goal.section,face:goal.face,text:ar?`يمكننا مراجعة ${goal.ar} أو تعديلها. ماذا تريد تغييره؟`:`We can review or change ${goal.title.toLowerCase()}. What would you like to adjust?`};
 }

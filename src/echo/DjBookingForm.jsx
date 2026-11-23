@@ -1,3 +1,4 @@
+import {reconcileSuggestedSongRows,savedSuggestedSongs} from '../lib/suggestedSongRows';
 import BookingStep from './BookingStep';
 import {FieldCode} from './BookingPhases';
 import {useState} from 'react';
@@ -50,11 +51,18 @@ export default function DjBookingForm({ar=false,ctx,djAdded,onClose,backLabel}){
  };
  const chipList=(items,selected,onToggle,empty)=>items.length?<div className="djf-chips">{items.map(name=><button type="button" key={name} aria-pressed={selected.includes(name)} onClick={()=>onToggle(name)}>{selected.includes(name)&&<Check size={13} aria-hidden="true"/>}{name}</button>)}</div>:<p className="djf-empty">{empty}</p>;
  // Suggested songs: local rows keep half-typed entries; only rows with a song are saved, in order.
- const [rows,setRows]=useState(()=>(music.suggestedSongs||[]).map((item,index)=>({key:`s${index}`,legacy:!item.artist,...item})));
+ const songs=music.suggestedSongs||[],signature=JSON.stringify(songs),draftId=ctx?.draftId||'';
+ const [songState,setSongState]=useState(()=>({signature,draftId,songs,rows:reconcileSuggestedSongRows([],[],songs)}));
+ let rows=songState.rows;
+ if(songState.signature!==signature||songState.draftId!==draftId){
+  rows=reconcileSuggestedSongRows(songState.draftId===draftId?songState.rows:[],songState.draftId===draftId?songState.songs:[],songs);
+  setSongState({signature,draftId,songs,rows});
+ }
+ const setRows=update=>setSongState(current=>({...current,rows:typeof update==='function'?update(current.rows):update}));
  const [nextKey,setNextKey]=useState(1000);
  const artistOptions=[...(lists?.artists||[]),...rows.map(row=>row.artist||'').filter(Boolean)];
  const validLink=link=>/^https:\/\/\S+$/i.test(String(link||'').trim());
- const commit=next=>{setRows(next);set('music.suggestedSongs',next.filter(row=>!(row.mode==='manual'&&!row.done)&&row.song.trim()&&(row.artist?.trim()||row.legacy)).map(({phase,song,artist,link})=>({phase,song:song.trim(),...(artist?.trim()?{artist:artist.trim()}:{}),...(validLink(link)?{link:link.trim()}:{})})));};
+ const commit=next=>{const saved=savedSuggestedSongs(next);setSongState({signature:JSON.stringify(saved),draftId,songs:saved,rows:next});set('music.suggestedSongs',saved);};
  // A song found on YouTube needs nothing else: its name, artist and link come from the video.
  const addFound=entry=>{if(rows.length>=30)return;setNextKey(value=>value+1);commit([...rows,{key:`s${nextKey}`,phase:'',...entry}]);};
  const patchRow=(key,patch)=>commit(rows.map(row=>row.key===key?{...row,...patch}:row));

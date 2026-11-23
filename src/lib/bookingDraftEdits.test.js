@@ -8,7 +8,7 @@ import {sectionLines} from './bookingReviewModel.js';
 import {bookingGoal} from './bookingGoals.js';
 import {accountEventDraft} from './accountEventDraft.js';
 
-const equipment=[{id:'speaker',name:'Speaker',category:'sound',minQuantity:1,stockTracked:true,quantityOwned:4,availableQuantity:4}];
+const equipment=[{id:'speaker',name:'Speaker',category:'sound',equipmentCategoryId:'sound',minQuantity:1,stockTracked:true,quantityOwned:4,availableQuantity:4}];
 const catalog=[{id:'sound',kind:'service',category:'sound',isActive:true}];
 test('manual removal works when another saved item is missing or exceeds current stock',()=>{
  const before=createEventOrder();

@@ -87,7 +87,7 @@ function BookingMenu({ request, onQuoteAction }) {
   </div>;
 }
 
-function RequestedServices({ requests, onQuoteAction, authToken }) {
+function RequestedServices({ requests, onQuoteAction, authToken, ar=false }) {
   // Left aside: one card per booking. Right main: the details of the selected booking.
   const [selectedId, setSelectedId] = useState('');
   const selected = requests.find((request) => request.id === selectedId) || requests[0];
@@ -128,7 +128,7 @@ function RequestedServices({ requests, onQuoteAction, authToken }) {
               {request.availabilityAcceptedAt && request.journey.clientNext === 'wait_for_quote' && <p>Availability confirmed. Your prices and deposit details are being prepared.</p>}
               {(request.journey.canRecordDeposit || request.journey.isBooked) && <BookingMeetingForm request={request} token={authToken} />}
               <BookingNegotiation request={request} token={authToken} onQuoteAction={onQuoteAction}/>
-              {request.order&&<section className="dashboard-service-brief"><h4>Your complete event brief</h4><BookingDraftReview order={request.order} snapshot/></section>}
+              {request.order&&<section className="dashboard-service-brief"><h4>{ar?'ملف فعاليتك الكامل':'Your complete event brief'}</h4><BookingDraftReview order={request.order} snapshot ar={ar}/></section>}
               <h4 className="dashboard-service-section-title">Rental services &amp; equipment</h4>
               <div className="dashboard-service-table">
                 <div className="dashboard-service-row dashboard-service-row-head">
@@ -201,7 +201,8 @@ function EmptyWorkspace({ title, children }) {
   return <div className="cw-panel cw-empty"><CalendarDays size={28} /><h2>{title}</h2><p>{children}</p><a className="primary-button" href="/#event-order">Plan an event <ArrowUpRight size={14} /></a></div>;
 }
 
-export default function DashboardPage({ user, serviceRequests = [], onQuoteAction, authToken, activeView = 'overview', onLogout, onProfileSaved }) {
+export default function DashboardPage({ user, serviceRequests = [], onQuoteAction, authToken, activeView = 'overview', onLogout, onProfileSaved, lang }) {
+  const ar=lang?.lang==='ar';
   if(activeView==='services')activeView='bookings';
   serviceRequests=serviceRequests.map(request=>({...request,journey:clientBookingJourney(request)}));
   const confirmed = serviceRequests.filter(request => request.journey.isBooked);
@@ -220,8 +221,8 @@ export default function DashboardPage({ user, serviceRequests = [], onQuoteActio
       {serviceRequests.length ? <section className="cw-panel"><h2>Your latest events</h2><p>Follow each request from first idea to confirmed booking.</p>{serviceRequests.slice(0,5).map(request => <a className="cw-event-row" href="/dashboard/bookings" key={request.id}><div><strong>{request.requestNumber || 'Event request'}</strong><small>{request.event?.eventDate || request.eventDate || 'Date to be confirmed'}</small></div><span className="cw-status">{request.journey.label} ↗</span></a>)}</section> : <EmptyWorkspace title="Make room for something unforgettable.">Start with your date and your vision. Your submitted requests and quotations will appear here.</EmptyWorkspace>}
       <section className="cw-panel"><h2>From request to celebration</h2><p>Tell us your plans, review your custom quote, then accept and arrange your deposit. Your booking is confirmed only after our team confirms availability and records payment.</p></section>
     </>}
-    {activeView === 'draft' && <EventDraftCard token={authToken} user={user}/>}
+    {activeView === 'draft' && <EventDraftCard token={authToken} user={user} ar={ar}/>}
     {activeView === 'conversations' && <BookingConversationHistory token={authToken}/>}
-    {activeView === 'bookings' && <RequestedServices requests={serviceRequests} onQuoteAction={onQuoteAction} authToken={authToken} />}
+    {activeView === 'bookings' && <RequestedServices requests={serviceRequests} onQuoteAction={onQuoteAction} authToken={authToken} ar={ar} />}
   </ClientWorkspace>;
 }

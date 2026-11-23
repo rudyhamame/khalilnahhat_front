@@ -5,7 +5,7 @@ export function reviewBookingAtom(reviews,line,confirmed){
  if(line.empty)return reviews;
  return {...reviews,[line.key]:{value:atomReviewSignature(line),state:confirmed?'confirmed':'correction'}};
 }
-export const applicableReviewAtoms=lines=>lines.filter(line=>!line.empty);
+export const applicableReviewAtoms=lines=>lines.filter(line=>!line.empty&&!line.category);
 export function editBookingAtom(reviews,line){
  const next={...reviews};delete next[line.key];return next;
 }
