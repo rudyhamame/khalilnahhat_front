@@ -21,7 +21,7 @@
 .admin-workspace .obs-session-toolbar>.admin-live-control { min-height:32px; padding:5px 12px; border:1px solid var(--aw-line); border-radius:6px; background:var(--aw-raised); color:var(--aw-text); font-size:12px; font-weight:600; white-space:nowrap; }
 .obs-controls details { min-width:0; font-size:12px; line-height:1.5; }
 .obs-disclosures { display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 20px; min-width:0; }
-.obs-disclosures>details[open] { flex-basis:100%; }
+.obs-disclosures>details[open],.obs-disclosures>.obs-connection-details { flex-basis:100%; }
 .obs-disclosures>.obs-help { margin-inline-start:auto; }
 .obs-controls summary { width:fit-content; color:var(--aw-muted,var(--muted)); cursor:pointer; font-size:12px; }
 .obs-controls summary:hover { color:var(--aw-text,inherit); }
@@ -33,7 +33,7 @@
 .admin-preview-sound-slot:empty { display:none; }
 .admin-preview-sound-slot { min-width:0; }
 .admin-preview-sound-slot .admin-preview-sound-control { display:flex; align-items:center; justify-content:center; gap:6px; }
-@media(max-width:600px) { .obs-connection-fields { grid-template-columns:minmax(0,1fr); } .obs-session-toolbar { gap:10px 12px; } .obs-recording-option { margin-inline-start:0; } .obs-session-toolbar>.admin-live-control { margin-inline-start:auto; } }
+@media(max-width:600px) { .obs-session-toolbar { gap:10px 12px; } .obs-recording-option { margin-inline-start:0; } .obs-session-toolbar>.admin-live-control { margin-inline-start:auto; } }
 .obs-quality-guide{display:grid;gap:10px;min-width:0}
 .obs-quality-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:10px}
 .obs-quality-option{min-width:0;padding:10px 12px;border:1px solid var(--aw-line,#ffffff1f);border-radius:8px}
@@ -80,3 +80,11 @@
 .obs-session-toolbar .obs-go-live:hover:not(:disabled){background:#fff}
 .obs-session-toolbar .obs-go-live:disabled{opacity:.5;cursor:wait}
 .obs-session-toolbar .obs-go-live:focus-visible{outline:2px solid #f2f2f6;outline-offset:3px}
+/* Connection details: each value sits in a visible field with its copy / show controls inside it. */
+.obs-connection-fields { grid-template-columns:minmax(0,1fr); gap:12px; margin:10px 0 8px; }
+.obs-connection-fields>label { gap:6px; font-weight:600; letter-spacing:.02em; }
+.obs-connection-fields .obs-field { gap:4px; padding:2px 4px 2px 10px; border:0; border-radius:8px; background:var(--aw-raised,#ffffff0a); }
+.obs-connection-fields .obs-field input { min-height:32px; padding:0; font:12px/1.4 ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace; text-overflow:ellipsis; outline:0; }
+.obs-connection-fields .obs-field button { min-height:28px; min-width:28px; padding:0 8px; border-radius:6px; color:var(--aw-muted,inherit); }
+.obs-connection-fields .obs-field button:hover { background:var(--aw-line,#ffffff1a); color:var(--aw-text,inherit); }
+.obs-connection-fields .obs-field .obs-reveal { font-weight:600; }

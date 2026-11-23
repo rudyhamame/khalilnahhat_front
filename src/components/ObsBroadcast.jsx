@@ -51,14 +51,13 @@ export default function ObsBroadcast({ token, title, item, onUpdate, missing = [
       {!obs?.roomName && !detailsReady && <p className="obs-help" role="status">Prepare OBS unlocks once you add {missing.join(", ").replace(/, ([^,]*)$/, " and $1")} in Session details.</p>}
     </div>
     <div className="obs-disclosures">
-    {obs?.streamKey && obs.state !== 'ending' ? <details className="obs-connection-details" open={obs.state !== 'live'}>
-      <summary>Connection details</summary>
+    {obs?.streamKey && obs.state !== 'ending' ? <div className="obs-connection-details">
       <div className="obs-connection-fields">
         <label>Server<div className="obs-field"><input aria-label="OBS server" value={obs.url} readOnly onFocus={event => event.target.select()} /><button type="button" aria-label="Copy OBS server" title="Copy server" onClick={() => copy(obs.url, 'Server')}><Copy size={14} aria-hidden="true" /></button></div></label>
         <label>{obs.transport === 'ovh' ? 'Bearer token' : 'Stream key'}<div className="obs-field"><input aria-label="OBS stream key" type={showKey ? 'text' : 'password'} value={obs.streamKey} readOnly onFocus={event => event.target.select()} /><button type="button" aria-label="Copy OBS stream key" title="Copy stream key" onClick={() => copy(obs.streamKey, 'Stream key')}><Copy size={14} aria-hidden="true" /></button><button className="obs-reveal" type="button" onClick={() => setShowKey(value => !value)}>{showKey ? 'Hide' : 'Show'}</button></div></label>
       </div>
       <p className="obs-help">Keep the key private. Prepare a new connection for each live stream.</p>
-    </details> : null}
+    </div> : null}
     {obs?.transport === 'ovh' ? <details className="obs-setup-guide" aria-label="OBS Studio setup instructions"><summary>OBS Studio setup (720p and 1080p)</summary><ObsQualityGuide /></details> : !obs?.roomName ? <p className="obs-help">OBS → Settings → Stream → Custom. Paste the server and key, then start streaming.</p> : null}
     {message || obs?.error ? <p className="obs-help" role="status">{message || obs?.error}</p> : null}
     </div>

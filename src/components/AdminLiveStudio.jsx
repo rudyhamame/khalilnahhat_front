@@ -1,7 +1,7 @@
 import LiveElapsedTimer from './LiveElapsedTimer';
 import {useStudioWorkspaceLayout} from '../hooks/useStudioWorkspaceLayout';
 import {useCallback,useEffect,useRef,useState} from 'react';
-import {Video,Radio,VideoOff,Minimize2,Maximize2,RefreshCw,Layers,Share2,Eye,EyeOff,LoaderCircle,Square,Info,X,PanelLeftClose,PanelLeftOpen} from 'lucide-react';
+import {Video,VideoOff,Minimize2,Maximize2,Layers,Share2,Eye,EyeOff,LoaderCircle,Info,X,PanelLeftClose,PanelLeftOpen} from 'lucide-react';
 import {adminToast} from './adminToast';
 import {useLiveStatus,liveSessionIdentity} from '../hooks/useLiveStatus';
 import {useWebrtcBroadcast} from '../hooks/useWebrtcBroadcast';
@@ -50,7 +50,6 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
    const dialog=settingsArea.current;if(!dialog)return;
    requestAnimationFrame(()=>{const card=dialog.querySelector(`[data-destination="${platform}"]`);card?.scrollIntoView({block:'nearest'});card?.querySelector('input')?.focus({preventScroll:true});});
  };
- const broadcastTitle=title.trim();
  const apply=item=>{if(!alive.current)return;update(item);onLiveStreamChange?.(item);};
  // The browser never records: on the OVH transport the relay records on the server, otherwise nothing is recorded.
  const start=async (title,outputs)=>{
@@ -58,30 +57,8 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
   apply(result.item);setTitle('');return result;};
  const end=async roomName=>{const result=await apiRequest('/live-stream/webrtc/end',{method:'POST',token,body:{roomName}});apply(result.item);setTitle('');setSetListId('none');setDetailsTried(false);};
  const ready=async roomName=>{const result=await apiRequest('/live-stream/webrtc/ready',{method:'POST',token,body:{roomName}});apply(result.item);};
- const resume=()=>apiRequest('/live-stream/webrtc/resume',{method:'POST',token});
- const beforeGoLive=()=>{
-  if(!title.trim()||!setListId){
-   setDetailsTried(true);setSettingsTab('studio');setHint('Enter a session title and select a set list before going live.');
-   requestAnimationFrame(()=>document.querySelector(!title.trim()?'.studio-title input':'.studio-set-list-picker select')?.focus());
-   return false;
-  }
-  return true;
- };
  const webrtc=useWebrtcBroadcast({onGoLive:start,onEndLive:end,onReady:ready,getOutputs:()=>({}),getPortraitAudio:()=>null,isNativePortrait:()=>output.nativePortrait,requireRecording:ovhRecording,recordingEnabled:ovhRecording,expectedRoom:liveStream?.webrtcRoomName});
  const output=useOutputFormat();
- // An ended live must never be "restored after a refresh": End live clears the tab's live marker and blocks the auto-restore.
- const stopLive=()=>webrtc.endLive();
- const [resumeBusy,setResumeBusy]=useState(false);
- // Reconnect only reconnects: it uses the input that is already set (its private preview is open) and never asks for a camera, tab or file.
- const reconnectLive=async()=>{
-  if(resumeBusy)return;
-  if(!webrtc.sourceChosen||!webrtc.isPreviewing){setSettingsTab('studio');adminToast('No input set. Choose a video input, then reconnect the live.',true);return;}
-  setResumeBusy(true);
-  try{
-   const claim=await resume();apply(claim.item);await webrtc.goLive('',claim,webrtc.sourceKind);
-  }catch(error){adminToast(error.message||'Could not reconnect this live stream.',true);}
-  finally{setResumeBusy(false);}
- };
  const previewReply=webrtc.statusMessage.startsWith('Private preview ready.')||webrtc.statusMessage==='Preview closed.';
  const controlHint=hint||destinationFeedback||(!previewReply&&webrtc.statusMessage)||'';
  // A hint removes itself after a few seconds (the close button still works at once).
@@ -138,14 +115,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  const lastCamera=useRef(webrtc.selectedVideoDeviceId);
  useEffect(()=>{if(lastCamera.current===webrtc.selectedVideoDeviceId)return;lastCamera.current=webrtc.selectedVideoDeviceId;if(webrtc.isPreviewing&&webrtc.sourceKind==='camera'){if(webrtc.paused||webrtc.inputLost)void webrtc.setPausedInput({kind:'camera'});else if(!webrtc.isBroadcasting)void webrtc.preparePreview();}},[webrtc.selectedVideoDeviceId]);// eslint-disable-line react-hooks/exhaustive-deps
  const previewFormat=output.format;
- const goLiveClick=()=>{if(beforeGoLive())void webrtc.goLive(broadcastTitle);};
- const actionButtons=(()=>{const otherLive=legacyObs||((isLiveOnAir||reserved)&&!webrtc.isBroadcasting);return <>
-                      {webrtc.isBroadcasting
-                        ?<>{webrtc.preflight?<button type="button" className="admin-live-fullscreen studio-go-live st-busy" disabled aria-label="Go live preflight"><LoaderCircle size={16} className="studio-opening-spinner" aria-hidden="true"/><span>Go live preflight</span></button>:null}<button type="button" className={`admin-live-fullscreen studio-go-live is-live ${webrtc.inputLost?'st-lost':webrtc.paused?'st-halted':'st-onair'}`} disabled={webrtc.isConnecting} aria-label="End live" title="End live" onClick={stopLive}><Square size={16} fill="currentColor" aria-hidden="true"/><span>End live</span></button></>
-                        :isLiveOnAir&&!webrtc.preflight&&liveStream?.broadcastSource==='browser'
-                          ?<><button type="button" className="admin-live-fullscreen studio-go-live st-paused" disabled={resumeBusy||webrtc.previewBusy||webrtc.isConnecting} aria-label="Reconnect this browser to the live stream" title="Reacquire the selected source and continue the active live" onClick={()=>reconnectLive()}><RefreshCw size={17} className={resumeBusy?'studio-opening-spinner':undefined} aria-hidden="true"/><span>{resumeBusy?'Reconnecting…':'Reconnect live'}</span></button><button type="button" className="admin-live-fullscreen studio-go-live is-live st-halted" disabled={resumeBusy||webrtc.isConnecting} aria-label="End live" title="End this live without reconnecting" onClick={stopLive}><Square size={16} fill="currentColor" aria-hidden="true"/><span>End live</span></button></>
-                          :<><button type="button" className={`admin-live-fullscreen studio-go-live${webrtc.isConnecting?' st-busy':webrtc.isPreviewing&&!otherLive&&!webrtc.previewBusy?' st-ready':''}`} disabled={!webrtc.isPreviewing||webrtc.isConnecting||webrtc.previewBusy||otherLive} aria-label="Go live on Echo" title="Go live on Echo" onClick={goLiveClick}>{webrtc.preflight?<LoaderCircle size={18} className="studio-opening-spinner" aria-hidden="true"/>:<Radio size={18} aria-hidden="true"/>}<span>{webrtc.preflight?'Go live preflight':'Go live'}</span></button></>}
-                    </>;})();
+
  return (
           <section id="admin-live-stream" className="admin-panel admin-live-stream-panel" aria-label="Live studio" data-hide-left={hidden.left?'1':undefined}>
             {error&&<p role="alert" className="admin-request-feedback">{error}</p>}
@@ -171,7 +141,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
                 </div>
 <div className="studio-comments-below"><AdminLiveComments token={token} session={isLiveOnAir?session:null} enabled={enabled}/></div>
 <section ref={settingsArea} className="studio-control-dock studio-controls-redesign" aria-labelledby="studio-controller-title">
- <header className="studio-controller-heading"><button type="button" className="studio-column-button" onClick={()=>toggleColumn('left')} title={hidden.left?'Open the controls column':'Close the controls column'} aria-label={hidden.left?'Open the controls column':'Close the controls column'} aria-expanded={!hidden.left}>{hidden.left?<PanelLeftOpen size={20}/>:<PanelLeftClose size={20}/>}</button><h3 id="studio-controller-title">Live control</h3><div className="studio-controller-tools"><div className="studio-control-status" data-state={studioState} role="status"><strong>{{preflight:'Go live preflight',live:'On air',opening:'Opening preview',connecting:'Connecting',preview:'Private preview',offline:'OBS disconnected'}[studioState]}</strong></div>{studioState==='live'&&<LiveElapsedTimer key={session||'local-live'} session={session}/>}{statusBadges.map(badge=><span key={badge.key} className="studio-badge" data-tone={badge.tone} title={badge.title}>{badge.text}</span>)}{actionButtons}</div></header>
+ <header className="studio-controller-heading"><button type="button" className="studio-column-button" onClick={()=>toggleColumn('left')} title={hidden.left?'Open the controls column':'Close the controls column'} aria-label={hidden.left?'Open the controls column':'Close the controls column'} aria-expanded={!hidden.left}>{hidden.left?<PanelLeftOpen size={20}/>:<PanelLeftClose size={20}/>}</button><h3 id="studio-controller-title">Live control</h3><div className="studio-controller-tools"><div className="studio-control-status" data-state={studioState} role="status"><strong>{{preflight:'Go live preflight',live:'On air',opening:'Opening preview',connecting:'Connecting',preview:'Private preview',offline:'OBS disconnected'}[studioState]}</strong></div>{studioState==='live'&&<LiveElapsedTimer key={session||'local-live'} session={session}/>}{statusBadges.map(badge=><span key={badge.key} className="studio-badge" data-tone={badge.tone} title={badge.title}>{badge.text}</span>)}</div></header>
  <div className="studio-control-workspace">
  <div className="studio-settings-tabs" role="tablist" aria-orientation="horizontal" aria-label="Stream settings sections" onKeyDown={event=>{
    const tabs=SETTINGS_TABS.map(([id])=>id),index=tabs.indexOf(settingsTab);
