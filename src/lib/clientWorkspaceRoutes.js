@@ -13,5 +13,5 @@ export function clientWorkspaceView(path, search='') {
     '/dashboard/planning':'planning',
     '/dashboard/payments':'payments',
     '/dashboard/profile':'profile',
-  })[path]||'overview';
+  })[path]||'draft';
 }

@@ -1,11 +1,10 @@
-import { FileText, History, LayoutDashboard, UserRound } from 'lucide-react';
+import { FileText, History, UserRound } from 'lucide-react';
 import AdminWorkspace from './AdminWorkspace';
 import './clientWorkspace.css';
 
 // Each booking view has its own workspace destination.
 const GROUPS = [
   { name: 'Your event', items: [
-    ['overview', 'Overview', '/dashboard', LayoutDashboard],
     ['draft', 'Booking draft', '/dashboard/draft', FileText],
     ['bookings', 'Requests & quotes', '/dashboard/bookings', History],
     ['profile', 'Personal info', '/dashboard/profile', UserRound],

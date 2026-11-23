@@ -18,7 +18,7 @@ test('legacy dashboard planning and payments views render useful empty states',(
 });
 test('dashboard handles saved requests without a journey object and exposes confirmed planning',()=>{
  const request={id:'one',status:'confirmed',requestNumber:'TEST-001',createdAt:'2026-11-17T12:00:00Z',event:{eventDate:'2027-06-19'},items:[],payments:[]};
- assert.match(render('overview',[request]),/TEST-001/);
+ assert.match(render('bookings',[request]),/TEST-001/);
  assert.match(render('planning',[request]),/SAVE PLANNING DETAILS/);
  assert.match(render('services',[request]),/Booking confirmed/);
 });

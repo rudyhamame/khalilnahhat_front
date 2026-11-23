@@ -6,13 +6,14 @@ import {OfferReview} from './BookingNegotiation';
 import {quoteTotals} from '../lib/quoteTotals.mjs';
 import {useTree} from '../lib/tree';
 import {quoteLineName} from '../lib/quoteAtoms';
+import {mapsLink} from '../lib/mapsLink';
 import {fieldName as bookingFieldName,optionName,customerNameParts} from '../lib/eventOrderCore.mjs';
 import {musicAtoms} from '../lib/musicAtoms.mjs';
 import './adminBookingRequests.css';
 import '../echo/eaAtomCode.css';
 import AdminSelect from './AdminSelect';
 import BookingDraftConversation from './BookingDraftConversation';
-import { Send } from 'lucide-react';
+import { Send, MapPin } from 'lucide-react';
 import { apiRequest } from '../lib/api';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -272,7 +273,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                     </dl>
                   </section>
                   <section className="booking-summary-group" aria-label={tr("Venue")}>
-                    <h4>{tr("Venue")}</h4>
+                    <h4>{tr("Venue")}{(()=>{const e=request.order?.event,v=e?.venue,href=(Number.isFinite(Number(v?.latitude))&&Number.isFinite(Number(v?.longitude))&&v?.latitude!==null&&v?.longitude!==null)?mapsLink(`${v.latitude},${v.longitude}`):mapsLink(v?.name||request.event?.venueName,v?.address||request.event?.venueAddress,v?.city||request.event?.city,v?.postalCode||request.event?.postalCode,v?.country);return href?<a className="map-link" href={href} target="_blank" rel="noopener noreferrer" aria-label={tr("Open the venue in Google Maps")} title={tr("Open in Google Maps")}><MapPin size={14} aria-hidden="true"/></a>:null;})()}</h4>
                     <p className="booking-summary-venue"><strong>{request.order?.event?.venue?.name||request.event?.venueName||'—'}</strong>
                       <span>{[request.order?.event?.venue?.address||request.event?.venueAddress,request.order?.event?.venue?.city||request.event?.city].filter(Boolean).join(', ')}</span></p>
                   </section>

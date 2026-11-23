@@ -2,7 +2,7 @@ import {bookingText,bookingLocale,bookingMoney} from '../lib/bookingUiText';
 import BookingNegotiation from './BookingNegotiation';
 import BookingMeetingForm from './BookingMeetingForm';
 import {clientBookingJourney} from '../lib/clientBookingJourney';
-import { ArrowUpRight, CalendarDays, EllipsisVertical, FileDown, PackageCheck, Undo2 } from 'lucide-react';
+import { EllipsisVertical, FileDown, PackageCheck, Undo2 } from 'lucide-react';
 import { openBookingConfirmation } from '../lib/bookingConfirmation';
 import { useEffect, useRef, useState } from 'react';
 import { PaymentsBlock, PlanningForm } from '../echo/ClientExtras';
@@ -199,31 +199,16 @@ function RequestedServices({ requests, onQuoteAction, authToken, ar=false }) {
 }
 
 
-function EmptyWorkspace({ title, children, ar=false }) {
-  const tr=text=>bookingText(text,ar);
-  return <div className="cw-panel cw-empty"><CalendarDays size={28} /><h2>{title}</h2><p>{children}</p><a className="primary-button" href="/#event-order">{tr("Plan an event")}<ArrowUpRight size={14} /></a></div>;
-}
-
-export default function DashboardPage({ user, serviceRequests = [], onQuoteAction, authToken, activeView = 'overview', onLogout, onProfileSaved, lang }) {
+export default function DashboardPage({ user, serviceRequests = [], onQuoteAction, authToken, activeView = 'draft', onLogout, onProfileSaved, lang }) {
   const ar=lang?.lang==='ar',tr=text=>bookingText(text,ar);
+  if(activeView==='overview')activeView='draft';
   if(activeView==='services')activeView='bookings';
   serviceRequests=serviceRequests.map(request=>({...request,journey:clientBookingJourney(request,ar)}));
   const confirmed = serviceRequests.filter(request => request.journey.isBooked);
-  const ready = serviceRequests.filter(request => request.journey.awaitingClient);
   return <ClientWorkspace ar={ar} activeKey={['planning','payments'].includes(activeView)?'bookings':activeView} user={user} onLogout={onLogout}>
     {activeView === 'planning' && <section className="cw-panel"><h1>{tr("Event planning")}</h1>{confirmed.length?confirmed.map(request=><article key={request.id}><h2>{request.requestNumber||tr("Your event")}</h2><PlanningForm ar={ar} request={request} onQuoteAction={onQuoteAction}/></article>):<p>{tr("Planning opens after confirmation.")}</p>}</section>}
     {activeView === 'payments' && <section className="cw-panel"><h1>{tr("Payments")}</h1>{confirmed.length?confirmed.map(request=><article key={request.id}><h2>{request.requestNumber||tr("Your event")}</h2><PaymentsBlock ar={ar} request={request} token={authToken}/></article>):<p>{tr("No payments to arrange yet.")}</p>}</section>}
     {activeView === 'profile' && <ClientProfile ar={ar} user={user} token={authToken} onSaved={onProfileSaved} onDeleted={()=>window.location.replace('/login')} />}
-    {activeView === 'overview' && <>
-      <header className="cw-heading"><div><h1>{user?.firstName ? (ar?'مرحباً، ':'Welcome, ') + user.firstName + '.' : tr("Your event starts here.")}</h1><p>{tr("Your plans, quotations, and every detail that makes the night yours.")}</p></div><a className="primary-button" href="/#event-order">{tr("Plan a new event")}<ArrowUpRight size={14}/></a></header>
-      <div className="cw-stats">
-        <a className="cw-stat" href="/dashboard/bookings"><span>{tr("Event requests")}</span><strong>{serviceRequests.length}</strong></a>
-        <a className="cw-stat" href="/dashboard/bookings"><span>{tr("Quotes ready to review")}</span><strong>{ready.length}</strong></a>
-        <a className="cw-stat" href="/dashboard/bookings"><span>{tr("Confirmed bookings")}</span><strong>{confirmed.length}</strong></a>
-      </div>
-      {serviceRequests.length ? <section className="cw-panel"><h2>{tr("Your latest events")}</h2><p>{tr("Follow each request from first idea to confirmed booking.")}</p>{serviceRequests.slice(0,5).map(request => <a className="cw-event-row" href="/dashboard/bookings" key={request.id}><div><strong>{request.requestNumber || tr("Event request")}</strong><small>{request.event?.eventDate || request.eventDate || tr("Date to be confirmed")}</small></div><span className="cw-status">{request.journey.label} ↗</span></a>)}</section> : <EmptyWorkspace ar={ar} title={tr("Make room for something unforgettable.")}>{tr("Start with your date and your vision. Your submitted requests and quotations will appear here.")}</EmptyWorkspace>}
-      <section className="cw-panel"><h2>{tr("From request to celebration")}</h2><p>{tr("Tell us your plans, review your custom quote, then accept and arrange your deposit. Your booking is confirmed only after our team confirms availability and records payment.")}</p></section>
-    </>}
     {activeView === 'draft' && <EventDraftCard token={authToken} user={user} ar={ar}/>}
     {activeView === 'conversations' && <BookingConversationHistory token={authToken}/>}
     {activeView === 'bookings' && <RequestedServices requests={serviceRequests} onQuoteAction={onQuoteAction} authToken={authToken} ar={ar} />}

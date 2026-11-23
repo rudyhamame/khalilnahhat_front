@@ -10,3 +10,7 @@ html body .ea-data-row>i.ea-atom-code.ea-atom-code{margin:0;justify-self:start}
 /* The badge never touches the name that follows it. */
 html body i.ea-atom-code.ea-atom-code,html body i.quote-atom-code.quote-atom-code{margin-inline-end:12px}
 html body .ea-data-row>i.ea-atom-code.ea-atom-code{margin-inline-end:0}
+
+/* A small map pin next to an address title: one click opens the place in Google Maps. */
+.map-link{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;margin-inline-start:8px;border-radius:50%;color:#8fd6bd;background:color-mix(in srgb,currentColor 14%,transparent);vertical-align:middle;text-decoration:none}
+.map-link:hover,.map-link:focus-visible{background:color-mix(in srgb,currentColor 28%,transparent)}

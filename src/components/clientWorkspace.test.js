@@ -12,10 +12,12 @@ const { default: AdminWorkspace } = await server.ssrLoadModule('/src/components/
 const user = { firstName: 'Test', username: 'client-test' };
 const render = (activeView, serviceRequests = []) => renderToStaticMarkup(createElement(Dashboard, { user, activeView, serviceRequests }));
 
-test('client overview shares the workspace shell but exposes no admin tools', () => {
+test('client default opens the booking draft without overview or admin tools', () => {
   const html = render('overview');
   assert.match(html, /Client Workspace/);
-  assert.match(html, /Welcome, Test/);
+  assert.match(html, /booking-draft-title/);
+  assert.doesNotMatch(html,/Welcome, Test|>Overview</);
+  assert.match(html,/href="\/dashboard\/draft"[^>]*aria-current="page"/);
   for (const href of ['/dashboard/draft', '/dashboard/bookings']) assert.ok(html.includes(`href="${href}"`));
   assert.doesNotMatch(html, /href="\/admin/);
   assert.doesNotMatch(html, /AI Search|Reserve a working slot/);
@@ -44,7 +46,7 @@ test('booking views are standalone pages with their own active sidebar link', ()
 
 test('workspace URLs and legacy booking links resolve to the correct view', () => {
   for(const [path,search,view] of [
-    ['/dashboard','','overview'],
+    ['/dashboard','','draft'],
     ['/dashboard/draft','','draft'],
     ['/dashboard/bookings','','bookings'],
     ['/dashboard/conversations','','conversations'],
