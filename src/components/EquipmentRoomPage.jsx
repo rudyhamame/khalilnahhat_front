@@ -28,7 +28,7 @@ export default function EquipmentRoomPage({item,allItems,token,onClose,onSaved,r
  },[item.id]);// eslint-disable-line react-hooks/exhaustive-deps
  useEffect(()=>{
   let disposed=false;
-  const items=allItems.filter(row=>row.isActive!==false&&!row.isSet||row.id===item.id).map(row=>({...row,quantity:1,...(row.id===item.id?{roomPlacement:placeRef.current}:{})}));
+  const items=allItems.filter(row=>row.isActive!==false||row.id===item.id).map(row=>({...row,quantity:1,...(row.id===item.id?{roomPlacement:placeRef.current}:{})}));
   import('../echo/setupSimulationEngine').then(({createSetupSimulation})=>{if(disposed)return;return createSetupSimulation(stage.current,{width:room.w,depth:room.d,boundary:null,holes:[],items,positions:{},grid:true,guests:0,active:{current:true},mode:{current:'day'},movableId:item.id},unit=>{
    if(disposed||!unit||unit.id!==item.id)return;
    setPlace(current=>({...current,x:fixed(unit.x),fromBack:fixed(unit.z+room.d/2),rotation:Math.round(unit.rotation*180/Math.PI),scale:Number((unit.scale||1).toFixed(2))}));

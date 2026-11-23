@@ -3,7 +3,6 @@ import {getPath,isAnswered,fieldName} from './eventOrderCore.mjs';
 import {bookingSections} from './bookingSections.js';
 import {goalFields,goalProgress,goalValue,ownTypeApplies} from './bookingGoals.js';
 import {ATOM_KEYS} from './eventPageModel.js';
-import {isCatalogSet} from './rentalCatalog.js'; // packaged sets are not individual equipment: they are not booking atoms
 
 // Review lines follow the booking contract order (its codes 01.01.01 → 05.03.01); the rental tree sits where the `equipment` atom is.
 const atomRank=key=>{const i=ATOM_KEYS.indexOf(key.startsWith('service:')?'equipment':key);return i<0?1e6:i;};
@@ -34,7 +33,7 @@ export function sectionLines(order,goal,ar,rentals=[],catalogLoading=false){
   for(const service of categories){
    const code=`04.${String(++categoryNumber).padStart(2,'0')}`;let itemNumber=0;
    const group=service.on?0:needs?1:2;
-   lines.push({key:`service:${service.id}`,category:true,reviewValue:service.on,reviewPath:service.selectionField||'services',label:name(service),value:service.on?tr('Added','مضاف'):goalValue(null,ar),empty:!service.on,required:false,group,items:service.equipment.filter(item=>!isCatalogSet(item)).map(item=>({key:`equipment:${service.id}:${item.id}`,code:`${code}.${String(++itemNumber).padStart(2,'0')}`,reviewValue:item.quantity||null,reviewPath:'equipment',label:name(item),value:item.quantity?`× ${item.quantity}`:'—',stock:stockLabel(item,ar),empty:!item.quantity}))});
+   lines.push({key:`service:${service.id}`,category:true,reviewValue:service.on,reviewPath:service.selectionField||'services',label:name(service),value:service.on?tr('Added','مضاف'):goalValue(null,ar),empty:!service.on,required:false,group,items:service.equipment.map(item=>({key:`equipment:${service.id}:${item.id}`,code:`${code}.${String(++itemNumber).padStart(2,'0')}`,reviewValue:item.quantity||null,reviewPath:'equipment',label:name(item),value:item.quantity?`× ${item.quantity}`:'—',stock:stockLabel(item,ar),empty:!item.quantity}))});
   }
  }else if(goal.id==='rentals'&&order.equipment?.length)lines.push({key:'equipment',reviewValue:order.equipment,reviewPath:'equipment',label:ar?'المعدات':'Equipment',value:bookingFieldValue(order,'equipment',ar)});
  return {progress,lines:lines.map((line,index)=>({line,index})).sort((a,b)=>atomRank(a.line.key)-atomRank(b.line.key)||a.index-b.index).map(row=>row.line)};

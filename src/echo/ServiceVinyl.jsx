@@ -2,7 +2,6 @@ import SetupNotes from './SetupNotes';
 import {useTree} from '../lib/tree';
 import {rentalServices,rentalServiceEquipment} from '../lib/numberedRentalCatalog';
 import RentalWorkbench from './RentalWorkbench';
-import {isEquipmentSet} from '../components/equipmentSets';
 import { Component, useEffect, useMemo, useRef, useState } from 'react';
 import {useCart} from './cart';
 import {useEventOrder} from './eventOrderContext';
@@ -51,7 +50,7 @@ export default function ServiceVinyl({lang}) {
   },[requestedServices,services,service?.id,equipmentSelection]);
   useEffect(()=>{if(previousEvent.current===eventType)return;previousEvent.current=eventType;setSelected('');setPreviewEquipment(null);},[eventType]);
   // Build an individual-equipment list for every service; packaged sets are excluded from the booking UI.
-  const serviceSections=useMemo(()=>services.map(service=>({service,items:rentalServiceEquipment(service,items).filter(row=>!isEquipmentSet(row))})),[services,items]);
+  const serviceSections=useMemo(()=>services.map(service=>({service,items:rentalServiceEquipment(service,items)})),[services,items]);
   const suggested=serviceSections.find(section=>section.service.id===service?.id)?.items||[];
   const previewEquipment=equipmentSelection===undefined?(suggested[0]||null):equipmentSelection&&suggested.find(item=>item.id===equipmentSelection.id)||null;
   return <><section ref={page} id="services" className="echo-section echo-service-vinyl setup-showcase rental-workbench" dir={ar?'rtl':'ltr'} aria-label={ar?'خدمات التأجير والمعدات':'Rental services and equipment'}>

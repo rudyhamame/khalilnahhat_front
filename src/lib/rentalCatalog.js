@@ -2,17 +2,13 @@
 // service keys. Custom service equipment is requested through equipment rental.
 import {BOOKING_SERVICE_KEYS,MC_ID,equipmentInService as inService} from './treeCore.js';
 const bookingServiceIds=new Set(BOOKING_SERVICE_KEYS);
-export const isCatalogSet=item=>Boolean(item?.isSet||item?.setItems?.length||item?.modelParts?.length);
 export const bookingServiceId=service=>bookingServiceIds.has(service.id)?service.id:'rental';
 // Hosting decisions are explicit; their accessories are equipment rental.
 export const equipmentBookingServiceId=service=>(service.selectionField||service.id===MC_ID)?'rental':bookingServiceId(service);
 // An item belongs to the service it points to (equipmentCategoryId); the tree fills it for older items (treeCore.withEquipmentCategoryIds).
 export const equipmentInService=inService;
 export function equipmentBelongsToService(item,service,equipment){
- const direct=row=>equipmentInService(row,service);
- if(direct(item))return true;
- if(!isCatalogSet(item))return false;
- return (item.setItems||[]).some(member=>{const row=equipment.find(row=>row.id===member.equipmentId);return row&&direct(row);});
+  return equipmentInService(item,service);
 }
 export function reconcileEquipmentServices(current,previous,next,catalog,equipment){
  const result=new Set(current);

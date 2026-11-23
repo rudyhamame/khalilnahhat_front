@@ -1,9 +1,8 @@
 import {useMemo} from 'react';
 import {useTree,useTreeService} from '../lib/tree';
-import {ArrowUpRight,Box,Disc3,Layers,Minus,Plus,X} from 'lucide-react';
+import {ArrowUpRight,Box,Disc3,Minus,Plus,X} from 'lucide-react';
 import {serviceIcon} from '../lib/serviceIcons';
 import {rentalServices,rentalServiceEquipment} from '../lib/numberedRentalCatalog';
-import {isEquipmentSet} from '../components/equipmentSets';
 import {displayImageUrl} from '../lib/displayImage';
 import {useCart} from './cart';
 import {useEventOrder} from './eventOrderContext';
@@ -19,12 +18,10 @@ export default function RentalsSoFar({ar=false}){
   const groups=useMemo(()=>{
     const taken=new Set(),out=[];
     for(const service of rentalServices(catalog)){
-      const own=new Set(rentalServiceEquipment(service,items).filter(row=>!isEquipmentSet(row)).map(row=>row.id)),rows=lines.filter(line=>own.has(line.id)&&!taken.has(line.id));
+      const own=new Set(rentalServiceEquipment(service,items).map(row=>row.id)),rows=lines.filter(line=>own.has(line.id)&&!taken.has(line.id));
       rows.forEach(line=>taken.add(line.id));
       if(rows.length)out.push({id:service.id,title:tr(service.name,service.nameAr||service.name),Icon:serviceIcon(service),rows});
     }
-    const sets=lines.filter(line=>isEquipmentSet(line)&&!taken.has(line.id));sets.forEach(line=>taken.add(line.id));
-    if(sets.length)out.push({id:'sets',title:tr('Packages','باكجات'),Icon:Layers,rows:sets});
     const rest=lines.filter(line=>!taken.has(line.id));
     if(rest.length)out.push({id:'other',title:tr('Other equipment','معدات أخرى'),Icon:Box,rows:rest});
     return out;

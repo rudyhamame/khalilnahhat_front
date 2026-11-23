@@ -1,6 +1,5 @@
 import {notifyCatalogChanged} from '../lib/catalogChanges';
 import Equipment3DGenerator from './Equipment3DGenerator';
-import {equipmentSetMemberships,isEquipmentSet} from './equipmentSets';
 import {withEquipmentCategoryIds,equipmentInService} from '../lib/treeCore';
 import CatalogEntryManager from './CatalogEntryManager';
 import RentalCategorySettings from './RentalCategorySettings';
@@ -57,7 +56,7 @@ function EquipmentEditor({ item, services, token, reload, report, onSelect, onDr
   const editing = Boolean(item);
   const [v, setV] = useState(() => item
     ? { slug: item.id, name: item.name, brandModel: item.brandModel || '', brand: (item.brandModel || '').split(' ')[0], model: (item.brandModel || '').split(' ').slice(1).join(' '), category: item.category, equipmentCategoryId: item.equipmentCategoryId || item.serviceId || services.find((service) => service.category === item.category)?.id || '', description: item.description || '', price: money(item.priceCents), minQuantity: item.minQuantity || 1, stockTracked: Boolean(item.stockTracked), quantityOwned: String(item.quantityOwned ?? 1), isActive: item.isActive !== false,imageUrl:item.imageUrl||'',youtubeUrl:item.youtubeUrl||'',modelParts:(item.modelParts||[]).map(part=>({...part})),modelUrl:item.modelUrl||'',modelJobId:item.modelJobId||'',functionSummary:item.functionSummary||'',eventFit:{...(item.eventFit||{})} }
-    : { slug: '', name: '', brandModel: '', brand: '', model: '', category: services[0]?.category || '', equipmentCategoryId: services[0]?.id || '', description: '', price: '0.00', minQuantity: 1, stockTracked: true, quantityOwned: '1', isActive: true,imageUrl:'',youtubeUrl:'',modelParts:[],modelUrl:'',modelJobId:null,functionSummary:'',eventFit:{} });
+    : { slug: '', name: '', brandModel: '', brand: '', model: '', category: services[0]?.category || '', equipmentCategoryId: services[0]?.id || '', description: '', price: '0.00', minQuantity: 1, stockTracked: true, quantityOwned: '1', isActive: true,imageUrl:'',youtubeUrl:'',modelUrl:'',modelJobId:null,functionSummary:'',eventFit:{} });
   const [busy, setBusy] = useState(false),[modelBusy,setModelBusy]=useState(false);
   const set = (key, value) => setV((current) => ({ ...current, [key]: value }));
   useEffect(() => { onDraft({ ...v, id: item?.id || '__new' }); }, [v, item, onDraft]);
@@ -72,7 +71,7 @@ function EquipmentEditor({ item, services, token, reload, report, onSelect, onDr
     if(modelBusy)return;
     const priceCents = Math.round(Number(v.price) * 100);
     if (!Number.isFinite(priceCents) || priceCents < 0) { report('Enter a valid price.', true); return; }
-    const body = { ...(!editing||v.modelJobId!==item.modelJobId||v.modelUrl!==item.modelUrl?{modelJobId:v.modelJobId}:{}), modelParts: v.modelParts, category: v.category, equipmentCategoryId: v.equipmentCategoryId, name: v.name.trim(), brandModel: v.brandModel.trim(), description: v.description.trim(), priceCents, minQuantity: Math.max(1, Number(v.minQuantity) || 1), quantityOwned: Math.max(0, Math.round(Number(v.quantityOwned) || 0)), stockTracked: true, isActive: v.isActive, imageUrl: v.imageUrl, youtubeUrl: v.youtubeUrl.trim(), functionSummary: v.functionSummary.trim(), eventFit: Object.fromEntries(Object.entries(v.eventFit).map(([type, text]) => [type, String(text || '').trim()]).filter(([, text]) => text)) };
+    const body = { ...(!editing||v.modelJobId!==item.modelJobId||v.modelUrl!==item.modelUrl?{modelJobId:v.modelJobId}:{}), category: v.category, equipmentCategoryId: v.equipmentCategoryId, name: v.name.trim(), brandModel: v.brandModel.trim(), description: v.description.trim(), priceCents, minQuantity: Math.max(1, Number(v.minQuantity) || 1), quantityOwned: Math.max(0, Math.round(Number(v.quantityOwned) || 0)), stockTracked: true, isActive: v.isActive, imageUrl: v.imageUrl, youtubeUrl: v.youtubeUrl.trim(), functionSummary: v.functionSummary.trim(), eventFit: Object.fromEntries(Object.entries(v.eventFit).map(([type, text]) => [type, String(text || '').trim()]).filter(([, text]) => text)) };
     setBusy(true);
     const slug = v.slug || 'item-' + Date.now().toString(36);
     try {
@@ -176,15 +175,14 @@ export default function AdminCatalogPanel({ token, mode = 'catalog' }) {
   }, [catalog, draft]);
   const liveEquipment = useMemo(() => {
     if (!draft || draft.kind !== undefined || draft.slug === undefined) return equipment;
-    const row = { id: draft.id, name: draft.name, brandModel: draft.brandModel, category: draft.category, description: draft.description, priceCents: Math.round(Number(draft.price || 0) * 100), isSet:Boolean(draft.isSet), setItems:draft.setItems||[], modelParts:draft.modelParts||[], modelUrl:draft.modelUrl||'', minQuantity: draft.minQuantity, stockTracked: draft.stockTracked, isActive: draft.isActive, imageUrl: draft.imageUrl };
+    const row = { id: draft.id, name: draft.name, brandModel: draft.brandModel, category: draft.category, description: draft.description, priceCents: Math.round(Number(draft.price || 0) * 100), modelUrl:draft.modelUrl||'', minQuantity: draft.minQuantity, stockTracked: draft.stockTracked, isActive: draft.isActive, imageUrl: draft.imageUrl };
     if (draft.id === '__new') return row.name?.trim() ? [...equipment, row] : equipment;
     return equipment.map((item) => (item.id === draft.id ? { ...item, ...row } : item));
   }, [equipment, draft]);
-  const setMemberships=useMemo(()=>equipmentSetMemberships(liveEquipment),[liveEquipment]);
   const events = liveCatalog.filter((item) => item.kind === 'event');
   const groups = useMemo(() => {
     const services = liveCatalog.filter((item) => item.kind === 'service');
-    const other = liveEquipment.filter((item) => !isEquipmentSet(item) && !services.some((service) => equipmentInService(item, service)));
+    const other = liveEquipment.filter((item) => !services.some((service) => equipmentInService(item, service)));
     return [...services.map((service) => ({ ...service, items: liveEquipment.filter((item) => equipmentInService(item, service)), price: service.__new && service.newPrice ? { amountCents: Math.round(Number(service.newPrice) * 100), currency: service.newCurrency || 'CAD' } : prices.find((price) => price.id === service.priceId) })),
       ...(other.length ? [{ id: 'other', category: 'other', name: 'Other equipment', items: other, price: null, noPrice: true }] : [])];
   }, [liveEquipment, prices, liveCatalog]);
@@ -193,8 +191,8 @@ export default function AdminCatalogPanel({ token, mode = 'catalog' }) {
   const selectedService = serviceGroups.find((group) => scope !== 'all' && group.id === scope && group.id !== '__new');
   const needle = query.trim().toLowerCase();
   const eqRows = groups.filter((group) => scope === 'all' || group.id === scope)
-    .flatMap((group) => group.items.filter((item) => !isEquipmentSet(item)).map((item) => ({ ...item, serviceName: group.name })))
-    .filter((item) => (!needle || `${item.name} ${item.brandModel || ''} ${(setMemberships.get(item.id)||[]).map(set=>set.name).join(' ')}`.toLowerCase().includes(needle)));
+    .flatMap((group) => group.items.map((item) => ({ ...item, serviceName: group.name })))
+    .filter((item) => (!needle || `${item.name} ${item.brandModel || ''}`.toLowerCase().includes(needle)));
   const eqSubtabs = <div className="cat-subtabs" aria-label="Equipment"><label className="cat-search"><Search size={15} aria-hidden="true" /><input type="search" placeholder="Search equipment" value={query} onChange={(event) => setQuery(event.target.value)} aria-label="Search equipment" /></label><span className="cat-subtab-actions"><button type="button" className="cat-settings-btn" aria-pressed={settings} aria-label={settings ? 'Back to services and equipment' : 'Settings'} title={settings ? 'Back to services and equipment' : 'Settings'} onClick={() => setSettings((value) => !value)}>{settings ? <ArrowLeft size={18} aria-hidden="true" /> : <Settings size={18} aria-hidden="true" />}<span>{settings ? 'Back' : 'Settings'}</span></button><button type="button" className="is-primary" onClick={() => {setSelectedEvent('');setEqOpen(true);}}><Plus size={15} />Add equipment</button></span></div>;
   const tabs = [['events', 'Events', CalendarDays, events.length], ['services', 'Services', Layers, serviceGroups.length], ['equipment', 'Equipment', Package, equipment.length]].filter(([id]) => (id === 'events') === (mode === 'events'));
 
@@ -248,7 +246,7 @@ export default function AdminCatalogPanel({ token, mode = 'catalog' }) {
             <td>{item.youtubeUrl ? <a href={item.youtubeUrl} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>Open video</a> : '—'}</td>
             <td>{item.quantityOwned ?? '—'}</td>
             <td>{item.minQuantity ?? '—'}</td>
-            <td>{item.modelUrl || item.modelParts?.length ? 'Yes' : '—'}</td>
+            <td>{item.modelUrl ? 'Yes' : '—'}</td>
           </tr>)}
         </tbody></table>{!eqRows.length && <p className="cat-empty">{equipment.length ? 'Nothing matches the filters.' : 'No equipment yet. Add the first item.'}</p>}</div>
       </div>
