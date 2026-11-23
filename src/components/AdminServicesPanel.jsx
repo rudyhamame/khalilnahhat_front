@@ -7,6 +7,7 @@ import {quoteTotals} from '../lib/quoteTotals.mjs';
 import {useTree} from '../lib/tree';
 import {quoteLineName} from '../lib/quoteAtoms';
 import {mapsLink} from '../lib/mapsLink';
+import VenueDistance from './VenueDistance';
 import {fieldName as bookingFieldName,optionName,customerNameParts} from '../lib/eventOrderCore.mjs';
 import {musicAtoms} from '../lib/musicAtoms.mjs';
 import './adminBookingRequests.css';
@@ -276,6 +277,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                     <h4>{tr("Venue")}{(()=>{const e=request.order?.event,v=e?.venue,href=(Number.isFinite(Number(v?.latitude))&&Number.isFinite(Number(v?.longitude))&&v?.latitude!==null&&v?.longitude!==null)?mapsLink(`${v.latitude},${v.longitude}`):mapsLink(v?.name||request.event?.venueName,v?.address||request.event?.venueAddress,v?.city||request.event?.city,v?.postalCode||request.event?.postalCode,v?.country);return href?<a className="map-link" href={href} target="_blank" rel="noopener noreferrer" aria-label={tr("Open the venue in Google Maps")} title={tr("Open in Google Maps")}><MapPin size={14} aria-hidden="true"/></a>:null;})()}</h4>
                     <p className="booking-summary-venue"><strong>{request.order?.event?.venue?.name||request.event?.venueName||'—'}</strong>
                       <span>{[request.order?.event?.venue?.address||request.event?.venueAddress,request.order?.event?.venue?.city||request.event?.city].filter(Boolean).join(', ')}</span></p>
+                    <VenueDistance requestId={request.id} token={token}/>
                   </section>
                   <div className="booking-summary-foot">
                     <div><span>{tr("Request")}</span><code>{request.requestNumber||request.id}</code></div>

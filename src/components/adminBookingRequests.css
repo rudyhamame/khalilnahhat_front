@@ -242,3 +242,11 @@
 .booking-summary-foot span{color:var(--aw-muted);font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase}
 .booking-summary-foot code{font:600 12.5px/1.4 ui-monospace,Menlo,Consolas,monospace}
 .booking-summary-foot strong{font-size:17px;font-variant-numeric:tabular-nums}
+
+/* Distance from the administrator's home to the venue, under the venue address. */
+.venue-distance{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:6px 0 0;font-size:13px}
+.venue-distance svg{color:var(--aw-muted)}
+.venue-distance strong{font-variant-numeric:tabular-nums}
+.venue-distance-note{color:var(--aw-muted);font-size:12px}
+.venue-distance.is-hint{color:var(--aw-muted);font-size:12px}
+.venue-distance a{color:inherit;text-decoration:underline;text-underline-offset:2px}
