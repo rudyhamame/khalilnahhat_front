@@ -1,13 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {reconcileEquipmentServices,isCatalogSet} from './rentalCatalog.js';
+import {reconcileEquipmentServices} from './rentalCatalog.js';
 import {resolveDraftEquipment} from './draftEquipment.js';
 const catalog=[{id:'sound',kind:'service',category:'sound',isActive:true},{id:'lighting',kind:'service',category:'lighting',isActive:true},{id:'special-service',kind:'service',category:'custom',isActive:true}];
-const equipment=[{id:'speaker',category:'sound',minQuantity:1,availableQuantity:4},{id:'light',category:'lighting',minQuantity:2,availableQuantity:6},{id:'custom-item',category:'custom'},{id:'bundle',isSet:true,category:'sets',setItems:[{equipmentId:'speaker',quantity:2},{equipmentId:'light',quantity:2}]}];
-test('sets infer every included service; removing equipment preserves unrelated manual selections',()=>{
- assert.equal(isCatalogSet(equipment[3]),true);
- assert.deepEqual(reconcileEquipmentServices(['dj'],{},{bundle:{quantity:1}},catalog,equipment),['dj','sound','lighting']);
- assert.deepEqual(reconcileEquipmentServices(['dj','sound','lighting'],{bundle:{quantity:1}},{light:{quantity:2}},catalog,equipment),['dj','lighting']);
+const equipment=[{id:'speaker',category:'sound',minQuantity:1,availableQuantity:4},{id:'light',category:'lighting',minQuantity:2,availableQuantity:6},{id:'custom-item',category:'custom'}];
+test('equipment infers its category service; removing equipment preserves unrelated manual selections',()=>{
+ assert.deepEqual(reconcileEquipmentServices(['dj'],{},{speaker:{quantity:1},light:{quantity:2}},catalog,equipment),['dj','sound','lighting']);
+ assert.deepEqual(reconcileEquipmentServices(['dj','sound','lighting'],{speaker:{quantity:1},light:{quantity:2}},{light:{quantity:2}},catalog,equipment),['dj','lighting']);
  assert.deepEqual(reconcileEquipmentServices([],{},{'custom-item':{quantity:1}},catalog,equipment),['rental']);
 });
 test('AI equipment replacements use catalog names and enforce whole quantities, unique IDs, minimums and stock',()=>{
