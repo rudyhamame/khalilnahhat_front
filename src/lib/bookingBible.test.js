@@ -17,6 +17,7 @@ test('rental decision stays visible, decline gates browsing and preserves saved 
  lines=sectionLines(order,goal,false,rentals).lines;
  assert.match(lines.find(row=>row.key==='rental.requested').value,/still saved/);
  assert.equal(lines.find(row=>row.category).items[0].reviewValue,2);
+ assert.equal(submittedSectionLines(order,goal).lines.find(row=>row.key==='rental.requested').value,'No');
  const reviewable=unconfirmedReviewAtoms({},lines.flatMap(row=>[row,...row.items||[]]));
  assert.deepEqual(reviewable.map(row=>row.key),['rental.requested','equipment:sound:speaker']);
 });
@@ -24,7 +25,7 @@ test('saved equipment missing from the current catalogue remains visible, also i
  const order=createEventOrder();order.equipment=[{id:'retired',name:'Saved speaker',quantity:3}];
  const goal=bookingGoal('rentals');
  const live=sectionLines(order,goal,false,rentals).lines.flatMap(row=>row.items||[]).find(row=>row.key.endsWith(':retired'));
- assert.equal(live.label,'Saved speaker');assert.equal(live.reviewValue,3);assert.match(live.stock,/remove or replace/);
+ assert.equal(live.label,'Saved speaker');assert.equal(live.reviewValue,3);assert.equal(live.stock,'Unavailable');
  assert.match(submittedSectionLines(order,goal).lines.find(row=>row.key==='equipment').value,/Saved speaker × 3/);
 });
 test('optional DJ and MC questions never inflate the required fields or goal missing count',()=>{
