@@ -1,0 +1,47 @@
+BOOKING BIBLE IMPLEMENTATION — 2026-11-23
+
+Frontend implementation: 594bf3a; follow-ups bb60b0a and 0cca8ad.
+Backend implementation: 1e54bf5; prompt follow-up c761901.
+
+F01: Rental decision retained in live review; declined rentals hide unselected
+catalogue rows. Existing saved selections remain visible with an explanation.
+F02: Saved equipment missing from the active catalogue gets an explicit
+Equipment to resolve group. Category headings do not require confirmation.
+F03: Account profile and standard/booking signup enforce the 60-character
+first/last name limits. Existing customer names were not truncated or changed.
+F04/F06: Admin canonical requests use the same submitted-brief renderer as
+client requests, preserving custom event types, song links and attachment
+comments. Legacy requests, planning and requested-change notes are preserved.
+F05: Suggested-song rows reconcile canonical changes, preserving incomplete
+local entries and retaining incoming songs when editing existing songs.
+F07: Both AI instruction blocks put optional DJ/MC choices in chapter 03,
+rentals in chapter 04, and require the custom event type for Other.
+F08: DJ/MC are optional prompts rather than required completion errors.
+F09: Production legacy set 8-pieces-set-mw02l7s4 was retired with isActive=false.
+It was not deleted. Existing request snapshots were not modified. The original
+record is backed up privately on OVH at:
+/srv/rh/khalil-security/ci/booking-bible-legacy-set-before-20261123.json
+Public catalogue verification: 19 active equipment IDs; all 19 bible codes
+match; the retired set is absent from the active catalogue.
+F10: Shared booking briefs, section headings and review controls accept the
+selected Arabic/English interface language in both client and admin dashboards.
+Other dashboard chrome and the printable PDF retain their existing language
+behavior; this change concerns the Booking bible's atom presentation.
+
+CHECKS
+57 targeted frontend regression tests passed.
+45 backend canonical-order/submission/conversation/signup tests passed.
+66 backend AI/order tests passed after the final prompt edit (overlaps above).
+11 focused snapshot/render tests passed after the snapshot follow-up.
+4 route/render tests passed after preserving requested-change notes.
+Frontend production builds passed. Lint exited successfully with existing
+repository warnings. Authenticated browser and live AI/voice checks were not
+performed. No real booking or outgoing notification was created for testing.
+
+DEPLOYMENT
+Final deployment verification is recorded below after the OVH runs complete.
+
+Frontend OVH run succeeded:
+https://github.com/rudyhamame/khalilnahhat_front/actions/runs/45116377533
+Backend OVH run succeeded, including public health check:
+https://github.com/rudyhamame/khalilnahhat_back/actions/runs/45116065223
