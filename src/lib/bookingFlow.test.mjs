@@ -21,9 +21,9 @@ test('review follows actual missing field objects and completes the venue chapte
  assert.equal(firstIncompleteStep(order),'additional');assert.deepEqual(missingViewportFields(order).map(field=>field.key),[]); // step 4 is optional: nothing there is incomplete
 });
 test('chapter 03 DJ choice preserves chapter 04 MC and rental choices',()=>{
- let order=createEventOrder();order.services=['sound'];order.music.djMc='Introduce the couple';order.music.mcRequested=true;
+ let order=createEventOrder();order.services=['sound'];order.music.mcRequested=true;
  order=applyOrderPatch(order,djServiceChanges(order,'dj'));assert.equal(djServiceChoice(order),'dj');assert.ok(order.services.includes('sound'));assert.equal(order.music.mcRequested,true);
- order=applyOrderPatch(order,djServiceChanges(order,'none'));assert.equal(djServiceChoice(order),'none');assert.deepEqual(order.services,['sound']);assert.equal(order.music.djMc,'Introduce the couple');assert.equal(order.music.mcRequested,true);
+ order=applyOrderPatch(order,djServiceChanges(order,'none'));assert.equal(djServiceChoice(order),'none');assert.deepEqual(order.services,['sound']);assert.equal(order.music.mcRequested,true);
 });
 test('the map and draft address picker use the same venue identity and clear stale coordinates',()=>{
  const updates=venueSelectionChanges({name:'New venue',address:'2 Example St',city:'Toronto'});

@@ -3,6 +3,7 @@
 html body .dj-prefs-section .rentals-hero-form .djf{background:none!important;background-image:none!important;border:0!important;box-shadow:none!important;border-radius:0;padding:0!important;backdrop-filter:none}
 .dj-service-step .dj-choice{margin-bottom:4px}
 .dj-service-step .mc-choice{margin-top:22px}
+.dj-service-step .mc-choice-note{margin:0 0 10px;color:#a6e3ce;font-size:13px;line-height:1.5}
 .dj-service-step .mc-choice-copy{margin:0 0 12px;color:#9fb5a8;font-size:13px;line-height:1.5}
 html body .echo[data-page=home][data-theme] .dj-service-step .mc-choice>.avail-kicker{display:flex;align-items:center;gap:8px;width:100%;margin-bottom:12px}
 html body .echo[data-page=home][data-theme] .dj-service-step .mc-choice>.avail-kicker>.ysf-order{order:2;margin-inline-start:auto;margin-inline-end:0}

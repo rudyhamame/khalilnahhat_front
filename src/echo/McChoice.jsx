@@ -10,6 +10,7 @@ export default function McRow({ar=false}){
   if(!svc.exists)return null; // the MC question exists only while an `mc` service is in the catalogue
   return <aside className="event-type-column mc-choice">
     <span className="avail-kicker"><FieldCode k="music.mcRequested"/>{svc.name.toUpperCase()} *</span>
+    <p className="mc-choice-note">{tr('Note: the MC is a third-party host, not DJ Khalil.','ملاحظة: مقدّم الحفل طرف ثالث وليس دي جي خليل.')}</p>
     {svc.description&&<p className="mc-choice-copy">{svc.description}</p>}
     <div role="group" aria-label={svc.name}>
       <button type="button" data-event-choice disabled={locked} aria-pressed={value===true} onClick={()=>set(true)}><Check size={17} aria-hidden="true"/><span>{tr(`Yes, add ${svc.name}`,`نعم، أضف ${svc.name}`)}</span></button>

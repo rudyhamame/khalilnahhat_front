@@ -29,7 +29,7 @@ export function bookingSteps(order){
 export function bookingIssueStep(order,issues){const keys=new Set(issues.map(issue=>typeof issue==='string'?issue:issue.key));return bookingSteps(order).find(step=>step.fields.some(field=>keys.has(field.key)))?.id||(keys.has('equipment')?'equipment':'additional');}
 export function firstIncompleteStep(order){return bookingIssueStep(order,missingOrderFields(order));}
 export function missingViewportFields(order){return missingOrderFields(order).filter(field=>['customer','event'].includes(bookingStepForField(field.key)));}
-export const djServiceChoice=order=>!order.services?.includes('dj')?'none':order.music?.mcRequested===true?'dj_mc':'dj';
+export const djServiceChoice=order=>order.services?.includes('dj')?'dj':'none';
 export function djServiceChanges(order,choice){
  return [{path:'music.djRequested',value:choice!=='none'}];
 }
