@@ -45,7 +45,7 @@ const ATOM_SKIP=new Set(['event.venue.latitude','event.venue.longitude','event.v
 // Where an atom's values come from: a branch of the tree ('services', 'events', 'music'), or the client / account when nothing is catalogued.
 export function atomSource(key){
  if(key==='music.djRequested')return {branch:'services',ref:DJ_ID};
- if(key==='music.mcRequested'||key==='music.djMc')return {branch:'services',ref:MC_ID};
+ if(key==='music.mcRequested')return {branch:'services',ref:MC_ID};
  if(key==='services'||key==='rental.requested'||key==='equipment')return {branch:'services',ref:''};
  if(key==='event.type'||key==='event.title')return {branch:'events',ref:''};
  if(key==='music.languagePairs')return {branch:'music',ref:'languages, dialects'};

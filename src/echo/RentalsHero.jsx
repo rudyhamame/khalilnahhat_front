@@ -11,7 +11,7 @@ import './rentalsHero.css';
 
 // Step 03, DJ Khalil Service: the same step layout as the event steps. The hero asks whether the client wants this service (or skips to the other services); "yes" opens the music preferences in the card.
 export default function RentalsHero({ar=false}){
-  const tr=(en,arabic)=>ar?arabic:en,svc=useTreeService('dj',ar),mcSvc=useTreeService('mc',ar),{catalog}=useTree(),rentalNames=rentalServices(catalog).filter(row=>row.id!=='mc'&&!row.selectionField).map(row=>(ar&&row.nameAr)||row.name).join(ar?'، ':', '),[prefs,setPrefs]=useState(()=>{const field=new URLSearchParams(window.location.search).get('field')||'';return field.startsWith('music.')&&!['music.mcRequested','music.djMc'].includes(field);}),[skipped,setSkipped]=useState(false),order=useEventOrder(),djAdded=Boolean(order?.order.services?.includes('dj')),locked=!order?.draftEditable;
+  const tr=(en,arabic)=>ar?arabic:en,svc=useTreeService('dj',ar),mcSvc=useTreeService('mc',ar),{catalog}=useTree(),rentalNames=rentalServices(catalog).filter(row=>row.id!=='mc'&&!row.selectionField).map(row=>(ar&&row.nameAr)||row.name).join(ar?'، ':', '),[prefs,setPrefs]=useState(()=>{const field=new URLSearchParams(window.location.search).get('field')||'';return field.startsWith('music.')&&field!=='music.mcRequested';}),[skipped,setSkipped]=useState(false),order=useEventOrder(),djAdded=Boolean(order?.order.services?.includes('dj')),locked=!order?.draftEditable;
   // Yes: add the DJ service to the booking and open the music preferences.
   const yes=()=>{
     if(order&&!djAdded)djServiceChanges(order.order,'dj').forEach(({path,value})=>order.setField(path,value));

@@ -12,7 +12,7 @@ export const bookingStepDefinition=id=>definitions.find(step=>step.id===id)||nul
 export const stepLabel=id=>{const step=bookingStepDefinition(id);return [step.title,step.ar];};
 export function bookingStepForField(path){
  // MC hosting (and its note) belong to step 3, DJ Khalil Service, with the DJ question.
- if(path==='music.mcRequested'||path==='music.djMc')return 'music';
+ if(path==='music.mcRequested')return 'music';
  if(path==='services')return 'music';
  if(path==='rental.requested')return 'equipment';
  if(path==='equipment'||path?.startsWith('equipment.'))return 'equipment';
@@ -29,8 +29,7 @@ export function bookingSteps(order){
 export function bookingIssueStep(order,issues){const keys=new Set(issues.map(issue=>typeof issue==='string'?issue:issue.key));return bookingSteps(order).find(step=>step.fields.some(field=>keys.has(field.key)))?.id||(keys.has('equipment')?'equipment':'additional');}
 export function firstIncompleteStep(order){return bookingIssueStep(order,missingOrderFields(order));}
 export function missingViewportFields(order){return missingOrderFields(order).filter(field=>['customer','event'].includes(bookingStepForField(field.key)));}
-export const MC_NOTE='MC service requested';
-export const djServiceChoice=order=>!order.services?.includes('dj')?'none':String(order.music?.djMc||'').split('\n').includes(MC_NOTE)?'dj_mc':'dj';
+export const djServiceChoice=order=>!order.services?.includes('dj')?'none':order.music?.mcRequested===true?'dj_mc':'dj';
 export function djServiceChanges(order,choice){
  return [{path:'music.djRequested',value:choice!=='none'}];
 }

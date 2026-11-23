@@ -19,7 +19,7 @@ const pricedMeaning=key=>({
  'music.mcRequested':'MC hosting selection; the same MC decision as the services list, not an additional charge.',
  'rental.requested':'Rental selection gate; not an additional charge on top of the selected services and equipment.'
 }[key]);
-const where=field=>field.key.startsWith('customer.')?'Event page → Personal info':field.key.startsWith('event.setup.')||['services','music.mcRequested','rental.requested','music.djMc'].includes(field.key)?'Services page → Rental services & equipment':field.key.startsWith('event.')?'Event page':field.key.startsWith('music.')?'Services page → DJ service (Music preferences)':field.key==='additional.notes'?'Services page → Additional notes section (#additional-notes)':'Services page → References section (#references)';
+const where=field=>field.key.startsWith('customer.')?'Event page → Personal info':field.key.startsWith('event.setup.')||['services','music.mcRequested','rental.requested'].includes(field.key)?'Services page → Rental services & equipment':field.key.startsWith('event.')?'Event page':field.key.startsWith('music.')?'Services page → DJ service (Music preferences)':field.key==='additional.notes'?'Services page → Additional notes section (#additional-notes)':'Services page → References section (#references)';
 const required=field=>field.key==='customer.phoneContact'?'When a phone number is entered':field.required?'Yes':'No';
 const when=field=>({'customer.phoneContact':'Only when a phone number is entered','customer.contactMethod':'Only after an email or a phone number is entered','event.title':'Required when the event type is Other: the client types their own event type. Not asked for any other type','music.genres':'After DJ Khalil service is added','music.languagePairs':'After DJ Khalil service is added','music.suggestedSongs':'After DJ Khalil service is added','music.favouriteSongs':'After DJ Khalil service is added','music.favouriteArtists':'After DJ Khalil service is added','additional.voucherCode':'When the client has a voucher (voucher ribbon)'}[field.key]||(field.locked==='account'?'From the account; the client edits it in the dashboard':'Always'));
 const choices=field=>field.options?field.options.map(option=>optionName(field.key,option)).join(' · '):'—';
@@ -130,7 +130,7 @@ export const bookingDataAtomsGuide={
    ])]},
    {type:'details',title:'Additional notes (Special requests is retired)',blocks:[list([
     'Additional notes (additional.notes) is the one free-text atom for anything else, and it is a section of its own. Text a client wrote before in Special requests is moved into Additional notes when the draft loads.',
-    'Setup notes (event.setup.requirements) are about the venue set-up and are kept apart on purpose. Hosting notes (music.djMc) are about the MC.'
+    'Setup notes (event.setup.requirements) are about the venue set-up and are kept apart on purpose.'
    ])]},
    {type:'details',title:'Music preferences (DJ service)',blocks:[list([
     'Five atoms: Languages and dialects, Music genres, Songs for event moments, Favourite songs and Favourite artists.',

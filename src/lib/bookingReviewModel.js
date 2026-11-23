@@ -18,7 +18,7 @@ export function sectionLines(order,goal,ar,rentals=[],catalogLoading=false){
  const tree=goal.id==='rentals'&&rentals.length>0,loading=goal.id==='rentals'&&catalogLoading&&!rentals.length;
  if(loading)return {progress,lines:[{key:'services',label:ar?'خدمات التأجير':'Rental services',value:ar?'جارٍ التحميل…':'Loading…',empty:true,required:false,group:2}]};
  // Rental services & equipment is listed as a tree: every service (MC included) with all of its equipment under it.
- const all=goalFields(goal).filter(field=>ownTypeApplies(order,field.key)&&(!field.gate||getPath(order,field.gate)===true)&&!(tree&&['services','music.mcRequested','rental.requested','music.djMc'].includes(field.key)));
+ const all=goalFields(goal).filter(field=>ownTypeApplies(order,field.key)&&(!field.gate||getPath(order,field.gate)===true)&&!(tree&&['services','music.mcRequested','rental.requested'].includes(field.key)));
  // Every field of the section is listed with its value; fields not answered yet read "Not set yet".
  const lines=all.map(field=>({key:field.key,reviewValue:draftValue(order,field.key),label:(fieldName(field.key,ar)||(ar?field.ar||field.label:field.label)).replace(/\s*[(（](?:optional|only if|اختياري)[^)）]*[)）]/i,''),value:bookingFieldValue(order,field.key,ar,draftValue(order,field.key)),...(field.key.startsWith('music.')||field.key.startsWith('references.')?{rawValue:draftValue(order,field.key)}:{}),empty:!isAnswered(draftValue(order,field.key)),required:progress.missing.some(item=>item.key===field.key)}));
  if(tree){
