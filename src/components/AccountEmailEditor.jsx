@@ -19,9 +19,9 @@ export default function AccountEmailEditor({user,token,onSaved,onBusyChange,disa
   finally{working(false);}
  };
  return <form className="cw-email-editor" onSubmit={event=>{event.preventDefault();void(pending?verify():start());}}>
-  <label>Email address<input type="email" required maxLength={254} autoComplete="email" value={email} disabled={busy||disabled||!!pending} onChange={event=>{setEmail(event.target.value);setSaved(false);setError('');}}/></label>
+  <label>Email address *<input type="email" required maxLength={254} autoComplete="email" value={email} disabled={busy||disabled||!!pending} onChange={event=>{setEmail(event.target.value);setSaved(false);setError('');}}/></label>
   <p>Your current email stays active until you verify the new address.</p>
-  {pending&&<><p role="status">Enter the 6-digit code sent to <strong>{pending}</strong>.</p><label>Verification code<input value={code} required pattern="[0-9]{6}" maxLength={6} inputMode="numeric" autoComplete="one-time-code" disabled={busy||disabled} onChange={event=>setCode(event.target.value.replace(/\D/g,'').slice(0,6))}/></label></>}
+  {pending&&<><p role="status">Enter the 6-digit code sent to <strong>{pending}</strong>.</p><label>Verification code *<input value={code} required pattern="[0-9]{6}" maxLength={6} inputMode="numeric" autoComplete="one-time-code" disabled={busy||disabled} onChange={event=>setCode(event.target.value.replace(/\D/g,'').slice(0,6))}/></label></>}
   {error&&<p className="cw-profile-error" role="alert">{error}</p>}{saved&&<p role="status">Email address updated.</p>}
   <div className="cw-email-actions"><button type="submit" className="primary-button" disabled={busy||disabled||(pending?code.length!==6:email.trim().toLowerCase()===(user?.email||'').toLowerCase())}>{busy?'Please wait…':pending?'Verify & update email':'Verify new email'}</button>{pending&&<><button type="button" disabled={busy||disabled||wait>0} onClick={start}>{wait>0?`Resend in ${wait}s`:'Resend code'}</button><button type="button" disabled={busy||disabled} onClick={()=>{setPending('');setCode('');setError('');}}>Cancel</button></>}</div>
  </form>;
