@@ -11,7 +11,7 @@
  html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-journey-intro>span{font-size:11px;letter-spacing:.08em}
  html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-step-card{padding:14px;border-radius:16px}
  html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-card-title{font-size:16px!important;line-height:1.35!important;margin-bottom:14px;padding-bottom:10px}
- html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-step-card:has(>.booking-reset)>.booking-card-title{padding-inline-end:84px}
+ html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-step-card:has(>.booking-reset)>.booking-card-title{padding-inline-end:100px}
  html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-reset{font-size:11px;min-height:34px;padding:6px 8px}
  html body .echo[data-page=home][data-theme] #availability.booking-journey :is(.booking-field-hint,.personal-info-note,.booking-calendar-note,.booking-calendar-note small,.booking-clear-date){font-size:12px;line-height:1.5;margin-top:10px}
  html body .echo[data-page=home][data-theme] #availability.booking-journey :is(label,.booking-field>span,.avail-time-duration){font-size:13px;line-height:1.4}
@@ -43,4 +43,31 @@
 }
 @media(min-width:360px) and (max-width:760px){
  html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-venue-pair{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:760px),(pointer:coarse) and (max-width:1100px) and (max-height:600px){
+ html body .echo[data-page=home][data-theme] #availability.booking-journey select:not([multiple]),
+ html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-venue-fields select:not([multiple]){font-size:13px!important;line-height:1.35!important;padding:7px 10px}
+ html body .echo[data-page=home][data-theme] #availability.booking-journey select option{font-size:13px}
+}
+
+/* Phones: Booking page fields use a smaller type size (inputs, selects, textareas, placeholders). */
+@media(max-width:760px),(pointer:coarse) and (max-width:1100px) and (max-height:600px){
+ html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) :is(input:not([type=radio],[type=checkbox],[type=range]),select:not([multiple]),textarea),
+ html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-field input,
+ html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-venue-fields :is(input:not([type=radio],[type=checkbox]),select:not([multiple])){font-size:14px!important;line-height:1.35!important;min-height:40px;height:auto}
+ html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-field input,
+ html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-venue-fields input:not([type=radio],[type=checkbox]){height:40px}
+ html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) :is(input,textarea)::placeholder{font-size:13px!important}
+ html body .echo[data-page=home][data-theme] #availability.booking-journey select option{font-size:14px}
+}
+
+/* Phones: Step 3 and the services steps sit outside #availability. Their headers get exactly the previous steps' type sizes and spacing (no width, padding or grid changes). */
+@media(max-width:760px),(pointer:coarse) and (max-width:1100px) and (max-height:600px){
+ html body .echo[data-page=home][data-theme] .booking-services .booking-step-copy h2{font-size:22px!important;line-height:1.2!important;margin:10px 0}
+ html body .echo[data-page=home][data-theme] .booking-services .booking-step-copy p{font-size:14px;line-height:1.55}
+ html body .echo[data-page=home][data-theme] .booking-services .booking-step-number{font-size:11px;letter-spacing:.08em}
+ html body .echo[data-page=home][data-theme] .booking-services .booking-card-title{font-size:16px!important;line-height:1.35!important;margin-bottom:14px;padding-bottom:10px}
+ html body .echo[data-page=home][data-theme] .booking-services :is(label,.booking-field>span){font-size:13px;line-height:1.4}
+ html body .echo[data-page=home][data-theme] .booking-services .booking-reset{font-size:11px;min-height:34px;padding:6px 8px}
+ html body .echo[data-page=home][data-theme] .booking-services :is(.avail-kicker,.avail-times .avail-kicker){font-size:11px;letter-spacing:.06em}
 }

@@ -139,3 +139,19 @@ html body .djf .djf-choose .djf-add{display:flex;align-items:center;justify-cont
 html body .djf .djf-choose .djf-add:hover{background:#e3d3a31f;border-color:#e3d3a3}
 @media(max-width:420px){html body .djf .djf-choose{grid-template-columns:1fr}}
 html body .djf .djf-moment .djf-more-songs{justify-content:center}
+
+/* Phones: "Songs for event moments" is smaller and has room to breathe. */
+@media(max-width:760px){
+ html body .djf .djf-songs.djf-songs>li.djf-moment{gap:18px;padding:16px}
+ html body .djf .djf-moment-head{gap:12px}
+ html body .djf .djf-moment-pick{gap:12px}
+ html body .djf .djf-moment-songs{gap:14px}
+ html body .djf .djf-moment-song{gap:12px;padding:14px}
+ html body .djf .djf-moment-song:has(>.djf-song-x){padding-inline-end:46px}
+ html body .djf .djf-moment :is(.djf-input,.djf-combo>input,select){min-height:38px;padding:0 10px;font-size:13px}
+ html body .djf .djf-moment :is(.djf-input,.djf-combo>input)::placeholder{font-size:12px}
+ html body .djf .djf-moment .djf-more-songs{gap:12px;padding-top:4px}
+ html body .djf .djf-moment .djf-add,html body .djf .djf-moment .djf-more-songs .djf-add{min-height:34px;padding:0 12px;font-size:12px}
+ html body .djf .djf-moment .djf-num{width:20px;height:20px;font-size:11px}
+ html body .djf .djf-moment .djf-row-actions button{width:30px;height:30px}
+}

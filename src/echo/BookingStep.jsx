@@ -1,3 +1,4 @@
+import './bookingCardHeaders.css';
 import {RotateCcw} from 'lucide-react';
 
 // STEP.SEC label of each numbered step: 01 = Personal info, 02 = Event info, 03 = DJ Khalil Service, 04 = Services info, 05 = Additional info.

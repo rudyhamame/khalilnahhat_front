@@ -279,3 +279,13 @@ html body .echo .rental-with-feature{box-sizing:border-box;padding:var(--echo-pa
 html body .echo[data-page=home][data-theme] .rental-question-wrap{padding-bottom:0!important;margin-bottom:0!important}
 html body .echo[data-page=home][data-theme] .rental-question-wrap+.rental-services-stack{padding-top:8px!important;margin-top:0!important}
 html body .echo[data-page=home][data-theme] .rental-question-step{margin-bottom:0!important;padding-bottom:0!important}
+
+/* Phones: the rental booking bar (quantity + Add to booking) is as short as it can be. */
+@media(max-width:760px){
+ html body .echo #services .rental-booking{flex-wrap:nowrap;gap:8px;margin-top:4px;padding:6px 8px;min-height:0;border-radius:12px}
+ html body .echo #services .rental-booking .setup-quantity-picker{flex:0 1 auto;gap:0}
+ html body .echo #services .rental-booking .setup-quantity-picker>span{display:none}
+ html body .echo #services .rental-booking .setup-quantity-picker button{width:30px;height:32px;min-height:32px;border-radius:8px}
+ html body .echo #services .rental-booking .setup-quantity-picker input{width:36px;height:32px;font-size:14px}
+ html body .echo #services .rental-booking .setup-add-booking{flex:1 1 0;min-width:0;height:34px;min-height:34px;padding:0 12px;gap:6px;font-size:13px;white-space:nowrap}
+}

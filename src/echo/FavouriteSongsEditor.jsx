@@ -4,7 +4,7 @@ import {favouriteSongEntries,isSafeLink,isYouTubeLink} from '../lib/favouriteSon
 import YouTubeSongSearch from './YouTubeSongSearch';
 import './favouriteSongsEditor.css';
 
-export default function FavouriteSongsEditor({value=[],onChange,ar=false,disabled=false,token='',signedIn=false}){
+export default function FavouriteSongsEditor({value=[],onChange,ar=false,disabled=false,token=''}){
  const tr=(en,arabic)=>ar?arabic:en;
  const [mode,setMode]=useState('youtube'),[song,setSong]=useState(''),[artist,setArtist]=useState(''),[link,setLink]=useState(''),[editing,setEditing]=useState(null);
  const entries=favouriteSongEntries(value);
@@ -23,7 +23,7 @@ export default function FavouriteSongsEditor({value=[],onChange,ar=false,disable
  const addFound=entry=>{if(!disabled&&entries.length<40)onChange([...source,entry]);};
  return <div className="favourite-songs-editor">
   <div className="song-entry-modes" role="group" aria-label={tr('How to add a song','طريقة إضافة الأغنية')}><button type="button" aria-pressed={mode==='youtube'} onClick={()=>setMode('youtube')}>{tr('Search YouTube','بحث يوتيوب')}</button><button type="button" aria-pressed={mode==='manual'} onClick={()=>setMode('manual')}>{tr('Add manually','إضافة يدوية')}</button></div>
-  {mode==='youtube'&&<><YouTubeSongSearch ar={ar} token={token} signedIn={signedIn} disabled={disabled||entries.length>=40} onPick={addFound}/></>}
+  {mode==='youtube'&&<><YouTubeSongSearch ar={ar} token={token} disabled={disabled||entries.length>=40} onPick={addFound}/></>}
   {(mode==='manual'||editing!==null)&&<>
   <div className="favourite-song-fields" onKeyDown={event=>{if(event.key==='Enter'&&event.target.tagName==='INPUT'){event.preventDefault();save();}}}>
    <label><span>{tr('Song name','اسم الأغنية')}</span><input className="djf-input" type="text" maxLength={200} required value={song} disabled={disabled} onChange={event=>setSong(event.target.value)} placeholder={tr('Name of the song','اسم الأغنية')}/></label>

@@ -452,3 +452,6 @@ html body .echo .ea-review .ea-account-import[data-imported]>button{background:t
 @keyframes ea-account-import-spin{to{transform:rotate(360deg)}}
 @container booking-review (max-width:420px){.echo .ea-review .ea-account-import{margin-inline:8px;padding:12px}.echo .ea-account-import-copy{flex-basis:100%}html body .echo .ea-review .ea-steps .ea-account-import>button{width:100%;min-height:44px}}
 @media(prefers-reduced-motion:reduce){.ea-account-import-spinner{animation:none}}
+html body .echo #echo-ai .ea-review .ea-steps .ea-account-import>button{width:auto;background:#b7d6b9!important;color:#17251b!important}
+html body .echo #echo-ai .ea-review .ea-steps .ea-account-import[data-imported]>button{background:#a6e3ce0c!important;color:#c8e3cd!important;border-color:#a6e3ce55}
+@container booking-review (max-width:420px){html body .echo #echo-ai .ea-review .ea-steps .ea-account-import>button{width:100%}}

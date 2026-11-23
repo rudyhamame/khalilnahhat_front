@@ -61,9 +61,10 @@ export function EventOrderProvider({user,token,lang,auth,children,isSessionReady
   const [cloudReady,setCloudReady]=useState(false);
   // A submitted booking that is still being handled: its values are shown on every page and locked.
   const [pending,setPending]=useState(null);
-  useEffect(()=>{setPending(null);if(!user||!token||user.isAdmin)return undefined;let alive=true;fetchMyServiceRequests(token).then(({items=[]})=>{if(alive)setPending(items.find(item=>item?.order&&item.journey?.holdsStock)||null);}).catch(()=>{});return()=>{alive=false;};},[user?.id,user?._id,token]);// eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(()=>{setPending(null);if(!user||!token||user.isAdmin)return undefined;let alive=true;fetchMyServiceRequests(token).then(({items=[]})=>{if(alive){const today=new Date().toLocaleDateString('en-CA',{timeZone:'America/Toronto'});setPending(items.find(item=>item?.order&&item.journey?.holdsStock&&!(item.event?.eventDate&&String(item.event.eventDate).slice(0,10)<today))||null);}}).catch(()=>{});return()=>{alive=false;};},[user?.id,user?._id,token]);// eslint-disable-line react-hooks/exhaustive-deps
   const [recentEdits,setRecentEdits]=useState([]);
   const [draftId,setDraftId]=useState(()=>initialDraftId(user));
+  const draftOwner=useRef('');draftOwner.current=`${user?.id||user?._id||'guest'}:${draftId}`;
   const [loadRetry,setLoadRetry]=useState(0);
   const cloud=useRef(null),edited=useRef(false),deleting=useRef(false),conversationSaver=useRef(null);
   const [clearing,setClearing]=useState(false),[resetVersion,setResetVersion]=useState(0);
@@ -234,8 +235,9 @@ export function EventOrderProvider({user,token,lang,auth,children,isSessionReady
   };
   const importAccountDetails=async()=>{
     if(!user||!token||pending||deleting.current||!cloudReady||['conflict','delete-conflict'].includes(saveState))return false;
+    const owner=draftOwner.current;
     const profile=await auth?.onRefreshAccount?.()||user;
-    if(deleting.current||!cloudReady)return false;
+    if(deleting.current||!cloudReady||draftOwner.current!==owner)return false;
     const next=applyAccountProfile({...getOrder(),accountDetailsImported:true},profile);
     edited.current=true;storedRef.current=next;setStoredState(next);setActive(true);setSaveState('pending');
     setRecentEdits(current=>[...current,...fields.filter(field=>field.locked==='account').map(({key})=>({path:key,source:'manual',at:new Date().toISOString()}))].slice(-16));
