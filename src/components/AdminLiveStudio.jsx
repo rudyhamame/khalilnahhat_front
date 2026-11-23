@@ -31,7 +31,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  const [dismissedHint,setDismissedHint]=useState('');
  const [setListId,setSetListId]=useState('');
  const [title,setTitle]=useState(''),[detailsTried,setDetailsTried]=useState(false);
- const [cropSlot,setCropSlot]=useState(null),[hint,setHint]=useState('');
+ const [cropSlot,setCropSlot]=useState(null);
  const [audience,setAudience]=useState('all'),priorAudience=useRef('all'),[audienceIds,setAudienceIds]=useState([]),[clientQuery,setClientQuery]=useState(''),[clientRows,setClientRows]=useState([]);
  useEffect(()=>{if(audience!=='specific')return undefined;const controller=new AbortController(),timer=setTimeout(()=>{apiRequest('/admin/clients?'+new URLSearchParams(clientQuery.trim()?{q:clientQuery.trim()}:{}),{token,signal:controller.signal}).then(data=>setClientRows((data.items||[]).filter(client=>!client.isAdmin))).catch(()=>{});},180);return()=>{clearTimeout(timer);controller.abort();};},[audience,clientQuery,token]);
  const ovhRecording=liveStream?.studio?.transport==='ovh';
@@ -60,7 +60,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  const webrtc=useWebrtcBroadcast({onGoLive:start,onEndLive:end,onReady:ready,getOutputs:()=>({}),getPortraitAudio:()=>null,isNativePortrait:()=>output.nativePortrait,requireRecording:ovhRecording,recordingEnabled:ovhRecording,expectedRoom:liveStream?.webrtcRoomName});
  const output=useOutputFormat();
  const previewReply=webrtc.statusMessage.startsWith('Private preview ready.')||webrtc.statusMessage==='Preview closed.';
- const controlHint=hint||destinationFeedback||(!previewReply&&webrtc.statusMessage)||'';
+ const controlHint=destinationFeedback||(!previewReply&&webrtc.statusMessage)||'';
  // A hint removes itself after a few seconds (the close button still works at once).
  useEffect(()=>{if(!controlHint)return;const timer=setTimeout(()=>setDismissedHint(controlHint),8000);return()=>clearTimeout(timer);},[controlHint]);
  useEffect(()=>{
