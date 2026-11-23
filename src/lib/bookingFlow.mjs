@@ -1,5 +1,5 @@
 import {contract,getPath,missingOrderFields} from './eventOrderCore.mjs';
-const all=contract.sections.flatMap(section=>section.fields.map(field=>({...field,gate:section.gate})));
+const all=contract.sections.flatMap(section=>section.fields.map(field=>({...field,gate:field.gate??section.gate})));
 const definitions=[
  {id:'customer',title:'Personal info',ar:'المعلومات الشخصية',description:'Tell us who we are planning with and how to reach you, so your quote request goes to the right person.',descriptionAr:'أخبرنا مع من نخطط وكيف نصل إليك، ليصل طلب عرض السعر إلى الشخص المناسب.'},
  {id:'event',title:'Event info',ar:'معلومات الفعالية',viewport:'availability',face:'calendar',chapter:'02',description:'Your occasion, date, guests and venue shape everything that follows: the sound, the lighting and the timing of the night.',descriptionAr:'مناسبتك وموعدك وضيوفك ومكانك تحدد كل ما يلي: الصوت والإضاءة وتوقيت السهرة.'},
