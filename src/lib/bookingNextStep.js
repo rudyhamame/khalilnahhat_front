@@ -24,16 +24,12 @@ const questions={
 // The ONE answer to "what is still missing from this draft?". The next question, each goal's progress and the review all read it.
 export function effectiveMissing(order={}){
  const missing=missingOrderFields(order);
- const decisions=[['music.djRequested',order.music?.djRequested??(order.services?.includes('dj')?true:null)]];
+ // Step 3 is Services: the DJ Khalil Nahhat decision and the MC hosting decision must both be answered, yes or no.
  const present=treeSteps();
- for(const [key,value] of decisions)if(typeof value!=='boolean'&&present.dj)missing.push({key}); // no DJ step without a `dj` service in the catalogue
- // Rental services & equipment: with DJ Khalil selected nothing is needed here; otherwise at least one rental service or item must be added.
+ const decisions=[['music.djRequested',order.music?.djRequested??(order.services?.includes('dj')?true:null),present.dj],['music.mcRequested',order.music?.mcRequested??(order.services?.includes('mc')?true:null),present.mc!==false]];
+ for(const [key,value,exists] of decisions)if(typeof value!=='boolean'&&exists)missing.push({key}); // no decision for a service the catalogue does not have
+ // Step 4 (Services info: the rental question, the services and equipment, the room setup notes) is entirely optional: nothing here is ever required.
  const rest=missing.filter(field=>!['services','rental.requested'].includes(field.key));
- const dj=order.music?.djRequested===true||order.services?.includes('dj');
- const rental=order.equipment?.length>0||order.services?.some(id=>!['dj','mc'].includes(id));
- // The rental question (Rental step, first section) must be answered, like the DJ question.
- if(present.rental&&typeof (order.rental?.requested??(rental?true:null))!=='boolean')rest.push({key:'rental.requested'});
- if(!dj&&!rental&&(present.dj||present.rental))rest.push({key:'services'});
  return rest;
 }
 

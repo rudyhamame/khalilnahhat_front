@@ -1,10 +1,13 @@
+import {bookingStepDefinition} from '../lib/bookingFlow.mjs';
 import {useEffect,useState} from 'react';
 import {useTreeService,useTreeSteps} from '../lib/tree';
 import {fieldCode} from '../lib/eventPageModel';
 import './bookingPhases.css';
 
 // The five steps of the Booking page. Music Preferences is not a step of its own: it is a sub-step (03.02) of DJ Khalil Service, shown only while that service is chosen.
-const ALL_PHASES=[['personal','Personal info','المعلومات الشخصية','Tell us who we are planning with and how to reach you, so your quote request goes to the right person.','أخبرنا مع من نخطط وكيف نصل إليك، ليصل طلب عرض السعر إلى الشخص المناسب.'],['event','Event info','معلومات الفعالية','Your occasion, date, guests and venue shape everything that follows: the sound, the lighting and the timing of the night.','مناسبتك وموعدك وضيوفك ومكانك تحدد كل ما يلي: الصوت والإضاءة وتوقيت السهرة.'],['dj','DJ Khalil Service','خدمة دي جي خليل','Add DJ Khalil to your event, then share the music you love: languages, genres, special moments and favourite songs.','أضف دي جي خليل إلى فعاليتك، ثم شاركنا الموسيقى التي تحبها: اللغات والأنواع واللحظات الخاصة وأغانيك المفضلة.'],['rental','Rental equipments for other services','معدات التأجير للخدمات الأخرى','We do not provide these services ourselves, but we rent you the equipment for them: speakers, lighting and more.','لا نقدم هذه الخدمات بأنفسنا، لكننا نؤجر لك المعدات اللازمة لها: مكبرات الصوت والإضاءة وغيرها.'],['additional','Additional info','معلومات إضافية','Inspiration, documents, a voucher and any last notes. Submitting requests a quote; it does not reserve your date.','أفكار ومستندات وقسيمة وأي ملاحظات أخيرة. الإرسال يطلب عرض سعر ولا يحجز موعدك.']];
+// The step names and texts come from the shared step definitions (lib/bookingFlow.mjs), so the Booking page, the Booking review and the Booking draft can never differ.
+const PHASE_STEPS=[['personal','customer'],['event','event'],['dj','music'],['rental','equipment'],['additional','additional']];
+const ALL_PHASES=PHASE_STEPS.map(([phase,step])=>{const definition=bookingStepDefinition(step);return [phase,definition.title,definition.ar,definition.description,definition.descriptionAr];});
 // Steps exist only while their service is in the catalogue; step 3 carries the name the admin gave the DJ service (id dj).
 const usePhases=(ar=false)=>{const dj=useTreeService('dj',ar),steps=useTreeSteps();return ALL_PHASES.filter(row=>(row[0]!=='dj'||steps.dj)&&(row[0]!=='rental'||steps.rental)).map(row=>row[0]==='dj'&&dj.name?[row[0],dj.name,dj.name,row[3].replace('DJ Khalil',dj.name),row[4].replace('دي جي خليل',dj.name)]:row);};
 // Longer headings for the page; the step bar keeps the short names above.

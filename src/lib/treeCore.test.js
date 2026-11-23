@@ -19,7 +19,7 @@ test('atoms of a step exist only while the tree has that step',()=>{
 
 test('steps follow the service ids, equipment follows serviceId, removed ids keep their place',()=>{
  const catalog=[{kind:'service',id:'dj',name:'DJ'},{kind:'service',id:'sound',name:'Sound',category:'sound',sortOrder:1}];
- assert.deepEqual(stepsOf(catalog),{dj:true,rental:true,djName:'DJ',djNameAr:''});
+ assert.deepEqual(stepsOf(catalog),{dj:true,mc:false,rental:true,djName:'DJ',djNameAr:''});
  const equipment=withServiceIds(catalog,[{id:'a',category:'sound'},{id:'b',category:'x',serviceId:'dj'}]);
  assert.deepEqual(equipment.map(row=>row.serviceId),['sound','dj']);
  const {nodes}=buildTreeNodes({services:catalog.filter(row=>row.id==='sound'),equipment,removed:{items:[{id:'mc',sortOrder:0}],equipment:[{id:'lectern',serviceId:'mc'}]}});

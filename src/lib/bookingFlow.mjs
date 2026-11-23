@@ -1,31 +1,31 @@
 import {contract,getPath,missingOrderFields} from './eventOrderCore.mjs';
 const all=contract.sections.flatMap(section=>section.fields.map(field=>({...field,gate:section.gate})));
 const definitions=[
- {id:'customer',title:'Personal info',ar:'المعلومات الشخصية',description:'Check your contact details before submitting your quote request.',descriptionAr:'راجع معلومات التواصل قبل إرسال طلب عرض السعر.'},
- {id:'event',title:'Event info',ar:'معلومات الفعالية',viewport:'availability',face:'calendar',chapter:'02',description:'Choose your event type, date, time, guests and venue. Times are in Toronto; an end after midnight is supported.',descriptionAr:'اختر نوع الفعالية والموعد والوقت والضيوف والمكان. التوقيت بتوقيت تورونتو ويمكن الانتهاء بعد منتصف الليل.'},
- {id:'music',title:'DJ service',ar:'خدمة الدي جي',viewport:'work',chapter:'03',description:'Add DJ Khalil service, then any optional music preferences. MC is available in chapter 04.',descriptionAr:'أضف خدمة دي جي خليل وتفضيلات الموسيقى الاختيارية. خدمة تقديم الحفل في القسم 04.'},
- {id:'equipment',title:'Rental services & equipment',ar:'الخدمات والمعدات للإيجار',viewport:'setup',chapter:'04',description:'Services, individual equipment and complete sets share your selection with the rental explorer. Stock remains subject to confirmation for your event date.',descriptionAr:'الخدمات والمعدات والمجموعات تشترك في اختياراتك مع مستكشف الإيجار. يُؤكد التوفر لتاريخ فعاليتك.'},
- {id:'references',title:'References & voucher',ar:'المراجع والقسيمة',description:'Add optional inspiration photos or links, event documents and a voucher.',descriptionAr:'أضف صوراً ملهمة أو روابطها، ومستندات الفعالية، وقسيمة اختيارية.'},
- {id:'notes',title:'Additional notes',ar:'ملاحظات إضافية',description:'Anything else we should know, optional. Submitting requests a quote; it does not reserve your date.',descriptionAr:'أي شيء آخر نحتاج معرفته، اختياري. الإرسال يطلب عرض سعر ولا يحجز الموعد.'},
+ {id:'customer',title:'Personal info',ar:'المعلومات الشخصية',description:'Tell us who we are planning with and how to reach you, so your quote request goes to the right person.',descriptionAr:'أخبرنا مع من نخطط وكيف نصل إليك، ليصل طلب عرض السعر إلى الشخص المناسب.'},
+ {id:'event',title:'Event info',ar:'معلومات الفعالية',viewport:'availability',face:'calendar',chapter:'02',description:'Your occasion, date, guests and venue shape everything that follows: the sound, the lighting and the timing of the night.',descriptionAr:'مناسبتك وموعدك وضيوفك ومكانك تحدد كل ما يلي: الصوت والإضاءة وتوقيت السهرة.'},
+ {id:'music',title:'DJ Khalil Service',ar:'خدمة دي جي خليل',viewport:'work',chapter:'03',description:'Add DJ Khalil to your event, then share the music you love: languages, genres, special moments and favourite songs.',descriptionAr:'أضف دي جي خليل إلى فعاليتك، ثم شاركنا الموسيقى التي تحبها: اللغات والأنواع واللحظات الخاصة وأغانيك المفضلة.'},
+ {id:'equipment',title:'Rental equipments for other services',ar:'معدات التأجير للخدمات الأخرى',viewport:'setup',chapter:'04',description:'We do not provide these services ourselves, but we rent you the equipment for them: speakers, lighting and more.',descriptionAr:'لا نقدم هذه الخدمات بأنفسنا، لكننا نؤجر لك المعدات اللازمة لها: مكبرات الصوت والإضاءة وغيرها.'},
+ {id:'additional',title:'Additional info',ar:'معلومات إضافية',description:'Inspiration, documents, a voucher and any last notes. Submitting requests a quote; it does not reserve your date.',descriptionAr:'أفكار ومستندات وقسيمة وأي ملاحظات أخيرة. الإرسال يطلب عرض سعر ولا يحجز موعدك.'}
 ];
 // The sections are defined once, here. Goals, the Booking summary and the assistant read their titles and order from this list.
 export const bookingStepDefinition=id=>definitions.find(step=>step.id===id)||null;
 export const stepLabel=id=>{const step=bookingStepDefinition(id);return [step.title,step.ar];};
 export function bookingStepForField(path){
- if(path==='music.mcRequested'||path==='music.djMc'||path==='rental.requested')return 'equipment';
+ // MC hosting (and its note) belong to step 3, DJ Khalil Service, with the DJ question.
+ if(path==='music.mcRequested'||path==='music.djMc')return 'music';
+ if(path==='rental.requested')return 'equipment';
  if(path==='services'||path==='equipment'||path?.startsWith('equipment.'))return 'equipment';
  if(path?.startsWith('event.setup.'))return 'equipment';
  if(path?.startsWith('event.'))return 'event';
  if(path?.startsWith('music.'))return 'music';
  if(path?.startsWith('customer.'))return 'customer';
- if(path==='additional.notes')return 'notes';
- return 'references';
+ return 'additional'; // references, notes and the voucher are one step, like the Booking page
 }
 export function bookingSteps(order){
- // Six sections, in the Booking summary's order: Personal info, Event info, DJ service, Rental services & equipment, References & voucher, Additional notes.
+ // Five sections, exactly the Booking page's steps and names: Personal info, Event info, DJ Khalil Service, Rental equipments for other services, Additional info.
  return definitions.map(step=>({...step,fields:all.filter(field=>bookingStepForField(field.key)===step.id&&(!field.gate||getPath(order,field.gate)===true))}));
 }
-export function bookingIssueStep(order,issues){const keys=new Set(issues.map(issue=>typeof issue==='string'?issue:issue.key));return bookingSteps(order).find(step=>step.fields.some(field=>keys.has(field.key)))?.id||(keys.has('equipment')?'equipment':'references');}
+export function bookingIssueStep(order,issues){const keys=new Set(issues.map(issue=>typeof issue==='string'?issue:issue.key));return bookingSteps(order).find(step=>step.fields.some(field=>keys.has(field.key)))?.id||(keys.has('equipment')?'equipment':'additional');}
 export function firstIncompleteStep(order){return bookingIssueStep(order,missingOrderFields(order));}
 export function missingViewportFields(order){return missingOrderFields(order).filter(field=>['customer','event'].includes(bookingStepForField(field.key)));}
 export const MC_NOTE='MC service requested';

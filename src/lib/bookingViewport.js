@@ -3,7 +3,8 @@ import {PUBLIC_PAGE_PATHS} from './publicPages.js';
 export const APP_VIEWPORT_TARGETS=Object.freeze({home:'.echo-artist-sequence',tree:'.seasonal-tree-viewport',work:'#khalil-work-archive',availability:'#availability',music:'#khalil-work-archive',setup:'#services',simulation:'#room-3d',room:'#room-3d',booking:'#event-order-panel',live:'#live',assistant:'#echo-ai',contact:'#contact',about:'#about-dj-khalil'});
 export function bookingFieldSection(path){
  if(path?.startsWith('customer.')||path?.startsWith('references.')||path?.startsWith('planning.')||path?.startsWith('additional.'))return 'booking';
- if(['music.mcRequested','music.djMc','rental.requested'].includes(path))return 'setup';
+ if(['music.mcRequested','music.djMc'].includes(path))return 'availability'; // step 3 sits on the Booking page
+ if(path==='rental.requested')return 'setup';
  return ['event.type','event.guestCount','event.date','event.startTime','event.endTime'].includes(path)?'availability':path?.startsWith('music.')?'work':path==='services'||path?.startsWith('equipment')||path?.startsWith('venue.')||path?.startsWith('event.')||path?.startsWith('additional.')?'setup':null;
 }
 export function scrollToAppSection(section,{source='booking',face,force=false}={}){

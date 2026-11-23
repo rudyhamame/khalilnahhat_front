@@ -30,12 +30,12 @@ export function buildTreeNodes({services,equipment,removed={items:[],equipment:[
  const orphans=removed.equipment.filter(row=>!liveIds.has(row.serviceId)&&!removed.items.some(item=>item.id===row.serviceId));
  return {nodes:nodes.map((node,at)=>({node,at})).sort((a,b)=>a.node.order-b.node.order||a.at-b.at).map(({node})=>node),orphans};
 }
-const EMPTY={dj:true,rental:true,djName:'',djNameAr:''};
+const EMPTY={dj:true,mc:true,rental:true,djName:'',djNameAr:''};
 let steps=EMPTY;
 export const treeSteps=()=>steps;
 export function stepsOf(catalog){
  const services=catalog.filter(row=>row.kind==='service'&&row.isActive!==false),dj=services.find(row=>row.id===DJ_ID);
- return {dj:Boolean(dj),rental:services.some(row=>row.id!==DJ_ID&&row.id!==MC_ID&&!row.selectionField),djName:dj?.name||'',djNameAr:dj?.nameAr||''};
+ return {dj:Boolean(dj),mc:services.some(row=>row.id===MC_ID),rental:services.some(row=>row.id!==DJ_ID&&row.id!==MC_ID&&!row.selectionField),djName:dj?.name||'',djNameAr:dj?.nameAr||''};
 }
 export function setTreeSteps(next){steps=next;}
 

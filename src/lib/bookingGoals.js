@@ -5,7 +5,7 @@ import {fieldQuestion} from './fieldQuestion.js';
 import {treeSteps} from './treeCore.js';
 
 // Goals are the flow's sections (lib/bookingFlow.mjs): same titles, same order, same field-to-section mapping.
-const GOAL_STEPS=[['contact','customer'],['event','event'],['music','music'],['rentals','equipment'],['references','references'],['notes','notes']];
+const GOAL_STEPS=[['contact','customer'],['event','event'],['music','music'],['rentals','equipment'],['additional','additional']];
 export const BOOKING_GOALS=GOAL_STEPS.map(([id,stepId])=>{const step=bookingStepDefinition(stepId);return {id,title:step.title,ar:step.ar,section:step.viewport||'booking',...(step.face?{face:step.face}:{}),matches:path=>bookingStepForField(path)===stepId};});
 // The sections of the Booking summary that exist in the catalogue: the DJ section needs a `dj` service (and takes its name), the
 // rental section needs a rental service. BOOKING_GOALS stays the full list for the AI and the tests.
