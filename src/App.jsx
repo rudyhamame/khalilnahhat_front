@@ -503,7 +503,10 @@ function App() {
 
   const quoteAction = async (requestId, action, body, method) => {
     const result = await serviceRequestAction(requestId, action, body, authToken, method);
-    if (result.item) {
+    if (result.deleted) {
+      // A deleted booking is gone for everyone: out of the admin list and out of the client's dashboard.
+      setServiceRequests((currentRequests) => currentRequests.filter((item) => item.id !== requestId));
+    } else if (result.item) {
       setServiceRequests((currentRequests) =>
         currentRequests.map((item) => (item.id === requestId ? result.item : item)),
       );

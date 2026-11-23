@@ -18,3 +18,11 @@ export function quoteAtomCode(line,catalog=[],equipment=[]){
 }
 // Lines in contract order: DJ, MC, then equipment by code; lines without an atom last.
 export const sortQuoteLines=(lines,catalog,equipment)=>lines.map((line,index)=>({line,index,code:quoteAtomCode(line,catalog,equipment)})).sort((a,b)=>(a.code?0:1)-(b.code?0:1)||a.code.localeCompare(b.code)||a.index-b.index);
+
+// A service line shows its name, never its id: the catalogue name ("DJ Khalil Nahhat"), else a readable fallback ("svc-dj" -> "DJ service").
+export const quoteLineName=(line,catalog=[])=>{
+ const id=line?.serviceId||'';
+ if(!id.startsWith('svc-'))return line?.name||'';
+ const key=id.slice(4),row=catalog.find(item=>item?.kind==='service'&&item.id===key);
+ return row?.name||({dj:'DJ service',mc:'MC hosting'})[key]||(line?.name&&line.name!==key?line.name:key.replaceAll('-',' ').replace(/^./,char=>char.toUpperCase()));
+};

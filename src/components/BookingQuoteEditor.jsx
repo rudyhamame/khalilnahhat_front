@@ -1,8 +1,7 @@
 import {useId} from 'react';
 import {Sparkles} from 'lucide-react';
-import {sortQuoteLines} from '../lib/quoteAtoms';
+import {sortQuoteLines,quoteLineName} from '../lib/quoteAtoms';
 import {bookingText,bookingLocale,bookingMoney} from '../lib/bookingUiText';
-import AdminSelect from './AdminSelect';
 import './bookingQuoteEditor.css';
 
 export default function BookingQuoteEditor({request,draft,totals,catalog=[],equipment=[],ar=false,editable=true,rateFeedback='',onPriceChange,onFieldChange,onNoteChange,onFillRates}){
@@ -22,9 +21,9 @@ export default function BookingQuoteEditor({request,draft,totals,catalog=[],equi
      <tbody>{lines.length?lines.map(({line:item,code})=>{
       const inputId=`${id}-${item.serviceId}`,value=draft.prices?.[item.serviceId]??'';
       return <tr key={item.serviceId}>
-       <th scope="row" className="bqe-item">{code&&<span className="bqe-code" dir="ltr">{code}</span>}<span>{item.name}</span></th>
+       <th scope="row" className="bqe-item">{code&&<span className="bqe-code" dir="ltr">{code}</span>}<span>{quoteLineName(item,catalog)}</span></th>
        <td className="bqe-quantity" data-label={tr('Quantity')}><bdi>{item.quantity}</bdi></td>
-       <td className="bqe-rate" data-label={tr('Unit price')}><label className="bqe-sr-only" htmlFor={inputId}>{tr('Unit price')} · {item.name} · CAD</label><input id={inputId} type="number" min="0" step="0.01" inputMode="decimal" value={value} onChange={event=>onPriceChange(item.serviceId,event.target.value)}/></td>
+       <td className="bqe-rate" data-label={tr('Unit price')}><label className="bqe-sr-only" htmlFor={inputId}>{tr('Unit price')} · {quoteLineName(item,catalog)} · CAD</label><input id={inputId} type="number" min="0" step="0.01" inputMode="decimal" value={value} onChange={event=>onPriceChange(item.serviceId,event.target.value)}/></td>
        <td className="bqe-line-total" data-label={tr('Line total')}><bdi>{money(Number(value||0)*item.quantity)}</bdi></td>
       </tr>;
      }):<tr><td className="bqe-empty" colSpan={4}>{ar?'لا توجد بنود مسعّرة لهذا الطلب.':'No priced items in this request.'}</td></tr>}</tbody>
@@ -33,8 +32,14 @@ export default function BookingQuoteEditor({request,draft,totals,catalog=[],equi
     <section className="bqe-adjustments" aria-labelledby={`${id}-adjustments`}>
      <h5 id={`${id}-adjustments`}>{ar?'تعديلات السعر':'Price adjustments'}</h5>
      <div className="bqe-adjustment-fields">
-      <label><span>{ar?'نوع الخصم':'Discount type'}</span><AdminSelect value={draft.discountType} onChange={event=>onFieldChange('discountType',event.target.value)} aria-label={ar?'نوع الخصم':'Discount type'}><option value="amount">{tr('Amount (CAD)')}</option><option value="percent">{ar?'النسبة المئوية (٪)':'Percentage (%)'}</option></AdminSelect></label>
-      <label><span>{draft.discountType==='percent'?tr('Discount (%)'):tr('Discount (CAD)')}</span><input type="number" min="0" max={draft.discountType==='percent'?100:totals.subtotal} step="0.01" inputMode="decimal" value={draft.discountValue} onChange={event=>onFieldChange('discountValue',event.target.value)}/></label>
+      <div className="bqe-discount">
+       <div className="bqe-discount-head"><span>{ar?'خصم الحجز':'Booking discount'}</span>
+        <div className="bqe-mini-tabs" role="group" aria-label={ar?'نوع الخصم':'Discount type'}>
+         {[['amount',tr('Amount')],['percent',ar?'نسبة':'Percent']].map(([kind,label])=><button key={kind} type="button" aria-pressed={draft.discountType===kind} className={draft.discountType===kind?'is-active':''} onClick={()=>onFieldChange('discountType',kind)}>{label}</button>)}
+        </div>
+       </div>
+       <input type="number" min="0" max={draft.discountType==='percent'?100:totals.subtotal} step="0.01" inputMode="decimal" placeholder={draft.discountType==='percent'?'0 %':'0.00'} aria-label={draft.discountType==='percent'?tr('Discount (%)'):tr('Discount (CAD)')} value={draft.discountValue} onChange={event=>onFieldChange('discountValue',event.target.value)}/>
+      </div>
       <label><span>{tr('Tax %')}</span><input type="number" min="0" max="30" step="0.01" inputMode="decimal" value={draft.taxPercent} onChange={event=>onFieldChange('taxPercent',event.target.value)}/></label>
      </div>
     </section>

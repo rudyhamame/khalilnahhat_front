@@ -210,3 +210,35 @@
 .admin-workspace[data-area=services] .bqe-editor{padding:16px 18px;border-radius:12px;background:var(--aw-raised,#ffffff08)}
 /* The booking summary shares the header's surface, flush to the top and both edges. */
 .admin-workspace[data-area=services] .admin-booking-detail-body .booking-summary{background:#121216;margin-top:calc(var(--quote-pad,24px) * -1);padding-top:var(--quote-pad,24px)}
+/* Delete is a red outline button in the Booking details header. */
+.admin-booking-detail-heading .booking-publish-action .secondary-button.is-danger{color:#e08a85;border-color:color-mix(in srgb,#e08a85 55%,transparent)}
+.admin-booking-detail-heading .booking-publish-action .secondary-button.is-danger:hover{background:color-mix(in srgb,#e08a85 14%,transparent)}
+
+/* Quote editor: "Booking discount" on the left with small Amount | Percent tabs opposite it; placeholders you can see. */
+.bqe-discount{display:grid;gap:8px;grid-column:1 / -1}
+.bqe-discount-head{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px;color:var(--aw-muted)}
+.bqe-mini-tabs{display:inline-flex;gap:3px;padding:3px;border-radius:999px;background:var(--aw-raised,#ffffff0d)}
+.bqe-mini-tabs button{padding:4px 12px;border:0;border-radius:999px;background:transparent;color:var(--aw-muted);font:600 11.5px/1.3 inherit;cursor:pointer}
+.bqe-mini-tabs button.is-active{background:var(--aw-text,#fff);color:var(--aw-main,#101514)}
+.admin-workspace[data-area=services] :is(input,textarea)::placeholder{color:#9aa6a2;opacity:1}
+
+/* Booking requests list: three bands per row (who, the facts, what was requested). */
+.admin-booking-list .admin-booking-list-item{gap:8px}
+.admin-booking-list .abl-number{color:var(--aw-muted);font-size:11px;line-height:1.4}
+.admin-booking-list .abl-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 10px}
+.admin-booking-list .abl-facts>span{display:grid;gap:1px;min-width:0;font-size:12.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.admin-booking-list .abl-facts em,.admin-booking-list .abl-requested em{font-style:normal;color:var(--aw-muted);font-size:9.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase}
+.admin-booking-list .abl-requested{display:flex;gap:8px;align-items:baseline;min-width:0;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Booking summary in the details: who, the event, the venue, then the reference and the total. */
+.admin-booking-detail-body .booking-summary{gap:16px}
+.booking-summary-who>a+a{flex-basis:auto}
+.booking-summary-group{display:grid;gap:8px;padding-top:14px;border-top:1px solid var(--aw-line)}
+.booking-summary-group>h4{margin:0;color:var(--aw-muted);font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase}
+.booking-summary-venue{display:grid;gap:2px;margin:0;font-size:14px}
+.booking-summary-venue span{color:var(--aw-muted);font-size:12.5px}
+.booking-summary-foot{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;padding-top:14px;border-top:1px solid var(--aw-line)}
+.booking-summary-foot>div{display:grid;gap:3px}
+.booking-summary-foot span{color:var(--aw-muted);font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase}
+.booking-summary-foot code{font:600 12.5px/1.4 ui-monospace,Menlo,Consolas,monospace}
+.booking-summary-foot strong{font-size:17px;font-variant-numeric:tabular-nums}

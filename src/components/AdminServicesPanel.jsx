@@ -5,6 +5,7 @@ import BookingDraftReview from './BookingDraftReview';
 import {OfferReview} from './BookingNegotiation';
 import {quoteTotals} from '../lib/quoteTotals.mjs';
 import {useTree} from '../lib/tree';
+import {quoteLineName} from '../lib/quoteAtoms';
 import {fieldName as bookingFieldName,optionName,customerNameParts} from '../lib/eventOrderCore.mjs';
 import {musicAtoms} from '../lib/musicAtoms.mjs';
 import './adminBookingRequests.css';
@@ -17,6 +18,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 
 
+const clock12=value=>{const m=/^(\d{1,2}):(\d{2})/.exec(value||'');if(!m)return value||'';const h=Number(m[1]);return `${h%12||12}:${m[2]} ${h<12?'AM':'PM'}`;};
 const readable=value=>String(value||'').replaceAll('_',' ').replace(/^./,char=>char.toUpperCase());
 const eventDate=(value,ar=false)=>{if(!/^\d{4}-\d{2}-\d{2}$/.test(value||''))return value||'Date not provided';return new Intl.DateTimeFormat(bookingLocale(ar),{dateStyle:'medium',timeZone:'America/Toronto'}).format(new Date(value+'T12:00:00-05:00'));};
 const eventTime=value=>{const match=/^(\d{2}):(\d{2})$/.exec(value||'');if(!match)return value||'—';const hour=Number(match[1]);return `${hour%12||12}:${match[2]} ${hour>=12?'PM':'AM'}`;};
@@ -213,8 +215,14 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
           <nav aria-label={tr("Choose a booking request")}>
             {requests.map(request=><button key={request.id} type="button" className="admin-booking-list-item" aria-current={selectedRequest?.id===request.id?'true':undefined} aria-controls="admin-booking-detail" onClick={()=>setSelectedId(request.id)}>
               <span className="admin-booking-list-top"><strong>{request.customerName}</strong><span className={`admin-service-request-status is-${request.status}`}>{bookingStatusLabel(request,ar)}</span></span>
-              <span className="admin-booking-list-event">{[(request.order?.event?.type==='other'?request.order.event.title:request.order?.event?.type)||request.event?.eventType,request.order?.event?.date||request.event?.eventDate].filter(Boolean).join(' · ')||tr("Event details pending")}</span>
-              <small>{request.requestNumber||request.id}</small>
+              <small className="abl-number">{[request.requestNumber||request.id,request.createdAt&&new Date(request.createdAt).toLocaleString(bookingLocale(ar),{dateStyle:'medium',timeStyle:'short'})].filter(Boolean).join(' · ')}</small>
+              <span className="abl-facts">
+                <span><em>{tr("Event")}</em>{readable((request.order?.event?.type==='other'?request.order.event.title:request.order?.event?.type)||request.event?.eventType)||'—'}</span>
+                <span><em>{tr("Date")}</em>{eventDate(request.order?.event?.date||request.event?.eventDate,ar)}</span>
+                <span><em>{tr("Venue")}</em>{request.order?.event?.venue?.name||request.event?.venueName||'—'}</span>
+                <span><em>{tr("Quote")}</em>{Number(request.total)>0?money(Number(request.total)):'—'}</span>
+              </span>
+              {!!(request.items||[]).length&&<span className="abl-requested"><em>{tr("Requested")}</em>{[...new Set(request.items.map(line=>quoteLineName(line,treeCatalog)))].join(' · ')}</span>}
             </button>)}
             {!requests.length&&<p className="admin-booking-list-empty">{tr("No booking requests yet.")}</p>}
           </nav>
@@ -237,7 +245,8 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                         ? tr("Update Published Quote")
                         : tr("Publish to Customer")}
                   </button>
-                  {selectedRequest.journey.cancellable ? <button type="button" className="secondary-button" onClick={() => window.confirm(tr("Cancel this request?")) && runAction(selectedRequest, 'cancel')}>{tr("Cancel request")}</button> : null}</div>}</header>
+                  {selectedRequest.journey.cancellable ? <button type="button" className="secondary-button" onClick={() => window.confirm(tr("Cancel this request?")) && runAction(selectedRequest, 'cancel')}>{tr("Cancel request")}</button> : null}
+            <button type="button" className="secondary-button is-danger" onClick={async () => { if (!window.confirm(tr("Delete this booking permanently? It is removed from the database and from the client's dashboard, and cannot be undone."))) return; await runAction(selectedRequest, 'delete', { confirmation: 'DELETE' }); setSelectedId(null); }}>{tr("Delete")}</button></div>}</header>
         {requests.length ? (
           [selectedRequest].map((request) => {
             const draft = drafts[request.id] || buildDraft(request);
@@ -251,14 +260,26 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                     <h3>{request.customerName}</h3>
                     <span className={`admin-service-request-status is-${request.status}`}>{bookingStatusLabel(request,ar)}</span>
                     <a href={`mailto:${request.customerEmail}`}>{request.customerEmail}</a>
+                    {(request.order?.customer?.phone||request.event?.phone)&&<a href={`tel:${request.order?.customer?.phone||request.event?.phone}`}>{request.order?.customer?.phone||request.event?.phone}</a>}
                   </div>
-                  <dl className="booking-summary-facts">
-                    <div><dt>{tr("Event")}</dt><dd>{readable((request.order?.event?.type==='other'?request.order.event.title:request.order?.event?.type)||request.event?.eventType)||'—'}</dd></div>
-                    <div><dt>{tr("Date")}</dt><dd>{eventDate(request.order?.event?.date||request.event?.eventDate,ar)}</dd></div>
-                    <div><dt>{tr("Guests")}</dt><dd>{request.order?.event?.guestCount??request.event?.guests??'—'}</dd></div>
-                    <div><dt>{tr("Venue")}</dt><dd>{request.order?.event?.venue?.name||request.event?.venueName||'—'}</dd></div>
-                    <div><dt>{tr("Quote total")}</dt><dd>{money(totals.total)}</dd></div>
-                  </dl>
+                  <section className="booking-summary-group" aria-label={tr("Event")}>
+                    <h4>{tr("Event")}</h4>
+                    <dl className="booking-summary-facts">
+                      <div><dt>{tr("Type")}</dt><dd>{readable((request.order?.event?.type==='other'?request.order.event.title:request.order?.event?.type)||request.event?.eventType)||'—'}</dd></div>
+                      <div><dt>{tr("Date")}</dt><dd>{eventDate(request.order?.event?.date||request.event?.eventDate,ar)}</dd></div>
+                      <div><dt>{tr("Time")}</dt><dd>{[request.order?.event?.startTime||request.event?.startTime,request.order?.event?.endTime||request.event?.endTime].filter(Boolean).map(clock12).join(' – ')||'—'}</dd></div>
+                      <div><dt>{tr("Guests")}</dt><dd>{request.order?.event?.guestCount??request.event?.guests??'—'}</dd></div>
+                    </dl>
+                  </section>
+                  <section className="booking-summary-group" aria-label={tr("Venue")}>
+                    <h4>{tr("Venue")}</h4>
+                    <p className="booking-summary-venue"><strong>{request.order?.event?.venue?.name||request.event?.venueName||'—'}</strong>
+                      <span>{[request.order?.event?.venue?.address||request.event?.venueAddress,request.order?.event?.venue?.city||request.event?.city].filter(Boolean).join(', ')}</span></p>
+                  </section>
+                  <div className="booking-summary-foot">
+                    <div><span>{tr("Request")}</span><code>{request.requestNumber||request.id}</code></div>
+                    <div><span>{tr("Quote total")}</span><strong>{money(totals.total)}</strong></div>
+                  </div>
                 </header>
                 {detailTab==='info'&&<div id="booking-tab-panel" role="tabpanel" aria-labelledby="booking-tab-info">
                 <div className="booking-detail-sections">
