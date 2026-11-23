@@ -123,7 +123,7 @@ export default function DjBookingForm({ar=false,ctx,djAdded,onClose,backLabel}){
     const counts={1:chosenLanguages.length,2:genres.length,3:rows.length,4:favouriteSongEntries(music.favouriteSongs).length,5:asList(music.favouriteArtists).length};
     // Every section is its own card, one under the other (no tabs): language & dialect, genres, event moments, favourite songs, favourite artists.
     return <div className="djf-cards">
-     {cards.map(card=><BookingStep key={card.number} number={9+card.number} className="djf-step" title={card.title} copy={card.hint||''} cardTitle={<><FieldCode k={MUSIC_PREFERENCE_ATOMS[card.number]}/>{card.title}</>}><div id={`djf-section-${card.number}`} className="djf-card-body">{card.action&&<div className="djf-card-action">{card.action}</div>}{card.children}</div></BookingStep>)}
+     {cards.map(card=><BookingStep key={card.number} number={9+card.number} className="djf-step" title={card.title} copy={card.hint||''} cardTitle={<>{card.title}</>}><div id={`djf-section-${card.number}`} className="djf-card-body">{card.action&&<div className="djf-card-action">{card.action}</div>}{card.children}</div></BookingStep>)}
     </div>;
    })()}
   </fieldset></div>
