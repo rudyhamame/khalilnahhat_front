@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {reconcileEquipmentServices} from './rentalCatalog.js';
 import {resolveDraftEquipment} from './draftEquipment.js';
 const catalog=[{id:'sound',kind:'service',category:'sound',isActive:true},{id:'lighting',kind:'service',category:'lighting',isActive:true},{id:'special-service',kind:'service',category:'custom',isActive:true}];
-const equipment=[{id:'speaker',category:'sound',minQuantity:1,availableQuantity:4},{id:'light',category:'lighting',minQuantity:2,availableQuantity:6},{id:'custom-item',category:'custom'}];
+const equipment=[{id:'speaker',category:'sound',equipmentCategoryId:'sound',minQuantity:1,availableQuantity:4},{id:'light',category:'lighting',equipmentCategoryId:'lighting',minQuantity:2,availableQuantity:6},{id:'custom-item',category:'custom',equipmentCategoryId:'special-service'}];
 test('equipment infers its category service; removing equipment preserves unrelated manual selections',()=>{
  assert.deepEqual(reconcileEquipmentServices(['dj'],{},{speaker:{quantity:1},light:{quantity:2}},catalog,equipment),['dj','sound','lighting']);
  assert.deepEqual(reconcileEquipmentServices(['dj','sound','lighting'],{speaker:{quantity:1},light:{quantity:2}},{light:{quantity:2}},catalog,equipment),['dj','lighting']);
