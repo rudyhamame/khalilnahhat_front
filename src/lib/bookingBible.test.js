@@ -44,3 +44,10 @@ test('external song additions, corrections and removals replace stale saved rows
  const removed=reconcileSuggestedSongRows(rows,[a,b],[b]);
  assert.deepEqual(savedSuggestedSongs(removed),[b]);assert.equal(removed.at(-1),draft);
 });
+
+test('live catalogue names never replace the bible section headings in either language',async()=>{
+ const {setTreeSteps}=await import('./treeCore.js');const {activeGoals,BOOKING_GOALS}=await import('./bookingGoals.js');
+ try{setTreeSteps({dj:true,mc:true,rental:true,djName:'Custom catalogue name',djNameAr:'اسم مختلف'});
+  assert.deepEqual(activeGoals().map(row=>[row.title,row.ar]),BOOKING_GOALS.map(row=>[row.title,row.ar]));
+ }finally{setTreeSteps({dj:true,mc:true,rental:true});}
+});

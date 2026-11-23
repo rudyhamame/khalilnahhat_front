@@ -4,7 +4,7 @@ const definitions=[
  {id:'customer',title:'Personal info',ar:'المعلومات الشخصية',description:'Tell us who we are planning with and how to reach you, so your quote request goes to the right person.',descriptionAr:'أخبرنا مع من نخطط وكيف نصل إليك، ليصل طلب عرض السعر إلى الشخص المناسب.'},
  {id:'event',title:'Event info',ar:'معلومات الفعالية',viewport:'availability',face:'calendar',chapter:'02',description:'Your occasion, date, guests and venue shape everything that follows: the sound, the lighting and the timing of the night.',descriptionAr:'مناسبتك وموعدك وضيوفك ومكانك تحدد كل ما يلي: الصوت والإضاءة وتوقيت السهرة.'},
  {id:'music',title:'DJ Khalil Service',ar:'خدمة دي جي خليل',viewport:'work',chapter:'03',description:'Add DJ Khalil to your event, then share the music you love: languages, genres, special moments and favourite songs.',descriptionAr:'أضف دي جي خليل إلى فعاليتك، ثم شاركنا الموسيقى التي تحبها: اللغات والأنواع واللحظات الخاصة وأغانيك المفضلة.'},
- {id:'equipment',title:'Rental equipments',ar:'معدات التأجير',viewport:'setup',chapter:'04',description:'We rent you the equipment: speakers, lighting and more.',descriptionAr:'نؤجر لك المعدات: مكبرات الصوت والإضاءة وغيرها.'},
+ {id:'equipment',title:'Rental equipment',ar:'معدات التأجير',viewport:'setup',chapter:'04',description:'We rent you the equipment: speakers, lighting and more.',descriptionAr:'نؤجر لك المعدات: مكبرات الصوت والإضاءة وغيرها.'},
  {id:'additional',title:'Additional info',ar:'معلومات إضافية',description:'Inspiration, documents, a voucher and any last notes. Submitting requests a quote; it does not reserve your date.',descriptionAr:'أفكار ومستندات وقسيمة وأي ملاحظات أخيرة. الإرسال يطلب عرض سعر ولا يحجز موعدك.'}
 ];
 // The sections are defined once, here. Goals, the Booking summary and the assistant read their titles and order from this list.
@@ -23,7 +23,7 @@ export function bookingStepForField(path){
  return 'additional'; // references, notes and the voucher are one step, like the Booking page
 }
 export function bookingSteps(order){
- // Five sections, exactly the Booking page's steps and names: Personal info, Event info, DJ Khalil Service, Rental equipments, Additional info.
+ // Five sections, exactly the Booking page's steps and names: Personal info, Event info, DJ Khalil Service, Rental equipment, Additional info.
  return definitions.map(step=>({...step,fields:all.filter(field=>bookingStepForField(field.key)===step.id&&(!field.gate||getPath(order,field.gate)===true))}));
 }
 export function bookingIssueStep(order,issues){const keys=new Set(issues.map(issue=>typeof issue==='string'?issue:issue.key));return bookingSteps(order).find(step=>step.fields.some(field=>keys.has(field.key)))?.id||(keys.has('equipment')?'equipment':'additional');}

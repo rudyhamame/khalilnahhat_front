@@ -23,3 +23,12 @@ test('the PDF shows uploaded photos as pictures (embedded data, never link text)
  assert.match(html,/Stage &lt;idea&gt;\.jpg — Like this/);assert.doesNotMatch(html,/evil\.example/);assert.doesNotMatch(html,/<a /);
 });
 
+
+test('Arabic print uses RTL, localized status, sections, totals and overnight times without changing client content',()=>{
+ const order=createEventOrder();Object.assign(order.event,{type:'other',title:'My original event',date:'2099-06-20',startTime:'20:00',endTime:'01:00'});
+ order.music.djRequested=true;order.additional.notes='<script>unsafe</script> My original note';
+ const request={status:'confirmed',requestNumber:'ECHO-AR',journey:{label:'Booking confirmed',isBooked:true,showsPrices:true},order,items:[{name:'Original equipment',quantity:2,unitPrice:10,lineTotal:20}],total:20};
+ const html=bookingConfirmationHtml(request,{ar:true});
+ for(const value of ['lang="ar"','dir="rtl"','تأكيد الحجز','خدمة دي جي خليل','تم تأكيد الحجز','الرصيد المتبقي','اليوم التالي','My original event','My original note','Original equipment','&lt;script&gt;'])assert.ok(html.includes(value),value);
+ assert.doesNotMatch(html,/<script>|Remaining balance|Booking confirmation|Rental services and equipment/);
+});

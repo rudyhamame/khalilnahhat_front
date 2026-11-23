@@ -14,7 +14,7 @@ import {accountEventDraft} from '../lib/accountEventDraft';
 import {mergeGuestDraft} from '../lib/mergeGuestDraft.mjs';
 import {aiTaskHistoryKey} from '../lib/aiTaskHistory';
 import { trackOnce, setFunnelStep, installDropOffTracking } from '../lib/analytics';
-import { createEventOrder, normalizeEventOrder, applyAccountProfile, applyDraftAccountProfile, fields, getPath, legacyToOrder, missingOrderFields,hasEventDraftContent,setAccountLock } from '../lib/eventOrderCore.mjs';
+import { createEventOrder, normalizeEventOrder, applyAccountProfile, applyDraftAccountProfile, fields, getPath, validValue, fieldName, legacyToOrder, missingOrderFields,hasEventDraftContent,setAccountLock } from '../lib/eventOrderCore.mjs';
 import './eventOrder.css';
 import './orderAsideUI.css';
 import './eventOrderInline.css';
@@ -246,6 +246,8 @@ export function EventOrderProvider({user,token,lang,auth,children,isSessionReady
     const profile=await auth?.onRefreshAccount?.()||user;
     if(deleting.current||!cloudReady||draftOwner.current!==owner)return false;
     const next=applyAccountProfile({...getOrder(),accountDetailsImported:true},profile);
+    const invalid=fields.filter(field=>field.locked==='account'&&getPath(next,field.key)!=null&&!validValue(field,getPath(next,field.key)));
+    if(invalid.length)throw new Error(ar?`صحّح المعلومات الشخصية في لوحة حسابك قبل الاستيراد: ${invalid.map(field=>fieldName(field.key,true)).join('، ')}. الحد الأقصى للاسم الأول واسم العائلة 60 حرفاً.`:`Update Personal info in your dashboard before importing: ${invalid.map(field=>fieldName(field.key)).join(', ')}. First and last names must be at most 60 characters.`);
     edited.current=true;storedRef.current=next;setStoredState(next);setActive(true);setSaveState('pending');
     setRecentEdits(current=>[...current,...fields.filter(field=>field.locked==='account').map(({key})=>({path:key,source:'manual',at:new Date().toISOString()}))].slice(-16));
     return true;

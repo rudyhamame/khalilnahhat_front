@@ -12,8 +12,8 @@ const GROUPS = [
   ] },
 ];
 
-export default function ClientWorkspace({ activeKey, user, onLogout, children }) {
-  return <AdminWorkspace activeKey={activeKey} username={user?.email || user?.username}
+export default function ClientWorkspace({ activeKey, user, onLogout, children,ar=false }) {
+  return <AdminWorkspace ar={ar} activeKey={activeKey} username={user?.email || user?.username}
     onLogout={onLogout} groups={GROUPS} workspaceLabel="Client Workspace"
     storagePrefix="khalil-client" variant="client">{children}</AdminWorkspace>;
 }

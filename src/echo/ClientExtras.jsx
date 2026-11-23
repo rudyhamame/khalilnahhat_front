@@ -1,9 +1,10 @@
+import {bookingText,bookingLocale,bookingMoney} from '../lib/bookingUiText';
 import { useState } from 'react';
 import { apiBaseUrl } from '../lib/api';
 
-const money = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD' });
 
-export function PaymentsBlock({ request, token }) {
+export function PaymentsBlock({ request, token, ar=false }) {
+  const tr=text=>bookingText(text,ar),money=value=>bookingMoney(value,ar);
   const paid = request.depositPaidCents / 100;
   const balance = Math.max(0, request.total - paid);
   const receipt = async (paymentId) => {
@@ -13,14 +14,14 @@ export function PaymentsBlock({ request, token }) {
   const entries = (request.payments || []).filter((p) => !p.voided);
   return (
     <div className="dashboard-quote-actions">
-      <p>{`Paid: ${money.format(paid)} · Remaining balance: ${money.format(balance)}`}</p>
-      {balance > 0 && request.paymentInstructions ? <p>{`How to pay: ${request.paymentInstructions}`}</p> : null}
+      <p>{`${ar?'المدفوع':'Paid'}: ${money(paid)} · ${tr('Remaining balance')}: ${money(balance)}`}</p>
+      {balance > 0 && request.paymentInstructions ? <p>{`${tr('How to pay')}: ${request.paymentInstructions}`}</p> : null}
       {entries.length ? (
         <ul>
           {entries.map((p) => (
             <li key={p.id}>
-              {`${new Date(p.paidAt).toLocaleDateString('en-CA')} · ${p.kind} · ${p.method} · ${money.format(p.amountCents / 100)} `}
-              {p.kind !== 'refund' ? <button type="button" className="echo-link" onClick={() => receipt(p.id)}>Receipt</button> : null}
+              {`${new Date(p.paidAt).toLocaleDateString(bookingLocale(ar))} · ${p.kind} · ${p.method} · ${money(p.amountCents / 100)} `}
+              {p.kind !== 'refund' ? <button type="button" className="echo-link" onClick={() => receipt(p.id)}>{tr('Receipt')}</button> : null}
             </li>
           ))}
         </ul>
@@ -36,7 +37,8 @@ const FIELDS = [
   ['musicLinks', 'Music links (YouTube, Spotify, Drive…)'], ['specialRequests', 'Special requests'],
 ];
 
-export function PlanningForm({ request, onQuoteAction }) {
+export function PlanningForm({ request, onQuoteAction, ar=false }) {
+  const tr=text=>bookingText(text,ar);
   const [f, setF] = useState(() => Object.fromEntries(FIELDS.map(([k]) => [k, request.planning?.[k] || ''])));
   const [state, setState] = useState('');
   const save = async (e) => {
@@ -51,13 +53,13 @@ export function PlanningForm({ request, onQuoteAction }) {
   };
   return (
     <form className="echo-form" onSubmit={save}>
-      <h4>Event planning</h4>
+      <h4>{tr('Event planning')}</h4>
       <fieldset>
         {FIELDS.map(([k, label]) => (
-          <label key={k}>{label}<textarea rows="2" value={f[k]} onChange={(e) => setF({ ...f, [k]: e.target.value })} /></label>
+          <label key={k}>{tr(label)}<textarea rows="2" value={f[k]} onChange={(e) => setF({ ...f, [k]: e.target.value })} /></label>
         ))}
       </fieldset>
-      <button className="primary-button">SAVE PLANNING DETAILS</button> <span role="status">{state}</span>
+      <button className="primary-button">{tr('SAVE PLANNING DETAILS')}</button> <span role="status">{tr(state)}</span>
     </form>
   );
 }

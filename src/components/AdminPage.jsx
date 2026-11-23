@@ -925,7 +925,7 @@ function AdminPage({
   );
 
   return (
-    <AdminWorkspace token={token} activeKey={activePanel} username={username} onLogout={onLogout} noAssistant={studioWindow} secondary={activePanel === 'archive' ? archiveEditor : null}>
+    <AdminWorkspace ar={lang?.lang==='ar'} token={token} activeKey={activePanel} username={username} onLogout={onLogout} noAssistant={studioWindow} secondary={activePanel === 'archive' ? archiveEditor : null}>
         <div className="admin-grid">
           {activePanel === 'registered-clients' && <RegisteredClients token={token} />}
           {activePanel === 'dj-service-builder' && <DjServiceBuilder token={token} liveStream={liveStream} onReviewLiveRequest={onReviewLiveRequest} />}

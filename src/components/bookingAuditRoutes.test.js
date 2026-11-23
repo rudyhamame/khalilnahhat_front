@@ -43,3 +43,16 @@ test('admin and client snapshots retain custom event types, song URLs and attach
   }
  }
 });
+
+test('Arabic dashboard localizes draft navigation, request actions and quote totals',async()=>{
+ const request={id:'ar',status:'quoted',requestNumber:'ECHO-AR',createdAt:'2026-11-22T12:00:00Z',items:[],payments:[],total:100,deposit:30,expiresAt:'2099-06-20T12:00:00Z'};
+ const html=renderToStaticMarkup(createElement(Dashboard,{user,activeView:'bookings',serviceRequests:[request],lang:{lang:'ar'}}));
+ for(const value of ['مسودة الحجز','الطلبات وعروض الأسعار','قبول عرض السعر','إجمالي عرض السعر','الرصيد المتبقي','بانتظار قرار العميل'])assert.ok(html.includes(value),value);
+ assert.doesNotMatch(html,/ACCEPT QUOTE|Remaining balance|Requests &amp; quotes/);
+ const draft=renderToStaticMarkup(createElement(Dashboard,{user,activeView:'draft',lang:{lang:'ar'}}));
+ assert.ok(draft.includes('جارٍ تحميل مسودة حسابك…'));
+ assert.match(draft,/dir="rtl" lang="ar"/);
+ const {default:Admin}=await server.ssrLoadModule('/src/components/AdminServicesPanel.jsx');
+ const admin=renderToStaticMarkup(createElement(Admin,{ar:true,requests:[{...request,journey:{label:'Waiting for client',repriceable:true}}]}));
+ for(const value of ['طلبات الحجز','تفاصيل الحجز','شروط عرض السعر','إجمالي الحجز','بانتظار قرار العميل'])assert.ok(admin.includes(value),value);
+});
