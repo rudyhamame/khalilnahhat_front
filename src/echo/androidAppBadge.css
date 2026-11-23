@@ -13,3 +13,19 @@
 .aw-app-badge .android-badge-btn b{font-size:13px}
 .aw-app-badge .android-badge-btn small{opacity:.7}
 .aw-app-badge .android-badge-form{width:100%;border:1px solid color-mix(in srgb,currentColor 25%,transparent);background:transparent;color:inherit;font-size:12px}
+
+/* The Android app is the last item of the sidebar menu: a plain menu row under a separator line, no group heading and no card. */
+.aw-app-badge{margin-top:12px;padding-top:12px;border-top:1px solid var(--aw-line,color-mix(in srgb,currentColor 18%,transparent))}
+.aw-app-badge .android-badge{margin:0;gap:6px}
+.aw-app-badge .android-badge-btn{display:flex;align-items:center;gap:10px;width:100%;padding:7px 10px;border:0;border-radius:8px;background:transparent;color:inherit;font:inherit;font-size:13px;text-align:start;cursor:pointer}
+.aw-app-badge .android-badge-btn:hover{background:var(--aw-raised,color-mix(in srgb,currentColor 10%,transparent))}
+.aw-app-badge .android-badge-btn svg{width:15px;height:15px;flex:none;color:inherit}
+.aw-app-badge .android-badge-btn span{display:flex;flex-direction:column;min-width:0}
+.aw-app-badge .android-badge-btn span>small:first-child{display:none}
+.aw-app-badge .android-badge-btn b{font-size:13px;font-weight:inherit}
+.aw-app-badge .android-badge-btn small{opacity:.6;font-size:10.5px;letter-spacing:0;text-transform:none}
+/* Same size and spacing as the other menu rows. */
+.aw-app-badge .android-badge-btn{min-height:36px;margin:3px 0;padding:8px 10px;border-radius:6px;font-size:12px;line-height:1.5}
+.aw-app-badge .android-badge-btn svg{color:var(--aw-muted)}
+.aw-app-badge .android-badge-btn b{font-size:12px}
+.aw-app-badge .android-badge-btn:hover{background:var(--aw-hover)}
