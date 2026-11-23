@@ -2286,3 +2286,19 @@ html body #admin-live-stream#admin-live-stream#admin-live-stream .admin-live-sin
 .obs-guide li{display:grid;grid-template-columns:26px minmax(0,1fr);gap:10px;align-items:start}
 .obs-guide li p{margin:0;color:#dbe7e0}
 .obs-guide-n{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#e3d3a31a;color:#e3d3a3;font:700 12px/1 'Manrope',sans-serif}
+/* Header Go live: a real button, icon and label on one line. */
+#admin-live-stream#admin-live-stream .studio-controller-tools .studio-go-live{display:inline-flex!important;flex-direction:row!important;flex-wrap:nowrap;align-items:center;justify-content:center;gap:8px;width:auto!important;height:auto!important;min-width:0;min-height:36px!important;padding:0 16px!important;border:1px solid #c5aa7e!important;border-radius:8px!important;background:#c5aa7e!important;color:#17130b!important;font:700 13px/1 inherit!important;letter-spacing:.02em;white-space:nowrap;cursor:pointer;box-shadow:none!important;transition:background .15s,filter .15s}
+#admin-live-stream#admin-live-stream .studio-controller-tools .studio-go-live>svg{flex:none;width:16px;height:16px}
+#admin-live-stream#admin-live-stream .studio-controller-tools .studio-go-live:hover:not(:disabled){background:#d4b98c!important}
+#admin-live-stream#admin-live-stream .studio-controller-tools .studio-go-live:disabled{background:transparent!important;border-color:#ffffff2e!important;color:#8e92aa!important;opacity:.7;cursor:not-allowed}
+#admin-live-stream#admin-live-stream .studio-controller-tools .studio-go-live.is-live{background:#7e3030!important;border-color:#c06464!important;color:#fff!important}
+#admin-live-stream#admin-live-stream .studio-controller-tools .studio-go-live:focus-visible{outline:2px solid #fff;outline-offset:2px}
+
+/* Fit the studio above the workspace footer; scroll the controller body, never clip its bottom. */
+html body .admin-workspace[data-area="live-stream"] .aw-content{height:auto;flex:1 1 0;min-height:0;overflow:auto}
+html body .admin-workspace[data-area="live-stream"] .admin-grid{min-height:0}
+html body .admin-workspace[data-area="live-stream"] #admin-live-stream#admin-live-stream .admin-live-single.has-requests-aside,
+html body .admin-workspace[data-area="live-stream"] #admin-live-stream#admin-live-stream .admin-live-single.has-requests-aside>.admin-live-preview{height:var(--studio-workspace-height);min-height:0;overflow:hidden}
+html body .admin-workspace[data-area="live-stream"] #admin-live-stream#admin-live-stream .studio-control-dock{height:100%;max-height:100%;min-height:0}
+html body .admin-workspace[data-area="live-stream"] #admin-live-stream#admin-live-stream .studio-control-workspace{flex:1 1 0;min-height:0}
+html body .admin-workspace[data-area="live-stream"] #admin-live-stream#admin-live-stream .studio-settings-panel{min-height:0;overflow-y:auto;overscroll-behavior:contain;scroll-padding-bottom:20px;padding-bottom:20px}

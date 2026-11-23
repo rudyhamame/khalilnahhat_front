@@ -21,3 +21,5 @@ html body .echo[data-page=home][data-theme] .echo-header .echo-account-menu .ech
 /* A gap between the menu buttons, so their hover highlights do not touch. */
 .echo-account-dropdown{display:flex;flex-direction:column;gap:4px}
 .echo-account-dropdown button.echo-menu-mixer{color:#eef5f0}
+
+@media(max-width:760px),(pointer:coarse) and (max-width:1100px) and (max-height:600px){.echo-account-menu .echo-menu-mixer,.echo-menu-mixer{display:none!important}}

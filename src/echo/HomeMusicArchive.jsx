@@ -1,3 +1,4 @@
+import {isMixerAvailable,MIXER_PHONE_MEDIA} from '../lib/mixerAvailability';
 import {displayImageUrl} from '../lib/displayImage';
 import {useArchivePlayerState,useArchivePlaybackPosition} from '../hooks/useArchivePlayerState';
 import OntologyPlayerBrowser from './OntologyPlayerBrowser';
@@ -42,7 +43,8 @@ export default function HomeMusicArchive({lang,embedded=false,workFilter=null,on
   const [mixerOpen,setMixerOpen]=useState(false),[mixerFlat,setMixerFlat]=useState(false),[mixerResetting,setMixerResetting]=useState(false);
   useEffect(()=>{publishArchiveMixerState(mixerOpen);return()=>publishArchiveMixerState(false);},[mixerOpen]);
   useEffect(()=>{if(!mixerOpen)return undefined;const timer=setTimeout(()=>setMixerFlat(true),900);return()=>clearTimeout(timer);},[mixerOpen]);
-  const toggleMixer=()=>{if(mixerOpen&&mixerFlat){setMixerResetting(true);setMixerFlat(false);requestAnimationFrame(()=>requestAnimationFrame(()=>{setMixerResetting(false);setMixerOpen(false);}));}else{setMixerFlat(false);setMixerOpen(open=>!open);}};
+  useEffect(()=>{const media=window.matchMedia(MIXER_PHONE_MEDIA),sync=()=>{if(media.matches){setMixerOpen(false);setMixerFlat(false);setMixerResetting(false);}};sync();media.addEventListener('change',sync);return()=>media.removeEventListener('change',sync);},[]);
+  const toggleMixer=()=>{if(!isMixerAvailable())return;if(mixerOpen&&mixerFlat){setMixerResetting(true);setMixerFlat(false);requestAnimationFrame(()=>requestAnimationFrame(()=>{setMixerResetting(false);setMixerOpen(false);}));}else{setMixerFlat(false);setMixerOpen(open=>!open);}};
   const gradientId=useId().replace(/:/g,'');
   // Favourites live in this browser; share uses the device share sheet or copies the link.
   const [likes,setLikes]=useState(()=>{try{return JSON.parse(localStorage.getItem('echo-archive-likes')||'[]');}catch{return [];}});

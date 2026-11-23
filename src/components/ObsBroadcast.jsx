@@ -20,6 +20,13 @@ export default function ObsBroadcast({ token, title, item, onUpdate, missing = [
     } catch (error) { setMessage(error.message); }
     finally { setBusy(false); }
   };
+  // Media reaching the relay only makes the connection ready; the site goes live when Go live is pressed.
+  const goLive = async () => {
+    setBusy(true); setMessage('');
+    try { const result = await apiRequest('/live-stream/obs/go-live', { token, method: 'POST', body: { roomName: obs.roomName } }); onUpdate(result.item); }
+    catch (error) { setMessage(error.message); }
+    finally { setBusy(false); }
+  };
   const copy = async (value, label) => {
     try {
       if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(value);
@@ -38,7 +45,8 @@ export default function ObsBroadcast({ token, title, item, onUpdate, missing = [
   };
   return <div className="obs-controls">
     <div className="obs-session-toolbar">
-      {(obs?.roomName||obs?.state==='ending')&&<span className={`obs-status is-${obs?.state === 'live' ? 'live' : obs?.state === 'ending' ? 'waiting' : obs?.roomName ? 'waiting' : 'off'}`}><i aria-hidden="true" />{obs?.state === 'live' ? 'Receiving OBS · On air' : obs?.state === 'ending' ? 'Disconnecting OBS…' : obs?.roomName ? 'Waiting for OBS · Start within 2 minutes' : 'OBS disconnected'}</span>}
+      {(obs?.roomName||obs?.state==='ending')&&<span className={`obs-status is-${obs?.state === 'live' ? 'live' : obs?.state === 'ready' ? 'ready' : obs?.state === 'ending' ? 'waiting' : obs?.roomName ? 'waiting' : 'off'}`}><i aria-hidden="true" />{obs?.state === 'live' ? 'Receiving OBS · On air' : obs?.state === 'ready' ? 'OBS connected · Private until you press Go live' : obs?.state === 'ending' ? 'Disconnecting OBS…' : obs?.roomName ? 'Waiting for OBS · Start within 2 minutes' : 'OBS disconnected'}</span>}
+      {obs?.state === 'ready' && <button type="button" className="obs-go-live" disabled={busy} onClick={goLive}>{busy ? 'Going live…' : 'Go live'}</button>}
       <button type="button" className="admin-live-control admin-live-control-start" disabled={busy || !item || (item.isLive && !obs?.roomName) || (!obs?.roomName && !detailsReady)} title={!obs?.roomName && !detailsReady ? `Add ${missing.join(", ")} first` : undefined} onClick={act}>{busy ? 'Working…' : obs?.roomName ? 'Disconnect OBS' : 'Prepare OBS'}</button>
       {!obs?.roomName && !detailsReady && <p className="obs-help" role="status">Prepare OBS unlocks once you add {missing.join(", ").replace(/, ([^,]*)$/, " and $1")} in Session details.</p>}
     </div>

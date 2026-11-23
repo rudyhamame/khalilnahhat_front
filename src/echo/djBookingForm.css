@@ -265,3 +265,5 @@ html body .rentals-hero-form .djf-nav>button[aria-selected=true]{border-color:va
  html body .rentals-hero-form .djf-nav{display:flex;flex-direction:row;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;scrollbar-width:thin}
  html body .rentals-hero-form .djf-nav>button{flex:0 0 min(70vw,190px);width:auto;scroll-snap-align:start}
 }
+
+@media(max-width:760px),(pointer:coarse) and (max-width:1100px) and (max-height:600px){.djf-note[data-loading-draft]{display:none!important}}

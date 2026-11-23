@@ -72,3 +72,11 @@
 #admin-live-stream#admin-live-stream .obs-field{border:0;border-bottom:1px solid #ffffff2e;background:transparent}
 #admin-live-stream#admin-live-stream .obs-field input{padding-inline:0;background:transparent;border:0}
 #admin-live-stream#admin-live-stream .obs-controls :is(details,summary,button:not(.obs-recording-switch)){border-radius:0;box-shadow:none}
+
+/* OBS is connected and private: the status turns green and Go live is the one clear action, in the same flat style as the other studio controls. */
+.obs-status.is-ready>i{background:#4fd08a;box-shadow:0 0 0 3px #4fd08a33}
+.obs-session-toolbar .obs-go-live,#admin-live-stream#admin-live-stream .obs-session-toolbar>.obs-go-live{display:inline-flex;align-items:center;justify-content:center;gap:10px;box-sizing:border-box;width:100%;min-height:42px;margin:0;padding:0 18px;border:0;border-radius:0;background:#f2f2f6;color:#101015;font:600 13px/1 'Manrope',system-ui,sans-serif;letter-spacing:.02em;cursor:pointer;transition:background .15s}
+.obs-session-toolbar .obs-go-live::before{content:"";width:8px;height:8px;border-radius:50%;background:#e5484d;flex:none}
+.obs-session-toolbar .obs-go-live:hover:not(:disabled){background:#fff}
+.obs-session-toolbar .obs-go-live:disabled{opacity:.5;cursor:wait}
+.obs-session-toolbar .obs-go-live:focus-visible{outline:2px solid #f2f2f6;outline-offset:3px}

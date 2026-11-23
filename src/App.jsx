@@ -358,6 +358,7 @@ function App() {
     const me = await fetchCurrentUser(authToken);
     // Only a real change touches the session state, so the rest of the page is left alone.
     if (me?.user) setAuthUser((current) => (JSON.stringify(current) === JSON.stringify(me.user) ? current : me.user));
+    return me?.user;
   };
 
   const handleLogin = async ({ email, username, password }) => {

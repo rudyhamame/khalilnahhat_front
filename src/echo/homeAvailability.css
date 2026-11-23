@@ -399,3 +399,5 @@
 .avail-phone-contact label{display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-size:14px}
 .avail-phone-contact input[type=radio]{flex:none;width:18px;height:18px;min-width:0;min-height:0;margin:0;padding:0;accent-color:#e3d3a3}
 .avail-phone-contact:disabled label{cursor:default;opacity:.8}
+
+@media(max-width:760px),(pointer:coarse) and (max-width:1100px) and (max-height:600px){.avail-edit-note[data-loading-draft]{display:none!important}}

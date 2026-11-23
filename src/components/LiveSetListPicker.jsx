@@ -12,10 +12,11 @@ export default function LiveSetListPicker({token,value,onChange,disabled=false,i
  return <div className="studio-set-list-picker">
   <label className="live-goal-picker"><span>Select set list <b className="studio-required" aria-hidden="true">*</b></span><AdminSelect required aria-required="true" aria-invalid={invalid} aria-label="Select set list" value={value} disabled={disabled} onChange={e=>onChange(e.target.value)}>
    <option value="" disabled>Select a set list</option>
+   <option value="none">No set list</option>
    {items.map(item=><option key={item.id} value={item.id}>{item.title} · {item.trackCount} tracks</option>)}
-   {value&&!items.some(item=>item.id===value)&&<option value={value}>Selected set list{loading?' — loading…':' — refresh to check availability'}</option>}
+   {value&&value!=='none'&&!items.some(item=>item.id===value)&&<option value={value}>Selected set list{loading?' — loading…':' — refresh to check availability'}</option>}
   </AdminSelect></label>
-  <small>{loading?'Loading saved DJ Builder set lists…':!value?'Choose the set list for this session.':'The saved running order is copied into this live session. It does not start audio playback.'}</small>
+  <small>{loading?'Loading saved DJ Builder set lists…':!value?'Choose the set list for this session, or No set list.':value==='none'?'This session starts without a set list.':'The saved running order is copied into this live session. It does not start audio playback.'}</small>
   {error&&<p role="alert">{error} <button type="button" disabled={disabled} onClick={()=>setRetry(n=>n+1)}>Retry</button></p>}
  </div>;
 }

@@ -1,3 +1,4 @@
+import {isMixerAvailable,MIXER_PHONE_MEDIA} from '../lib/mixerAvailability';
 import useMicChannel from '../hooks/useMicChannel';
 import { EQUALIZER_BANDS, flatEqualizer, equalizerGain } from '../lib/audioEqualizer';
 import usePartyLighting from '../hooks/usePartyLighting';
@@ -25,12 +26,14 @@ export default function ArchiveFooter() {
 }
 
 function ArchiveMusicPlayer() {
-  const [mixerOpen,setMixerOpen]=useState(readArchiveMixerState);
+  const [mixerOpen,setMixerOpen]=useState(()=>isMixerAvailable()&&readArchiveMixerState());
   useEffect(()=>{
-    const sync=()=>setMixerOpen(readArchiveMixerState());
+    const media=window.matchMedia(MIXER_PHONE_MEDIA);
+    const sync=()=>{const open=readArchiveMixerState();if(!isMixerAvailable()&&open){publishArchiveMixerState(false);return;}setMixerOpen(open);};
+    media.addEventListener('change',sync);
     const close=()=>publishArchiveMixerState(false),key=event=>{if(event.key==='Escape'&&readArchiveMixerState())close();};
     sync();window.addEventListener(ARCHIVE_MIXER_STATE,sync);window.addEventListener('echo:close-mixer',close);window.addEventListener('keydown',key);
-    return()=>{window.removeEventListener(ARCHIVE_MIXER_STATE,sync);window.removeEventListener('echo:close-mixer',close);window.removeEventListener('keydown',key);};
+    return()=>{media.removeEventListener('change',sync);window.removeEventListener(ARCHIVE_MIXER_STATE,sync);window.removeEventListener('echo:close-mixer',close);window.removeEventListener('keydown',key);};
   },[]);
   const audio = useRef(null);
   const scratch = useRef({active:false,was:false,timer:0});

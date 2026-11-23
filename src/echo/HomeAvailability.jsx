@@ -22,6 +22,7 @@ import './homeAvailability.css';
 import './availabilityMinimal.css';
 import './bookingJourney.css';
 import './yourEventSoFar.css';
+import './bookingMobile.css';
 
 const parse=key=>new Date(key+'T12:00:00');
 const time=minutes=>`${String(Math.floor(minutes/60)).padStart(2,'0')}:${String(minutes%60).padStart(2,'0')}`;
@@ -243,7 +244,7 @@ export default function HomeAvailability({lang}){
  return <section id="availability" ref={shell} className="echo-section home-availability booking-journey" aria-label={tr('Plan your event','خطط لفعاليتك')} dir={ar?'rtl':'ltr'}>
   <div className="booking-journey-inner">
    <SubmittedBookingNotice ar={ar}/>
-   {editNote&&<p className="avail-edit-note" role="status">{editNote}</p>}
+   {editNote&&<p className="avail-edit-note" role="status" data-loading-draft={!ctx?.cloudReady?'':undefined}>{editNote}</p>}
 
    <PhaseHeading id="personal" ar={ar}/>
    <BookingStep number={1} onReset={updatePersonal} resetLabel={refreshing?tr('Refreshing…','جارٍ التحديث…'):tr('Refresh','تحديث')} ResetIcon={RefreshCw} title={tr('Who are we planning with?','مع من نخطط؟')} cardTitle={<><FieldCode code="01.01"/>{tr('Your details','بياناتك')}</>} copy={signedIn?tr('These contact details come from your account. To update them, visit Personal info in your dashboard. Choose how we should reach you below.','معلومات التواصل مأخوذة من حسابك. لتعديلها، افتح المعلومات الشخصية في لوحة حسابك. اختر أدناه طريقة التواصل المفضلة.'):tr('Tell us who to reach and how. Before your booking is sent you create your account and confirm your email with a code.','أخبرنا بمن نتواصل معه وكيف. قبل إرسال حجزك تنشئ حسابك وتؤكد بريدك الإلكتروني برمز.')}>

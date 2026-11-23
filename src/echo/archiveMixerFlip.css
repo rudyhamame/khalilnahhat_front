@@ -43,3 +43,5 @@
 .home-archive-mixer-status{flex:1;min-width:0;text-align:center;font-size:13px;color:#cfe0d6}
 .home-archive-mixer-status .ddj-msg{display:block}
 #home-music-archive .home-archive-flip-back #home-archive-channels{padding:0}
+
+@media(max-width:760px),(pointer:coarse) and (max-width:1100px) and (max-height:600px){.home-archive-mixer-toggle:not(.home-archive-back-toggle),#home-archive-mixer{display:none!important}}

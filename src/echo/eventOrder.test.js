@@ -122,11 +122,11 @@ for(const [language,direction] of [['en','cw'],['ar','ccw']])test(`hero record s
  assert.ok(html.includes(`data-direction="${direction}"`));assert.ok(html.includes(`record-${direction}-alpha.webm`));assert.ok(html.includes(`record-${direction}.mp4`));assert.match(html,/muted=""/);assert.doesNotMatch(html,/<canvas/);
 });
 
-test('review shows all account contacts as read-only with account values',()=>{
+test('account contacts stay read-only and are not automatically imported into a new booking',()=>{
  const user={id:'locked-contact',firstName:'Original',lastName:'Client',email:'original@example.invalid',phoneNumber:'4165550199',company:'Original Company'},lang={lang:'en',t:{}};
  const html=renderToStaticMarkup(createElement(EventOrderProvider,{user,token:'fixture',lang},createElement(QuotePage,{lang,user,isSessionReady:true})));
  for(const key of ['firstName','lastName','email','phone','company'])assert.match(html,new RegExp('<input[^>]*id="order-customer-'+key+'"[^>]*readOnly=""'));
- for(const value of ['Original','Client','original@example.invalid','+1 (416) 555-0199','Original Company'])assert.ok(html.includes('value="'+value+'"'));
+ for(const value of ['Original','Client','original@example.invalid','+1 (416) 555-0199','Original Company'])assert.ok(!html.includes('value="'+value+'"'));
 });
 
 test('the concept map and the Booking review have an icon for every booking section',()=>{

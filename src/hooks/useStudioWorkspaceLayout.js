@@ -18,12 +18,18 @@ export function useStudioWorkspaceLayout({liveFrame,settingsArea}) {
   const measure=()=>{
    cancelAnimationFrame(frame);frame=requestAnimationFrame(()=>{
     const top=dock.getBoundingClientRect().top;
-    const footer=root.closest('.admin-workspace')?.querySelector('.aw-workspace-footer');
-    const bottom=window.innerHeight-(footer?.getBoundingClientRect().height||0);
-    root.style.setProperty('--studio-workspace-height',`${Math.max(240,bottom-Math.max(0,top))/.9}px`);
+    const workspace=root.closest('.admin-workspace'),content=root.closest('.aw-content');
+    const footer=workspace?.querySelector('.aw-workspace-footer');
+    const viewport=window.visualViewport;
+    const bottom=Math.min((viewport?.offsetTop||0)+(viewport?.height||window.innerHeight),content?.getBoundingClientRect().bottom??Infinity,footer?.getBoundingClientRect().top??Infinity);
+    // Measure the actual CSS zoom rather than assuming the workspace is always at 90%.
+    const zoom=dock.offsetWidth?dock.getBoundingClientRect().width/dock.offsetWidth:1;
+    if(!zoom)return;
+    const height=`${Math.floor(Math.max(0,bottom-Math.max(0,top))/zoom*100)/100}px`;
+    if(root.style.getPropertyValue('--studio-workspace-height')!==height)root.style.setProperty('--studio-workspace-height',height);
    });
   };
-  const observer=new ResizeObserver(measure);if(root.firstElementChild)observer.observe(root.firstElementChild);
+  const observer=new ResizeObserver(measure);const content=root.closest('.aw-content');if(content)observer.observe(content);const footer=root.closest('.admin-workspace')?.querySelector('.aw-workspace-footer');if(footer)observer.observe(footer);
   window.addEventListener('resize',measure);document.addEventListener('fullscreenchange',measure);measure();
   return()=>{observer.disconnect();cancelAnimationFrame(frame);window.removeEventListener('resize',measure);document.removeEventListener('fullscreenchange',measure);};
  },[settingsArea]);

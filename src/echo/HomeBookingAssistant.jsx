@@ -3,7 +3,7 @@ import {useTree} from '../lib/tree';
 import useBookingAtomReview from './useBookingAtomReview';
 import {useEffect,useLayoutEffect,useRef,useState} from 'react';
 import {eventTypeLabel} from '../lib/eventTypeLabel';
-import {Sparkles,MessageCircle,CalendarDays,Disc3,Boxes,UserRound,Images,StickyNote,Check,ArrowUpRight,ClipboardList,Trash2,X,Minimize2,Maximize2} from 'lucide-react';
+import {ArrowDownToLine,LoaderCircle,Sparkles,MessageCircle,CalendarDays,Disc3,Boxes,UserRound,Images,StickyNote,Check,ArrowUpRight,ClipboardList,Trash2,X,Minimize2,Maximize2} from 'lucide-react';
 import {EventOrderAside} from './EventOrderProvider';
 import {useEventOrder} from './eventOrderContext';
 import useEquipmentChanges from './useEquipmentChanges';
@@ -145,6 +145,13 @@ export default function HomeBookingAssistant({lang,user,token,auth,overlay=false
   if(section)select(section.item.id,true);
   window.dispatchEvent(new CustomEvent('echo:booking-atom-correction',{detail:{path:line.reviewPath||line.key,label:line.label,atomKey:line.key}}));
  };
+ const [importingAccount,setImportingAccount]=useState(false),[accountImportError,setAccountImportError]=useState('');
+ const getAccountDetails=async()=>{
+  if(importingAccount)return;setImportingAccount(true);setAccountImportError('');
+  try{if(!await ctx.importAccountDetails?.())throw Error(tr('Account details could not be imported. Please try again.','تعذر استيراد معلومات الحساب. حاول مرة أخرى.'));}
+  catch(error){setAccountImportError(error.message);}
+  finally{setImportingAccount(false);}
+ };
  const review={stateFor:atomReview.stateFor,disabled:busy||!ctx.draftEditable,onReview:(line,confirmed)=>{
   if(busy||!ctx.draftEditable||line.empty)return;
   atomReview.review(line,confirmed);
@@ -187,6 +194,7 @@ export default function HomeBookingAssistant({lang,user,token,auth,overlay=false
        <span className="ea-step-text"><strong><i className="ea-step-no" aria-hidden="true">{String(index+1).padStart(2,'0')}</i>{ar?item.ar:item.title}</strong>
        </span>
       </button>
+      {item.id==='contact'&&ctx.signedIn&&!ctx.pendingRequest&&<section className="ea-account-import" aria-label={tr('Import personal information','استيراد المعلومات الشخصية')} aria-busy={importingAccount} data-imported={ctx.order.accountDetailsImported||undefined}><div className="ea-account-import-copy"><span className="ea-account-import-icon"><UserRound size={18} aria-hidden="true"/></span><div><strong>{tr('Your account details','معلومات حسابك')}</strong><small>{ctx.order.accountDetailsImported?tr('Added from Personal info. Import again to refresh.','أُضيفت من المعلومات الشخصية. أعد الاستيراد للتحديث.'):tr('Fill this section from Personal info in your dashboard.','املأ هذا القسم من المعلومات الشخصية في لوحة حسابك.')}</small></div></div><button type="button" disabled={importingAccount||busy||!ctx.draftEditable} onClick={getAccountDetails}>{importingAccount?<LoaderCircle size={15} className="ea-account-import-spinner" aria-hidden="true"/>:<ArrowDownToLine size={15} aria-hidden="true"/>}{importingAccount?tr('Getting details…','جارٍ جلب المعلومات…'):ctx.order.accountDetailsImported?tr('Refresh details','تحديث المعلومات'):tr('Get from account','جلب من الحساب')}</button>{accountImportError&&<p role="alert">{accountImportError}</p>}</section>}
       <span className="ea-step-text ea-step-details"><AtomGroups lines={lines} progress={progress} tr={tr} review={review}/></span>
      </li>;})}</ol>
      <div className="ea-actions">

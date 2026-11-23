@@ -14,7 +14,7 @@ import {accountEventDraft} from '../lib/accountEventDraft';
 import {mergeGuestDraft} from '../lib/mergeGuestDraft.mjs';
 import {aiTaskHistoryKey} from '../lib/aiTaskHistory';
 import { trackOnce, setFunnelStep, installDropOffTracking } from '../lib/analytics';
-import { createEventOrder, normalizeEventOrder, applyAccountProfile, fields, getPath, legacyToOrder, missingOrderFields,hasEventDraftContent,setAccountLock } from '../lib/eventOrderCore.mjs';
+import { createEventOrder, normalizeEventOrder, applyAccountProfile, applyDraftAccountProfile, fields, getPath, legacyToOrder, missingOrderFields,hasEventDraftContent,setAccountLock } from '../lib/eventOrderCore.mjs';
 import './eventOrder.css';
 import './orderAsideUI.css';
 import './eventOrderInline.css';
@@ -44,7 +44,7 @@ function initialState(user){
     if(saved){order=normalizeEventOrder(JSON.parse(saved));active=true;}
     else {const legacy=JSON.parse(localStorage.getItem(`echo-quote-draft:${user?.id||user?._id||'guest'}`)||'null');if(legacy?.form){order=legacyToOrder(order,legacy.form);active=true;}}
   }catch{/* A corrupt or unavailable local draft must not block booking. */}
-  order=applyAccountProfile(order,user);
+  order=applyDraftAccountProfile(order,user);
   return {order,active};
 }
 
@@ -73,12 +73,12 @@ export function EventOrderProvider({user,token,lang,auth,children,isSessionReady
   };
   const [stored,setStoredState]=useState(initial.order),[active,setActive]=useState(initial.active),[editorOpen,setEditorOpen]=useState(false),[revision,setRevision]=useState(0),[saveState,setSaveState]=useState('');
   const storedRef=useRef(initial.order);
-  const setStored=update=>{const next=applyAccountProfile(typeof update==='function'?update(storedRef.current):update,user);storedRef.current=next;setStoredState(next);};
+  const setStored=update=>{const next=applyDraftAccountProfile(typeof update==='function'?update(storedRef.current):update,user);storedRef.current=next;setStoredState(next);};
   const getOrder=()=>({...storedRef.current,equipment:Object.values(readCart()).map(({id,name,quantity})=>({id,name,quantity}))});
   const cart=useCart();
   const {catalog,equipment}=useTree();
   useLayoutEffect(()=>{restoreOrderCart(initial.order.equipment||[]);},[initial]);
-  const order=useMemo(()=>pending?applyAccountProfile(normalizeEventOrder(pending.order),user):({...stored,equipment:Object.values(cart).map(item=>({id:item.id,name:item.name,quantity:item.quantity}))}),[stored,cart,pending,user]);
+  const order=useMemo(()=>pending?normalizeEventOrder(pending.order):({...stored,equipment:Object.values(cart).map(item=>({id:item.id,name:item.name,quantity:item.quantity}))}),[stored,cart,pending,user]);
   // The header's Book an event button shows how many booking drafts still need completing (the account has one draft).
   const draftsToComplete=user&&token&&active&&hasEventDraftContent(order)&&missingOrderFields(order).length>0?1:0;
   // Funnel events: the event details complete, the personal details complete, and where a visitor stopped if they leave.
@@ -125,7 +125,7 @@ export function EventOrderProvider({user,token,lang,auth,children,isSessionReady
     }).catch(()=>{if(alive)setSaveState('load-failed');});
     return()=>{alive=false;client.dispose();if(cloud.current===client)cloud.current=null;};
   },[user?.id,user?._id,token,loadRetry]);// eslint-disable-line react-hooks/exhaustive-deps -- a refreshed profile must not reload the draft; the effect below applies it
-  // A refreshed account profile (name, email, phone, company) updates the booking form only.
+  // A refreshed profile updates contacts only in drafts that have opted in.
   useEffect(()=>{if(user)setStored(current=>current);},[user]);// eslint-disable-line react-hooks/exhaustive-deps
   useEffect(()=>{
     const openBooking=()=>{if(['#how-to-book','#event-order'].includes(window.location.hash)){setPanelOpen(true);requestAnimationFrame(()=>scrollToAppSection('assistant'));}};
@@ -174,7 +174,7 @@ export function EventOrderProvider({user,token,lang,auth,children,isSessionReady
     setPanelOpen(true);
     requestAnimationFrame(()=>window.dispatchEvent(new Event('echo:booking-review')));
   };
-  const blankProfile=()=>applyAccountProfile(createEventOrder(),user);
+  const blankProfile=()=>applyDraftAccountProfile(createEventOrder(),user);
   const finish=async receipt=>{
     setLastSubmission({reference:receipt,cleaning:true});
     const cleared=await clear(true);
@@ -231,6 +231,15 @@ export function EventOrderProvider({user,token,lang,auth,children,isSessionReady
       if(result.equipmentChanged)restoreOrderCart(resolveDraftEquipment(result.order.equipment,equipment,{previous:source==='manual'?snapshot.equipment:[]}));
     }
     return result;
+  };
+  const importAccountDetails=async()=>{
+    if(!user||!token||pending||deleting.current||!cloudReady||['conflict','delete-conflict'].includes(saveState))return false;
+    const profile=await auth?.onRefreshAccount?.()||user;
+    if(deleting.current||!cloudReady)return false;
+    const next=applyAccountProfile({...getOrder(),accountDetailsImported:true},profile);
+    edited.current=true;storedRef.current=next;setStoredState(next);setActive(true);setSaveState('pending');
+    setRecentEdits(current=>[...current,...fields.filter(field=>field.locked==='account').map(({key})=>({path:key,source:'manual',at:new Date().toISOString()}))].slice(-16));
+    return true;
   };
   const setEquipment=(item,quantity)=>{
     const current=equipment.find(row=>row.id===item.id)||item;
@@ -299,7 +308,7 @@ export function EventOrderProvider({user,token,lang,auth,children,isSessionReady
   const value={
     user,lang,auth,isSessionReady,onCreateServiceRequest,token,signedIn:Boolean(user&&token),draftEditable:!pending&&!deleting.current&&cloudReady&&!['conflict','delete-conflict'].includes(saveState),pendingRequest:pending,
     order,getOrder,active,cloudReady,clearing,draftId,revision,resetVersion,recentEdits,
-    setField,setEquipment,removeService,editDraft,patchAi,commitAi,applyLegacy,
+    setField,setEquipment,importAccountDetails,removeService,editDraft,patchAi,commitAi,applyLegacy,
     save,saveState,clear,finish,retrySync:()=>setLoadRetry(value=>value+1),
     panelOpen,assistantAvailable,editorOpen,begin,openEditor,reviewDraft,closeEditor:()=>setEditorOpen(false),
     assistantSession,assistantRequest,openAssistant,closeAssistant:()=>setPanelOpen(false),

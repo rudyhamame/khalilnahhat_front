@@ -76,7 +76,7 @@ export default function DjBookingForm({ar=false,ctx,djAdded,onClose,backLabel}){
  const cards=[];
  const section=(number,title,hint,children,action=null)=>{cards.push({number,title,hint,children,action});return null;};
  return <div className="djf" dir={ar?'rtl':'ltr'}>
-  {note&&<p className="djf-note" role="status">{note}</p>}
+  {note&&<p className="djf-note" role="status" data-loading-draft={!ctx?.cloudReady?'':undefined}>{note}</p>}
   <div className="djf-body"><fieldset className="djf-fields" disabled={!canEdit}>
    <div hidden className="djf-collect">
    <div className="djf-col">
