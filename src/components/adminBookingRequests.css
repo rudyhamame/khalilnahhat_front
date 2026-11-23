@@ -71,8 +71,6 @@
 .booking-section-title>span{color:var(--aw-muted);font-size:12px;font-weight:400}
 .admin-booking-detail-body .admin-service-quote-row{grid-template-columns:minmax(100px,1fr) 48px minmax(80px,110px) 80px;gap:12px;padding:12px 0;min-width:390px}
 .admin-booking-detail-body .admin-service-quote-row-head{background:transparent;color:var(--aw-muted);font-size:12px}
-.admin-booking-detail-body .admin-service-quote-footer{display:grid;grid-template-columns:minmax(0,1fr) auto;padding:18px 0;align-items:end;gap:20px}
-.admin-booking-detail-body .admin-service-quote-footer label{display:grid;gap:8px;font-size:12px}
 .admin-booking-detail-body .admin-service-request-terms{display:flex;flex-wrap:wrap;gap:14px;padding:0;margin:0 0 20px;border:0}
 .admin-booking-detail-body .admin-service-request-terms label{flex:1 1 100px;display:grid;gap:8px;font-size:12px}
 .admin-booking-detail-body label.admin-service-request-terms{display:grid;gap:8px;font-size:12px}
@@ -92,33 +90,13 @@
 .booking-conversation-aside .booking-draft-conversation li time{font-size:12px;color:var(--aw-muted)}
 .booking-conversation-empty{padding:20px;color:var(--aw-muted);font-size:12px;line-height:1.7}
 @media(max-width:1200px){.admin-booking-detail-body{grid-template-columns:minmax(0,1fr) 250px}.admin-booking-detail-body>.admin-service-request-card{padding:18px}.admin-booking-detail-body .admin-service-request-event{grid-template-columns:minmax(0,1fr)}}
-@media(max-width:950px){.admin-booking-detail-body{display:flex;flex-direction:column;overflow:auto}.admin-booking-detail-body>.admin-service-request-card{flex:none;overflow:visible}.booking-conversation-aside{flex:none;min-height:260px;max-height:500px;border-inline-start:0;border-top:1px solid var(--aw-line)}.admin-booking-detail-body .admin-service-quote-footer{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:950px){.admin-booking-detail-body{display:flex;flex-direction:column;overflow:auto}.admin-booking-detail-body>.admin-service-request-card{flex:none;overflow:visible}.booking-conversation-aside{flex:none;min-height:260px;max-height:500px;border-inline-start:0;border-top:1px solid var(--aw-line)}}
 .admin-booking-detail-body{grid-template-rows:minmax(0,1fr)}
 .admin-booking-detail-body>.admin-service-request-card{box-sizing:border-box;height:100%;max-height:100%;overflow-y:auto;overflow-x:hidden;scrollbar-gutter:stable}
-.booking-discount-editor{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:12px 0 20px}
-.booking-discount-editor label{display:grid;gap:8px;font-size:12px;color:var(--aw-muted)}
-.booking-price-summary{margin:0;padding:16px 0;border-block:1px solid var(--aw-line);display:grid;gap:12px}
-.booking-price-summary>div{display:flex;justify-content:space-between;gap:16px;font-size:12px}
-.booking-price-summary dt{color:var(--aw-muted)}
-.booking-price-summary dd{margin:0;font-variant-numeric:tabular-nums}
-.booking-price-summary .is-total{padding-top:14px;border-top:1px solid var(--aw-line);font-size:17px;font-weight:600}
-.booking-price-summary .is-total dt{color:var(--aw-text)}
-.booking-pricing-hint{font-size:12px;line-height:1.7;color:var(--aw-muted);margin:12px 0 24px}
 @media(max-width:950px){.admin-booking-detail-body>.admin-service-request-card{height:auto;max-height:none;overflow:visible}}
 
 /* Quote terms sit beside the line items within the scrollable booking column. */
 .admin-booking-detail-body>.admin-service-request-card{container:booking-content / inline-size}
-.booking-quote-layout{display:grid;grid-template-columns:minmax(0,1fr) 210px;align-items:start;gap:24px;margin-bottom:24px}
-.booking-pricing-column,.booking-quote-terms{min-width:0}
-.booking-quote-terms{padding-inline-start:20px;border-inline-start:1px solid var(--aw-line)}
-.booking-quote-layout .booking-section-title{margin-top:0}
-.admin-booking-detail-body .booking-quote-terms .admin-service-request-terms{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
-.booking-quote-terms .admin-service-request-terms>span{font-size:12px;line-height:1.6;color:var(--aw-muted);overflow-wrap:anywhere}
-@container booking-content (max-width:650px){
- .booking-quote-layout{grid-template-columns:minmax(0,1fr);gap:8px}
- .booking-quote-terms{padding-inline-start:0;border-inline-start:0}
- .admin-booking-detail-body .booking-quote-terms div.admin-service-request-terms{grid-template-columns:repeat(auto-fit,minmax(120px,1fr))}
-}
 
 .booking-detail-sections{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 28px;margin-bottom:28px}
 .booking-detail-section{min-width:0;padding:22px 0;border-bottom:1px solid var(--aw-line)}
@@ -139,49 +117,13 @@
 .admin-service-quote-row .quote-atom-code{display:inline-block;margin-inline-end:8px;padding:1px 6px;border-radius:5px;background:var(--aw-raised,#ffffff10);color:var(--aw-muted,#9aaba2);font:600 11px/1.5 ui-monospace,Menlo,Consolas,monospace;font-style:normal;letter-spacing:.03em}
 
 /* ── Quote editor, cleaner: a bordered price table, a terms card beside it, a clear price summary and one obvious Publish action. ── */
-.booking-quote-layout{grid-template-columns:minmax(0,1fr) 264px;gap:28px}
-.booking-quote-layout :is(input,textarea){width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--aw-line);border-radius:8px;background:transparent;color:inherit;font:inherit;font-size:13px}
-.booking-quote-layout :is(input,textarea):focus-visible{outline:2px solid var(--aw-muted,currentColor);outline-offset:1px}
-.booking-quote-layout textarea{resize:vertical;line-height:1.5}
-
-.booking-pricing-column .admin-service-quote-table{overflow-x:auto;border:1px solid var(--aw-line);border-radius:12px}
-.admin-booking-detail-body .booking-pricing-column .admin-service-quote-row{padding:12px 14px;border-bottom:1px solid var(--aw-line);align-items:center;transition:background .12s}
-.booking-pricing-column .admin-service-quote-row:last-child{border-bottom:0}
-.booking-pricing-column .admin-service-quote-row:not(.admin-service-quote-row-head):hover{background:var(--aw-raised,#ffffff08)}
-.admin-booking-detail-body .booking-pricing-column .admin-service-quote-row-head{padding-block:9px;background:var(--aw-raised,#ffffff08);font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
-.booking-pricing-column .admin-service-quote-row>:is(:nth-child(2),:nth-child(3),:nth-child(4)){text-align:end;font-variant-numeric:tabular-nums}
-.booking-pricing-column .admin-service-quote-row:not(.admin-service-quote-row-head) input{text-align:end;font-variant-numeric:tabular-nums}
-.booking-pricing-column .admin-service-quote-row:not(.admin-service-quote-row-head)>span:last-child{font-weight:600}
-.booking-pricing-column .admin-service-quote-row>strong{min-width:0;font-weight:500;overflow-wrap:anywhere}
-
-.admin-booking-detail-body .booking-pricing-column .admin-service-quote-footer{padding:16px 0 4px;grid-template-columns:minmax(0,1fr) auto;align-items:end}
-.booking-pricing-column .admin-service-quote-total{display:grid;gap:2px;justify-items:end}
-.booking-pricing-column .admin-service-quote-total span{font-size:11px;color:var(--aw-muted)}
-.booking-pricing-column .admin-service-quote-total strong{font-size:16px;font-variant-numeric:tabular-nums}
-
-.booking-discount-editor{padding:14px;border:1px solid var(--aw-line);border-radius:12px;gap:12px;margin:14px 0}
-.booking-price-summary{padding:14px 16px;border:1px solid var(--aw-line);border-radius:12px;background:var(--aw-raised,#ffffff06);gap:10px}
-.booking-price-summary>div{font-size:13px}
-.booking-price-summary dd{font-weight:500}
-.booking-price-summary .is-total{padding-top:12px;font-size:18px}
-.booking-price-summary .is-total dd{font-weight:700}
-button.booking-pricing-hint{display:inline-flex;align-items:center;margin:0 0 12px;padding:7px 12px;border:1px solid var(--aw-line);border-radius:8px;background:transparent;color:inherit;font-size:12px;cursor:pointer}
-button.booking-pricing-hint:hover{background:var(--aw-raised,#ffffff10)}
-p.booking-pricing-hint{margin:10px 0 20px}
-
-.booking-quote-terms{align-self:start;position:sticky;top:12px;padding:16px;border:1px solid var(--aw-line);border-radius:12px;background:var(--aw-raised,#ffffff06)}
-.booking-quote-terms .booking-section-title{margin:0 0 12px;padding-top:0;border-top:0}
-.booking-quote-terms .admin-service-request-terms{margin:0 0 14px}
-.booking-quote-terms label{color:var(--aw-muted)}
 .booking-publish-action{display:flex;align-items:center;flex-wrap:wrap;gap:12px 16px;margin:4px 0 28px}
 .booking-publish-action .primary-button{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;font-weight:600}
 .booking-publish-action small{color:var(--aw-muted);font-size:12px}
-@container booking-content (max-width:650px){.booking-quote-terms{position:static}}
 
 /* One line, edge to edge, separates the booking details above from the quote below. */
 .admin-booking-detail-body>.admin-service-request-card{--quote-pad:24px}
 @media(max-width:1200px){.admin-booking-detail-body>.admin-service-request-card{--quote-pad:18px}}
-.admin-booking-detail-body .booking-quote-layout{margin-inline:calc(var(--quote-pad,24px) * -1);padding:var(--quote-pad,24px) var(--quote-pad,24px) 0;border-top:1px solid var(--aw-line)}
 /* Publish and Cancel live in the Booking details header bar. */
 .admin-booking-detail-heading .booking-publish-action{margin:0;margin-inline-start:auto;gap:8px}
 .admin-booking-detail-heading .booking-publish-action .primary-button,.admin-booking-detail-heading .booking-publish-action .secondary-button{padding:7px 14px;font-size:12px}
@@ -207,10 +149,6 @@ p.booking-pricing-hint{margin:10px 0 20px}
 /* Booking requests: only the structural lines stay (column dividers, header bars, the line above the quote, input boxes). Decorative borders are gone. */
 .admin-workspace[data-area=services] :is(.booking-brief-heading,.booking-detail-section){border-bottom:0}
 .admin-workspace[data-area=services] .booking-conversation-aside .booking-draft-conversation li{border-bottom:0}
-.admin-workspace[data-area=services] :is(.booking-discount-editor,.booking-price-summary,.booking-quote-terms,.booking-pricing-column .admin-service-quote-table){border:0}
-.admin-workspace[data-area=services] .booking-price-summary .is-total{border-top:0}
-.admin-workspace[data-area=services] :is(.booking-discount-editor,.booking-price-summary,.booking-quote-terms){background:var(--aw-raised,#ffffff08)}
-.admin-workspace[data-area=services] .booking-pricing-column .admin-service-quote-row{border-bottom:0}
 
 /* The three column headers (Booking requests, Booking details, conversation) share one height. */
 @media(min-width:761px){
@@ -230,13 +168,43 @@ p.booking-pricing-hint{margin:10px 0 20px}
 /* The status badge sits at the far end of the summary row, opposite the client name, and reads at a glance. */
 .admin-booking-detail-body .booking-summary-who{justify-content:space-between}
 .admin-booking-detail-body .booking-summary-who>h3{flex:1 1 auto}
-.admin-booking-detail-body .booking-summary-who>.admin-service-request-status{order:2;margin-inline-start:auto;display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border:1px solid currentColor;border-radius:999px;background:color-mix(in srgb,currentColor 14%,transparent);font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;color:#e6b95a}
+.admin-booking-detail-body .booking-summary-who>.admin-service-request-status{order:1;margin-inline-start:auto;display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border:1px solid currentColor;border-radius:999px;background:color-mix(in srgb,currentColor 14%,transparent);font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;color:#e6b95a}
 .admin-booking-detail-body .booking-summary-who>.admin-service-request-status::before{content:'';width:8px;height:8px;border-radius:50%;background:currentColor}
 .admin-booking-detail-body .booking-summary-who>.admin-service-request-status:is(.is-accepted,.is-confirmed){color:#5fd3a0}
 .admin-booking-detail-body .booking-summary-who>.admin-service-request-status:is(.is-quoted){color:#7fb4ff}
 .admin-booking-detail-body .booking-summary-who>.admin-service-request-status:is(.is-changes_requested){color:#f0b04f}
 .admin-booking-detail-body .booking-summary-who>.admin-service-request-status:is(.is-cancelled,.is-expired){color:#e08a85}
-.admin-booking-detail-body .booking-summary-who>a{order:1;flex:1 1 100%}
+.admin-booking-detail-body .booking-summary-who>a{order:2;flex:1 1 100%}
 /* Status badge: pinned to the top-right corner of the summary, level with the client name. */
 .admin-booking-detail-body .booking-summary-who{align-items:flex-start}
 .admin-booking-detail-body .booking-summary-who>.admin-service-request-status{align-self:flex-start;margin-top:0}
+
+/* Booking details tabs: Booking info | Quote, in the header bar between the title and the actions. */
+.booking-detail-tabs{display:flex;align-items:stretch;align-self:stretch;gap:4px;margin-inline-start:8px}
+.booking-detail-tabs button{position:relative;display:inline-flex;align-items:center;padding:0 14px;border:0;background:transparent;color:var(--aw-muted,var(--text-secondary));font:600 13px/1 inherit;cursor:pointer}
+.booking-detail-tabs button:hover{color:var(--aw-text,inherit)}
+.booking-detail-tabs button.is-active{color:var(--aw-text,inherit)}
+.booking-detail-tabs button.is-active::after{content:'';position:absolute;inset-inline:10px;bottom:-1px;height:2px;border-radius:2px;background:var(--aw-text,currentColor)}
+.booking-detail-tabs button:focus-visible{outline:2px solid var(--aw-muted,currentColor);outline-offset:-2px;border-radius:6px}
+
+/* Header: title left, tabs centred, actions right. Tabs are a segmented control. */
+.admin-booking-detail-heading{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center}
+.booking-detail-title{display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px;min-width:0}
+.admin-booking-detail-heading .booking-detail-title>span{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;background:var(--aw-raised,#ffffff0d);color:var(--aw-muted,var(--text-secondary));font:600 11px/1.4 ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace;letter-spacing:.04em}
+.admin-booking-detail-heading .booking-publish-action{justify-self:end;margin-inline-start:0}
+.booking-detail-tabs{justify-self:center;align-self:center;align-items:center;gap:2px;margin:0;padding:3px;border-radius:10px;background:var(--aw-raised,#ffffff0d)}
+.booking-detail-tabs button{min-height:30px;padding:0 18px;border-radius:8px;font-size:12px;letter-spacing:.02em;transition:background .15s,color .15s}
+.booking-detail-tabs button:hover:not(.is-active){background:#ffffff0a}
+.booking-detail-tabs button.is-active{background:var(--aw-text,#fff);color:var(--aw-main,#101514);box-shadow:0 1px 3px #0005}
+.booking-detail-tabs button.is-active::after{display:none}
+@media(max-width:900px){.admin-booking-detail-heading{grid-template-columns:minmax(0,1fr) auto}.booking-detail-tabs{grid-row:2;grid-column:1 / -1;justify-self:stretch}.booking-detail-tabs button{flex:1}}
+
+/* The Booking details header uses the same dark surface as the Recordings header. */
+.admin-workspace[data-area=services] .admin-booking-detail-heading{background:#121216}
+/* Room under the booking summary before the first section. */
+.admin-booking-detail-body .booking-summary{padding-bottom:28px;margin-bottom:8px}
+/* A full line, edge to edge, closes the booking summary. */
+.admin-workspace[data-area=services] .admin-booking-detail-body .booking-summary{margin-inline:calc(var(--quote-pad,24px) * -1);padding-inline:var(--quote-pad,24px);border-bottom:1px solid var(--aw-line)}
+
+/* "Services & pricing" sits in its own wrapper with the raised background, like the quote terms card. */
+.admin-workspace[data-area=services] .bqe-editor{padding:16px 18px;border-radius:12px;background:var(--aw-raised,#ffffff08)}

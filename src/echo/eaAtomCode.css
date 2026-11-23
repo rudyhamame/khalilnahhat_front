@@ -1,0 +1,12 @@
+/* One look for every data-atom code badge (01.01.03, 04.02.07 …): a quiet mono tag with a hairline border, aligned by fixed digit width. */
+html body i.ea-atom-code.ea-atom-code,
+html body i.quote-atom-code.quote-atom-code{
+ display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;min-width:4.9em;margin-inline-end:8px;padding:2px 7px;
+ border:1px solid color-mix(in srgb,currentColor 28%,transparent);border-radius:6px;
+ background:color-mix(in srgb,currentColor 9%,transparent);color:#8fd6bd;
+ font:600 10.5px/1.5 ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace;font-style:normal;font-variant-numeric:tabular-nums;letter-spacing:.05em;white-space:nowrap;
+}
+html body .ea-data-row>i.ea-atom-code.ea-atom-code{margin:0;justify-self:start}
+/* The badge never touches the name that follows it. */
+html body i.ea-atom-code.ea-atom-code,html body i.quote-atom-code.quote-atom-code{margin-inline-end:12px}
+html body .ea-data-row>i.ea-atom-code.ea-atom-code{margin-inline-end:0}

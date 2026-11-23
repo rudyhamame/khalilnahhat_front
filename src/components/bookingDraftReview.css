@@ -21,8 +21,52 @@
 
 .bdr-no{display:inline-block;margin-inline-end:8px;color:#d9b46e;font-style:normal;font-weight:700;font-size:.78em;letter-spacing:.06em;font-variant-numeric:tabular-nums}
 
-.bdr-atoms .ea-data-row[data-coded]{grid-template-columns:4.6em minmax(0,.9fr) minmax(0,1.1fr);align-items:center}
+.bdr-atoms .ea-data-row[data-coded]{grid-template-columns:5.2em minmax(0,.9fr) minmax(0,1.1fr);column-gap:16px;align-items:center}
 /* Step 03 rows (music preferences) use the same table columns as every other step: code | label | value, not a stacked column. */
 .bdr-atoms .ea-data-row[data-music]{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr)!important;column-gap:12px!important;row-gap:0!important;align-items:start!important}
-.bdr-atoms .ea-data-row[data-music][data-coded]{grid-template-columns:4.6em minmax(0,.9fr) minmax(0,1.1fr)!important}
+.bdr-atoms .ea-data-row[data-music][data-coded]{grid-template-columns:5.2em minmax(0,.9fr) minmax(0,1.1fr)!important;column-gap:16px!important}
 .bdr-atoms .ea-data-row[data-music]>.ea-data-value{width:auto}
+/* In the admin workspace the review sections use the admin theme's raised surface, not the fixed green. */
+.admin-workspace .bdr-section{background:var(--aw-raised,#ffffff08)}
+
+/* Step 03 multi-row atoms (languages, genres, songs, artists): each kind reads in its own clear shape inside the value column. */
+.bdr-atoms .music-value-list{flex-direction:row;flex-wrap:wrap;gap:6px}
+.bdr-atoms .music-value-list>[role=listitem]{padding:3px 11px;border:0;border-radius:999px;background:var(--aw-raised,#ffffff10);font-size:12px;line-height:1.5;color:inherit}
+.bdr-atoms .music-language-list{gap:6px}
+.bdr-atoms .music-language{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px;padding:0;border:0}
+.bdr-atoms .music-language>strong{font:600 13px/1.5 inherit;color:inherit}
+.bdr-atoms .music-language>span{font-size:12px;color:var(--aw-muted,#acbdb4)}
+.bdr-atoms .music-language>span::before{content:'· ';opacity:.6}
+.bdr-atoms .music-song-list{gap:12px}
+.bdr-atoms .music-song{display:grid;gap:2px;padding:0 0 0 10px;border:0;border-inline-start:2px solid color-mix(in srgb,#8fd6bd 45%,transparent)}
+.bdr-atoms .music-song-moment{width:fit-content;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8fd6bd}
+.bdr-atoms .music-song .music-song-title{font-size:13px;line-height:1.5}
+.bdr-atoms .music-song-artist{font-size:12px;color:var(--aw-muted,#acbdb4)}
+.bdr-atoms .music-song a{font-size:12px}
+
+/* Step 05 rows: photos, photo links and event documents are stacked rows (number, link, comment), not chips; notes and the voucher keep their text. */
+.bdr-atoms .reference-links{flex-direction:column;flex-wrap:nowrap;gap:8px}
+.bdr-atoms .reference-links>[role=listitem]{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px;padding:0;border:0;border-radius:0;background:none;font-size:13px;line-height:1.5}
+.bdr-atoms .reference-links .reference-number{min-width:1.6em;margin:0;color:#8fd6bd}
+.bdr-atoms .reference-links a{min-width:0;overflow-wrap:anywhere;color:#a4e4cf;text-decoration:underline;text-underline-offset:3px}
+.bdr-atoms .reference-links .reference-comment{flex:1 1 100%;padding-inline-start:calc(1.6em + 8px);opacity:.75;font-size:12px}
+.bdr-atoms .music-value-text{white-space:pre-wrap;line-height:1.6;color:inherit}
+
+/* Mini tables for multi-row atoms (songs, languages, genres, artists, photos, links, documents). */
+.bdr-atoms .mini-table{width:100%;border-collapse:collapse;table-layout:auto;font-size:12.5px;line-height:1.5}
+.bdr-atoms .mini-table th{padding:0 10px 6px 0;border-bottom:1px solid var(--aw-line,#ffffff1f);color:var(--aw-muted,#9aaba2);font-size:10px;font-weight:600;letter-spacing:.08em;text-align:start;text-transform:uppercase;white-space:nowrap}
+.bdr-atoms .mini-table td{padding:7px 10px 7px 0;border:0;vertical-align:top;overflow-wrap:anywhere}
+.bdr-atoms .mini-table tbody tr+tr td{border-top:1px solid #ffffff0d}
+.bdr-atoms .mini-table .mini-num{width:1%;padding-inline-end:12px;color:var(--aw-muted,#9aaba2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.bdr-atoms .mini-table strong{font-weight:600;color:inherit}
+.bdr-atoms .mini-table a{color:#a4e4cf;text-decoration:underline;text-underline-offset:3px;white-space:normal}
+/* Mini-table cells never wrap: a long value keeps its line and the table scrolls sideways instead. */
+.bdr-atoms .mini-table td,.bdr-atoms .mini-table a{white-space:nowrap;overflow-wrap:normal}
+.bdr-atoms .ea-data-value:has(>.mini-table){display:block;overflow-x:auto;scrollbar-width:thin}
+/* Padding inside the mini tables: air around every cell and the whole table. */
+.bdr-atoms .mini-table{border-collapse:separate;border-spacing:0}
+.bdr-atoms .ea-data-value:has(>.mini-table){padding:6px 8px}
+.bdr-atoms .mini-table th{padding:8px 16px 8px 12px}
+.bdr-atoms .mini-table td{padding:10px 16px 10px 12px}
+.bdr-atoms .mini-table :is(th,td):last-child{padding-inline-end:12px}
+.bdr-atoms .mini-table .mini-num{padding-inline:12px 8px}

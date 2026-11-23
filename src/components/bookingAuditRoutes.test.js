@@ -54,5 +54,22 @@ test('Arabic dashboard localizes draft navigation, request actions and quote tot
  assert.match(draft,/dir="rtl" lang="ar"/);
  const {default:Admin}=await server.ssrLoadModule('/src/components/AdminServicesPanel.jsx');
  const admin=renderToStaticMarkup(createElement(Admin,{ar:true,requests:[{...request,journey:{label:'Waiting for client',repriceable:true}}]}));
- for(const value of ['طلبات الحجز','تفاصيل الحجز','شروط عرض السعر','إجمالي الحجز','بانتظار قرار العميل'])assert.ok(admin.includes(value),value);
+ for(const value of ['طلبات الحجز','تفاصيل الحجز','بانتظار قرار العميل'])assert.ok(admin.includes(value),value);
+});
+
+test('quote editor preserves prices and notes, renders totals and terms once, and supports read-only Arabic',async()=>{
+ const {default:Editor}=await server.ssrLoadModule('/src/components/BookingQuoteEditor.jsx');
+ const {quoteTotals}=await server.ssrLoadModule('/src/lib/quoteTotals.mjs');
+ const draft={items:[{serviceId:'speaker',name:'Saved speaker',quantity:2}],prices:{speaker:'120.50'},discountType:'percent',discountValue:10,taxPercent:13,depositAmount:50,validDays:7,adminNote:'Keep <original> note',paymentInstructions:'Original instructions'};
+ const totals=quoteTotals({...draft,items:draft.items.map(item=>({...item,unitPrice:Number(draft.prices[item.serviceId])}))});
+ const props={request:{},draft,totals,onPriceChange:()=>{},onFieldChange:()=>{},onNoteChange:()=>{},onFillRates:()=>{}};
+ const english=renderToStaticMarkup(createElement(Editor,props));
+ for(const value of ['Saved speaker','120.50','Keep &lt;original&gt; note','Original instructions','$245.10','$195.10','Quote terms','Price adjustments'])assert.ok(english.includes(value),value);
+ assert.equal((english.match(/max="30"/g)||[]).length,1,'one tax control');
+ assert.equal((english.match(/max="60"/g)||[]).length,1,'one validity control');
+ assert.ok(english.includes('<table'));assert.ok(english.includes('scope="row"'));
+ const arabic=renderToStaticMarkup(createElement(Editor,{...props,ar:true,editable:false}));
+ for(const value of ['dir="rtl"','إجمالي عرض السعر','شروط عرض السعر','Saved speaker','Original instructions'])assert.ok(arabic.includes(value),value);
+ assert.equal((arabic.match(/<fieldset[^>]*disabled=""/g)||[]).length,2);
+ assert.ok(arabic.includes('للقراءة فقط'));
 });

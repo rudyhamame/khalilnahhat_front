@@ -1,13 +1,14 @@
+import BookingQuoteEditor from './BookingQuoteEditor';
 import {bookingStatusLabel} from '../lib/clientBookingJourney';
 import {bookingText,bookingLocale,bookingMoney} from '../lib/bookingUiText';
 import BookingDraftReview from './BookingDraftReview';
 import {OfferReview} from './BookingNegotiation';
 import {quoteTotals} from '../lib/quoteTotals.mjs';
-import {sortQuoteLines} from '../lib/quoteAtoms';
 import {useTree} from '../lib/tree';
 import {fieldName as bookingFieldName,optionName,customerNameParts} from '../lib/eventOrderCore.mjs';
 import {musicAtoms} from '../lib/musicAtoms.mjs';
 import './adminBookingRequests.css';
+import '../echo/eaAtomCode.css';
 import AdminSelect from './AdminSelect';
 import BookingDraftConversation from './BookingDraftConversation';
 import { Send } from 'lucide-react';
@@ -73,6 +74,8 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
   const selectedRequest=requests.find(request=>request.id===selectedId)||requests[0];
   const [drafts, setDrafts] = useState({});
   const [publishingId, setPublishingId] = useState('');
+  const [detailTab, setDetailTab] = useState('info'); // Booking details: 'info' (the brief) or 'quote' (pricing, terms and payments)
+  useEffect(() => { setDetailTab('info'); }, [selectedRequest?.id]);
   const [statuses, setStatuses] = useState({});
   // Fill rates from the pricing engine (policies, event hours, packages). The admin still reviews every rate before publishing.
   const fillFromEngine = async (request, draft) => {
@@ -215,7 +218,10 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
           </nav>
         </aside>
       <section id="admin-booking-detail" className="admin-booking-detail-column" aria-labelledby="admin-booking-detail-title">
-        <header className="admin-booking-detail-heading"><h2 id="admin-booking-detail-title">{tr("Booking details")}</h2>{selectedRequest&&<span>{selectedRequest.requestNumber||selectedRequest.id}</span>}
+        <header className="admin-booking-detail-heading"><div className="booking-detail-title"><h2 id="admin-booking-detail-title">{tr("Booking details")}</h2>{selectedRequest&&<span>{selectedRequest.requestNumber||selectedRequest.id}</span>}</div>
+          {selectedRequest&&<div className="booking-detail-tabs" role="tablist" aria-label={tr("Booking details sections")}>
+            {[['info',tr("Booking info")],['quote',tr("Quote")]].map(([id,label])=><button key={id} type="button" role="tab" id={`booking-tab-${id}`} aria-selected={detailTab===id} aria-controls="booking-tab-panel" tabIndex={detailTab===id?0:-1} className={detailTab===id?'is-active':''} onClick={()=>setDetailTab(id)}>{label}</button>)}
+          </div>}
           {selectedRequest&&<div className="booking-publish-action">                  <button
                     type="button"
                     className="primary-button"
@@ -252,93 +258,21 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                     <div><dt>{tr("Quote total")}</dt><dd>{money(totals.total)}</dd></div>
                   </dl>
                 </header>
+                {detailTab==='info'&&<div id="booking-tab-panel" role="tabpanel" aria-labelledby="booking-tab-info">
                 <div className="booking-detail-sections">
-                  {request.order&&<BookingDraftReview order={request.order} snapshot ar={ar}/>}
+                  {request.order&&<BookingDraftReview order={{...request.order,customer:{...request.order.customer,...(n=>({firstName:request.order.customer?.firstName||n.firstName,lastName:request.order.customer?.lastName||n.lastName}))(customerNameParts({...request.order.customer,fullName:request.order.customer?.fullName??request.customerName}))}}} snapshot ar={ar}/>}
                   {bookingSections(request,ar).map(section=>request.order&&section.title==="References & notes"?{...section,rows:section.rows.filter(([label])=>label==="Requested changes")}:section).filter(section=>!request.order||section.title==="Event planning"||section.title==="References & notes"&&section.rows.length).map((section,index)=><section key={section.title} className={`booking-detail-section${section.wide?' is-wide':''}`} aria-label={tr(section.title)}>
                     <h4><span aria-hidden="true">{String(index+1).padStart(2,'0')}</span>{tr(section.title)}</h4>
                     <dl>{section.rows.map(([label,value])=><div key={label}><dt>{tr(label)}</dt><dd>{detailText(value)}</dd></div>)}</dl>
                     {!section.rows.length&&<p className="booking-detail-empty">{tr("No details provided.")}</p>}
                   </section>)}
                 </div>
+                </div>}
+                {detailTab==='quote'&&<div id="booking-tab-panel" role="tabpanel" aria-labelledby="booking-tab-quote">
                 <OfferReview ar={ar} request={request} onAdopt={request.journey.repriceable ? offer=>setDrafts(current=>({...current,[request.id]:{...buildDraft(request,current[request.id]),proposalRevision:offer.revision,items:offer.items,prices:Object.fromEntries(offer.items.map(item=>[item.serviceId,item.unitPrice]))}})) : undefined}/>
                 {draft.proposalRevision&&<p role="status">Editing client offer {draft.proposalRevision}. Publishing sends a new quote for the client to accept or decline.</p>}
-                <div className="booking-quote-layout">
-                <section className="booking-pricing-column" aria-label={tr("Services and pricing")}>
-                <h4 className="booking-section-title">{tr("Services & pricing")}<span>CAD</span></h4>
-                {draft.items.length>0&&<button type="button" className="booking-pricing-hint" onClick={()=>fillFromEngine(request,draft)}>{tr("Fill rates from the pricing engine")}</button>}
-                <div className="admin-service-quote-table">
-                  <div className="admin-service-quote-row admin-service-quote-row-head">
-                    <span>{tr("Priced item")}</span>
-                    <span>{tr("Quantity")}</span>
-                    <span>{tr("Amount per unit (CAD)")}</span>
-                    <span>{tr("Line total")}</span>
-                  </div>
-                  {sortQuoteLines(draft.items,treeCatalog,treeEquipment).map(({line:item,code}) => {
-                    const value = draft.prices?.[item.serviceId] ?? '';
-                    const lineTotal = Number(value || 0) * item.quantity;
-
-                    return (
-                      <div key={item.serviceId} className="admin-service-quote-row">
-                        <strong>{code&&<i className="quote-atom-code">{code}</i>}{item.name}</strong>
-                        <span>{item.quantity}</span>
-                        <label>
-                          <span className="sr-only">Amount per unit for {item.name}</span>
-                          <input
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            value={value}
-                            onChange={(event) => updatePrice(request.id, item.serviceId, event.target.value)}
-                          />
-                        </label>
-                        <span>{money(lineTotal)}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <div className="admin-service-quote-footer">
-                  <label>
-                    <span>Message to customer</span>
-                    <textarea
-                      rows="2"
-                      value={draft.adminNote || ''}
-                      onChange={(event) => updateNote(request.id, event.target.value)}
-                      placeholder="Optional details about this quote"
-                    />
-                  </label>
-                  <div className="admin-service-quote-total">
-                    <span>{ar?'المجموع الفرعي للخدمات':'Services subtotal'}</span>
-                    <strong>{money(totals.subtotal)}</strong>
-                  </div>
-
-                </div>
-                <div className="booking-discount-editor">
-                  <label>{ar?'خصم الحجز':'Booking discount'}<AdminSelect value={draft.discountType} onChange={event=>setField(request.id,'discountType',event.target.value)} aria-label={ar?'نوع خصم الحجز':'Booking discount type'}><option value="amount">{tr("Amount (CAD)")}</option><option value="percent">{ar?'النسبة المئوية (٪)':'Percentage (%)'}</option></AdminSelect></label>
-                  <label>{draft.discountType==='percent'?tr("Discount (%)"):tr("Discount (CAD)")}<input type="number" min="0" max={draft.discountType==='percent'?100:totals.subtotal} step="0.01" value={draft.discountValue} onChange={event=>setField(request.id,'discountValue',event.target.value)}/></label>
-                </div>
-                <dl className="booking-price-summary">
-                  <div><dt>{tr("Subtotal")}</dt><dd>{money(totals.subtotal)}</dd></div>
-                  <div><dt>{tr('Discount')}{draft.discountType==='percent'?` (${draft.discountValue||0}%)`:''}</dt><dd>−{money(totals.discount)}</dd></div>
-                  <div><dt>{tr('Tax')} ({draft.taxPercent||0}%)</dt><dd>{money(totals.tax)}</dd></div>
-                  <div className="is-total"><dt>{tr("Booking total")}</dt><dd>{money(totals.total)}</dd></div>
-                  <div><dt>{tr("Deposit")}</dt><dd>{money(totals.deposit)}</dd></div>
-                  <div><dt>{tr("Balance after deposit")}</dt><dd>{money(totals.balance)}</dd></div>
-                </dl>
-                <p className="booking-pricing-hint">{tr("Equipment prices are prefilled from the equipment table. Edit any rate for this quote. The booking discount applies to the subtotal before tax.")}</p>
-                </section>
-                <aside className="booking-quote-terms" aria-label={tr("Quote terms")}>
-                <h4 className="booking-section-title">{tr("Quote terms")}</h4>
-                <div className="admin-service-request-terms">
-                  <label>{tr("Valid days")}<input type="number" min="1" max="60" value={draft.validDays} onChange={(e) => setField(request.id, 'validDays', e.target.value)} /></label>
-                  <label>{tr("Tax %")}<input type="number" min="0" max="30" step="0.01" value={draft.taxPercent} onChange={(e) => setField(request.id, 'taxPercent', e.target.value)} /></label>
-                  <label>{tr("Deposit (CAD)")}<input type="number" min="0" step="0.01" value={draft.depositAmount} onChange={(e) => setField(request.id, 'depositAmount', e.target.value)} /></label>
-                  {request.expiresAt ? <span>{`${ar?'تنتهي الصلاحية':'Expires'} ${new Date(request.expiresAt).toLocaleString(bookingLocale(ar))}`}</span> : null}
-                </div>
-                <label className="admin-service-request-terms">{tr("Payment instructions shown to the customer")}<textarea rows="2" value={draft.paymentInstructions} onChange={(e) => setField(request.id, 'paymentInstructions', e.target.value)} />
-                </label>
-                </aside>
-                </div>
+                <BookingQuoteEditor request={request} draft={draft} totals={totals} catalog={treeCatalog} equipment={treeEquipment} ar={ar} editable={request.journey.repriceable&&!publishingId}
+                  onPriceChange={(id,value)=>updatePrice(request.id,id,value)} onFieldChange={(key,value)=>setField(request.id,key,value)} onNoteChange={value=>updateNote(request.id,value)} onFillRates={()=>fillFromEngine(request,draft)}/>
                 {(request.journey.canRecordDeposit||request.journey.isBooked||(request.payments||[]).length>0)&&<h4 className="booking-section-title">{tr("Payments")}</h4>}
                 {request.journey.canRecordDeposit||request.journey.isBooked ? (
                   <form className="admin-service-request-terms" onSubmit={(e) => {
@@ -375,6 +309,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                     </button>
                   </div>
                 ) : null}
+                </div>}
                 {statuses[request.id] ? (
                   <p className="admin-service-request-feedback" role="status">
                     {statuses[request.id]}

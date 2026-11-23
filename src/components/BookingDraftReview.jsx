@@ -23,7 +23,7 @@ export default function BookingDraftReview({order,snapshot=false,tabbed=false,ar
    const {progress,lines}=sections[index];
    return <section className="bdr-section" key={goal.id} aria-label={ar?goal.ar:goal.title} {...(tabbed?{role:'tabpanel',id:`bdr-panel-${index}`,'aria-labelledby':`bdr-tab-${index}`}:{})}>
     <header><h3><i className="bdr-no" aria-hidden="true">{String(index+1).padStart(2,'0')}</i>{ar?goal.ar:goal.title}</h3><span>{snapshot?tr('Submitted details','المعلومات المرسلة'):progress.missing.length?tr(`${progress.missing.length} to complete`,`${progress.missing.length} متبقي`):tr('Ready to review','جاهز للمراجعة')}</span></header>
-    <div className="bdr-atoms"><AtomGroups lines={lines} progress={progress} tr={tr}/></div>
+    <div className="bdr-atoms"><AtomGroups lines={lines} progress={progress} tr={tr} table/></div>
    </section>;})}</div>
  </>;
 }
