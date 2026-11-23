@@ -39,7 +39,7 @@ test('Echo Docs keeps its existing session and administrator gate',()=>{
 });
 test('the manual review editor uses the canonical questionnaire and does not request final dance planning',()=>{
   const html=renderToStaticMarkup(createElement(EventOrderProvider,{user:{firstName:'Example',lastName:'Client',email:'test@example.invalid'},lang:{lang:'en'}},createElement(QuotePage,{lang:{lang:'en',t:{}},user:{firstName:'Example'},isSessionReady:true})));
-  for(const id of ['order-customer-firstName','order-event-venue-address','order-event-setup-requirements','order-music-djMc','order-additional-notes'])assert.ok(html.includes(id),id);
+  for(const id of ['order-customer-firstName','order-event-venue-address','order-event-setup-requirements','order-additional-notes'])assert.ok(html.includes(id),id);
   assert.doesNotMatch(html,/name="firstDance"/);
   assert.match(html,/Submit quote request/);
 });

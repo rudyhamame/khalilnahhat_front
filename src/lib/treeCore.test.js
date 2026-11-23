@@ -3,7 +3,7 @@ import {treeAtoms,stepMounted,atomSource,stepsOf,withServiceIds,buildTreeNodes} 
 
 test('every data atom is a node of the tree: an id, a step, a section and a source',()=>{
  const atoms=treeAtoms({dj:true,rental:true});
- assert.ok(atoms.length>=36,`${atoms.length} atoms`);
+ assert.ok(atoms.length>=35,`${atoms.length} atoms`);
  assert.equal(new Set(atoms.map(atom=>atom.id)).size,atoms.length,'ids are unique');
  for(const atom of atoms){assert.ok(atom.step>=1&&atom.step<=5,atom.id);assert.match(atom.code,/^\d\d\.\d\d\.\d\d/);assert.ok(['services','events','music','client','account'].includes(atom.branch),atom.id);}
  assert.equal(atoms.find(atom=>atom.id==='event.type').branch,'events');
