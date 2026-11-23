@@ -208,3 +208,5 @@
 
 /* "Services & pricing" sits in its own wrapper with the raised background, like the quote terms card. */
 .admin-workspace[data-area=services] .bqe-editor{padding:16px 18px;border-radius:12px;background:var(--aw-raised,#ffffff08)}
+/* The booking summary shares the header's surface, flush to the top and both edges. */
+.admin-workspace[data-area=services] .admin-booking-detail-body .booking-summary{background:#121216;margin-top:calc(var(--quote-pad,24px) * -1);padding-top:var(--quote-pad,24px)}

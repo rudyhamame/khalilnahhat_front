@@ -5,7 +5,7 @@ import {bookingText,bookingLocale,bookingMoney} from '../lib/bookingUiText';
 import AdminSelect from './AdminSelect';
 import './bookingQuoteEditor.css';
 
-export default function BookingQuoteEditor({request,draft,totals,catalog=[],equipment=[],ar=false,editable=true,onPriceChange,onFieldChange,onNoteChange,onFillRates}){
+export default function BookingQuoteEditor({request,draft,totals,catalog=[],equipment=[],ar=false,editable=true,rateFeedback='',onPriceChange,onFieldChange,onNoteChange,onFillRates}){
  const id=useId(),tr=text=>bookingText(text,ar),money=value=>bookingMoney(value,ar);
  const lines=sortQuoteLines(draft.items,catalog,equipment);
  return <div className="booking-quote-layout" dir={ar?'rtl':'ltr'}>
@@ -13,6 +13,7 @@ export default function BookingQuoteEditor({request,draft,totals,catalog=[],equi
    <header className="bqe-heading"><div><h4 id={`${id}-pricing`}>{tr('Services & pricing')}</h4><p>{ar?'راجع الكميات وحدّد سعر كل بند.':'Review quantities and set a rate for each item.'}</p></div>
     {!!lines.length&&<button type="button" className="bqe-fill" disabled={!editable} onClick={onFillRates}><Sparkles size={15} aria-hidden="true"/>{ar?'تحميل الأسعار':'Load rates'}</button>}
    </header>
+   {rateFeedback&&<p className="bqe-rate-feedback" role="status">{rateFeedback}</p>}
    <fieldset className="bqe-fields" disabled={!editable}>
     <legend className="bqe-sr-only">{tr('Services and pricing')}</legend>
     <div className="bqe-table-wrap"><table className="bqe-table">
@@ -60,7 +61,7 @@ export default function BookingQuoteEditor({request,draft,totals,catalog=[],equi
     <label className="bqe-payment-note"><span>{tr('Payment instructions')}</span><textarea rows={3} value={draft.paymentInstructions||''} onChange={event=>onFieldChange('paymentInstructions',event.target.value)} placeholder={ar?'التفاصيل التي يحتاجها العميل للدفع':'Details the customer needs to make a payment'}/></label>
     {request.expiresAt&&<p className="bqe-expiry">{ar?'تنتهي صلاحية العرض الحالي':'Current quote expires'} <time dateTime={request.expiresAt}>{new Date(request.expiresAt).toLocaleString(bookingLocale(ar),{dateStyle:'medium',timeStyle:'short'})}</time></p>}
    </fieldset>
-   <p className="bqe-review-note">{editable?tr('The customer reviews the quote before accepting.'):(ar?'عرض السعر هذا للقراءة فقط في مرحلته الحالية.':'This quote is read-only at its current stage.')}</p>
+   {!editable&&<p className="bqe-review-note">{ar?'عرض السعر هذا للقراءة فقط في مرحلته الحالية.':'This quote is read-only at its current stage.'}</p>}
   </aside>
  </div>;
 }

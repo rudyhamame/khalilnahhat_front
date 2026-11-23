@@ -1,5 +1,5 @@
 /* Quote editor: line items and adjustments, followed by an independent summary. */
-.booking-quote-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(250px,290px);align-items:start;gap:24px;margin:0 0 28px;min-width:0}
+.booking-quote-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(250px,290px);align-items:stretch;gap:24px;margin:0;min-width:0;flex:1 0 auto;box-sizing:border-box}
 .booking-quote-layout :is(.bqe-editor,.bqe-sidebar){min-width:0}
 .booking-quote-layout .bqe-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}
 .booking-quote-layout h4{margin:0;color:var(--aw-text);font-size:15px;font-weight:650;line-height:1.4}
@@ -16,9 +16,9 @@
 .booking-quote-layout .bqe-table-wrap{overflow-x:auto;border:1px solid var(--aw-line);border-radius:12px}
 .booking-quote-layout .bqe-table{width:100%;border-collapse:collapse;border-spacing:0;table-layout:auto;color:var(--aw-text)}
 .booking-quote-layout .bqe-table :is(th,td){padding:14px 12px;border:0;border-bottom:1px solid var(--aw-line);text-align:start;vertical-align:middle;font-size:13px;line-height:1.5}
-.booking-quote-layout .bqe-table thead th{padding-block:10px;background:var(--aw-raised,#ffffff06);font-size:11px;font-weight:600;color:var(--aw-muted);white-space:nowrap}
+.booking-quote-layout .bqe-table thead th{padding-block:10px;background:transparent;font-size:11px;font-weight:600;color:var(--aw-muted);white-space:nowrap}
 .booking-quote-layout .bqe-table tbody tr:last-child :is(th,td){border-bottom:0}
-.booking-quote-layout .bqe-table .bqe-item{min-width:130px;font-weight:500;overflow-wrap:anywhere}
+.booking-quote-layout .bqe-table .bqe-item{background:transparent;min-width:130px;font-weight:500;overflow-wrap:anywhere}
 .booking-quote-layout .bqe-code{display:block;width:fit-content;margin-bottom:4px;color:var(--aw-muted);font:500 10.5px/1.4 ui-monospace,Menlo,monospace;letter-spacing:.02em}
 .booking-quote-layout .bqe-table :is(.bqe-quantity,.bqe-rate,.bqe-line-total){text-align:end;font-variant-numeric:tabular-nums}
 .booking-quote-layout .bqe-quantity{width:54px}
@@ -32,7 +32,7 @@
 .booking-quote-layout .bqe-note{margin-top:22px}
 .booking-quote-layout .bqe-note>span{display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--aw-text)}
 .booking-quote-layout .bqe-note small{font-size:11px;font-weight:400;color:var(--aw-muted)}
-.booking-quote-layout .bqe-sidebar{display:grid;gap:18px;align-self:start;position:sticky;top:16px}
+.booking-quote-layout .bqe-sidebar{display:grid;grid-template-rows:auto minmax(min-content,1fr);gap:18px;align-self:stretch}
 .booking-quote-layout .bqe-summary{padding:20px;border:1px solid var(--aw-line);border-radius:14px;background:var(--aw-raised,#ffffff06)}
 .booking-quote-layout .bqe-summary>header{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .booking-quote-layout .bqe-summary h4{font-size:12px;font-weight:500;color:var(--aw-muted)}
@@ -44,7 +44,7 @@
 .booking-quote-layout :is(.bqe-breakdown,.bqe-balance) dd{margin:0;color:var(--aw-text);text-align:end;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .booking-quote-layout .bqe-balance{margin-top:18px;padding-top:16px;border-top:1px solid var(--aw-line)}
 .booking-quote-layout .bqe-balance>div:last-child :is(dt,dd){color:var(--aw-text);font-weight:600}
-.booking-quote-layout .bqe-terms{padding:18px;border:1px solid var(--aw-line);border-radius:14px}
+.booking-quote-layout .bqe-terms{padding:18px;border:1px solid var(--aw-line);border-radius:14px;background:var(--aw-raised,#ffffff06)}
 .booking-quote-layout .bqe-terms>legend{padding:0 6px;color:var(--aw-text);font-size:12px;font-weight:600}
 .booking-quote-layout .bqe-term-fields{display:grid;grid-template-columns:.8fr 1.2fr;gap:12px}
 .booking-quote-layout .bqe-payment-note{margin-top:16px}
@@ -55,7 +55,7 @@
 .booking-quote-layout .bqe-sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
 @container booking-content (max-width:860px){
  .booking-quote-layout{grid-template-columns:minmax(0,1fr);gap:24px}
- .booking-quote-layout .bqe-sidebar{position:static;grid-template-columns:1fr 1fr;align-items:start}
+ .booking-quote-layout .bqe-sidebar{grid-template-columns:1fr 1fr;grid-template-rows:auto auto;align-items:start}
  .booking-quote-layout .bqe-review-note{grid-column:1/-1}
 }
 @container booking-content (max-width:540px){
@@ -74,3 +74,14 @@
  .booking-quote-layout .bqe-table .bqe-line-total::before{margin:0}
  .booking-quote-layout .bqe-table .bqe-empty{grid-column:1/-1}
 }
+
+.booking-quote-layout .bqe-rate-feedback{margin:-6px 0 16px;font-size:12px;line-height:1.6;color:var(--aw-muted);overflow-wrap:anywhere}
+
+/* Fill the quote tab's remaining space while allowing long quotes to scroll. */
+.admin-booking-detail-body>.admin-service-request-card.is-quote-open{display:flex;flex-direction:column}
+.admin-service-request-card.is-quote-open>.booking-summary{flex:none}
+.admin-service-request-card>.booking-quote-panel{display:flex;flex-direction:column;flex:1 0 auto;min-width:0;min-height:0}
+.booking-quote-layout .bqe-editor{display:flex;flex-direction:column}
+.booking-quote-layout .bqe-editor>.bqe-fields{display:flex;flex-direction:column;flex:1 0 auto}
+.booking-quote-layout .bqe-editor .bqe-note{display:flex;flex-direction:column;flex:1 0 auto}
+.booking-quote-layout .bqe-editor .bqe-note textarea{flex:1 0 auto}

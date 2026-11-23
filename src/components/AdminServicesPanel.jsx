@@ -77,15 +77,17 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
   const [detailTab, setDetailTab] = useState('info'); // Booking details: 'info' (the brief) or 'quote' (pricing, terms and payments)
   useEffect(() => { setDetailTab('info'); }, [selectedRequest?.id]);
   const [statuses, setStatuses] = useState({});
+  const [rateFeedback,setRateFeedback]=useState({});
   // Fill rates from the pricing engine (policies, event hours, packages). The admin still reviews every rate before publishing.
   const fillFromEngine = async (request, draft) => {
+    setRateFeedback(current=>({...current,[request.id]:''}));
     try {
       const { suggestions, warnings } = await apiRequest(`/admin/pricing/suggest/${request.id}`, { method: 'POST', token, body: { items: draft.items.map((i) => ({ serviceId: i.serviceId, quantity: i.quantity })) } });
       const filled = suggestions.filter((x) => x.unitPrice != null);
       setDrafts((current) => ({ ...current, [request.id]: { ...buildDraft(request, current[request.id]), prices: { ...draft.prices, ...Object.fromEntries(filled.map((x) => [x.serviceId, x.unitPrice.toFixed(2)])) } } }));
       const skipped = suggestions.length - filled.length;
-      setStatuses((current) => ({ ...current, [request.id]: `Filled ${filled.length} rate(s) from the pricing engine.${skipped ? ` ${skipped} need a manual price.` : ''}${warnings.length ? ' ' + warnings[0] : ''}` }));
-    } catch (error) { setStatuses((current) => ({ ...current, [request.id]: error.message || 'The pricing engine could not suggest rates.' })); }
+      setRateFeedback((current) => ({ ...current, [request.id]: `Filled ${filled.length} rate(s) from the pricing engine.${skipped ? ` ${skipped} need a manual price.` : ''}${warnings.length ? ' ' + warnings[0] : ''}` }));
+    } catch (error) { setRateFeedback((current) => ({ ...current, [request.id]: error.message || 'The pricing engine could not suggest rates.' })); }
   };
 
   useEffect(() => {
@@ -243,7 +245,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
 
             return (
               <div key={request.id} className="admin-booking-detail-body">
-              <article className="admin-service-request-card" aria-busy={publishingId===request.id}>
+              <article className={`admin-service-request-card${detailTab==='quote'?' is-quote-open':''}`} aria-busy={publishingId===request.id}>
                 <header className="booking-brief-heading booking-summary" aria-label={tr("Booking summary")}>
                   <div className="booking-summary-who">
                     <h3>{request.customerName}</h3>
@@ -268,10 +270,10 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                   </section>)}
                 </div>
                 </div>}
-                {detailTab==='quote'&&<div id="booking-tab-panel" role="tabpanel" aria-labelledby="booking-tab-quote">
+                {detailTab==='quote'&&<div className="booking-quote-panel" id="booking-tab-panel" role="tabpanel" aria-labelledby="booking-tab-quote">
                 <OfferReview ar={ar} request={request} onAdopt={request.journey.repriceable ? offer=>setDrafts(current=>({...current,[request.id]:{...buildDraft(request,current[request.id]),proposalRevision:offer.revision,items:offer.items,prices:Object.fromEntries(offer.items.map(item=>[item.serviceId,item.unitPrice]))}})) : undefined}/>
                 {draft.proposalRevision&&<p role="status">Editing client offer {draft.proposalRevision}. Publishing sends a new quote for the client to accept or decline.</p>}
-                <BookingQuoteEditor request={request} draft={draft} totals={totals} catalog={treeCatalog} equipment={treeEquipment} ar={ar} editable={request.journey.repriceable&&!publishingId}
+                <BookingQuoteEditor request={request} draft={draft} totals={totals} catalog={treeCatalog} equipment={treeEquipment} ar={ar} editable={request.journey.repriceable&&!publishingId} rateFeedback={rateFeedback[request.id]}
                   onPriceChange={(id,value)=>updatePrice(request.id,id,value)} onFieldChange={(key,value)=>setField(request.id,key,value)} onNoteChange={value=>updateNote(request.id,value)} onFillRates={()=>fillFromEngine(request,draft)}/>
                 {(request.journey.canRecordDeposit||request.journey.isBooked||(request.payments||[]).length>0)&&<h4 className="booking-section-title">{tr("Payments")}</h4>}
                 {request.journey.canRecordDeposit||request.journey.isBooked ? (
