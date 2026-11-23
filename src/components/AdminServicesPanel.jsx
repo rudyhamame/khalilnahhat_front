@@ -228,7 +228,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                 </header>
                 <div className="booking-detail-sections">
                   {request.order&&<BookingDraftReview order={request.order} snapshot ar={ar}/>}
-                  {bookingSections(request).filter(section=>!request.order||section.title==='Event planning').map((section,index)=><section key={section.title} className={`booking-detail-section${section.wide?' is-wide':''}`} aria-label={section.title}>
+                  {bookingSections(request).map(section=>request.order&&section.title==='References & notes'?{...section,rows:section.rows.filter(([label])=>label==='Requested changes')}:section).filter(section=>!request.order||section.title==='Event planning'||section.title==='References & notes'&&section.rows.length).map((section,index)=><section key={section.title} className={`booking-detail-section${section.wide?' is-wide':''}`} aria-label={section.title}>
                     <h4><span aria-hidden="true">{String(index+1).padStart(2,'0')}</span>{section.title}</h4>
                     <dl>{section.rows.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{detailText(value)}</dd></div>)}</dl>
                     {!section.rows.length&&<p className="booking-detail-empty">No details provided.</p>}
