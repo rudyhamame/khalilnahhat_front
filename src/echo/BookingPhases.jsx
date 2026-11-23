@@ -11,7 +11,7 @@ const ALL_PHASES=PHASE_STEPS.map(([phase,step])=>{const definition=bookingStepDe
 // Steps exist only while their service is in the catalogue; step 3 carries the name the admin gave the DJ service (id dj).
 const usePhases=(ar=false)=>{const dj=useTreeService('dj',ar),steps=useTreeSteps();return ALL_PHASES.filter(row=>(row[0]!=='dj'||steps.dj)&&(row[0]!=='rental'||steps.rental)).map(row=>row[0]==='dj'&&dj.name?[row[0],dj.name,dj.name,row[3].replace('DJ Khalil',dj.name),row[4].replace('دي جي خليل',dj.name)]:row);};
 // Longer headings for the page; the step bar keeps the short names above.
-const HEADINGS={personal:['Personal info: who we are planning with','المعلومات الشخصية: مع من نخطط'],event:['Event info: your occasion, date, guests and venue','معلومات الفعالية: المناسبة والموعد والضيوف والمكان'],dj:['DJ Khalil Service: live music for your night','خدمة دي جي خليل: موسيقى حية لسهرتك'],rental:['Rental equipments for the services we do not provide','معدات التأجير للخدمات التي لا نقدمها'],additional:['Additional info: inspiration, documents and notes','معلومات إضافية: أفكار ومستندات وملاحظات']};
+const HEADINGS={personal:['Personal info: who we are planning with','المعلومات الشخصية: مع من نخطط'],event:['Event info: your occasion, date, guests and venue','معلومات الفعالية: المناسبة والموعد والضيوف والمكان'],dj:['DJ Khalil Service: live music for your night','خدمة دي جي خليل: موسيقى حية لسهرتك'],rental:['Rental equipments','معدات التأجير'],additional:['Additional info: inspiration, documents and notes','معلومات إضافية: أفكار ومستندات وملاحظات']};
 
 export function PhaseHeading({id,ar=false}){
  const phases=usePhases(ar),dj=useTreeService('dj',ar),index=phases.findIndex(([key])=>key===id);

@@ -69,24 +69,24 @@ export default function RentalWorkbench({services,sections,service,items,selecte
     return `04.${String(Math.max(0,sectionIndex)+2).padStart(2,'0')}.${String(Math.max(0,itemIndex)+1).padStart(2,'0')}`;
   };
   const quantity=item?(cart[item.id]?.quantity||0):0;
-  const heading=name(service||{name:tr('Service items','عناصر الخدمة'),nameAr:'عناصر الخدمة'});
+  const heading=name(service||{name:tr('Category items','عناصر الفئة'),nameAr:'عناصر الخدمة'});
   const openEquipment=(row,forService=service)=>{if(!forService)return;onService(forService);onEquipment(row);setDetail({itemId:row.id,serviceId:forService.id});};
   if(djPreferencesOpen)return <div className="rental-with-feature is-dj-preferences rw-dj">
     <DjWorkFeature ar={ar} expanded onClose={()=>setDjPreferencesOpen(false)}/>
   </div>;
   return <div className="rw" dir={ar?'rtl':'ltr'} ref={vp}>
-    {view==="services"?<div className="rw-service-sections" aria-label={tr('Services and equipment','الخدمات والمعدات')}>
-      {(sections||[]).map(({service:serviceRow,items:serviceItems},index)=><BookingStep key={serviceRow.id} number={20+index} className="rw-service-section-step booking-services" title={name(serviceRow)} copy={serviceRow.description||tr('Choose individual equipment for this service.','اختر المعدات الفردية لهذه الخدمة.')} cardTitle={<>{name(serviceRow)}<span className="rw-wheel-nav"><button type="button" className="rw-wheel-arrow" aria-label={ar?'المعدات السابقة':'Previous equipment'} onClick={event=>scrollServiceWheel(event,-1,ar)}>{ar?<ChevronRight size={17} aria-hidden="true"/>:<ChevronLeft size={17} aria-hidden="true"/>}</button><span className="rw-service-section-head">{serviceItems.length} {tr(serviceItems.length===1?'item':'items','عنصر')}</span><button type="button" className="rw-wheel-arrow" aria-label={ar?'المعدات التالية':'Next equipment'} onClick={event=>scrollServiceWheel(event,1,ar)}>{ar?<ChevronLeft size={17} aria-hidden="true"/>:<ChevronRight size={17} aria-hidden="true"/>}</button></span></>}>
+    {view==="services"?<div className="rw-service-sections" aria-label={tr('Equipment categories','فئات المعدات')}>
+      {(sections||[]).map(({service:serviceRow,items:serviceItems},index)=><BookingStep key={serviceRow.id} number={20+index} className="rw-service-section-step booking-services" title={name(serviceRow)} copy={serviceRow.description||tr('Choose individual equipment for this category.','اختر المعدات الفردية لهذه الفئة.')} cardTitle={<>{name(serviceRow)}<span className="rw-wheel-nav"><button type="button" className="rw-wheel-arrow" aria-label={ar?'المعدات السابقة':'Previous equipment'} onClick={event=>scrollServiceWheel(event,-1,ar)}>{ar?<ChevronRight size={17} aria-hidden="true"/>:<ChevronLeft size={17} aria-hidden="true"/>}</button><span className="rw-service-section-head">{serviceItems.length} {tr(serviceItems.length===1?'item':'items','عنصر')}</span><button type="button" className="rw-wheel-arrow" aria-label={ar?'المعدات التالية':'Next equipment'} onClick={event=>scrollServiceWheel(event,1,ar)}>{ar?<ChevronLeft size={17} aria-hidden="true"/>:<ChevronRight size={17} aria-hidden="true"/>}</button></span></>}>
         <div className="rw-service-section-content">
         {serviceItems.length?<EquipmentWheel ar={ar} label={`${name(serviceRow)} ${tr('equipment choices','خيارات المعدات')}`} selectedItemId={serviceItems.find(row=>serviceRow.id===service?.id&&row.id===item?.id&&cart[row.id]?.quantity>0)?.id||serviceItems.find(row=>cart[row.id]?.quantity>0)?.id}>{serviceItems.map(row=>{const picked=cart[row.id]?.quantity||0,on=row.id===item?.id&&serviceRow.id===service?.id&&showDetails;return <button type="button" key={row.id} data-equipment-id={row.id} className={`rw-card${on?' is-open':''}${picked>0?' is-picked':''}`} aria-pressed={on} onClick={()=>openEquipment(row,serviceRow)}>
           <span className="rw-card-img"><EquipmentThumbnail key={`${row.id}:${row.imageUrl||''}`} item={row}/></span><span className="rw-card-tag" aria-label={`${tr('Equipment','المعدة')} ${equipmentTag(row,serviceRow.id)}`}>{equipmentTag(row,serviceRow.id)}</span><span className="rw-card-copy"><strong>{name(row)}</strong>{row.brandModel&&<small>{row.brandModel}</small>}</span>{picked>0&&<em className="rw-card-picked">{tr('Selected','المحدد')} · {picked}</em>}<ArrowUpRight size={16} className="rw-card-go" aria-hidden="true"/>
-        </button>;})}</EquipmentWheel>:<p className="rw-empty">{tr('No individual equipment is listed for this service yet.','لا توجد معدات فردية مدرجة لهذه الخدمة حالياً.')}</p>}
+        </button>;})}</EquipmentWheel>:<p className="rw-empty">{tr('No individual equipment is listed for this category yet.','لا توجد معدات فردية مدرجة لهذه الفئة حالياً.')}</p>}
         </div>
       </BookingStep>)}{!sections?.length&&<p className="rw-empty" role="status">{failed?tr('Please try again shortly.','يرجى المحاولة لاحقاً.'):tr('The equipment list is being prepared.','جارٍ إعداد قائمة المعدات.')}</p>}
     </div>:<section id="rental-equipment" className="rw-vp rw-equipment" aria-label={tr('Equipment','المعدات')}>
       <header className="rw-eq-head">
-        <button type="button" className="rw-back" onClick={()=>{setDetail(null);setView('services');}}><ArrowUp size={16} aria-hidden="true"/>{tr('All services','كل الخدمات')}</button>
-        <div><span className="rw-kicker">{tr('Service','الخدمة')} {String(Math.max(1,serviceNumber)).padStart(2,'0')}</span><h2>{heading}</h2></div>
+        <button type="button" className="rw-back" onClick={()=>{setDetail(null);setView('services');}}><ArrowUp size={16} aria-hidden="true"/>{tr('All categories','كل الفئات')}</button>
+        <div><span className="rw-kicker">{tr('Category','الفئة')} {String(Math.max(1,serviceNumber)).padStart(2,'0')}</span><h2>{heading}</h2></div>
         <span className="rw-count">{items.length} {tr(items.length===1?'item':'items','عنصر')}</span>
       </header>
       <div id="rental-equipment-panel" className="rw-eq-grid" role="region" aria-label={heading}>

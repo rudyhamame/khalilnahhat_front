@@ -29,7 +29,7 @@ export default function RentalsHero({ar=false}){
       <span className="avail-kicker"><FieldCode k="music.djRequested"/>{svc.name.toUpperCase()} *</span>
       <div role="group" aria-label={svc.name}>
         <button type="button" data-event-choice disabled={locked} aria-pressed={yesOn} onClick={yes}><Disc3 size={17} strokeWidth={1.6} aria-hidden="true"/><span>{djAdded?tr('Yes, edit music preferences','نعم، تعديل التفضيلات الموسيقية'):tr(`Yes, add ${svc.name}`,`نعم، أضف ${svc.name}`)}</span></button>
-        <button type="button" data-event-choice disabled={locked} aria-pressed={skipped&&!yesOn} onClick={skip}><ArrowDown size={17} strokeWidth={1.6} aria-hidden="true"/><span>{tr('Skip, show other services','تخطَّ، اعرض الخدمات الأخرى')}</span></button>
+        <button type="button" data-event-choice disabled={locked} aria-pressed={skipped&&!yesOn} onClick={skip}><ArrowDown size={17} strokeWidth={1.6} aria-hidden="true"/><span>{tr('Skip, show rental equipment','تخطَّ، اعرض معدات التأجير')}</span></button>
       </div>
     </aside>
     <McRow ar={ar}/>

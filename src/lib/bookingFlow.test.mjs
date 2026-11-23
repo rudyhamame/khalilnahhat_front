@@ -9,7 +9,7 @@ test('draft steps follow VP02, VP03 and VP04 and cover every canonical field onc
  const keys=steps.flatMap(step=>step.fields.map(field=>field.key));
  assert.equal(new Set(keys).size,keys.length);
  assert.deepEqual([...keys].sort(),contract.sections.flatMap(section=>section.fields.map(field=>field.key)).sort());
- assert.equal(bookingStepForField('services'),'equipment');assert.equal(bookingStepForField('event.venue.address'),'event');
+ assert.equal(bookingStepForField('services'),'music');assert.equal(bookingStepForField('event.venue.address'),'event');
 });
 test('review follows actual missing field objects and completes the venue chapter',()=>{
  const order=createEventOrder();assert.equal(firstIncompleteStep(order),'customer');order.customer={firstName:'Test',lastName:'Client',email:'client@example.invalid',phone:'123456789',contactMethod:'email',phoneContact:'call'};

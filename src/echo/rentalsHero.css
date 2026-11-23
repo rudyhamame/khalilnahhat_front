@@ -3,8 +3,8 @@
 html body .dj-prefs-section .rentals-hero-form .djf{background:none!important;background-image:none!important;border:0!important;box-shadow:none!important;border-radius:0;padding:0!important;backdrop-filter:none}
 .dj-service-step .dj-choice{margin-bottom:4px}
 .dj-service-step .mc-choice{margin-top:22px}
-.dj-service-step .mc-choice-copy{margin:9px 0 12px;color:#9fb5a8;font-size:13px;line-height:1.5}
-html body .echo[data-page=home][data-theme] .dj-service-step .mc-choice>.avail-kicker{display:flex;align-items:center;gap:8px;width:100%}
+.dj-service-step .mc-choice-copy{margin:0 0 12px;color:#9fb5a8;font-size:13px;line-height:1.5}
+html body .echo[data-page=home][data-theme] .dj-service-step .mc-choice>.avail-kicker{display:flex;align-items:center;gap:8px;width:100%;margin-bottom:12px}
 html body .echo[data-page=home][data-theme] .dj-service-step .mc-choice>.avail-kicker>.ysf-order{order:2;margin-inline-start:auto;margin-inline-end:0}
 /* Hero image of the DJ Khalil Service step: wide banner above the step, same width as the step. */
 .dj-service-hero{display:block;box-sizing:border-box;width:100%;max-width:1280px;height:clamp(220px,34vw,460px);margin:16px auto 0;border-radius:24px;object-fit:cover;object-position:50% 28%;background:#0b1315;box-shadow:0 16px 48px #0003;user-select:none;-webkit-user-drag:none}
