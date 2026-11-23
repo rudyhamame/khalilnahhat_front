@@ -1,6 +1,7 @@
 import {useEffect,useState} from 'react';
 import {MapPin,Pencil,Plus,RefreshCw,Search,ShieldCheck} from 'lucide-react';
 import {apiRequest} from '../lib/api';
+import {searchPlaces} from '../lib/placeSearch';
 import './adminsList.css';
 
 const date=value=>value?new Date(value).toLocaleString(): '—';
@@ -24,15 +25,15 @@ export default function AdminsList({token}){
   // Find by search: while the address is typed, matching places from the map are offered; picking one carries its map point.
   useEffect(()=>{
     if(!editing||picked||draft.trim().length<3){setPlaces([]);return undefined;}
-    let current=true;setSearching(true);
+    let current=true;const controller=new AbortController();setSearching(true);
     const timer=setTimeout(()=>{
-      apiRequest('/admin/places/search?'+new URLSearchParams({q:draft.trim()}),{token})
-        .then(result=>{if(current)setPlaces(result.items||[]);})
-        .catch(()=>{if(current)setPlaces([]);})
+      searchPlaces(draft.trim(),controller.signal)
+        .then(found=>{if(current){setPlaces(found);setRowError(found.length?'':'No matching address found. Try the street number, street and city.');}})
+        .catch(failure=>{if(current&&!controller.signal.aborted){setPlaces([]);setRowError(failure.message||'The map search is unavailable right now.');}})
         .finally(()=>{if(current)setSearching(false);});
-    },500);
-    return()=>{current=false;clearTimeout(timer);setSearching(false);};
-  },[draft,editing,picked,token]);
+    },350);
+    return()=>{current=false;clearTimeout(timer);controller.abort();setSearching(false);};
+  },[draft,editing,picked]);
   const saveAddress=async item=>{
     setSaving(true);setRowError('');
     try{
