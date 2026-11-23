@@ -1,0 +1,240 @@
+BOOKING GOAL AUDIT — USER-SUPPLIED BIBLE
+
+Authority: source-of-truth.txt, preserved verbatim beside this report.
+Frontend inspected: 22ca5471310641fcc9fea0747c603bf0989c0beb
+Backend inspected: 7029fcf177ff4af524f689acfa7ae19a449d68da
+Live catalogue: public GET https://api.djkhalilnahhat.ca/api/tree (snapshot beside this report).
+
+RESULT
+The schema largely matches, but the booking experience does not fully comply.
+All 40 numbered non-catalogue atoms exist in the atom index. Of these, 39 have
+field definitions in eventOrderContract.json; equipment is defined separately
+in aiFields/validValue, matching the source document's explicit exception.
+The frontend/backend field contract, atom index, and shared order helpers match.
+All 19 listed equipment IDs exist in the live catalogue; their stock values,
+minimum quantity 1, and presence of 3D model URLs match the supplied table.
+The extra 8-pieces set remains live, as the source document acknowledges.
+
+METHOD / LIMITS
+Read frontend/backend code, compared shared files, exercised pure models,
+rendered AdminServicesPanel with React server rendering and marker values,
+ran selected existing tests, and read the public production catalogue.
+This was not an authenticated browser audit. Browser access was unavailable.
+No real booking was created, changed, deleted, quoted, or submitted. No live
+AI conversation or voice call was sampled. A 3D URL's presence was checked;
+its mesh rendering was not. Emails were inspected as code, not sent.
+Application code and production data were not changed.
+
+CONFIRMED FINDINGS
+
+F01 HIGH — Rental decision is omitted from the live review.
+Authority: 04.01.01 rental.requested gates the rental section.
+Evidence: src/lib/bookingReviewModel.js:25 explicitly filters it out when a
+catalogue tree exists. The tree is then rendered regardless of this decision.
+Reproduction: rental.requested=false with qsc-k122 quantity 2 still produces
+the selected equipment tree, without a rental.requested row. This affects
+Booking review, Concept map, and the client's editable draft review. Snapshot
+views use a different path and can display the rental decision.
+Impact: the client cannot review/confirm this numbered decision on those
+surfaces; the documented rental gate is not applied there.
+Correction: retain the rental decision row and define one shared gate policy.
+Preserve saved items on decline unless explicitly removed, but make the
+contradiction visible rather than hiding the decision.
+
+F02 HIGH — Saved equipment can disappear from the live review.
+Evidence: src/lib/bookingReviewModel.js:32-40 builds rows from today's catalogue;
+when the tree exists, it does not append saved items missing from that tree.
+Reproduction: order.equipment=[{id:'retired-speaker',name:'Saved retired speaker',
+quantity:2}] produces no matching live review row with the production tree.
+Impact: Booking review, Concept map and client draft can omit a saved selection,
+so it is also absent from the atom confirmation list. Server validation may
+reject an unavailable item later; hiding it is still a review failure.
+Submitted snapshots preserve their captured equipment independently.
+Correction: show missing/inactive saved items explicitly with a resolve/remove
+state and include them in review validation.
+
+F03 HIGH — Account names allow values that booking rejects or normalizes away.
+Authority: 01.01.01 / 01.01.02, maximum 60 characters each.
+Evidence: ClientProfile.jsx:48-49 permits 80; backend server.js:892-893 also
+accepts 80. eventOrderContract.json limits both to 60.
+Reproduction: importing a 70-character first name yields a customer.firstName
+validation error; normalizeEventOrder then resets that invalid value to null.
+Impact: a valid account profile can prevent booking completion.
+Correction: use the 60-character contract limit at profile, signup, import and
+server boundaries; handle existing oversized account values explicitly.
+
+F04 HIGH — Admin cannot see the client's custom event type.
+Authority: 02.01.02 event.title is required when event.type=other.
+Evidence: AdminServicesPanel.jsx:24-40 manually builds sections and never reads
+event.title; list/header display event.type. React server render with an
+AUDIT_CUSTOM_EVENT marker returns no marker in the output.
+Impact: the client explains the event, but the admin sees only Other.
+Correction: include the conditional custom event type in the admin brief and
+use it where the request's event type is summarized.
+
+F05 HIGH — Suggested-song editor can overwrite a newer canonical song list.
+Authority: 03.02.03 ordered songs must persist consistently across manual/AI edits.
+Evidence: DjBookingForm.jsx:53-60 initializes local rows from suggestedSongs
+only on mount; commit writes the entire local list. There is no synchronization
+when canonical music.suggestedSongs changes while this editor stays mounted.
+Scenario: open editor with song A; Echo adds song B; edit A in the still-open
+editor; commit can write the old local list and drop B.
+Confidence: confirmed by state/commit code inspection; mounted browser sequence
+not exercised. Existing servicesAuditGuide.js also documents this risk.
+Correction: reconcile canonical updates with incomplete local rows, or base
+writes on the latest canonical list and stable song identities.
+
+F06 MEDIUM — Admin loses attachment comments and song links in presentation.
+Authority: 05.01.01 photos with comments; 05.01.03 documents with notes;
+03.02.03 / 03.02.04 songs include their saved link where present.
+Evidence: AdminServicesPanel.jsx:29 renders files as name/url anchors only;
+its music rows at :37 omit link values. Server-rendered markers for photo
+comment, document note and suggested-song link are absent.
+Impact: those values are stored and visible in shared client review renderers,
+but the administrator cannot read them in the structured booking brief.
+Correction: reuse the shared reference/music value renderers in admin.
+
+F07 MEDIUM — Echo instructions contradict the bible and shared chapter model.
+Authority: 03.01.02 MC belongs to DJ Khalil service, not Rental equipment.
+Evidence: backend src/event-order.js:37 explicitly says MC belongs ONLY to
+chapter 04 and never chapter 03. Frontend bookingFlow.mjs:19-20 puts MC in 03.
+Also backend event-order.js:45 calls Event title optional, whereas
+missingOrderFields requires it for Other and ai-booking.js:54 tells Echo to
+ask for it immediately.
+Impact: text and voice receive competing rules; conversation can direct the
+client to the wrong chapter or describe a conditional requirement incorrectly.
+Correction: generate chapter ownership and conditional requirements from the
+shared field/flow model and remove conflicting prose.
+
+F08 MEDIUM — Optional DJ/MC answers are marked missing by progress logic.
+Authority: 03.01.01 / 03.01.02 are optional.
+Evidence: bookingNextStep.js:29-30 adds missing DJ and MC decisions when their
+services exist. validateEventOrder(submission:true) does not require them.
+Reproduction: a blank order produces missing DJ/MC in effectiveMissing, but
+no corresponding DJ/MC validation errors. goalProgress uses effectiveMissing;
+HomeBookingAssistant's submit readiness uses missingOrderFields instead.
+Impact: review/map/client draft can say Needs attention while the submission
+rules treat those answers as optional.
+Correction: preserve optional semantics in completeness; prompting an optional
+question must not turn it into a required answer.
+
+F09 MEDIUM / ACKNOWLEDGED CLEANUP — Sound equipment codes differ from the bible.
+Evidence: bookingReviewModel.js:34-36 generates item codes by catalogue position.
+The live extra set is inserted at 04.02.02. The bible leaves that set unnumbered.
+Examples: wedge monitors are live 04.02.03 versus bible 04.02.02;
+QSC is live 04.02.07 versus bible 04.02.06; Soundcraft is live 04.02.11 versus
+bible 04.02.10. Other listed sound entries after the set are shifted by one.
+The item IDs, stock and minima match; this is a code/ordering mismatch.
+Correction: complete the acknowledged catalogue cleanup or assign an explicit
+numbering/exclusion rule. Do not reinterpret stock counts as permanent values;
+the source document explicitly makes the live catalogue authoritative for stock.
+No database cleanup was performed as part of this audit.
+
+F10 MEDIUM — Dashboard views do not support the bible's Arabic presentation.
+Evidence: BookingDraftReview.jsx:13 hardcodes tr=en=>en and :14 supplies ar=false;
+headings are goal.title. DashboardPage, ClientProfile and AdminServicesPanel
+also use English-only booking copy. Echo review/map accept Arabic.
+Impact: the same atoms have Arabic labels in the contract and Echo surfaces,
+but draft/request dashboard briefs do not select them.
+Correction: pass the interface language into shared renderers and translate
+surrounding labels if bilingual coverage is required across all named surfaces.
+
+TEST DEBT (SEPARATE FROM A PRODUCTION DEFECT)
+T01: bookingDraftEdits.test.js:63 fails at :69 because its speaker fixture has
+only category:'sound', while current equipment membership reads
+ equipmentCategoryId || serviceId. The pure edit helper expects normalized
+catalogue equipment. Production /api/tree returns equipmentCategoryId.
+This observed failure does not establish that live sound selection is broken.
+Update the fixture to the current identity shape and keep a separate test for
+legacy normalization at the tree boundary.
+
+SURFACE COVERAGE
+- Booking review: shared sectionLines + AtomGroups; F01/F02/F08/F09.
+- Concept map: same model, same issues; code is shared, not independent proof.
+- Echo text + voice: shared patch validation and save boundary; F07/F08;
+  prompts inspected, actual provider behavior not sampled.
+- Client Booking draft: shared model; F01/F02/F08/F09/F10.
+- Client Requests: submittedSectionLines uses captured order and saved equipment;
+  full brief is shown only when request.order exists; F10. Historical requests
+  with no captured canonical order cannot reconstruct missing details.
+- Admin Booking requests: separate manually maintained field list; F04/F06/F10.
+- Account Personal info/import: account-owned fields protected; F03.
+- Manual DJ preferences: language order/dialects and song records supported; F05.
+- Submission/API: canonical validation, authenticated profile ownership,
+  equipment/quote reconciliation, idempotency and transcript receipts tested.
+- Download booking information / printable PDF: uses shared review lines,
+  preserves saved equipment and photo comments, escapes HTML; English only.
+- Internal booking bible page: generated from the contract, but broad claims
+  that all surfaces cannot disagree are disproven by the separate admin list
+  and prompt/completeness logic found above.
+- Notifications: email is a summary/transcript surface, not a complete typed
+  atom renderer. No delivery or full-field parity guarantee established.
+- Live catalogue: all 19 listed IDs, stock values, minimums and model URLs match;
+  extra set/numbering issue remains as acknowledged in the source.
+
+CHECKS
+Frontend targeted tests: 42 total, 41 passed, 1 failed (T01).
+Files: bookingAtomsAudit, bookingAtomReview, bookingGoals, bookingAudit,
+contractsSync, bookingConfirmation, bookingFlow, bookingDraftEdits,
+components/bookingAuditRoutes.
+Backend targeted tests: 44 total, all passed.
+Files: src/event-order.test.js, test/service-request-submission.test.js,
+src/booking-conversations.test.js.
+Additional read-only probes reproduced F01/F02/F03/F04/F06/F08/F09.
+Existing passing tests verify shared structural coverage, not every rendered
+value; this is why the admin omissions and hidden rental decision escaped them.
+
+FIELD COVERAGE INDEX
+Each of the following codes/paths matches the supplied non-catalogue atom index.
+P=Personal info; E=Event info; D=DJ service; R=Rental equipment; A=Additional info.
+Reference F01-F10 above for rendering/behavior exceptions. Venue metadata is
+intentionally hidden from ordinary review and is not counted as a missing field.
+01.01.01  customer.firstName
+01.01.02  customer.lastName
+01.01.03  customer.email
+01.01.04  customer.phone
+01.01.05  customer.contactMethod
+01.01.06  customer.phoneContact
+01.01.07  customer.company
+02.01.01  event.type
+02.01.02  event.title
+02.02.01  event.date
+02.02.02  event.startTime
+02.02.03  event.endTime
+02.03.01  event.guestCount
+02.04.01  event.venue.name
+02.04.02  event.venue.address
+02.04.03  event.venue.addressDetails
+02.04.04  event.venue.city
+02.04.05  event.venue.postalCode
+02.04.06  event.venue.country
+02.04.07  event.venue.setting
+02.04.08  event.venue.latitude
+02.04.09  event.venue.longitude
+02.04.10  event.venue.source
+02.04.11  event.venue.sourceId
+02.04.12  event.venue.sourceAttribution
+03.01.01  music.djRequested
+03.01.02  music.mcRequested
+03.02.01  music.languagePairs
+03.02.02  music.genres
+03.02.03  music.suggestedSongs
+03.02.04  music.favouriteSongs
+03.02.05  music.favouriteArtists
+04.01.01  rental.requested
+04.01.02  equipment
+04.06.01  event.setup.requirements
+05.01.01  references.photos
+05.01.02  references.images
+05.01.03  references.files
+05.02.01  additional.notes
+05.03.01  additional.voucherCode
+
+FIX ORDER
+1. Restore complete visible review of rental decisions and saved equipment.
+2. Align account limits and preserve all admin brief values.
+3. Prevent song editor overwrites.
+4. Align AI chapter/requirement rules and optional completeness.
+5. Resolve acknowledged catalogue numbering and dashboard language coverage.
+6. Repair stale test fixture; add behavioral regression coverage for the
+   confirmed omissions, not just schema-key coverage.

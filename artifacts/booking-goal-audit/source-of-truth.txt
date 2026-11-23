@@ -1,0 +1,74 @@
+01 · Personal info
+Code	Atom	English label / Arabic	Type, options, limits	Flags
+01.01.01	customer.firstName	First name / الاسم الأول	text, max 60	REQ, account, private
+01.01.02	customer.lastName	Last name / اسم العائلة	text, max 60	REQ, account, private
+01.01.03	customer.email	Email / البريد الإلكتروني	email	REQ, account, private
+01.01.04	customer.phone	Phone number / رقم الهاتف	tel, max 30	REQ, account, private
+01.01.05	customer.contactMethod	Preferred contact method / طريقة التواصل المفضلة	options: any, email, phone	REQ, account, private
+01.01.06	customer.phoneContact	How may we reach you on your phone? / كيف نتواصل معك على هاتفك؟	options: whatsapp-text, whatsapp-call, sms, call	REQ, account, private
+01.01.07	customer.company	Company name (only if this is a business event) / اسم الشركة	text, max 120	opt, account, private
+02 · Event info
+Code	Atom	English label / Arabic	Type, options, limits	Flags
+02.01.01	event.type	Event type / نوع الفعالية	options: wedding, engagement, birthday, corporate, party, graduation, other	REQ
+02.01.02	event.title	Your event type / نوع فعاليتك	text, max 120	required only when type = other, hidden
+02.02.01	event.date	Event date / تاريخ الفعالية	date	REQ
+02.02.02	event.startTime	Start time / وقت البداية	time	REQ
+02.02.03	event.endTime	End time (after midnight is fine) / وقت الانتهاء	time	REQ
+02.03.01	event.guestCount	Guest count / عدد الضيوف	number, max 100000	REQ
+02.04.01	event.venue.name	Venue name / اسم المكان	text, max 160	REQ
+02.04.02	event.venue.address	Venue street address / عنوان الشارع	text, max 240	REQ, private
+02.04.03	event.venue.addressDetails	Address details / تفاصيل العنوان	text, max 300	opt, private
+02.04.04	event.venue.city	City / المدينة	text, max 80	REQ
+02.04.05	event.venue.postalCode	Postal code / الرمز البريدي	text, max 12	REQ, private
+02.04.06	event.venue.country	Country / الدولة	text, max 80	REQ, private
+02.04.07	event.venue.setting	Indoor or outdoor / داخلي أو خارجي	options: indoor, outdoor, both	REQ
+02.04.08	event.venue.latitude	Venue latitude / خط العرض	coordinate, max 85	opt, private, manual, hidden
+02.04.09	event.venue.longitude	Venue longitude / خط الطول	coordinate, max 180	opt, private, manual, hidden
+02.04.10	event.venue.source	Venue source / مصدر المكان	text, max 40	opt, private, manual, hidden
+02.04.11	event.venue.sourceId	Venue source identifier / معرّف المصدر	text, max 500	opt, private, manual, hidden
+02.04.12	event.venue.sourceAttribution	Venue source attribution / مصدر بيانات المكان	text, max 2000	opt, private, manual, hidden
+03 · DJ Khalil service
+Code	Atom	English label / Arabic	Type	Flags
+03.01.01	music.djRequested	Add DJ Khalil service to your booking? / هل تريد إضافة خدمة دي جي خليل؟	boolean	opt
+03.01.02	music.mcRequested	Add MC hosting and announcements? / هل تريد إضافة تقديم الحفل والإعلانات؟	boolean	opt
+03.02.01	music.languagePairs	Languages, each with its dialect (the first is the main language) / اللغات، لكل لغة لهجتها	pairs	opt, only if DJ = yes, hidden
+03.02.02	music.genres	Which music genres do you like? / ما الأنواع الموسيقية التي تفضلها؟	tags	opt, only if DJ = yes, hidden
+03.02.03	music.suggestedSongs	Suggested songs, in order, each with its moment (intro, outro …) / الأغاني المقترحة بالترتيب	songs	opt, only if DJ = yes, hidden
+03.02.04	music.favouriteSongs	Favourite songs (optional) / الأغاني المفضلة	songs	opt, only if DJ = yes, hidden
+03.02.05	music.favouriteArtists	Favourite artists (optional) / الفنانون المفضلون	tags	opt, only if DJ = yes, hidden
+04 · Rental equipment
+Code	Atom	English label / Arabic	Type	Flags
+04.01.01	rental.requested	Would you like rental services or equipment? / هل تريد خدمات تأجير أو معدات؟	boolean	opt, gates the section
+04.01.02	equipment	(no field definition in the contract)	list of items with quantities	opt
+04.06.01	event.setup.requirements	Anything we should know about the space or setup? (optional) / هل هناك ما يجب أن نعرفه عن المكان أو التجهيز؟	textarea	opt
+Equipment items. The numbers come from the live catalogue. Each item has a minimum quantity of 1.
+
+Code	Id	Name	Brand/model	In stock	3D model
+04.02.01	shure-wireless-receiver	Shure Wireless Receiver	Shure BLX4	on request	yes
+04.02.02	wedge-shaped-floor-monitors	Wedge-shaped floor monitors	JBL	2	yes
+04.02.03	tall-floor-standing-speakers	Tall floor-standing speakers	JBL	2	yes
+04.02.04	sound-system-subwoofers	Sound system subwoofers	JBL	2	yes
+04.02.05	pole-mounted-speakers	Pole-mounted speakers	JBL	2	yes
+04.02.06	qsc-k122	12-inch powered speakers	QSC K12.2	10	yes
+04.02.07	elite-15	15-inch speakers	Elite 15"	10	yes
+04.02.08	es18p	18-inch subwoofer	ES18P	4	yes
+04.02.09	shure-mics	Vocal microphones	Shure	2	yes
+04.02.10	soundcraft	Mixing console	Soundcraft	4	yes
+04.03.01	movingheads	Intelligent Moving Heads	–	10	yes
+04.03.02	trussing	Base Plates / Trussing	–	10	yes
+04.03.03	uplights	Uplights	–	30	yes
+04.04.01	led-screen	LED Screen	Six-panel	30	yes
+04.04.02	projector	Projector	–	4	yes
+04.05.01	smoke	Smoke Machine	–	8	yes
+04.05.02	sparklers	Sparklers / Cold Spark Effects	–	8	yes
+04.05.03	dry-ice	Dry Ice Machine	–	4	yes
+04.05.04	co2-gun	CO₂ Gun With Tank	–	4	yes
+The live catalogue also still lists the "8-pieces Sound System" set, which is not numbered here. It is waiting for the database cleanup.
+
+05 · Additional info
+Code	Atom	English label / Arabic	Type	Flags
+05.01.01	references.photos	Inspiration photos with comments (optional) / صور ملهمة مع تعليقات	attachments	opt, manual, hidden
+05.01.02	references.images	Links to inspiration photos (optional, an alternative to uploading photos) / روابط صور ملهمة	links	opt
+05.01.03	references.files	Event documents with notes (optional) / مستندات الفعالية مع ملاحظات	attachments	opt, manual, hidden
+05.02.01	additional.notes	Anything else we should know? (optional) / أي شيء آخر نحتاج معرفته؟	textarea	opt
+05.03.01	additional.voucherCode	Voucher code / رمز القسيمة	text, max 24	opt, hidden
