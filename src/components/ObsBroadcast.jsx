@@ -37,6 +37,12 @@ export default function ObsBroadcast({ token, title, item, onUpdate, missing = [
     catch { setMessage('Select the field and copy it manually.'); }
   };
   return <div className="obs-controls">
+    {!item?.isLive && <aside className="obs-before-live" aria-label="Before streaming from OBS">
+      <strong>Before streaming from OBS</strong>
+      <p>In OBS → Settings → Output, choose Advanced mode. Under Streaming, use <b>H.264</b> video with <b>Baseline or Constrained Baseline</b> profile, <b>0 B-frames</b>, a <b>2-second keyframe interval</b>, and <b>Opus</b> audio.</p>
+      <p>These settings let viewers watch in their browser with low delay. Other video profiles or audio formats may be rejected.</p>
+      <p>Set these while OBS is stopped, then prepare a new connection. Starting streaming in OBS puts the session on air automatically.</p>
+    </aside>}
     <div className="obs-session-toolbar">
       {(obs?.roomName||obs?.state==='ending')&&<span className={`obs-status is-${obs?.state === 'live' ? 'live' : obs?.state === 'ready' ? 'ready' : obs?.state === 'ending' ? 'waiting' : obs?.roomName ? 'waiting' : 'off'}`}><i aria-hidden="true" />{obs?.state === 'live' ? 'Receiving OBS · On air' : obs?.state === 'ready' ? 'OBS connected · Going on air…' : obs?.state === 'ending' ? 'Disconnecting OBS…' : obs?.roomName ? 'Waiting for OBS · Start within 2 minutes' : 'OBS disconnected'}</span>}
       <button type="button" className="admin-live-control admin-live-control-start" disabled={busy || !item || (item.isLive && !obs?.roomName) || (!obs?.roomName && !detailsReady)} title={!obs?.roomName && !detailsReady ? `Add ${missing.join(", ")} first` : undefined} onClick={act}>{busy ? 'Working…' : obs?.roomName ? 'Disconnect OBS' : 'Prepare OBS'}</button>

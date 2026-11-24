@@ -1,4 +1,7 @@
 .obs-controls { display:flex; flex-direction:column; gap:8px; min-width:0; font-size:12px; }
+.obs-before-live { display:grid; gap:6px; padding:12px; border:1px solid var(--aw-line,#ffffff26); background:var(--aw-raised,#ffffff0a); color:var(--aw-text,inherit); line-height:1.5; overflow-wrap:anywhere; }
+.obs-before-live>strong { font-size:13px; }
+.obs-before-live p { margin:0; }
 .obs-controls label { display:grid; gap:4px; min-width:0; font-size:12px; color:var(--aw-muted,var(--muted)); }
 .obs-field { display:flex; align-items:center; gap:6px; min-width:0; padding:0; border:0; border-radius:0; background:var(--aw-main,transparent); }
 .obs-field input { width:100%; min-width:0; min-height:30px; padding:4px 0; background:transparent; border:0; border-radius:0; color:var(--aw-text,inherit); font-size:12px; }
