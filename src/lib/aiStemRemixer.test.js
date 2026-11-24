@@ -29,6 +29,7 @@ test('seeks re-arm without seeking the media, and ending restores the manual ste
  const f=fixture();f.remix.start();await flush();f.position=12;f.remix.tick();f.position=3;f.remix.tick();assert.equal(f.statuses.at(-1).phase,'armed');assert.equal(f.restored.at(-1),f.snapshot);f.ended=true;f.remix.tick();assert.equal(f.remix.enabled,false);
 });
 test('untrusted plans use bounded presets and a labelled local fallback',()=>{
+ assert.equal(safeStemRemixPlan({sequence:[null,null]}).source,'local');
  const fallback=safeStemRemixPlan({sequence:[{preset:'silence',bars:1}]});assert.equal(fallback.source,'local');assert.equal(fallback.sequence.at(-1).preset,'full');
  for(const preset of Object.values(REMIX_PRESETS)){const gains=['vocals','drums','bass','other'].map(key=>preset[key]);assert.ok(gains.every(value=>value>=0&&value<=1));assert.ok(gains.some(value=>value>=.5));}
 });

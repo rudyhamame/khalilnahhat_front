@@ -16,7 +16,7 @@ import {recordingBeatGrid} from '../lib/recordingBeatGrid';
 import {mediaScratch} from '../lib/mediaScratch';
 import {apiRequest} from '../lib/api';
 import {createAiDjAutopilot} from '../lib/aiDjAutopilot';
-import {localDjPlan,safeDjPlan} from '../lib/aiDjPlanner';
+import {localDjPlan,safeDjPlan,trackBpm} from '../lib/aiDjPlanner';
 import {StemChannelControls} from './StemChannels';
 import './ddjController.css';
 
@@ -340,7 +340,7 @@ export default function LandscapeDjController({stems:mainStems,mic,audioGraph,un
     async plan(){
       let token='';const raw=localStorage.getItem('khalil-auth-token')||'';try{token=JSON.parse(raw)||'';}catch{token=raw;}
       if(!token)throw Error('Use local arrangement');
-      const bpm=Number(selectedRemixTrack?.bpm||selectedRemixTrack?.sound?.bpm)||null;
+      const bpm=trackBpm(selectedRemixTrack)||null;
       const result=await apiRequest('/admin/ai-dj/remix-plan',{method:'POST',token,timeoutMs:14000,body:{track:{id:selectedRemixTrack.id,title:selectedRemixTrack.title||'Untitled',bpm},style:remixStyle}});
       return result.plan;
     },

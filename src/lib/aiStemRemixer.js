@@ -3,7 +3,7 @@ import {trackBpm} from './aiDjPlanner.js';
 export const REMIX_PRESETS=contract.presets;
 export function safeStemRemixPlan(value,style='balanced'){
  const rows=value?.sequence;
- if(!Array.isArray(rows)||rows.length<2||rows.length>8||rows.some(row=>!Object.hasOwn(REMIX_PRESETS,row.preset)||![4,8,16].includes(row.bars))||rows.at(-1).preset!=='full'||!rows.some(row=>row.preset!=='full'))return {sequence:(Object.hasOwn(contract.styles,style)?contract.styles[style]:contract.fallback).map(row=>({...row})),reason:'Local phrase arrangement',source:'local'};
+ if(!Array.isArray(rows)||rows.length<2||rows.length>8||rows.some(row=>!row||typeof row!=='object'||!Object.hasOwn(REMIX_PRESETS,row.preset)||![4,8,16].includes(row.bars))||rows.at(-1).preset!=='full'||!rows.some(row=>row.preset!=='full'))return {sequence:(Object.hasOwn(contract.styles,style)?contract.styles[style]:contract.fallback).map(row=>({...row})),reason:'Local phrase arrangement',source:'local'};
  return {sequence:rows.map(row=>({preset:row.preset,bars:row.bars})),reason:String(value.reason||'Stem arrangement').slice(0,180),source:value.source==='ai'?'ai':'local'};
 }
 
