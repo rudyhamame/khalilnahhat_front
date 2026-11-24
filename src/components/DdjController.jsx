@@ -10,7 +10,7 @@ import './ddjController.css';
 
 // A 4-channel performance DJ controller drawn from a reference photo. Coordinates are in photo-derived units (1047 x 495).
 const W=1047,H=495,DECK2=680,LABEL_H=26;// LABEL_H: room under the controller for the one-line model name
-const PORTRAIT='https://res.cloudinary.com/nqiooluk/image/upload/v1793064081/khalil/site-assets/90c13a68010e/echo/blue-portrait.webp';
+const PORTRAIT='https://vps-ba7fb4cb.vps.ovh.ca/khalil-media/public/fcc07cbec08f08a9dd53156f897ced5d4c9c5b6792558668c95a123f5aa1b937.webp';
 const COLS=[{n:3,x:447},{n:1,x:498},{n:2,x:549.5},{n:4,x:599.5}];
 const STEM_OF={1:'vocals',2:'drums',3:'bass',4:'other'};
 const STEM_NAME={vocals:'VOCALS',drums:'DRUMS',bass:'BASS',other:'MUSIC'};

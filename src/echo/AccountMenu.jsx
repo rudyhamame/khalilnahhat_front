@@ -1,6 +1,7 @@
 import {isMixerAvailable} from '../lib/mixerAvailability';
 import {Fragment,useEffect,useRef,useState} from 'react';
-import {Menu,LogOut,UserRound,Home,TreePine,Radio,CalendarDays,Disc3,Box,Mail,Info,SlidersHorizontal} from 'lucide-react';
+import {Menu,LogOut,UserRound,Home,TreePine,Radio,CalendarDays,Disc3,Box,Mail,Info,SlidersHorizontal,Smartphone} from 'lucide-react';
+import {apiBaseUrl} from '../lib/api';
 import {PUBLIC_PAGE_PATHS,publicPageSection} from '../lib/publicPages';
 import {SEASONAL_TREE_ENABLED} from '../config/features';
 import {publishArchiveMixerState} from '../lib/archivePlayerBridge';
@@ -31,6 +32,8 @@ export default function AccountMenu({user=null,ar=false,badge,onLogout,path='/'}
    {destinations.map(([id,Icon,en,arabic])=><Fragment key={id}><a role="menuitem" href={PUBLIC_PAGE_PATHS[id]} aria-current={active===id?'location':undefined}><Icon size={16} aria-hidden="true"/><span>{tr(en,arabic)}</span></a>
     {id==='work'&&<button type="button" role="menuitem" className="echo-menu-mixer" onClick={()=>{setOpen(false);if(isMixerAvailable())publishArchiveMixerState(true);}}><SlidersHorizontal size={16} aria-hidden="true"/><span>{tr('Mixer','المازج')}</span></button>}</Fragment>)}
    {user&&<button type="button" role="menuitem" onClick={()=>{setOpen(false);onLogout?.();}}><LogOut size={16} aria-hidden="true"/><span>{tr('Log out','تسجيل الخروج')}</span></button>}
+   <div className="echo-account-menu-divider" role="separator" aria-orientation="horizontal"/>
+   <a role="menuitem" href={`${apiBaseUrl}/android/client`} download><Smartphone size={16} aria-hidden="true"/><span>{tr('Android app','تطبيق أندرويد')}</span></a>
   </div>}
  </div>;
 }

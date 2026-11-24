@@ -2,7 +2,6 @@ import {useEffect,useState} from 'react';
 import {useTree,useTreeSteps} from '../lib/tree';
 import {ChevronUp,X} from 'lucide-react';
 import {useEventOrder} from './eventOrderContext';
-import {bookingProgress} from './BookingCart';
 import {PUBLIC_PAGE_PATHS} from '../lib/publicPages';
 import {effectiveMissing} from '../lib/bookingNextStep';
 import {NAMES,SKIP,stepOfKey,REQUIRED_KEYS,REQUIRED_ALL,answered,nextRequiredKey,nextOptionalKey} from '../lib/footerAtoms';
@@ -43,7 +42,9 @@ export default function BookingFooter({ar=false}){
    return {n,name:ar?arabic:en,left,reqDone,reqTotal,optDone,optTotal,percent,state:left>0?'todo':reqTotal>0||optDone>0?'done':'optional'};});
   const visible=steps.filter(step=>(step.n!==3||avail.dj)&&(step.n!==4||avail.rental)).map((step,at)=>({...step,pos:at+1})); // steps that exist in the catalogue, numbered as the page numbers them
   const goStep=n=>{const el=document.getElementById(`booking-phase-${n}`);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});else window.location.assign(`/booking#booking-phase-${n}`);}; // off the steps tab: open it at that step
-  const {count,total}=bookingProgress(ctx.order),percent=Math.min(100,Math.round(count/total*100));
+  // Every data atom of the booking contract counts: total = the contract's atoms.
+  // Every piece of catalogue equipment is its own atom, replacing the single `equipment` entry.
+  const chosenItems=ctx.order.equipment?.length||0,others=ATOM_KEYS.filter(key=>key!=='equipment'),total=others.length+Math.max(catalogEquipment.length,chosenItems),count=others.filter(key=>answered(ctx.order,key)).length+chosenItems,percent=Math.min(100,Math.round(count/total*100));
   return <><div className="booking-footer-spacer" aria-hidden="true"/><footer className={`booking-footer${shown?'':' is-hidden'}`} dir={ar?'rtl':'ltr'} aria-label={tr('Booking status','حالة الحجز')}>
     <button type="button" className="booking-footer-close" onClick={close} aria-label={tr('Close booking status','إغلاق حالة الحجز')} title={tr('Close','إغلاق')}><X size={16} aria-hidden="true"/></button>
     <ol className="booking-footer-steps" aria-label={tr('Step progress','تقدم الخطوات')}>{visible.map(step=><li key={step.n}><button type="button" className={`is-${step.state}`} onClick={()=>goStep(step.pos)} aria-label={`${tr('Step','الخطوة')} ${step.pos} ${step.name}: ${tr('required','مطلوب')} ${step.reqDone}/${step.reqTotal}, ${tr('optional','اختياري')} ${step.optDone}/${step.optTotal}`}><span className="step-line"><b>{step.pos}</b><em>{step.name}</em><i aria-hidden="true">{step.state==='done'&&step.percent===100?'✓':`${step.percent}%`}</i></span><u className="step-bar" aria-hidden="true"><s style={{width:`${step.percent}%`}}/></u><small className="step-counts">{step.reqTotal>0&&<span>{tr('Required','مطلوب')} {step.reqDone}/{step.reqTotal}</span>}{step.optTotal>0&&<span>{tr('Optional','اختياري')} {step.optDone}/{step.optTotal}</span>}</small></button></li>)}</ol>

@@ -1,3 +1,4 @@
+import {UnavailableReasonDialog} from './BookingAvailability';
 import BookingQuoteEditor from './BookingQuoteEditor';
 import {bookingStatusLabel} from '../lib/clientBookingJourney';
 import {bookingText,bookingLocale,bookingMoney} from '../lib/bookingUiText';
@@ -78,6 +79,12 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
   const selectedRequest=requests.find(request=>request.id===selectedId)||requests[0];
   const [drafts, setDrafts] = useState({});
   const [publishingId, setPublishingId] = useState('');
+  const [availabilityBusy,setAvailabilityBusy]=useState(''),[unavailableRequest,setUnavailableRequest]=useState(null);
+  const isAvailable=request=>request.availability?.status==='available'||(!request.availability&&Boolean(request.availabilityAcceptedAt));
+  const informAvailability=async(request,decision,reason)=>{
+    setAvailabilityBusy(request.id);setStatuses(current=>({...current,[request.id]:''}));
+    try{const result=await onQuoteAction(request.id,'admin-review',{decision,quoteRevision:request.quoteRevision||0,...(reason?{reason}:{})});setStatuses(current=>({...current,[request.id]:result.notificationSent?tr('Availability saved and emailed to the customer.'):tr('Availability saved on the customer dashboard, but the email could not be sent.')}));return result;}catch(error){setStatuses(current=>({...current,[request.id]:error.message}));throw error;}finally{setAvailabilityBusy('');}
+  };
   const [detailTab, setDetailTab] = useState('info'); // Booking details: 'info' (the brief) or 'quote' (pricing, terms and payments)
   useEffect(() => { setDetailTab('info'); }, [selectedRequest?.id]);
   const [statuses, setStatuses] = useState({});
@@ -142,6 +149,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
     setDrafts((current) => ({ ...current, [id]: { ...current[id], [field]: value } }));
 
   const publishQuote = async (request) => {
+    if(!isAvailable(request)){setStatuses(current=>({...current,[request.id]:tr('Inform availability before publishing the quote.')}));return;}
     const draft = drafts[request.id] || buildDraft(request);
     if(!Number.isInteger(Number(draft.validDays))||Number(draft.validDays)<1||Number(draft.validDays)>60||!Number.isFinite(Number(draft.taxPercent))||Number(draft.taxPercent)<0||Number(draft.taxPercent)>30||!Number.isFinite(Number(draft.depositAmount))||Number(draft.depositAmount)<0){
       setStatuses(current=>({...current,[request.id]:'Check quote terms: validity 1–60 days, tax 0–30%, and a non-negative deposit.'}));return;
@@ -234,11 +242,15 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
           {selectedRequest&&<div className="booking-detail-tabs" role="tablist" aria-label={tr("Booking details sections")}>
             {[['info',tr("Booking info")],['quote',tr("Quote")]].map(([id,label])=><button key={id} type="button" role="tab" id={`booking-tab-${id}`} aria-selected={detailTab===id} aria-controls="booking-tab-panel" tabIndex={detailTab===id?0:-1} className={detailTab===id?'is-active':''} onClick={()=>setDetailTab(id)}>{label}</button>)}
           </div>}
-          {selectedRequest&&<div className="booking-publish-action">                  <button
+          {selectedRequest&&<div className="booking-publish-action">
+                  <button type="button" className="secondary-button" disabled={Boolean(publishingId||availabilityBusy)||!selectedRequest.journey.repriceable||isAvailable(selectedRequest)} onClick={()=>{void informAvailability(selectedRequest,'accept').catch(()=>{});}}>{availabilityBusy===selectedRequest.id?tr('Informing…'):isAvailable(selectedRequest)?tr('Availability informed'):tr('Inform Availability')}</button>
+                  <button type="button" className="secondary-button" disabled={Boolean(publishingId||availabilityBusy)||!selectedRequest.journey.repriceable} onClick={()=>setUnavailableRequest(selectedRequest)}>{tr('Not available')}</button>
+                  <button
                     type="button"
                     className="primary-button"
                     onClick={() => publishQuote(selectedRequest)}
-                    disabled={Boolean(publishingId)||!selectedRequest.journey.repriceable}
+                    disabled={Boolean(publishingId||availabilityBusy)||!selectedRequest.journey.repriceable||!isAvailable(selectedRequest)}
+                    title={!isAvailable(selectedRequest)?tr("Inform availability before publishing the quote."):undefined}
                   >
                     <Send size={15} />
                     {publishingId === selectedRequest.id
@@ -256,6 +268,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
 
             return (
               <div key={request.id} className="admin-booking-detail-body">
+              {request.journey.repriceable&&<section className="booking-availability-step" aria-label={tr('Availability before quote')}><strong>{tr('1. Inform Availability → 2. Publish quote')}</strong>{request.availability?.status==='unavailable'?<><p>{tr('Not available. The client is invited to book an optional meeting to discuss date and time options.')}</p><p>{request.availability.reason}</p></>:<p>{isAvailable(request)?tr('Availability confirmed. You can now publish the quote.'):tr('Confirm availability or explain why the requested date and time are not available.')}</p>}</section>}
               <article className={`admin-service-request-card${detailTab==='quote'?' is-quote-open':''}`} aria-busy={publishingId===request.id}>
                 <header className="booking-brief-heading booking-summary" aria-label={tr("Booking summary")}>
                   <div className="booking-summary-who">
@@ -354,6 +367,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
         )}
       </section>
       </div>
+      {unavailableRequest&&<UnavailableReasonDialog request={unavailableRequest} ar={ar} onClose={()=>setUnavailableRequest(null)} onConfirm={reason=>informAvailability(unavailableRequest,'unavailable',reason)}/>}
     </>
   );
 }

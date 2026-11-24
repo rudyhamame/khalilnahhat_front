@@ -6,8 +6,8 @@ import profile from './song-test-profile.json';
 import './songPerformance.css';
 
 const FRAME_COUNT = 8;
-const FALLBACK = 'https://res.cloudinary.com/nqiooluk/image/upload/v1793064104/khalil/site-assets/3691073b9e76/echo/khalil-fresh-natural-hands.webp';
-const POSTER = 'https://res.cloudinary.com/nqiooluk/image/upload/v1793064097/khalil/site-assets/b95944de8b16/echo/headphone-motion-cutout/pose-00.webp';
+const FALLBACK = 'https://vps-ba7fb4cb.vps.ovh.ca/khalil-media/public/0f9a23a078185dc12f091312908df4846425a84a9702485a94cade2f83b22da8.webp';
+const POSTER = 'https://vps-ba7fb4cb.vps.ovh.ca/khalil-media/public/68ee4b7b4440208f10c1b89a2cc3e61ecd9b8709bd19931485eee07ab7062890.webp';
 const FRAMES = Array.from({ length: FRAME_COUNT }, (_, index) => cloudAsset(`/echo/headphone-motion-cutout/pose-${String(index).padStart(2, '0')}.webp`));
 
 // Playback-controlled headphones sequence, independent of page scrolling.

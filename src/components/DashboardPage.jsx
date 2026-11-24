@@ -1,3 +1,4 @@
+import {ClientAvailabilityNotice} from './BookingAvailability';
 import {bookingText,bookingLocale,bookingMoney} from '../lib/bookingUiText';
 import BookingNegotiation from './BookingNegotiation';
 import BookingMeetingForm from './BookingMeetingForm';
@@ -91,7 +92,7 @@ function BookingMenu({ request, onQuoteAction, ar=false }) {
 function RequestedServices({ requests, onQuoteAction, authToken, ar=false }) {
   const tr=text=>bookingText(text,ar),money=value=>bookingMoney(value,ar),dateTime=value=>new Intl.DateTimeFormat(bookingLocale(ar),{dateStyle:'long',timeStyle:'short'}).format(value);
   // Left aside: one card per booking. Right main: the details of the selected booking.
-  const [selectedId, setSelectedId] = useState('');
+  const [selectedId, setSelectedId] = useState(()=>new URLSearchParams(window.location.search).get('booking')||'');
   const selected = requests.find((request) => request.id === selectedId) || requests[0];
   return (
     <section className={`dashboard-services-view${requests.length ? ' is-split' : ''}`} aria-label={tr("Requests and quotes")}>
@@ -126,6 +127,7 @@ function RequestedServices({ requests, onQuoteAction, authToken, ar=false }) {
               </div>
 
               <StatusSteps ar={ar} journey={request.journey} />
+              <ClientAvailabilityNotice key={`${request.id}:${request.quoteRevision}`} request={request} onQuoteAction={onQuoteAction} token={authToken} ar={ar}/>
               {(request.journey.awaitingClient || request.journey.canNegotiate) && <QuoteActions ar={ar} request={request} onQuoteAction={onQuoteAction}/>}
               {request.availabilityAcceptedAt && request.journey.clientNext === 'wait_for_quote' && <p>{ar?'تم تأكيد التوافر. يجري إعداد الأسعار وتفاصيل العربون.':'Availability confirmed. Your prices and deposit details are being prepared.'}</p>}
               {(request.journey.canRecordDeposit || request.journey.isBooked) && <BookingMeetingForm ar={ar} request={request} token={authToken} />}

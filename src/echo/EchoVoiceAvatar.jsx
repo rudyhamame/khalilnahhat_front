@@ -2,7 +2,7 @@ import {useEffect,useRef,useState} from 'react';
 import {isAssistantAudible,speechFeatures,speechMorphs} from '../lib/voiceAvatarMotion';
 import './voiceAvatar.css';
 
-const MODEL='https://res.cloudinary.com/nqiooluk/raw/upload/v1793064208/khalil/site-assets/d077fb7bc385/echo/models/echo-assistant-v1.glb';
+const MODEL='https://vps-ba7fb4cb.vps.ovh.ca/khalil-media/public/4d5a9002c3e9acaf7301d5edda017f310a563423bd5e71f049d7750d5cf39c90.glb';
 function disposeModel(root){
   const materials=new Set(),textures=new Set();
   root?.traverse(node=>{node.geometry?.dispose();for(const material of Array.isArray(node.material)?node.material:node.material?[node.material]:[])materials.add(material);});

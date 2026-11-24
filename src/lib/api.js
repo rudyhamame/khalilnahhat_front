@@ -54,7 +54,7 @@ async function request(path, options = {}) {
       throw error;
     }
 
-    if(payload.cloudinaryCleanupPending)window.dispatchEvent(new CustomEvent('admin:toast',{detail:{text:'Item permanently deleted. Cloudinary cleanup is pending and will retry automatically.'}}));
+    if(payload.cloudinaryCleanupPending)window.dispatchEvent(new CustomEvent('admin:toast',{detail:{text:'Item deleted. File cleanup is queued and will retry automatically.'}}));
     return payload;
   } catch (error) {
     const failure = timedOut ? new Error('Content loading timed out. Please retry.') : error;
@@ -196,10 +196,6 @@ export function deleteLiveSession(sessionId, token) {
     method: 'DELETE',
     token,
   });
-}
-
-export function setLiveStreamGoal(goal, token) {
-  return request('/live-stream/goal', { method: 'PUT', body: { goal }, token });
 }
 
 export function updateLiveStream(payload, token) {

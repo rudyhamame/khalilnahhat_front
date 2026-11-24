@@ -13,7 +13,7 @@ import ArtworkGlow from './ArtworkGlow';
 import MusicContentLoader from './MusicContentLoader';
 import './musicPlayerPage.css';
 
-const FALLBACK_ART='https://res.cloudinary.com/nqiooluk/image/upload/v1793064081/khalil/site-assets/90c13a68010e/echo/blue-portrait.webp';
+const FALLBACK_ART='https://vps-ba7fb4cb.vps.ovh.ca/khalil-media/public/fcc07cbec08f08a9dd53156f897ced5d4c9c5b6792558668c95a123f5aa1b937.webp';
 const clock=value=>Number.isFinite(value)&&value>=0?`${Math.floor(value/60)}:${String(Math.floor(value%60)).padStart(2,'0')}`:'0:00';
 const seconds=value=>{const parts=String(value||'').split(':').map(Number);return parts.length>1&&parts.every(Number.isFinite)?parts.reduce((sum,part)=>sum*60+part,0):0;};
 const artwork=track=>displayImageUrl(track?.coverImage)||FALLBACK_ART;

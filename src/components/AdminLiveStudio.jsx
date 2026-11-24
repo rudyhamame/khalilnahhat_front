@@ -7,7 +7,6 @@ import {useLiveStatus,liveSessionIdentity} from '../hooks/useLiveStatus';
 import {useWebrtcBroadcast} from '../hooks/useWebrtcBroadcast';
 import {apiRequest} from '../lib/api';
 import ObsRecordingGuide from './ObsRecordingGuide';
-import {startStudioBroadcast} from '../lib/studioRecordingFallback';
 import {useAutoDuck} from '../hooks/useAutoDuck';
 import {useOutputFormat} from '../hooks/useOutputFormat';
 import ObsBroadcast from './ObsBroadcast';
@@ -34,8 +33,8 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  const [cropSlot,setCropSlot]=useState(null);
  const [audience,setAudience]=useState('all'),priorAudience=useRef('all'),[audienceIds,setAudienceIds]=useState([]),[clientQuery,setClientQuery]=useState(''),[clientRows,setClientRows]=useState([]);
  useEffect(()=>{if(audience!=='specific')return undefined;const controller=new AbortController(),timer=setTimeout(()=>{apiRequest('/admin/clients?'+new URLSearchParams(clientQuery.trim()?{q:clientQuery.trim()}:{}),{token,signal:controller.signal}).then(data=>setClientRows((data.items||[]).filter(client=>!client.isAdmin))).catch(()=>{});},180);return()=>{clearTimeout(timer);controller.abort();};},[audience,clientQuery,token]);
- const ovhRecording=liveStream?.studio?.transport==='ovh';
- // Close the left (controls) and right (recording) columns to give the preview the whole width; remembered in this browser.
+ const ovhTransport=liveStream?.studio?.transport==='ovh';
+ // Close the controls column to give the preview the whole width; remembered in this browser.
  const [hidden,setHidden]=useState(()=>{try{return JSON.parse(localStorage.getItem('echo-studio-hidden-columns')||'{}')||{};}catch{return {};}});
  const toggleColumn=side=>setHidden(current=>{const next={...current,[side]:!current[side]};try{localStorage.setItem('echo-studio-hidden-columns',JSON.stringify(next));}catch{/* still applies */}return next;});
  const [settingsTab,setSettingsTab]=useState('studio');
@@ -51,13 +50,13 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
    requestAnimationFrame(()=>{const card=dialog.querySelector(`[data-destination="${platform}"]`);card?.scrollIntoView({block:'nearest'});card?.querySelector('input')?.focus({preventScroll:true});});
  };
  const apply=item=>{if(!alive.current)return;update(item);onLiveStreamChange?.(item);};
- // The browser never records: on the OVH transport the relay records on the server, otherwise nothing is recorded.
+ // Live publishing never starts a browser or server recording.
  const start=async (title,outputs)=>{
-  const result=await startStudioBroadcast({title,outputs,setListId,saveRecording:ovhRecording,audience,audienceUserIds:audienceIds,transport:ovhRecording?'ovh':'livekit',request:body=>apiRequest('/live-stream/webrtc/go-live',{method:'POST',token,body}),hasFolder:()=>false,askLocalOnly:async()=>false});
+  const result=await apiRequest('/live-stream/webrtc/go-live',{method:'POST',token,body:{title,outputs,setListId,saveRecording:false,audience,audienceUserIds:audienceIds,transport:ovhTransport?'ovh':'livekit'}});
   apply(result.item);setTitle('');return result;};
  const end=async roomName=>{const result=await apiRequest('/live-stream/webrtc/end',{method:'POST',token,body:{roomName}});apply(result.item);setTitle('');setSetListId('none');setDetailsTried(false);};
  const ready=async roomName=>{const result=await apiRequest('/live-stream/webrtc/ready',{method:'POST',token,body:{roomName}});apply(result.item);};
- const webrtc=useWebrtcBroadcast({onGoLive:start,onEndLive:end,onReady:ready,getOutputs:()=>({}),getPortraitAudio:()=>null,isNativePortrait:()=>output.nativePortrait,requireRecording:ovhRecording,recordingEnabled:ovhRecording,expectedRoom:liveStream?.webrtcRoomName});
+ const webrtc=useWebrtcBroadcast({onGoLive:start,onEndLive:end,onReady:ready,getOutputs:()=>({}),getPortraitAudio:()=>null,isNativePortrait:()=>output.nativePortrait,requireRecording:false,recordingEnabled:false,expectedRoom:liveStream?.webrtcRoomName});
  const output=useOutputFormat();
  const previewReply=webrtc.statusMessage.startsWith('Private preview ready.')||webrtc.statusMessage==='Preview closed.';
  const controlHint=destinationFeedback||(!previewReply&&webrtc.statusMessage)||'';
@@ -70,10 +69,6 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  const reserved=Boolean(liveStream?.obs?.roomName||liveStream?.webrtcRoomName),isLiveOnAir=Boolean(liveStream?.isLive),session=liveSessionIdentity(liveStream);
  const legacyObs=Boolean(liveStream?.obs?.roomName)&&liveStream?.broadcastSource!=='browser';
  
- const rec=liveStream?.recording,recProblem=[rec?.warning,rec?.error].filter(Boolean).join(' · ');
- const statusBadges=[];
- // The Record this live card already shows recording state; only a real problem earns a badge here.
- if((reserved||isLiveOnAir)&&recProblem)statusBadges.push({key:'problem',text:'Recording issue',tone:'warn',title:recProblem});
  // After a reload or a halt, bring back what the live was set up with: the pause screen (also kept on the server), the session title.
  useEffect(()=>{if(!isLiveOnAir||!liveStream)return;setTitle(current=>current||liveStream.title||'');setSetListId(liveStream.liveSetListId||'none');},[isLiveOnAir,liveStream?.title,liveStream?.liveSetListId]);// eslint-disable-line react-hooks/exhaustive-deps
  const [inputMeter,setInputMeter]=useState(null),[voiceMeter,setVoiceMeter]=useState(null),[outputMeter,setOutputMeter]=useState(null),[listenStream,setListenStream]=useState(null),[inputMuted,setInputMuted]=useState(false);
@@ -141,7 +136,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
                 </div>
 <div className="studio-comments-below"><AdminLiveComments token={token} session={isLiveOnAir?session:null} enabled={enabled}/></div>
 <section ref={settingsArea} className="studio-control-dock studio-controls-redesign" aria-labelledby="studio-controller-title">
- <header className="studio-controller-heading"><button type="button" className="studio-column-button" onClick={()=>toggleColumn('left')} title={hidden.left?'Open the controls column':'Close the controls column'} aria-label={hidden.left?'Open the controls column':'Close the controls column'} aria-expanded={!hidden.left}>{hidden.left?<PanelLeftOpen size={20}/>:<PanelLeftClose size={20}/>}</button><h3 id="studio-controller-title">Live control</h3><div className="studio-controller-tools"><div className="studio-control-status" data-state={studioState} role="status"><strong>{{preflight:'Go live preflight',live:'On air',opening:'Opening preview',connecting:'Connecting',preview:'Private preview',offline:'OBS disconnected'}[studioState]}</strong></div>{studioState==='live'&&<LiveElapsedTimer key={session||'local-live'} session={session}/>}{statusBadges.map(badge=><span key={badge.key} className="studio-badge" data-tone={badge.tone} title={badge.title}>{badge.text}</span>)}</div></header>
+ <header className="studio-controller-heading"><button type="button" className="studio-column-button" onClick={()=>toggleColumn('left')} title={hidden.left?'Open the controls column':'Close the controls column'} aria-label={hidden.left?'Open the controls column':'Close the controls column'} aria-expanded={!hidden.left}>{hidden.left?<PanelLeftOpen size={20}/>:<PanelLeftClose size={20}/>}</button><h3 id="studio-controller-title">Live control</h3><div className="studio-controller-tools"><div className="studio-control-status" data-state={studioState} role="status"><strong>{{preflight:'Go live preflight',live:'On air',opening:'Opening preview',connecting:'Connecting',preview:'Private preview',offline:'OBS disconnected'}[studioState]}</strong></div>{studioState==='live'&&<LiveElapsedTimer key={session||'local-live'} session={session}/>}</div></header>
  <div className="studio-control-workspace">
  <div className="studio-settings-tabs" role="tablist" aria-orientation="horizontal" aria-label="Stream settings sections" onKeyDown={event=>{
    const tabs=SETTINGS_TABS.map(([id])=>id),index=tabs.indexOf(settingsTab);

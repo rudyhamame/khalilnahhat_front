@@ -13,14 +13,14 @@ const SETTINGS=[
 ];
 const STEPS=[
  'Settings → Output → Output Mode: Advanced → Recording tab. Apply the table above, then click Apply and OK.',
- 'Do a 10 second test recording and play it back: check picture, sound and that the Studio preview shows the OBS Virtual Camera.',
- 'For the real live: open Echo Live Studio, press Open preview, press Start Recording in OBS, then press Go live in the Studio.',
- 'When the live ends: End live in the Studio, then Stop Recording in OBS.',
- 'Upload the .mkv from the Recording Path in Live → Live Recordings and publish it. The Studio does not receive the file by itself.',
+ 'Do a 10 second test recording and play it back: check picture and sound in the saved file.',
+ 'For the real live: prepare OBS in Echo Live Studio, paste the server and bearer token into OBS, then start streaming in OBS. Press Go live in the Studio. If you want a local copy, also press Start Recording in OBS.',
+ 'When the live ends: disconnect OBS in the Studio and stop streaming in OBS. If you recorded locally, press Stop Recording in OBS too.',
+ 'Your .mkv stays in the Recording Path on your computer. The app does not record or upload live sessions.',
 ];
 export default function ObsRecordingGuide(){
  return <div className="obs-guide">
-  <p className="obs-guide-lead">The Studio does not record in the browser. Record in OBS. These are the settings I recommend for this laptop (Intel UHD 620, hardware H.264):</p>
+  <p className="obs-guide-lead">The app does not record or archive live sessions. To keep a local copy, record in OBS. These are the settings I recommend for this laptop (Intel UHD 620, hardware H.264):</p>
   <table className="obs-guide-table"><thead><tr><th scope="col">OBS setting</th><th scope="col">Use</th><th scope="col">Why</th></tr></thead>
    <tbody>{SETTINGS.map(([name,value,why])=><tr key={name}><th scope="row">{name}</th><td><b>{value}</b></td><td>{why}</td></tr>)}</tbody></table>
   <h4>Every live</h4>

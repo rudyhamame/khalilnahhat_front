@@ -6,10 +6,10 @@ import {sectionLines} from './bookingReviewModel.js';
 const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[char]);
 // The printable "Booking confirmation" a client can save as a PDF from the Booking history. Everything is escaped; nothing is fetched or sent anywhere.
 const LOGO_PATH='/echo/echo-event-entertainment-transparent.webp';
-// The client's uploaded inspiration photos (Cloudinary only). They are shown as pictures in the PDF, never as links.
+// The client's uploaded inspiration photos (approved media origins only). They are shown as pictures in the PDF, never as links.
 export function bookingPhotos(request){
  const list=request?.order?.references?.photos;
- return (Array.isArray(list)?list:[]).filter(item=>{try{const url=new URL(item?.url);return url.protocol==='https:'&&url.hostname==='res.cloudinary.com';}catch{return false;}});
+ return (Array.isArray(list)?list:[]).filter(item=>{try{const url=new URL(item?.url);return url.protocol==='https:'&&(url.hostname==='res.cloudinary.com'||(url.hostname==='vps-ba7fb4cb.vps.ovh.ca'&&url.pathname.startsWith('/khalil-media/')));}catch{return false;}});
 }
 // A downsized copy for print (a 900 px wide JPEG), so the PDF stays light.
 export const printablePhotoUrl=url=>String(url).replace('/upload/','/upload/w_900,c_limit,q_auto,f_jpg/');

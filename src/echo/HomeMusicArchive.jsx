@@ -103,7 +103,7 @@ export default function HomeMusicArchive({lang,embedded=false,workFilter=null,on
     if(inPlayer&&sameQueue)archivePlayerCommand('toggle');else start(song);
   };
   const stop=()=>{archivePlayerCommand('stop');setUnpackedId(null);};
-  const artwork=track=>displayImageUrl(track.coverImage)||'https://res.cloudinary.com/nqiooluk/image/upload/v1793064081/khalil/site-assets/90c13a68010e/echo/blue-portrait.webp';
+  const artwork=track=>displayImageUrl(track.coverImage)||'https://vps-ba7fb4cb.vps.ovh.ca/khalil-media/public/fcc07cbec08f08a9dd53156f897ced5d4c9c5b6792558668c95a123f5aa1b937.webp';
   const backgroundTrack=player.playing&&!player.error?player.track:null;
   // Entrance and outro, in both scroll directions: the card comes in from whichever side it arrives from, and leaves toward
   // the side it exits on. phase is 'in', 'above' (left through the top / will return from the top) or 'below'.

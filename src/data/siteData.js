@@ -1,12 +1,12 @@
-const heroImage = 'https://res.cloudinary.com/nqiooluk/image/upload/v1793064133/khalil/site-assets/726292fae458/echo/performance.webp';
-const liveImage = 'https://res.cloudinary.com/nqiooluk/image/upload/v1793064135/khalil/site-assets/179c49458150/echo/production.webp';
-const archiveImage = 'https://res.cloudinary.com/nqiooluk/image/upload/v1793064135/khalil/site-assets/179c49458150/echo/production.webp';
-const datesImage = 'https://res.cloudinary.com/nqiooluk/image/upload/v1793064135/khalil/site-assets/179c49458150/echo/production.webp';
-const portraitImage = "https://res.cloudinary.com/nqiooluk/image/upload/v1793064224/khalil/site-assets/a445a8b57cf5/src-assets/images/portrait-placeholder.svg";
-const archiveLive = "https://res.cloudinary.com/nqiooluk/image/upload/v1793064213/khalil/site-assets/c2cc533cd2e5/src-assets/images/archive-live.svg";
-const archivePortrait = "https://res.cloudinary.com/nqiooluk/image/upload/v1793064216/khalil/site-assets/3395de370018/src-assets/images/archive-portrait.svg";
-const archiveCrowd = "https://res.cloudinary.com/nqiooluk/image/upload/v1793064212/khalil/site-assets/c2ea2e486627/src-assets/images/archive-crowd.svg";
-const archiveMotion = "https://res.cloudinary.com/nqiooluk/image/upload/v1793064215/khalil/site-assets/a6248c0d6ee0/src-assets/images/archive-motion.svg";
+const heroImage = 'https://vps-ba7fb4cb.vps.ovh.ca/khalil-media/public/92794dd809da37f6c60df17abfe2e0d6fd510f7c2cfaacd7255ef1f8a04664be.webp';
+const liveImage = 'https://vps-ba7fb4cb.vps.ovh.ca/khalil-media/public/7e1124fa381b88f5df1eaaf81f87798b78c81642205965bb3a81edd23e287ea8.webp';
+const archiveImage = 'https://vps-ba7fb4cb.vps.ovh.ca/khalil-media/public/7e1124fa381b88f5df1eaaf81f87798b78c81642205965bb3a81edd23e287ea8.webp';
+const datesImage = 'https://vps-ba7fb4cb.vps.ovh.ca/khalil-media/public/7e1124fa381b88f5df1eaaf81f87798b78c81642205965bb3a81edd23e287ea8.webp';
+const portraitImage = "https://vps-ba7fb4cb.vps.ovh.ca/khalil-media/public/b39b39d5c91812b46458da98707415fbebe3d8b9ea9074b57ba10b47d4d4b975.svg";
+const archiveLive = "https://vps-ba7fb4cb.vps.ovh.ca/khalil-media/public/73c41bbb482d878d87fe8eba96c83d4a7018b208dab198cbf6dc6e73599bd991.svg";
+const archivePortrait = "https://vps-ba7fb4cb.vps.ovh.ca/khalil-media/public/14ed551f495e3736652326974d419a240ba10010a21b7fd3b9435acf259eb56f.svg";
+const archiveCrowd = "https://vps-ba7fb4cb.vps.ovh.ca/khalil-media/public/7862f2f6df0aee15f2096ec15d5eb97c03270bad7664d5947cfcf22f10ad6fd8.svg";
+const archiveMotion = "https://vps-ba7fb4cb.vps.ovh.ca/khalil-media/public/d0fe66ab64b7f254036206dc5d19954d44ac8dec66d00199f944cef43e570e60.svg";
 import { resolveApiBaseUrl, resolveBookingApiUrl } from '../lib/runtimeConfig';
 
 function formatAudioTrackName(filePath) {
@@ -21,7 +21,7 @@ function formatAudioTrackName(filePath) {
 }
 
 const audioTrackModules = {
-  "/src-assets/audios/Lionel Richie - Hello (Official Music Video).mp3": "https://res.cloudinary.com/nqiooluk/video/upload/v1793064210/khalil/site-assets/ebca17397acb/src-assets/audios/Lionel%20Richie%20-%20Hello%20%28Official%20Music%20Video%29.mp4"
+  "/src-assets/audios/Lionel Richie - Hello (Official Music Video).mp3": "https://vps-ba7fb4cb.vps.ovh.ca/khalil-media/public/975b775523bb1813195130442c1b71490c4989d3d98e3de1293407e703fc56ea.mp4"
 };
 
 const audioTracks = Object.entries(audioTrackModules)

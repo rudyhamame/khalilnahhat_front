@@ -28,7 +28,7 @@
 .echo-access{--access-viewport-gutter:clamp(12px,2.5svh,28px);height:calc(100svh - var(--echo-header-height,80px));min-height:0;padding-block:var(--access-viewport-gutter);box-sizing:border-box;align-items:stretch}
 .echo-access .access-portrait{min-height:0;max-height:none;height:100%}
 .echo-access .access-portrait{overflow:visible;background:transparent;box-shadow:none;border-radius:0;isolation:isolate}
-.echo-access .access-portrait::before{content:'';position:absolute;inset:14% 12% 2%;z-index:-1;border-radius:28px 130px 28px 28px;background:#111b20 url('https://res.cloudinary.com/nqiooluk/image/upload/v1793064107/khalil/site-assets/8831e782c65d/echo/login-green-backdrop-v1.webp') center/cover no-repeat;box-shadow:0 24px 60px -35px #0c141799}
+.echo-access .access-portrait::before{content:'';position:absolute;inset:14% 12% 2%;z-index:-1;border-radius:28px 130px 28px 28px;background:#111b20 url('https://vps-ba7fb4cb.vps.ovh.ca/khalil-media/public/b0ef0a32f1b947b4e77500faed5fd68343a1e9506b79303b58cefc5742d52cd9.webp') center/cover no-repeat;box-shadow:0 24px 60px -35px #0c141799}
 .echo-access .access-portrait>img{inset:var(--access-viewport-gutter) -3% auto;width:106%;height:100%;object-fit:contain;object-position:center bottom;border-radius:0;filter:drop-shadow(0 12px 12px #0b121533)}
 .echo-access .access-portrait::after{display:none}
 .echo-access .access-portrait-top{inset:18% 16% auto;z-index:2}

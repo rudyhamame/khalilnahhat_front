@@ -2,7 +2,7 @@
 // 110 BPM across the track. The opening kick anchors the estimated 4/4 phase.
 const RECORDING = {
   trackId: 'archive-dc3b1186-e0c3-4550-ac7f-29013bf1168d',
-  audioUrl: 'https://res.cloudinary.com/nqiooluk/video/upload/v1792786516/khalil/live-sessions/file_mt2kvc.wav',
+  audioUrl: 'https://vps-ba7fb4cb.vps.ovh.ca/khalil-media/public/07350b048b9526d05cb83ff9880ce596341926dc3216442bc3264e84ff7d73a1.wav',
   bpm: 110,
   firstDownbeat: 0,
 };

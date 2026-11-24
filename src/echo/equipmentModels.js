@@ -156,7 +156,7 @@ export const EQUIPMENT_MODELS={
  },
 
  uplights:{
-  src:"https://res.cloudinary.com/nqiooluk/raw/upload/v1793064494/khalil/site-assets/5f7776b39e8e/echo/models/uplight.glb",profile:"https://res.cloudinary.com/nqiooluk/image/upload/v1793064227/khalil/site-assets/1d8b0fc48029/echo/models/uplight-reference.jpg",
+  src:"https://vps-ba7fb4cb.vps.ovh.ca/khalil-media/public/3b6ea13c9d3171b25fa1f79417c2cdf8657cf45a996ecff45c2293e8ff1bdb82.glb",profile:"https://vps-ba7fb4cb.vps.ovh.ca/khalil-media/public/91779486ef265ed31e2d153b75c490d02cb6d2b868c7848f766aa25142900884.jpg",
   brand:'ECHO / LIGHTING',model:'UPLIGHT',subtitle:['Compact event uplight','وحدة إضاءة للفعاليات'],
   specs:[
    {key:'power',label:['LIGHT ARRAY','عدسات الإضاءة'],value:'9 lenses',arabicValue:'9 عدسات',detail:['Nine circular optics visible in reference','تسع عدسات دائرية ظاهرة في الصورة المرجعية']},
@@ -168,14 +168,14 @@ export const EQUIPMENT_MODELS={
    {key:'dimensions',label:['DIMENSIONS','الأبعاد'],value:'Not supplied',arabicValue:'غير متوفرة',detail:['Exact measurements unverified','لم يتم التحقق من القياسات الدقيقة']},
    {key:'weight',label:['MODEL / RATINGS','الطراز والمواصفات'],value:'Not identified',arabicValue:'غير محدد',detail:['Brand, power and controls unverified','لم يتم التحقق من العلامة والقدرة والتحكم']},
   ],
-  source:"https://res.cloudinary.com/nqiooluk/image/upload/v1793064227/khalil/site-assets/1d8b0fc48029/echo/models/uplight-reference.jpg",sourceLabel:['View reference photo','عرض الصورة المرجعية'],
+  source:"https://vps-ba7fb4cb.vps.ovh.ca/khalil-media/public/91779486ef265ed31e2d153b75c490d02cb6d2b868c7848f766aa25142900884.jpg",sourceLabel:['View reference photo','عرض الصورة المرجعية'],
   connections:['Exact connections and electrical ratings have not been supplied.','لم يتم توفير تفاصيل التوصيلات والمواصفات الكهربائية الدقيقة.'],
   disclosure:['Illustrative 3D model based on supplied product photo','مجسم توضيحي مبني على صورة المنتج المرفقة'],
  },
 
  es18p:{
   youtube:'https://www.youtube.com/watch?v=h9z1V82w5yY',
-  src:'https://res.cloudinary.com/nqiooluk/raw/upload/v1793064132/khalil/site-assets/7f685d12a92f/echo/models/es18p-subwoofer.glb',profile:'https://res.cloudinary.com/nqiooluk/image/upload/v1793064131/khalil/site-assets/1874a9519ba5/echo/models/es18p-profile.jpg',
+  src:'https://vps-ba7fb4cb.vps.ovh.ca/khalil-media/public/37b5c08e3268b0ceefc24a59e7afc3db749b9ce5531954d370ae9c920a2faff1.glb',profile:'https://vps-ba7fb4cb.vps.ovh.ca/khalil-media/public/0a2816c5f74a3cd1b7fc3a141f88a4dc11dadf30668df069a9611600a3fc567a.jpg',
   brand:'YORKVILLE / ÉLITE',model:'ES18P',subtitle:['18″ powered subwoofer','ساب ووفر نشط 18 بوصة'],
   specs:ES18P_SPECS,source:ES18P_SPEC_SOURCE,sourceLabel:['Yorkville specifications','مواصفات Yorkville'],
   connections:['XLR input + mono blend + link out · ¼″ link in / out · power, activity & protection LEDs','مدخل XLR + دمج أحادي + مخرج ربط · مدخل ومخرج ¼ بوصة · مؤشرات التشغيل والنشاط والحماية'],
@@ -183,7 +183,7 @@ export const EQUIPMENT_MODELS={
  },
  movingheads:{
   youtube:'https://www.youtube.com/watch?v=PW1Yz53xUyk',
-  src:'https://res.cloudinary.com/nqiooluk/raw/upload/v1793064133/khalil/site-assets/cc69f53ad3b2/echo/models/intimidator-moving-head.glb',profile:'https://res.cloudinary.com/nqiooluk/image/upload/v1793064132/khalil/site-assets/55dcd5c83fe3/echo/models/intimidator-moving-head-profile.jpg',
+  src:'https://vps-ba7fb4cb.vps.ovh.ca/khalil-media/public/d59b424e68bc037ff9f8ada7430dd0297270dfc82a2397077d187baa548d46d3.glb',profile:'https://vps-ba7fb4cb.vps.ovh.ca/khalil-media/public/4b0d62b121f7e62df5d7f21c9217b7b74f1b50a10361ab49ec26cee88d630a6c.jpg',
   brand:'CHAUVET DJ / INTIMIDATOR',model:'SPOT 260X',subtitle:['Intelligent moving head spot','كشاف متحرك ذكي'],
   specs:movingHeadSpecs,source:movingHeadSource,sourceLabel:['Chauvet specifications','مواصفات Chauvet'],
   connections:['3-pin XLR DMX · powerCON-compatible power in / out · full-colour LCD · RF remote support','تحكم DMX عبر XLR بثلاثة أطراف · مدخل ومخرج طاقة متوافقان مع powerCON · شاشة LCD ملونة · دعم تحكم RF'],

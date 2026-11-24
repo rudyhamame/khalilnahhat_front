@@ -408,33 +408,9 @@ html:not([dir=rtl]).echo-access-open body .echo[data-theme]>.echo-header>.echo-l
 html.echo-access-open body .echo[data-theme]>.echo-header>.echo-lang-start:not(#_){inset-inline:auto!important;left:50%!important;transform:translate(-50%,-50%) scale(1.2);background:#0d0919!important;border:1.5px solid #f0b25e88!important;border-radius:50%!important}
 }
 
-/* Header: white bare Android icon (no box); the language button's size follows the screen on every layout. */
-html body .echo[data-theme] .echo-header .echo-android:not(#_){color:#fff!important;background:none!important;border:0!important;box-shadow:none!important;padding:0!important;display:inline-grid;place-items:center}
-html body .echo[data-theme] .echo-header .echo-android>svg:not(#_){width:calc(var(--lang-size,48px) * .55);height:calc(var(--lang-size,48px) * .55);fill:currentColor}
 html body .echo[data-page=home][data-theme] .echo-header .echo-lang:not(#_){--lang-size:clamp(40px,4.4vw,60px);width:var(--lang-size)!important;height:var(--lang-size)!important;min-height:var(--lang-size)!important;padding:calc(var(--lang-size) * .2)!important}
 html body .echo[data-page=home][data-theme] .echo-header .echo-lang>svg:not(#_){width:calc(var(--lang-size) * .52)!important;height:calc(var(--lang-size) * .52)!important}
-html body .echo[data-page=home][data-theme] .echo-header .echo-android:not(#_){--lang-size:clamp(40px,4.4vw,60px);width:var(--lang-size)!important;height:var(--lang-size)!important}
 /* Menu button: same responsive size as the language and Android buttons. */
 html body .echo[data-page=home][data-theme] .echo-header .echo-account-menu>.echo-icon-button:not(#_){--lang-size:clamp(40px,4.4vw,60px);width:var(--lang-size)!important;height:var(--lang-size)!important;min-height:var(--lang-size)!important;padding:calc(var(--lang-size) * .2)!important}
 html body .echo[data-page=home][data-theme] .echo-header .echo-account-menu>.echo-icon-button>svg:not(#_){width:calc(var(--lang-size) * .52)!important;height:calc(var(--lang-size) * .52)!important}
 
-/* Home page: the Android download is a bigger, glossy 3D button in the middle of the header. */
-html body .echo[data-page=home][data-theme]>.echo-header>.echo-android:not(#_){position:absolute!important;inset:50% auto auto 50%!important;translate:-50% -50%;z-index:6;--and-size:clamp(54px,5.8vw,78px);width:var(--and-size)!important;height:var(--and-size)!important;min-height:var(--and-size)!important;margin:0!important;padding:0!important;display:grid;place-items:center;border:0!important;border-radius:50%;color:#fff!important;
- background:radial-gradient(circle at 32% 24%,#9bffc3 0,#3ddc84 34%,#1a9a55 74%,#0e6a37 100%)!important;
- box-shadow:0 0 0 2px #0a4a28,0 0 0 4px #ffffff30,0 14px 22px #000a,0 4px 6px #0008,inset 0 3px 5px #ffffffb0,inset 0 -8px 12px #00000055;transition:transform .2s cubic-bezier(.2,.8,.2,1),box-shadow .2s}
-html body .echo[data-page=home][data-theme]>.echo-header>.echo-android:not(#_)>svg{width:52%;height:52%;filter:drop-shadow(0 3px 3px #0007)}
-html body .echo[data-page=home][data-theme]>.echo-header>.echo-android:not(#_)::after{content:'';position:absolute;inset:6% 18% auto;height:34%;border-radius:50%;background:linear-gradient(180deg,#ffffff8c,transparent);pointer-events:none}
-html body .echo[data-page=home][data-theme]>.echo-header>.echo-android:not(#_):hover{transform:translateY(-3px) scale(1.06);box-shadow:0 0 0 2px #0a4a28,0 0 0 4px #ffffff45,0 20px 28px #000b,0 6px 8px #0008,inset 0 3px 5px #ffffffb0,inset 0 -8px 12px #00000055}
-html body .echo[data-page=home][data-theme]>.echo-header>.echo-android:not(#_):active{transform:translateY(2px) scale(.97);box-shadow:0 0 0 2px #0a4a28,0 0 0 4px #ffffff30,0 6px 10px #000a,inset 0 4px 8px #00000066}
-html body .echo[data-page=home][data-theme]>.echo-header>.echo-android:not(#_)>svg{width:62%;height:62%}
-/* No green button: the Android download is just the white icon, in the middle of the header. */
-html body .echo[data-page=home][data-theme]>.echo-header>.echo-android:not(#_){background:none!important;box-shadow:none!important;border-radius:0}
-html body .echo[data-page=home][data-theme]>.echo-header>.echo-android:not(#_)::after{display:none}
-html body .echo[data-page=home][data-theme]>.echo-header>.echo-android:not(#_)>svg{width:100%;height:100%;color:#fff;filter:drop-shadow(0 3px 5px #0009)}
-html body .echo[data-page=home][data-theme]>.echo-header>.echo-android:not(#_):hover{background:none!important;box-shadow:none!important;transform:translateY(-2px) scale(1.08)}
-html body .echo[data-page=home][data-theme]>.echo-header>.echo-android:not(#_):active{background:none!important;box-shadow:none!important}
-/* Home header: the white Android icon with its caption under it. */
-html body .echo[data-page=home][data-theme]>.echo-header>.echo-android:not(#_){width:auto!important;height:auto!important;min-height:0!important;min-width:0;flex-direction:column;gap:4px;padding:4px 8px!important;text-align:center}
-html body .echo[data-page=home][data-theme]>.echo-header>.echo-android:not(#_)>svg{width:clamp(30px,3vw,40px);height:clamp(30px,3vw,40px)}
-.echo-android-text{display:block;max-width:150px;color:#fff;font:700 11px/1.25 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:.04em;text-shadow:0 1px 4px #000c}
-@media(max-width:560px){.echo-android-text{max-width:92px;font-size:10px}}

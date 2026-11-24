@@ -29,6 +29,6 @@ test('Arabic print uses RTL, localized status, sections, totals and overnight ti
  order.music.djRequested=true;order.additional.notes='<script>unsafe</script> My original note';
  const request={status:'confirmed',requestNumber:'ECHO-AR',journey:{label:'Booking confirmed',isBooked:true,showsPrices:true},order,items:[{name:'Original equipment',quantity:2,unitPrice:10,lineTotal:20}],total:20};
  const html=bookingConfirmationHtml(request,{ar:true});
- for(const value of ['lang="ar"','dir="rtl"','تأكيد الحجز','خدمة دي جي خليل','تم تأكيد الحجز','الرصيد المتبقي','اليوم التالي','My original event','My original note','Original equipment','&lt;script&gt;'])assert.ok(html.includes(value),value);
+ for(const value of ['lang="ar"','dir="rtl"','تأكيد الحجز','خدمة دي جي خليل','تم الحجز','الرصيد المتبقي','اليوم التالي','My original event','My original note','Original equipment','&lt;script&gt;'])assert.ok(html.includes(value),value);
  assert.doesNotMatch(html,/<script>|Remaining balance|Booking confirmation|Rental services and equipment/);
 });
