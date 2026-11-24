@@ -109,11 +109,6 @@ export default function MailComposer({ composer, onReview, polish }) {
             placeholder="Write your message…"
           />
         </label>
-        {polish && <div className="ae-ai-row">
-          <button type="button" className="ae-secondary" disabled={locked || polishing || !draft.text.trim()} onClick={runPolish}><Sparkles size={15} aria-hidden="true" /> {polishing ? "Writing…" : "Polish with AI · subject & body"}</button>
-          {before && <button type="button" className="ae-secondary" disabled={locked} onClick={() => { edit("subject", before.subject); edit("text", before.text); setBefore(null); }}>Undo</button>}
-          {aiError && <span role="alert" className="ae-ai-error">{aiError}</span>}
-        </div>}
         </>}
         {error && (
           <div className="ae-alert" role="alert">
@@ -156,6 +151,11 @@ export default function MailComposer({ composer, onReview, polish }) {
                   : "Replies return to your bookings inbox"}
             </span>
           </div>
+          {polish && !reviewing && <div className="ae-ai-row">
+            <button type="button" className="ae-secondary" disabled={locked || polishing || !draft.text.trim()} onClick={runPolish}><Sparkles size={15} aria-hidden="true" /> {polishing ? "Writing…" : "Polish with AI · subject & body"}</button>
+            {before && <button type="button" className="ae-secondary" disabled={locked} onClick={() => { edit("subject", before.subject); edit("text", before.text); setBefore(null); }}>Undo</button>}
+            {aiError && <span role="alert" className="ae-ai-error">{aiError}</span>}
+          </div>}
           <button className="ae-primary ae-send-button" type="submit" disabled={locked}>
             <Send size={16} />
             {sending ? "Sending…" : checking ? "Checking…" : reviewing ? "Confirm and send" : "Review email"}

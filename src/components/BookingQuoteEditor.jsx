@@ -41,6 +41,17 @@ export default function BookingQuoteEditor({request,draft,totals,catalog=[],equi
        <input type="number" min="0" max={draft.discountType==='percent'?100:totals.subtotal} step="0.01" inputMode="decimal" placeholder={draft.discountType==='percent'?'0 %':'0.00'} aria-label={draft.discountType==='percent'?tr('Discount (%)'):tr('Discount (CAD)')} value={draft.discountValue} onChange={event=>onFieldChange('discountValue',event.target.value)}/>
       </div>
       <label><span>{tr('Tax %')}</span><input type="number" min="0" max="30" step="0.01" inputMode="decimal" value={draft.taxPercent} onChange={event=>onFieldChange('taxPercent',event.target.value)}/></label>
+      <div className="bqe-discount bqe-deposit">
+       <div className="bqe-discount-head"><span>{ar?'العربون':'Deposit'}</span>
+        <div className="bqe-mini-tabs" role="group" aria-label={ar?'نوع العربون':'Deposit type'}>
+         {[['amount',tr('Amount')],['percent',ar?'نسبة':'Percent']].map(([kind,label])=><button key={kind} type="button" aria-pressed={draft.depositType===kind} className={draft.depositType===kind?'is-active':''} onClick={()=>onFieldChange('depositType',kind)}>{label}</button>)}
+        </div>
+       </div>
+       {draft.depositType==='percent'
+        ?<input type="number" min="0" max="100" step="0.01" inputMode="decimal" placeholder="0 %" aria-label={tr('Deposit (%)')} value={draft.depositPercent} onChange={event=>onFieldChange('depositPercent',event.target.value)}/>
+        :<input type="number" min="0" step="0.01" inputMode="decimal" placeholder="0.00" aria-label={tr('Deposit (CAD)')} value={draft.depositAmount} onChange={event=>onFieldChange('depositAmount',event.target.value)}/>}
+       {draft.depositType==='percent'&&<small className="bqe-deposit-amount">{tr('Deposit')}: <bdi>{money(totals.deposit)}</bdi></small>}
+      </div>
      </div>
     </section>
     <label className="bqe-note"><span>{ar?'رسالة للعميل':'Message to customer'}<small>{tr('(optional)')}</small></span><textarea rows={3} value={draft.adminNote||''} onChange={event=>onNoteChange(event.target.value)} placeholder={ar?'أضف تفاصيل أو ملاحظات حول هذا العرض':'Add context or notes about this quote'}/></label>
@@ -61,7 +72,6 @@ export default function BookingQuoteEditor({request,draft,totals,catalog=[],equi
     <legend>{tr('Quote terms')}</legend>
     <div className="bqe-term-fields">
      <label><span>{tr('Valid days')}</span><input type="number" min="1" max="60" step="1" inputMode="numeric" value={draft.validDays} onChange={event=>onFieldChange('validDays',event.target.value)}/></label>
-     <label><span>{tr('Deposit (CAD)')}</span><input type="number" min="0" step="0.01" inputMode="decimal" value={draft.depositAmount} onChange={event=>onFieldChange('depositAmount',event.target.value)}/></label>
     </div>
     <label className="bqe-payment-note"><span>{tr('Payment instructions')}</span><textarea rows={3} value={draft.paymentInstructions||''} onChange={event=>onFieldChange('paymentInstructions',event.target.value)} placeholder={ar?'التفاصيل التي يحتاجها العميل للدفع':'Details the customer needs to make a payment'}/></label>
     {request.expiresAt&&<p className="bqe-expiry">{ar?'تنتهي صلاحية العرض الحالي':'Current quote expires'} <time dateTime={request.expiresAt}>{new Date(request.expiresAt).toLocaleString(bookingLocale(ar),{dateStyle:'medium',timeStyle:'short'})}</time></p>}

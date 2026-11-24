@@ -7,6 +7,7 @@ export function quoteTotals(sr){
  const taxableCents=subtotalCents-discountCents;
  const taxPercent=Math.max(0,Number(sr.taxPercent)||0);
  const taxCents=Math.round(taxableCents*taxPercent/100),totalCents=taxableCents+taxCents;
- const depositCents=Math.min(Math.max(0,cents(sr.depositAmount)),totalCents);
+ // The deposit is a fixed amount, or a percentage of the total (after discount and tax); the server stores the resulting amount.
+ const depositCents=Math.min(Math.max(0,sr.depositType==='percent'?Math.round(totalCents*Math.min(100,Math.max(0,Number(sr.depositPercent)||0))/100):cents(sr.depositAmount)),totalCents);
  return {subtotal:subtotalCents/100,discountType,discountValue,discount:discountCents/100,taxableSubtotal:taxableCents/100,taxPercent,tax:taxCents/100,total:totalCents/100,deposit:depositCents/100,balance:(totalCents-depositCents)/100};
 }

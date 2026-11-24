@@ -339,3 +339,15 @@ html body .admin-workspace[data-area=services] article.admin-service-request-car
 /* The Quote column uses the very same header (markup, padding, alignment) as the Booking details column. */
 .admin-workspace[data-area=services] .admin-booking-detail-body .booking-quote-aside{padding:24px!important}
 .booking-quote-aside>.booking-column-heading{padding:16px 0 12px}
+/* Price adjustments: rounded corners and a solid border (the other Quote cards keep the dashed, square look). */
+.admin-workspace[data-area=services] .booking-quote-aside .bqe-adjustments{border:1px solid color-mix(in srgb,var(--aw-text) 40%,transparent)!important;border-radius:12px!important}
+/* Price adjustments: same background as the Services & pricing table (transparent over the card's tint) and padded. */
+.admin-workspace[data-area=services] .booking-quote-aside .bqe-adjustments{background:transparent!important;padding:18px 20px!important}
+.admin-workspace[data-area=services] .booking-quote-aside .bqe-adjustments .bqe-adjustment-fields{gap:16px}
+.admin-workspace[data-area=services] .booking-quote-aside .bqe-adjustments :is(.bqe-discount,label){padding:0}
+/* Price adjustments: discount, tax and deposit each on their own line. */
+.admin-workspace[data-area=services] .booking-quote-aside .bqe-adjustments .bqe-adjustment-fields{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:16px}
+.admin-workspace[data-area=services] .booking-quote-aside .bqe-adjustments .bqe-adjustment-fields>*{grid-column:1 / -1}
+.admin-workspace[data-area=services] .booking-quote-aside .bqe-adjustments{border:1px solid var(--aw-line)!important;border-radius:12px!important}
+.admin-workspace[data-area=services] .booking-quote-aside .bqe-adjustments{background:var(--aw-main)!important}
+.bqe-deposit-amount{color:var(--aw-muted);font-size:12px}

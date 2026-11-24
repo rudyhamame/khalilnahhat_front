@@ -68,6 +68,8 @@ function buildDraft(request, currentDraft) {
     discountType: currentDraft?.discountType ?? request.discountType ?? 'amount',
     discountValue: currentDraft?.discountValue ?? request.discountValue ?? 0,
     depositAmount: currentDraft?.depositAmount ?? request.deposit ?? 0,
+    depositType: currentDraft?.depositType ?? 'amount',
+    depositPercent: currentDraft?.depositPercent ?? '',
     paymentInstructions: currentDraft?.paymentInstructions ?? request.paymentInstructions ?? '',
     prices: Object.fromEntries(
       (currentDraft?.items||request.items).map((item) => [
@@ -199,7 +201,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
   const publishQuote = async (request) => {
     if(!isAvailable(request)){setStatuses(current=>({...current,[request.id]:tr('Inform availability before publishing the quote.')}));return;}
     const draft = drafts[request.id] || buildDraft(request);
-    if(!Number.isInteger(Number(draft.validDays))||Number(draft.validDays)<1||Number(draft.validDays)>60||!Number.isFinite(Number(draft.taxPercent))||Number(draft.taxPercent)<0||Number(draft.taxPercent)>30||!Number.isFinite(Number(draft.depositAmount))||Number(draft.depositAmount)<0){
+    if(!Number.isInteger(Number(draft.validDays))||Number(draft.validDays)<1||Number(draft.validDays)>60||!Number.isFinite(Number(draft.taxPercent))||Number(draft.taxPercent)<0||Number(draft.taxPercent)>30||!Number.isFinite(Number(draft.depositAmount))||Number(draft.depositAmount)<0||(draft.depositType==='percent'&&!(Number(draft.depositPercent)>=0&&Number(draft.depositPercent)<=100))){
       setStatuses(current=>({...current,[request.id]:'Check quote terms: validity 1–60 days, tax 0–30%, and a non-negative deposit.'}));return;
     }
     const hasMissingPrice = draft.items.some((item) => {
@@ -236,7 +238,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
         taxPercent: Number(draft.taxPercent) || 0,
         discountType: draft.discountType,
         discountValue: Number(draft.discountValue)||0,
-        depositAmount: Number(draft.depositAmount) || 0,
+        depositAmount: quoteTotals({...draft,items:draft.items.map(item=>({...item,unitPrice:Number(draft.prices[item.serviceId])}))}).deposit,
         paymentInstructions: draft.paymentInstructions || '',
       });
       setStatuses((current) => ({

@@ -1194,3 +1194,6 @@
 .ae-ai-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:0 24px 14px}
 .ae-ai-row .ae-secondary{display:inline-flex;align-items:center;gap:7px}
 .ae-ai-error{font-size:12px;color:#e08a85}
+/* Polish buttons live in the footer, between the draft note and Review email. */
+.ae-composer footer .ae-ai-row{padding:0;margin-inline-start:auto;flex-wrap:nowrap}
+@media(max-width:700px){.ae-composer footer{flex-wrap:wrap}.ae-composer footer .ae-ai-row{flex-wrap:wrap;margin-inline-start:0}}
