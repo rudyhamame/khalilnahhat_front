@@ -79,3 +79,12 @@
 .ddj-ai-top{display:flex;flex-wrap:wrap;justify-content:center;max-width:44%;width:max-content}
 .ddj-ai-top .ddj-ai-note{flex-basis:100%;text-align:center}
 .ddj-ai-top .ddj-close-mixer{border-color:#8a5a5a;background:#2a1a1c}.ddj-ai-top .ddj-close-mixer:hover{background:#40262a}
+.ddj-remix-toolbar select{min-width:0;max-width:155px;min-height:28px;padding:4px 8px;border:1px solid #64727a;border-radius:8px;background:#182126;color:#e8eef1;font:600 10px/1.4 system-ui}
+.ddj-ai-top button:disabled{opacity:.5;cursor:not-allowed}
+
+.ddj-remix-toolbar{flex:none;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px;padding:10px 14px;border:1px solid #34434a;border-radius:12px;background:#111b20;color:#e8eef1}
+.ddj-remix-toolbar :is(button,select){min-height:38px;font:600 12px/1.5 system-ui}
+.ddj-remix-toolbar button{padding:8px 16px;border:1px solid #64727a;border-radius:8px;background:#182126;color:#e8eef1;cursor:pointer}
+.ddj-remix-toolbar button.is-on{border-color:#5fe0a7;background:#123d2d;color:#caffea}
+.ddj-remix-toolbar button:disabled{opacity:.5;cursor:not-allowed}
+.ddj-remix-toolbar .ddj-ai-note{flex-basis:100%;text-align:center;font:12px/1.5 system-ui;color:#c4d6db;overflow-wrap:anywhere}

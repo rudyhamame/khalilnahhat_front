@@ -15,6 +15,7 @@ export const CONTRACTS=[
  ['src/eventOrderCore.mjs','src/lib/eventOrderCore.mjs'],
  ['src/eventOrderContract.json','src/lib/eventOrderContract.json'],
  ['contracts/booking-journey.json','src/lib/bookingJourneyContract.json'],
+ ['contracts/dj-remix.json','src/lib/contracts/dj-remix.json'],
 ];
 export const backendPresent=()=>fs.existsSync(path.join(back,'contracts'));
 export function drift(){

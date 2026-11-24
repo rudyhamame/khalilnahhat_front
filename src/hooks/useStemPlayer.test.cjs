@@ -8,11 +8,11 @@ function harness({active=false,decode,duration=10}={}){
  const channels=['vocals','drums','bass','other'];const mix=()=>Object.fromEntries(channels.map(n=>[n,{volume:1,solo:false,muted:false}]));
  const same=(a,b)=>a&&b&&a.length===b.length&&a.every((v,i)=>Object.is(v,b[i]));
  const node=()=>({gain:{setValueAtTime(){},setTargetAtTime(){}},connect(){},disconnect(){this.disconnected=true;},getFloatTimeDomainData(samples){samples.fill(.1);}});
- const original=node(),context={currentTime:1,sampleRate:44100,resume:async()=>{},createGain:node,createAnalyser:node,decodeAudioData:decode||(async()=>({duration:10,length:441000,numberOfChannels:2}))};
+ const originalWrites=[];const original=node();original.gain.setValueAtTime=(value,time)=>originalWrites.push({value,time});original.gain.cancelScheduledValues=time=>originalWrites.push({cancel:time});const context={currentTime:1,sampleRate:44100,resume:async()=>{},createGain:node,createAnalyser:node,decodeAudioData:decode||(async()=>({duration:10,length:441000,numberOfChannels:2}))};
  const element={paused:false,seeking:false,currentTime:0,playbackRate:1,events:{},addEventListener(n,f){this.events[n]=f;},removeEventListener(n){delete this.events[n];}};
  const props={active,audio:{current:element},track:{id:'one',audioUrl:'one.mp3'},audioGraph:{current:{context,stemInput:node(),originalGain:original}},unlock(){},master:1};
  const source=fs.readFileSync(__dirname+'/useStemPlayer.js','utf8').replace(/^import .*;\n/gm,'').replace('export default function useStemPlayer','function useStemPlayer');
- const sandbox={AbortController,Float32Array,Date,console,document:{hidden:false},localStorage:{getItem:()=>null},apiBaseUrl:'/api',STEM_DECODE_LIMIT:384*1024*1024,stemDecodeLimit:()=>384*1024*1024,STEM_FOLDED_INTO_OTHER:['guitar','piano'],stemDecodeBytes:(duration,rate,n)=>duration*rate*2*4*n,STEM_CHANNELS:channels,STEM_REQUIRED:channels,initialStemMix:mix,stemGain:()=>1,
+ const sandbox={playbackMediaUrl:value=>value,AbortController,Float32Array,Date,console,document:{hidden:false},localStorage:{getItem:()=>null},apiBaseUrl:'/api',STEM_DECODE_LIMIT:384*1024*1024,stemDecodeLimit:()=>384*1024*1024,STEM_FOLDED_INTO_OTHER:['guitar','piano'],stemDecodeBytes:(duration,rate,n)=>duration*rate*2*4*n,STEM_CHANNELS:channels,STEM_REQUIRED:channels,initialStemMix:mix,stemGain:()=>1,
   scheduleStemSources:()=>channels.map(()=>({stop(){},disconnect(){}})),
   useRef(v){const i=cursor++;return slots[i]||=( {current:v});},
   useState(v){const i=cursor++;if(!(i in slots))slots[i]=typeof v==='function'?v():v;return [slots[i],value=>{const next=typeof value==='function'?value(slots[i]):value;if(!Object.is(next,slots[i])){slots[i]=next;dirty=true;states++;}}];},
@@ -26,7 +26,7 @@ function harness({active=false,decode,duration=10}={}){
  const render=()=>{cursor=0;dirty=false;value=hook(props);const todo=pending;pending=[];todo.forEach(fn=>fn());};
  const settle=async()=>{for(let n=0;n<30;n++){await new Promise(resolve=>setImmediate(resolve));if(dirty)render();}};
  render();
- return {props,context,element,original,requests,fetches,intervals,timeouts,get value(){return value;},get states(){return states;},render,settle,unmount(){effects.forEach(e=>e?.cleanup?.());}};
+ return {props,context,element,original,originalWrites,requests,fetches,intervals,timeouts,get value(){return value;},get states(){return states;},render,settle,unmount(){effects.forEach(e=>e?.cleanup?.());}};
 }
 test('ordinary playback does not poll, separate or decode hidden mixer channels',async()=>{
  let decoded=0;const h=harness({decode:async()=>{decoded++;return {duration:10};}});await h.settle();
@@ -51,4 +51,15 @@ test('reopening and switching tracks creates one new engine and cancels the old 
 
 test('long recordings retain original playback without allocating full-length stem buffers',async()=>{
  const h=harness({active:true,duration:3600});await h.settle();assert.equal(h.fetches.length,0);assert.equal(h.value.mode,false);assert.match(h.value.notice,/memory limit/);assert.equal(h.intervals.size,0);h.unmount();
+});
+test('remix automation changes decoded channel gains without restarting or seeking the playing deck',async()=>{
+ const h=harness({active:true});await h.settle();h.element.currentTime=123;
+ const before=h.value.mix;h.value.applyRemix({vocals:0,drums:1,bass:.7,other:.4});h.render();await h.settle();
+ assert.equal(h.element.currentTime,123);assert.equal(h.value.mix.vocals.volume,0);assert.equal(h.value.mix.drums.volume,1);assert.equal(h.value.mode,true);
+ h.value.restoreMix(before);h.render();await h.settle();assert.equal(h.value.mix.vocals.volume,1);assert.equal(h.element.currentTime,123);h.unmount();
+});
+
+test('switching to stems keeps original audio until their scheduled start and cancels pending mutes on close',async()=>{
+ const h=harness({active:true});await h.settle();const mute=h.originalWrites.find(write=>write.value===0);assert.equal(mute.time,h.context.currentTime+.04);
+ h.props.active=false;h.render();await h.settle();assert.equal(h.originalWrites.at(-1).value,1);assert.equal(h.originalWrites.at(-2).cancel,h.context.currentTime);h.unmount();
 });

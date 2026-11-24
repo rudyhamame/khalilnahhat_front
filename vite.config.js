@@ -1,3 +1,4 @@
+import {mediaDevProxy} from './scripts/media-dev-proxy.mjs';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 let publicContactEmail='';
@@ -15,6 +16,7 @@ export default defineConfig({
     port: 5176,
     strictPort: true,
     proxy: {
+      '/khalil-media': mediaDevProxy(),
       // The mailbox always sends from OVH's fixed IP, even when other APIs run locally.
       // Keep inbox, send and send-status on the same authenticated mailbox service.
       '/api/admin/mail': {

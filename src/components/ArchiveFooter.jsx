@@ -1,3 +1,4 @@
+import {playbackMediaUrl} from '../lib/playbackMediaUrl';
 import {retainArchiveSource} from '../lib/archivePlaybackSource';
 import useAutoEqualizer from '../hooks/useAutoEqualizer';
 import {isMixerAvailable,MIXER_PHONE_MEDIA} from '../lib/mixerAvailability';
@@ -207,7 +208,7 @@ function ArchiveMusicPlayer() {
     if (playing && currentUrl && enabled) {
       const swap = fade.current.pendingIn || fade.current.hasPlayed && element.currentTime === 0 && fade.current.trackChanged;
       if (swap) element.volume = 0; else { cancelAnimationFrame(fade.current.raf); element.volume = volumeRef.current; }
-      element.play().then(() => { fade.current.hasPlayed = true; if (swap) { fade.current.pendingIn = false; fade.current.trackChanged = false; ramp(volumeRef.current, 1100); } }).catch(() => { if (!cancelled) { setPlaying(false); setError('Unable to play this recording. Try the next track.'); } });
+      element.play().then(() => { fade.current.hasPlayed = true; if (swap) { fade.current.pendingIn = false; fade.current.trackChanged = false; ramp(volumeRef.current, 1100); } }).catch(error => { if (!cancelled&&error?.name!=='AbortError') { setPlaying(false); setError(error?.name==='NotAllowedError'?'Press Play to allow audio in this browser.':'Unable to play this recording. Check your connection and try again.'); } });
     } else { cancelAnimationFrame(fade.current.raf); element.volume = volumeRef.current; element.pause(); }
     return () => { cancelled = true; element.pause(); };
   }, [playing, current?.id, currentUrl, enabled]);
@@ -282,7 +283,7 @@ function ArchiveMusicPlayer() {
   const handleEnded=()=>{if(autoDjOwnsTransport.current)setPlaying(false);else step(1);};
 
   return <>
-    <audio data-track-id={current?.id} ref={audio} crossOrigin="anonymous" src={currentUrl || undefined} preload="metadata"
+    <audio data-track-id={current?.id} ref={audio} crossOrigin="anonymous" src={playbackMediaUrl(currentUrl) || undefined} preload="metadata"
       onLoadedMetadata={(event) => { event.currentTarget.playbackRate = playbackRate; setDuration(event.currentTarget.duration); setBuffering(false); }}
       onTimeUpdate={(event) => setPosition(event.currentTarget.currentTime)}
       onWaiting={() => setBuffering(true)} onPlaying={() => setBuffering(false)} onCanPlay={() => setBuffering(false)}

@@ -1,3 +1,4 @@
+import {playbackMediaUrl} from '../lib/playbackMediaUrl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { apiRequest, apiBaseUrl } from '../lib/api';
 import { initialStemMix, STEM_CHANNELS, STEM_REQUIRED, stemGain, scheduleStemSources, stemDecodeBytes, stemDecodeLimit, STEM_FOLDED_INTO_OTHER } from '../lib/stemMix';
@@ -16,6 +17,7 @@ export default function useStemPlayer({audio, track, audioGraph, unlock, master,
   const separationAttempt = useRef({id:null,count:0,retryAt:0});
   const current = useRef(track?.id);
   current.current = track?.id;
+  const mixRamp=useRef(.015);
   const settings = useRef({mix,master});
   settings.current = {mix,master};
   const stop = useCallback(() => {
@@ -31,7 +33,8 @@ export default function useStemPlayer({audio, track, audioGraph, unlock, master,
     engine.current=null;
     if(graph) { clearInterval(graph.timer); for(const node of Object.values(graph.outputs)) node.disconnect(); for(const node of Object.values(graph.analysers)) node.disconnect(); }
     for(const node of Object.values(levelRefs.current).flat())node?.style.setProperty('--channel-level','0');
-    audioGraph.current?.originalGain?.gain.setValueAtTime(1,audioGraph.current.context.currentTime);
+    const original=audioGraph.current?.originalGain?.gain,now=audioGraph.current?.context.currentTime;
+    original?.cancelScheduledValues?.(now);original?.setValueAtTime(1,now);
   },[audioGraph,stop]);
   useEffect(() => {
     let canceled=false, timer,failures=0;const controller=new AbortController();
@@ -57,7 +60,8 @@ export default function useStemPlayer({audio, track, audioGraph, unlock, master,
   useEffect(() => {
     const graph=engine.current;
     if(!graph) return;
-    for(const name of STEM_CHANNELS) graph.outputs[name].gain.setTargetAtTime(stemGain(mix,name,master),graph.context.currentTime,.015);
+    for(const name of STEM_CHANNELS) graph.outputs[name].gain.setTargetAtTime(stemGain(mix,name,master),graph.context.currentTime,mixRamp.current);
+    mixRamp.current=.015;
   },[mix,master]);
   useEffect(() => {
     if(!mode) return undefined;
@@ -69,6 +73,9 @@ export default function useStemPlayer({audio, track, audioGraph, unlock, master,
       try {
         graph.context.resume().catch(()=>{});
         graph.sources=scheduleStemSources(graph.context,graph.buffers,graph.outputs,element.currentTime,element.playbackRate);
+        const original=audioGraph.current?.originalGain?.gain,now=graph.context.currentTime;
+        // Keep the original audible until all stem buffers start on the same future sample.
+        original?.cancelScheduledValues?.(now);original?.setValueAtTime(1,now);original?.setValueAtTime(0,now+.04);
         graph.startedAt=graph.context.currentTime;
         graph.offset=element.currentTime;
         graph.rate=element.playbackRate;
@@ -124,7 +131,7 @@ export default function useStemPlayer({audio, track, audioGraph, unlock, master,
       for(const channel of status.channels){
         if(controller.signal.aborted||request!==generation.current)return;
         const base=apiBaseUrl.replace(/\/api$/,'');
-        const response=await fetch(/^https:/.test(channel.url)?channel.url:`${base}${channel.url}`,{cache:'no-cache',signal:controller.signal});
+        const response=await fetch(playbackMediaUrl(/^https:/.test(channel.url)?channel.url:`${base}${channel.url}`),{cache:'no-cache',signal:controller.signal});
         if(!response.ok)throw new Error('A channel could not be loaded.');
         const buffer=await graph.context.decodeAudioData(await response.arrayBuffer());
         decodedBytes+=buffer.length*buffer.numberOfChannels*Float32Array.BYTES_PER_ELEMENT;
@@ -153,7 +160,6 @@ export default function useStemPlayer({audio, track, audioGraph, unlock, master,
           for(const node of levelRefs.current[name]||[])node?.style.setProperty('--channel-level',String(level));
         }
       },100);
-      graph.originalGain.gain.setValueAtTime(0,graph.context.currentTime);
       setMode(true);setNotice('');
     } catch(error) {if(request===generation.current){release();setMode(false);setNotice(error.message||'Could not load the separated channels.');}}
     finally {if(request===generation.current)setLoading(false);}
@@ -163,5 +169,7 @@ export default function useStemPlayer({audio, track, audioGraph, unlock, master,
     automaticAttempt.current=track.id;
     toggle();
   },[active,audioGraph,status.status,status.trackId,track?.id,mode,loading,toggle]);
-  return {status,notice,loading,mode,mix,levelRefs,automatic:true,active,separate,toggle,change:(name,patch)=>setMix(value=>({...value,[name]:{...value[name],...patch}}))};
+  const applyRemix=volumes=>{mixRamp.current=.2;setMix(value=>Object.fromEntries(STEM_CHANNELS.map(name=>[name,{...value[name],volume:Math.max(0,Math.min(1,Number.isFinite(volumes[name])?volumes[name]:1)),muted:false,solo:false}])));};
+  const restoreMix=snapshot=>{mixRamp.current=.12;setMix(Object.fromEntries(STEM_CHANNELS.map(name=>[name,{...snapshot[name]}])));};
+  return {applyRemix,restoreMix,status,notice,loading,mode,mix,levelRefs,automatic:true,active,separate,toggle,change:(name,patch)=>setMix(value=>({...value,[name]:{...value[name],...patch}}))};
 }

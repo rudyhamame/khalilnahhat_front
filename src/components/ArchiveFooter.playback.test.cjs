@@ -3,17 +3,17 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
 
-async function harness(){
+async function harness({playError}={}){
  const {retainArchiveSource}=await import('../lib/archivePlaybackSource.js');
  const slots=[],effects=[],timers=new Map();let cursor=0,pending=[],dirty=false,value,serial=0,catalogCount=0,playCalls=0,pauseCalls=0;
  const url=signature=>`https://media.example/khalil-media/private/${'a'.repeat(64)}.mp3?expires=9999999999&signature=${signature}`;
  const catalog=()=>({songs:[{id:'one',audioUrl:url(++catalogCount)},{id:'two',audioUrl:'two.mp3'}]});
- const element={paused:true,currentTime:0,duration:300,readyState:4,volume:1,play(){playCalls++;this.paused=false;return Promise.resolve();},pause(){pauseCalls++;this.paused=true;}};
+ const element={paused:true,currentTime:0,duration:300,readyState:4,volume:1,play(){playCalls++;this.paused=false;return playError?Promise.reject(playError):Promise.resolve();},pause(){pauseCalls++;this.paused=true;}};
  const node={current:null},graph={current:{}};
  const same=(a,b)=>a&&b&&a.length===b.length&&a.every((v,i)=>Object.is(v,b[i]));
  const window=new EventTarget();window.matchMedia=()=>({addEventListener(){},removeEventListener(){}});window.location={pathname:'/music'};
  const source=fs.readFileSync(__dirname+'/ArchiveFooter.jsx','utf8');const start=source.indexOf('function ArchiveMusicPlayer()');const end=source.indexOf('\n  return <>',start);
- const program=source.slice(start,end)+'\n return {remote:remoteControl.current,archive:archiveHandler.current,url:currentUrl,track:current,ended:handleEnded,equalizer,autoEqualizer,playing};\n} ; ArchiveMusicPlayer';
+ const program=source.slice(start,end)+'\n return {remote:remoteControl.current,archive:archiveHandler.current,url:currentUrl,track:current,ended:handleEnded,equalizer,autoEqualizer,playing,error};\n} ; ArchiveMusicPlayer';
  const sandbox={window,Event,CustomEvent,AbortController,console,performance:{now:()=>0},retainArchiveSource,
   isMixerAvailable:()=>true,MIXER_PHONE_MEDIA:'',readArchiveMixerState:()=>true,publishArchiveMixerState(){},ARCHIVE_MIXER_STATE:'mixer',ARCHIVE_PLAYER_COMMAND:'command',publishArchivePlayerState(){},
   localStorage:{getItem:()=>null,setItem(){}},document:{documentElement:{classList:{remove(){}}}},flatEqualizer:()=>({bass:0}),equalizerGain:v=>v,EQUALIZER_BANDS:[{key:'bass'}],
@@ -49,4 +49,11 @@ test('EQ and volume controls do not reset transport, and reopening the current s
 test('while Auto DJ owns the transport, Deck 1 ending cannot start the playlist over it',async()=>{
  const h=await harness();h.value.remote({detail:{type:'autodj-transport',value:true}});h.element.currentTime=300;h.value.ended();await h.settle();assert.equal(h.value.track.id,'one');assert.equal(h.element.currentTime,300);
  h.value.remote({detail:{type:'autodj-transport',value:false}});h.value.ended();await h.settle();assert.equal(h.value.track.id,'two');h.unmount();
+});
+
+test('a browser-cancelled play promise does not report an unavailable recording',async()=>{
+ const h=await harness({playError:{name:'AbortError'}});h.value.remote({detail:{type:'deck-toggle'}});await h.settle();assert.equal(h.value.error,'');assert.equal(h.value.playing,true);h.unmount();
+});
+test('a gesture restriction asks for Play instead of falsely claiming the recording is missing',async()=>{
+ const h=await harness({playError:{name:'NotAllowedError'}});h.value.remote({detail:{type:'deck-toggle'}});await h.settle();assert.match(h.value.error,/Press Play/);assert.equal(h.value.playing,false);h.unmount();
 });
