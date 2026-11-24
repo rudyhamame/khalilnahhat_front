@@ -1,11 +1,11 @@
+import {recordingAudioIdentity} from '../lib/recordingAudioIdentity';
 import RecordingLoadingHint from './RecordingLoadingHint';
 import {useEffect,useRef,useState} from 'react';
 import {Check,Copy} from 'lucide-react';
 // The audio's identity: SHA-256 of its bytes. Uploads are stored under this name, so identical audio is stored once.
-const fromUrl=url=>/\/khalil\/assets\/[^/]+\/([0-9a-f]{64})\.[a-z0-9]+(?:$|\?)/i.exec(String(url||''))?.[1]?.toLowerCase()||'';
+const fromUrl=url=>recordingAudioIdentity(url).hash;
 export const audioHash=fromUrl;
-const publicIdOf=url=>/(khalil\/assets\/[^/]+\/[0-9a-f]{64})\.[a-z0-9]+(?:$|\?)/i.exec(String(url||''))?.[1]||'';
-const versionOf=url=>/\/v(\d+)\//.exec(String(url||''))?.[1]||'';
+const publicIdOf=url=>recordingAudioIdentity(url).storageId;
 // Whether the channel list is open outlives any re-render or remount of the panel (it was closing and reopening on its own).
 let channelsOpen=false;
 function IdRow({label,hint,value,title}){
@@ -31,11 +31,11 @@ export default function RecordingAudioId({url,file,usedBy,recordingId='',stems=[
  // A momentarily empty channel list (while the stems reload) keeps the last good one, so the list never disappears and reappears.
  if(fresh.length)lastChannels.current=fresh;
  const channels=fresh.length?fresh:(stems===null||stems===undefined?[]:lastChannels.current);
- const publicId=publicIdOf(url),version=versionOf(url);
+ const {storageId:publicId,version,provider}=recordingAudioIdentity(url);
  return <div className="recording-audio-id"><RecordingLoadingHint message={calculating?'Calculating audio ID…':''}/>
   <IdRow label="Audio ID" hint="SHA-256 of the audio file" value={hash} title="SHA-256 fingerprint of the audio file: the same audio always has the same ID, so it is stored once. It is not the recording\u2019s own ID."/>
-  <IdRow label="Storage ID" hint="Cloudinary public ID" value={publicId}/>
-  <IdRow label="Storage version" hint="Cloudinary" value={version}/>
+  <IdRow label="Storage ID" hint={provider==='OVH'?'OVH object key':'Cloudinary public ID'} value={publicId}/>
+  <IdRow label="Storage version" hint={provider} value={version}/>
   <IdRow label="Recording ID" hint="owner of this audio" value={recordingId}/>
   {channels.length>0&&<details className="recording-audio-id-channels" open={channelsOpen} onToggle={event=>{channelsOpen=event.currentTarget.open;}}><summary>Channel IDs <small>{channels.length} channels</small></summary>
    <div className="recording-audio-id-channel-list">{channels.map(channel=><IdRow key={channel.name} label={`${channel.name[0].toUpperCase()}${channel.name.slice(1)}`} hint="SHA-256 of the channel file" value={channel.hash}/>)}</div>

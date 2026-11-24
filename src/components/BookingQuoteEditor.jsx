@@ -4,7 +4,7 @@ import {sortQuoteLines,quoteLineName} from '../lib/quoteAtoms';
 import {bookingText,bookingLocale,bookingMoney} from '../lib/bookingUiText';
 import './bookingQuoteEditor.css';
 
-export default function BookingQuoteEditor({request,draft,totals,catalog=[],equipment=[],ar=false,editable=true,rateFeedback='',onPriceChange,onFieldChange,onNoteChange,onFillRates}){
+export default function BookingQuoteEditor({request,draft,totals,catalog=[],equipment=[],ar=false,editable=true,rateFeedback='',onPriceChange,onFieldChange,onNoteChange,onFillRates,onSaveTerms,termsDefaults,onApplyTerms}){
  const id=useId(),tr=text=>bookingText(text,ar),money=value=>bookingMoney(value,ar);
  const lines=sortQuoteLines(draft.items,catalog,equipment);
  return <div className="booking-quote-layout" dir={ar?'rtl':'ltr'}>
@@ -79,6 +79,16 @@ export default function BookingQuoteEditor({request,draft,totals,catalog=[],equi
       return <label key={method} className={picked?'is-on':''}><input type="checkbox" checked={picked} onChange={()=>onFieldChange('paymentOptions',picked?(draft.paymentOptions||[]).filter(item=>item!==method):[...(draft.paymentOptions||[]),method])}/><span>{label}</span></label>;})}
      {(draft.paymentOptions||[]).includes('etransfer')&&<label className="bqe-etransfer-email"><span>{tr('E-transfer: email address that receives the payment')}</span><input type="email" inputMode="email" autoComplete="off" placeholder="payments@example.com" value={draft.etransferEmail||''} onChange={event=>onFieldChange('etransferEmail',event.target.value)}/></label>}
     </fieldset>
+    {termsDefaults&&Object.keys(termsDefaults).length>0&&<details className="bqe-default-terms"><summary>{tr('Default terms')}</summary>
+     <dl>
+      <div><dt>{tr('Valid days')}</dt><dd>{termsDefaults.validDays}</dd></div>
+      <div><dt>{tr('Payment instructions')}</dt><dd>{termsDefaults.paymentInstructions||'—'}</dd></div>
+      <div><dt>{tr('Payment options')}</dt><dd>{(termsDefaults.paymentOptions||[]).length?termsDefaults.paymentOptions.map(method=>tr({etransfer:'E-transfer',cheque:'Cheque',bank_transfer:'Bank transfer',other:'Other'}[method]||method)).join(', '):'—'}</dd></div>
+      {(termsDefaults.paymentOptions||[]).includes('etransfer')&&<div><dt>{tr('E-transfer: email address that receives the payment')}</dt><dd>{termsDefaults.etransferEmail||'—'}</dd></div>}
+     </dl>
+     {onApplyTerms&&<button type="button" className="secondary-button" disabled={!editable} onClick={onApplyTerms}>{tr('Use these terms for this quote')}</button>}
+    </details>}
+    {onSaveTerms&&<div className="bqe-save-terms"><button type="button" className="secondary-button" disabled={!editable} onClick={onSaveTerms}>{tr('Save as default terms')}</button><small>{tr('New quotes start from these terms. Quotes already published keep their own.')}</small></div>}
     {request.expiresAt&&<p className="bqe-expiry">{ar?'تنتهي صلاحية العرض الحالي':'Current quote expires'} <time dateTime={request.expiresAt}>{new Date(request.expiresAt).toLocaleString(bookingLocale(ar),{dateStyle:'medium',timeStyle:'short'})}</time></p>}
    </fieldset>
    {!editable&&<p className="bqe-review-note">{ar?'عرض السعر هذا للقراءة فقط في مرحلته الحالية.':'This quote is read-only at its current stage.'}</p>}

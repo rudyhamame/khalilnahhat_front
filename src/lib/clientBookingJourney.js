@@ -12,6 +12,11 @@ export function bookingStatusLabel(request,ar=false){
  const definition=contract.statuses[request.status],stage=request.journey?.clientStatus||fallbackStage(request,definition),display=contract.clientStages?.[stage]||definition;
  return (ar?display?.labelAr:display?.label)||request.journey?.label||request.status||'';
 }
+// The administrator's own wording for each stage (e.g. "Booking received" where the client sees "Booking requested").
+export function adminStatusLabel(request,ar=false){
+ const definition=contract.statuses[request.status],stage=request.bookingStatus||request.journey?.clientStatus||fallbackStage(request,definition),display=contract.clientStages?.[stage]||definition;
+ return (ar?display?.adminLabelAr||display?.labelAr:display?.adminLabel||display?.label)||request.journey?.label||request.status||'';
+}
 export function clientBookingJourney(request,ar=false){
  const definition=contract.statuses[request.status],stage=request.journey?.clientStatus||fallbackStage(request,definition),display=contract.clientStages?.[stage];
  const facts=Object.fromEntries(Object.keys(contract.facts).map(key=>[key,definition?.facts.includes(key)||false]));

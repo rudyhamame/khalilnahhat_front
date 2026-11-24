@@ -1,3 +1,4 @@
+import {playbackMediaUrl} from '../lib/playbackMediaUrl';
 import RecordingLoadingHint from './RecordingLoadingHint';
 import {useEffect,useId,useMemo,useRef,useState} from 'react';
 import {AudioWaveform,Download,Pause,Play,Scissors,Trash2,RefreshCw} from 'lucide-react';
@@ -42,12 +43,12 @@ export default function TranscriptionAudioTape({src,metadata,onDuration,onTimeCh
   if(waveformCache.has(src)){const cached=waveformCache.get(src);setPeaks(cached.peaks);setDiscovered(cached.metadata);setWaveStatus('');return;}
   if(duration>1800){
    setWaveStatus('Waveform unavailable for audio over 30 minutes. Playback and seeking are available.');
-   fetch(src,{method:'HEAD',signal:request.signal}).then(response=>{if(active&&response.ok){const size=Number(response.headers.get('content-length'));setDiscovered({format:audioFormat(src,response.headers.get('content-type')||''),sizeBytes:size>0?size:undefined});}}).catch(()=>{});
+   fetch(playbackMediaUrl(src),{method:'HEAD',signal:request.signal}).then(response=>{if(active&&response.ok){const size=Number(response.headers.get('content-length'));setDiscovered({format:audioFormat(src,response.headers.get('content-type')||''),sizeBytes:size>0?size:undefined});}}).catch(()=>{});
    return()=>{active=false;request.abort();};
   }
   setWaveStatus('Building waveform…');
   (async()=>{
-   const response=await fetch(src,{signal:request.signal});if(!response.ok)throw Error(`Audio download failed (${response.status}).`);
+   const response=await fetch(playbackMediaUrl(src),{signal:request.signal});if(!response.ok)throw Error(`Audio download failed (${response.status}).`);
    if(Number(response.headers.get('content-length'))>MAX_WAVEFORM_BYTES)throw Error('Waveform audio must be under 100 MB.');
    const chunks=[];let bytes=0;
    if(response.body?.getReader){
@@ -176,7 +177,7 @@ export default function TranscriptionAudioTape({src,metadata,onDuration,onTimeCh
  // eslint-disable-next-line react-hooks/exhaustive-deps
  },[playing,duration,zoomed]);
  return <section ref={section} className="transcription-audio-tape" aria-label="Recording waveform and playback">
-  <audio ref={audio} src={src} preload="metadata" muted={muted} onLoadedMetadata={event=>{const seconds=Number.isFinite(event.currentTarget.duration)?event.currentTarget.duration:0;setDuration(seconds);if(seconds)onDuration?.(seconds);}} onPlay={()=>{setPlaying(true);window.dispatchEvent(new CustomEvent('echo:recording-audio-play',{detail:audio.current}));}} onPause={()=>{setPlaying(false);sync();}} onEnded={()=>{setPlaying(false);sync();}} onTimeUpdate={sync} onSeeked={sync} onError={()=>{setPlaying(false);setWaveStatus('');setError('Recording audio is unavailable.');}}/>
+  <audio ref={audio} src={playbackMediaUrl(src)} preload="metadata" muted={muted} onLoadedMetadata={event=>{const seconds=Number.isFinite(event.currentTarget.duration)?event.currentTarget.duration:0;setDuration(seconds);if(seconds)onDuration?.(seconds);}} onPlay={()=>{setPlaying(true);window.dispatchEvent(new CustomEvent('echo:recording-audio-play',{detail:audio.current}));}} onPause={()=>{setPlaying(false);sync();}} onEnded={()=>{setPlaying(false);sync();}} onTimeUpdate={sync} onSeeked={sync} onError={()=>{setPlaying(false);setWaveStatus('');setError('Recording audio is unavailable.');}}/>
   <div className="audio-tape-main">
   <div className="audio-tape-bar">
    <header className="stem-lanes-head audio-tape-master-head"><div className="stem-lanes-heading"><span className="stem-lanes-icon" aria-hidden="true"><AudioWaveform size={16}/></span><div><strong>Master</strong><small><i className="stem-lanes-dot is-saved" aria-hidden="true"/>{[format,duration?trimClock(duration):''].filter(Boolean).join(' · ')||'Original recording'}</small></div></div></header>

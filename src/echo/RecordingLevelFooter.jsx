@@ -1,3 +1,4 @@
+import {playbackMediaUrl} from '../lib/playbackMediaUrl';
 import RecordingLoadingHint from './RecordingLoadingHint';
 import {useEffect,useRef,useState} from 'react';
 import {analyzeAudio} from '../lib/audioAnalysis';
@@ -9,7 +10,7 @@ const dbOf=amp=>amp>1e-6?20*Math.log10(amp):-120;
 const show=(value,digits=1,unit='')=>Number.isFinite(value)&&value>-119?`${value.toFixed(digits)}${unit}`:'–';
 async function analyze(src,signal){
  if(cache.has(src))return cache.get(src);
- const response=await fetch(src,{signal});if(!response.ok)throw Error('The audio could not be read.');
+ const response=await fetch(playbackMediaUrl(src),{signal});if(!response.ok)throw Error('The audio could not be read.');
  if(Number(response.headers.get('content-length'))>60*1024*1024)throw Error('Level analysis is skipped for files over 60 MB.');
  const Context=window.OfflineAudioContext||window.webkitOfflineAudioContext;if(!Context)throw Error('Level analysis is not supported in this browser.');
  const buffer=await new Context(2,1,32000).decodeAudioData(await response.arrayBuffer());
