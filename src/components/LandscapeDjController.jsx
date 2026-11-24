@@ -12,7 +12,7 @@ import {fetchArchivePlaybackCatalog,fetchMusicArchiveCatalog} from '../lib/music
 import {fetchDjWorkTypes} from '../lib/musicOntology';
 import {djWorkTypeText} from '../lib/djWorkTypeText';
 import {createDjChannelStrip} from '../lib/djChannelStrip';
-import {useEffect,useMemo,useRef,useState} from 'react';
+import {useEffect,useId,useMemo,useRef,useState} from 'react';
 import {archivePlayerCommand} from '../lib/archivePlayerBridge';
 import {EQUALIZER_BANDS} from '../lib/audioEqualizer';
 import {recordingBeatGrid} from '../lib/recordingBeatGrid';
@@ -153,6 +153,9 @@ export default function LandscapeDjController({stems:mainStems,mic,audioGraph,un
   const [library,setLibrary]=useState([]);
   const [notice,setNotice]=useState('');
   const [decks,setDecks]=useState({});
+  const footerId=useId();
+  const [footerExpanded,setFooterExpanded]=useState(()=>{try{return localStorage.getItem('echo-mixer-footer-collapsed')!=='true';}catch{return true;}});
+  useEffect(()=>{try{localStorage.setItem('echo-mixer-footer-collapsed',String(!footerExpanded));}catch{/* Storage may be unavailable. */}},[footerExpanded]);
   const [layers,setLayers]=useState([1,2]);
   const [blend,setBlend]=useState(.5);
   const [settings,setSettings]=useState({});
@@ -532,23 +535,40 @@ export default function LandscapeDjController({stems:mainStems,mic,audioGraph,un
   </svg>}
   <LoadPicker library={library} onPick={loadDeck}/>
   </div></div>
-  <footer className="ddj-ai-footer" aria-label="Mixer audio and remix controls">
-    <DjAiTimingStrip onTap={()=>tapDeckTempo(timingSnapshot().deck.n)} onClearTap={clearTappedTempo} getSnapshot={timingSnapshot} onAnalyze={()=>{const {deck}=timingSnapshot(),element=deck.n===1?audioGraph.current?.element:media.current[deck.n];analysisService().retry(deck.track,{duration:element?.duration});}}/>
+  <footer className={`ddj-ai-footer${footerExpanded?'':' is-collapsed'}`} aria-label="Mixer audio and remix controls">
+    <div className="ddj-footer-heading">
+      <button type="button" className="ddj-footer-toggle" aria-expanded={footerExpanded} aria-controls={footerId} onClick={()=>setFooterExpanded(value=>!value)} title={footerExpanded?'Collapse mixer controls':'Expand mixer controls'}>
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m5 7 5 5 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        <strong>Mixer controls</strong><span>{footerExpanded?'Collapse':'Expand'}</span>
+      </button>
+      <div className="ddj-footer-indicators" aria-label="Active audio controls">
+        {player.autoEqualizer&&<span>Auto EQ</span>}{aiTrimEnabled&&<span>AI trim</span>}{remixState.enabled&&<span>Remix · Deck {remixDeck}</span>}{(notice||player.error)&&<span className="is-notice">Notice</span>}
+      </div>
+      <button type="button" className="ddj-close-mixer" onClick={()=>window.dispatchEvent(new Event('echo:close-mixer'))}>Close mixer</button>
+    </div>
+    <div className="ddj-footer-body" id={footerId} hidden={!footerExpanded}>
+    <div className="ddj-footer-workspace">
+    <div className="ddj-footer-controls">
+
     <div className="ddj-ai-footer-actions">
-      <div className="ddj-ai-footer-group" role="group" aria-label="Equalizer and channel trims">
+      <div className="ddj-ai-footer-group" role="group" aria-label="Equalizer and channel trims"><span className="ddj-footer-label">Sound balance</span>
         <button type="button" className={player.autoEqualizer?'is-on':''} aria-pressed={Boolean(player.autoEqualizer)} onClick={()=>archivePlayerCommand('equalizer-auto',!player.autoEqualizer)} title={player.autoEqStatus||'Gently balance the playing mix'}>AUTO EQ {player.autoEqualizer?'ON':'OFF'}</button>
         <button type="button" className={aiTrimEnabled?'is-on':''} aria-pressed={aiTrimEnabled} onClick={()=>{unlock();setAiTrimEnabled(value=>!value);}} title="Automatically match audible deck levels using channel trims">AI TRIM {aiTrimEnabled?'ON':'OFF'}</button>
       </div>
-      <div className="ddj-ai-footer-group" role="group" aria-label="Song remix controls">
+      <div className="ddj-ai-footer-group" role="group" aria-label="Song remix controls"><span className="ddj-footer-label">Song remix</span>
         <label><span>Deck</span><select aria-label="Deck to remix" value={remixDeck} onChange={event=>chooseRemixDeck(Number(event.target.value))}>{[1,2,3,4].map(n=><option key={n} value={n} disabled={n===1?!player.track:!decks[n]?.track}>Deck {n}</option>)}</select></label>
         <label><span>Remix style</span><select aria-label="Remix style" value={remixStyle} onChange={event=>{remixer.current.stop();setRemixStyle(event.target.value);}}><option value="balanced">Balanced</option><option value="instrumental">Instrumental focus</option><option value="vocal">Vocal focus</option></select></label>
         <button type="button" className={remixState.enabled?'is-on':''} aria-pressed={remixState.enabled} onClick={toggleRemix} disabled={!selectedRemixTrack}>{remixState.enabled?'STOP REMIX':'REMIX SONG'}</button>
         <button type="button" disabled={!selectedStems?.mode} onClick={()=>{remixer.current.stop();selectedStems.applyRemix({vocals:1,drums:1,bass:1,other:1});}}>ORIGINAL MIX</button>
       </div>
-      <button type="button" className="ddj-close-mixer" onClick={()=>window.dispatchEvent(new Event('echo:close-mixer'))}>CLOSE MIXER</button>
     </div>
     <div className="ddj-ai-trims" role="group" aria-label="Channel trim automation">
       {[1,2,3,4].map(n=><button key={n} type="button" disabled={!aiTrimEnabled} aria-label={`Channel ${n} ${manualTrimChannels.includes(n)?'enable automatic trim':'hold trim manually'}`} aria-pressed={aiTrimEnabled&&!manualTrimChannels.includes(n)} className={aiTrimEnabled&&!manualTrimChannels.includes(n)?'is-on':''} onClick={()=>toggleTrimChannel(n)}><span>CH {n} TRIM</span><strong>{trimDecibels(dv('trim'+n)).toFixed(1)} dB</strong><small>{aiTrimEnabled&&!manualTrimChannels.includes(n)?'AUTO':'MANUAL'}</small></button>)}
+    </div>
+    </div>
+    <div className="ddj-footer-timing">
+    <DjAiTimingStrip onTap={()=>tapDeckTempo(timingSnapshot().deck.n)} onClearTap={clearTappedTempo} getSnapshot={timingSnapshot} onAnalyze={()=>{const {deck}=timingSnapshot(),element=deck.n===1?audioGraph.current?.element:media.current[deck.n];analysisService().retry(deck.track,{duration:element?.duration});}}/>
+    </div>
     </div>
     <div className="ddj-ai-footer-status" role="status" aria-live="polite">
       {aiTrimEnabled&&<span>{aiTrimStatus}</span>}
@@ -557,6 +577,7 @@ export default function LandscapeDjController({stems:mainStems,mic,audioGraph,un
       {(notice||player.error)&&<span className="ddj-ai-footer-warning">{notice||player.error}</span>}
     </div>
     {status}
+    </div>
   </footer>
   </div>;
 }

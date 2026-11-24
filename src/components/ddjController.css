@@ -74,24 +74,28 @@
 
 
 
-/* One footer owns the AI controls; the controller drawing has no control overlay. */
-.ddj-ai-footer{flex:none;box-sizing:border-box;min-width:0;max-height:45%;overflow-y:auto;padding:12px 16px;border:1px solid #34434a;border-radius:12px;background:#111b20;color:#e8eef1}
-.ddj-ai-footer-actions{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 20px}
-.ddj-ai-footer-group{display:flex;flex-wrap:wrap;align-items:center;gap:10px;min-width:0}
-.ddj-ai-footer label{display:flex;align-items:center;gap:8px;min-width:0;color:#b8cbd5;font:12px/1.5 system-ui}
-.ddj-ai-footer :is(button,select){box-sizing:border-box;min-height:40px;max-width:100%;padding:8px 12px;border:1px solid #64727a;border-radius:8px;background:#182126;color:#e8eef1;font:600 12px/1.5 system-ui}
-.ddj-ai-footer select{min-width:0;max-width:180px}
-.ddj-ai-footer button{cursor:pointer;white-space:normal}
-.ddj-ai-footer button:hover{background:#223038}
-.ddj-ai-footer button.is-on{border-color:#5fe0a7;background:#123d2d;color:#caffea}
-.ddj-ai-footer button:disabled{opacity:.5;cursor:not-allowed}
-.ddj-ai-footer .ddj-close-mixer{border-color:#8a5a5a;background:#2a1a1c;margin-inline-start:auto}
-.ddj-ai-footer-status{display:flex;flex-wrap:wrap;gap:6px 18px;color:#c4d6db;font:12px/1.5 system-ui;overflow-wrap:anywhere}
-.ddj-ai-footer-status:not(:empty){margin-top:10px;padding-top:10px;border-top:1px solid #34434a}
-.ddj-ai-footer-warning{color:#ffd19c}
-.ddj-ai-footer>.ddj-msg:has(> :not(:empty)),.ddj-ai-footer>.ddj-msg:not(:empty){margin-top:8px;font:12px/1.5 system-ui;color:#a9bac2;overflow-wrap:anywhere}
-@media(max-width:1100px){.ddj-ai-footer-actions{justify-content:flex-start}.ddj-ai-footer-group{gap:8px}.ddj-ai-footer{padding:10px 12px}}
-
-.ddj-ai-trims{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid #34434a}
-.ddj-ai-trims button{display:flex;align-items:center;gap:10px;padding:6px 10px;min-height:34px;font-size:11px;font-variant-numeric:tabular-nums}
-.ddj-ai-trims button span{color:#b5c9d3;letter-spacing:.04em}.ddj-ai-trims button strong{color:#e8f6fb;font-size:12px}.ddj-ai-trims button small{font-size:9px;color:#80c6a0}.ddj-ai-trims button:disabled{opacity:.75}
+/* A compact control drawer leaves the deck surface free to grow. */
+.ddj-ai-footer{flex:none;display:flex;flex-direction:column;box-sizing:border-box;min-width:0;min-height:0;max-height:none;padding:0;border:1px solid #334047;border-radius:10px;background:#10171b;color:#e8eef1;overflow:hidden}
+.ddj-ai-footer.is-collapsed{max-height:none}
+.ddj-footer-heading{display:flex;align-items:center;gap:12px;flex:none;padding:9px 12px;background:#182126;min-width:0}
+.ddj-ai-footer :is(button,select){box-sizing:border-box;min-height:36px;max-width:100%;padding:7px 10px;border:1px solid #41535d;border-radius:7px;background:#1a252c;color:#dfebf0;font:600 11px/1.5 system-ui}
+.ddj-ai-footer button{cursor:pointer;white-space:normal}.ddj-ai-footer button:hover:not(:disabled){background:#263943;border-color:#7795a5}
+.ddj-ai-footer button.is-on{border-color:#448c70;background:#15372b;color:#b0f3cf}.ddj-ai-footer button:disabled{opacity:.45;cursor:not-allowed}
+.ddj-ai-footer .ddj-footer-toggle{display:flex;align-items:center;gap:9px;min-height:32px;padding:4px 2px;border:0;background:transparent;text-align:start;flex-shrink:0}
+.ddj-footer-toggle strong{font-size:12px;font-weight:650}.ddj-footer-toggle>span{font-size:10px;color:#8ba4b1;font-weight:400}.ddj-footer-toggle svg{transform:rotate(180deg)}.is-collapsed .ddj-footer-toggle svg{transform:none}
+.ddj-footer-indicators{display:flex;flex-wrap:wrap;gap:5px;min-width:0}.ddj-footer-indicators>span{padding:2px 7px;border:1px solid #345b4b;border-radius:20px;color:#9fd7bb;background:#132e24;font:10px/1.5 system-ui}.ddj-footer-indicators>.is-notice{color:#f0c180;background:#332919;border-color:#685335}
+.ddj-ai-footer .ddj-close-mixer{margin-inline-start:auto;flex-shrink:0;min-height:30px;background:transparent;border-color:#4d4344;color:#d8bcbc;font-size:10px}
+.ddj-footer-body{flex:none;min-height:0;overflow:visible;padding:12px;border-top:1px solid #2c3c44}.ddj-footer-body[hidden]{display:none}
+.ddj-footer-workspace{display:grid;grid-template-columns:minmax(280px,.9fr) minmax(0,1.5fr);gap:18px;align-items:start}
+.ddj-footer-controls{display:grid;gap:12px;min-width:0}.ddj-ai-footer-actions{display:grid;gap:12px}
+.ddj-ai-footer-group{display:flex;flex-wrap:wrap;align-items:end;gap:8px;min-width:0;padding:12px;border:1px solid #2b3d47;border-radius:9px;background:#141f25}
+.ddj-footer-label{flex-basis:100%;color:#9eb8c6;font:600 10px/1.5 system-ui;letter-spacing:.07em;text-transform:uppercase;margin-bottom:2px}
+.ddj-ai-footer label{display:grid;gap:4px;min-width:0;flex:1 1 100px;color:#94adba;font:10px/1.5 system-ui}.ddj-ai-footer select{width:100%;min-width:0}
+.ddj-ai-footer-group[aria-label="Song remix controls"]>button{flex:1 1 100px}
+.ddj-ai-trims{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;min-width:0}
+.ddj-ai-trims button{display:grid;justify-items:center;gap:3px;min-width:0;padding:8px 4px;font-variant-numeric:tabular-nums}.ddj-ai-trims button span{color:#a5bdc9;font-size:9px}.ddj-ai-trims button strong{font-size:12px;white-space:nowrap}.ddj-ai-trims button small{font-size:8px;letter-spacing:.08em;color:#8fcdb0}
+.ddj-footer-timing{min-width:0;border-inline-start:1px solid #2b3d47;padding-inline-start:18px}.ddj-footer-timing .dj-timing{margin:0;padding:0;border:0}.ddj-footer-timing .dj-timing-main{grid-template-columns:minmax(0,1fr);gap:12px}.ddj-footer-timing .dj-timing-tempo{grid-template-columns:repeat(2,minmax(0,1fr))}.ddj-footer-timing .dj-timing-tempo strong{font-size:18px}
+.ddj-ai-footer-status{display:flex;flex-wrap:wrap;gap:6px 16px;color:#a5beca;font:11px/1.6 system-ui;overflow-wrap:anywhere}.ddj-ai-footer-status:not(:empty){margin-top:12px;padding-top:10px;border-top:1px solid #2b3d47}.ddj-ai-footer-warning{color:#f0c180}
+.ddj-footer-body>.ddj-msg:not(:empty){margin-top:8px;font:10px/1.6 system-ui;color:#8faab8;overflow-wrap:anywhere}
+@media(max-width:850px){.ddj-footer-workspace{grid-template-columns:minmax(0,1fr)}.ddj-footer-timing{padding-inline-start:0;border-inline-start:0;border-top:1px solid #2b3d47;padding-top:14px}.ddj-footer-heading{gap:8px;padding:8px 10px}.ddj-footer-toggle>span{display:none}.ddj-footer-body{padding:10px}.ddj-footer-indicators>span{font-size:9px}.ddj-ai-footer{max-height:none}}
+@media(max-width:480px){.ddj-footer-indicators{display:none}.ddj-footer-toggle strong{font-size:11px}.ddj-ai-trims{grid-template-columns:repeat(2,minmax(0,1fr))}}
