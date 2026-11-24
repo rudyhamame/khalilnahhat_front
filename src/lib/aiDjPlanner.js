@@ -2,6 +2,7 @@ const number=value=>Number.isFinite(Number(value))?Number(value):0;
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 
 export function trackBpm(track){
+  if(Number.isFinite(track?.manualBpm)&&track.manualBpm>=50&&track.manualBpm<=220)return track.manualBpm;
   const measured=track?.audioBeatGrid;
   if(measured?.tempoVerified&&Number.isFinite(measured.bpm)&&measured.bpm>=50&&measured.bpm<=220)return measured.bpm;
   const direct=number(track?.bpm||track?.sound?.bpm);

@@ -1,3 +1,4 @@
+import {createTapTempo} from '../lib/tapTempo';
 import {createAutoDjRemix} from '../lib/autoDjRemix';
 import {createBeatGridAnalysis,measuredTrack,beatAnalysisKey} from '../lib/beatGridAnalysis';
 import {createDjAutoTrim,trimDecibels} from '../lib/djAutoTrim';
@@ -30,7 +31,7 @@ const STEM_OF={1:'vocals',2:'drums',3:'bass',4:'other'};
 const STEM_NAME={vocals:'VOCALS',drums:'DRUMS',bass:'BASS',other:'MUSIC'};
 const PAD_MODES=['HOT CUE','BEAT LOOP','BEAT JUMP','KEY SHIFT'];
 
-function Deck({dx,n,player,command=archivePlayerCommand,art,switchLayer,mediaTime,readout=true}){
+function Deck({dx,n,player,command=archivePlayerCommand,art,switchLayer,mediaTime,readout=true,onTapTempo}){
   const dur=player.duration||0,pos=player.position||0,ready=Boolean(player.track)&&dur>0;
   const transportReady=Boolean(player.track)&&player.enabled!==false,progress=ready?clamp(pos/dur,0,1):0,playing=transportReady&&player.playing;
   const scrub=useRef(null);
@@ -42,7 +43,7 @@ function Deck({dx,n,player,command=archivePlayerCommand,art,switchLayer,mediaTim
   const [mode,setMode]=useState(0),[shift,setShift]=useState(false);
   const [cues,setCues]=useState({}),[loop,setLoop]=useState(null),[tapBpm,setTapBpm]=useState(0);
   const lastTap=useRef(0),clock=useRef(null);
-  const bpm=tapBpm||Number(player.track?.sound?.bpm||player.track?.bpm)||recordingBeatGrid({trackId:player.track?.id,audioUrl:player.track?.audioUrl,time:0})?.bpm;
+  const bpm=trackBpm(player.track)||tapBpm||Number(player.track?.sound?.bpm||player.track?.bpm)||recordingBeatGrid({trackId:player.track?.id,audioUrl:player.track?.audioUrl,time:0})?.bpm;
   const beat=bpm?60/bpm:null;
   const now=()=>mediaTime()?.currentTime??pos;
   clock.current={now,seek};
@@ -57,6 +58,7 @@ function Deck({dx,n,player,command=archivePlayerCommand,art,switchLayer,mediaTim
     return ()=>cancelAnimationFrame(frame);
   },[loop,playing]);
   const tap=()=>{
+    if(onTapTempo){onTapTempo();return;}
     const stamp=performance.now(),delta=stamp-lastTap.current;
     lastTap.current=stamp;
     if(delta>=200&&delta<=2000)setTapBpm(Math.round(60000/delta));
@@ -170,9 +172,14 @@ export default function LandscapeDjController({stems:mainStems,mic,audioGraph,un
   const media=useRef({}), strips=useRef({}), scratchers=useRef({}),uiClock=useRef({}),loadWaiters=useRef({});
   const playerState=useRef(player),deckState=useRef(decks),libraryState=useRef(library);
   playerState.current=player;deckState.current=decks;libraryState.current=library;
+  const manualTempo=useRef(new Map()),tapTempo=useRef(createTapTempo());
+  const [,refreshTempo]=useState(0);
   const beatAnalysis=useRef(null);
   const analysisService=()=>beatAnalysis.current||(beatAnalysis.current=createBeatGridAnalysis());
-  const withTiming=track=>measuredTrack(track,analysisService().get(track));
+  const withTiming=track=>{
+    const measured=measuredTrack(track,analysisService().get(track)),manual=manualTempo.current.get(beatAnalysisKey(track));
+    return manual?{...measured,...manual,audioBeatGrid:null}:measured;
+  };
   useEffect(()=>{const service=analysisService();return()=>{service.dispose();if(beatAnalysis.current===service)beatAnalysis.current=null;};},[]);
   useEffect(()=>{if(player.track)analysisService().analyze(player.track,{duration:player.duration});},[player.track?.id,player.track?.audioUrl,player.duration]);
   const dv=(key,fallback=0)=>settings[key]??fallback;
@@ -468,6 +475,15 @@ export default function LandscapeDjController({stems:mainStems,mic,audioGraph,un
     const deck=readDeck(active);
     return {deck,incoming:aiState.enabled&&aiState.target&&aiState.phase!=='planning'?readDeck(aiState.target):null,analysis:analysisService().get(deck.track),ai:aiState,remix:remixer.current?.timing(),now:performance.now()};
   };
+  const tapDeckTempo=n=>{
+    const state=n===1?playerState.current:deckState.current[n],element=n===1?audioGraph.current?.element:media.current[n],key=beatAnalysisKey(state?.track);
+    if(!key)return;
+    const value=tapTempo.current.tap(`${n}:${key}:${element?.playbackRate||1}`,performance.now(),{rate:element?.playbackRate||1,position:element?.currentTime||0});
+    if(!value){setNotice('Tap BPM again on the next beat.');return;}
+    manualTempo.current.set(key,value);while(manualTempo.current.size>32)manualTempo.current.delete(manualTempo.current.keys().next().value);
+    refreshTempo(value=>value+1);setNotice(`Deck ${n}: tapped tempo ${(value.manualBpm*(element?.playbackRate||1)).toFixed(1)} BPM · ${value.taps} taps`);
+  };
+  const clearTappedTempo=()=>{const key=beatAnalysisKey(timingSnapshot().deck.track);manualTempo.current.delete(key);tapTempo.current.reset();refreshTempo(value=>value+1);setNotice('Using audio analysis or saved track tempo.');};
   const setBand=(band,label,v)=>{archivePlayerCommand('equalizer',{band,gain:v});setLast(`${label} ${v>0?'+':''}${v} dB`);};
   const stemOn=Boolean(stems?.mode);
   const micLevel=mic?.micMeter;
@@ -513,7 +529,7 @@ export default function LandscapeDjController({stems:mainStems,mic,audioGraph,un
     </defs>
     <rect x="0" y="0" width={W} height={H} rx="9" fill="url(#body)" stroke="#2c3033" strokeWidth="1.4"/>
     <rect x="370" y="3" width="326" height={H-6} fill="#0b0c0d" stroke="#2a2d2f"/>
-    {layers.map(n=><g key={n}><Deck key={(n===1?player:decks[n])?.track?.id||n} mediaTime={()=>n===1?audioGraph.current?.element:media.current[n]} dx={n%2?0:DECK2} n={n} player={n===1?player:(decks[n]||{})} command={(type,value)=>command(n,type,value)} art={n===1?art:n===visibleDeck2?art2:null} readout={!(n===1&&jogArt)} switchLayer={()=>setLayers(previous=>previous.map(value=>value===n?(n>2?n-2:n+2):value))}/></g>)}
+    {layers.map(n=><g key={n}><Deck key={(n===1?player:decks[n])?.track?.id||n} onTapTempo={()=>tapDeckTempo(n)} mediaTime={()=>n===1?audioGraph.current?.element:media.current[n]} dx={n%2?0:DECK2} n={n} player={{...(n===1?player:(decks[n]||{})),track:withTiming((n===1?player:decks[n])?.track)}} command={(type,value)=>command(n,type,value)} art={n===1?art:n===visibleDeck2?art2:null} readout={!(n===1&&jogArt)} switchLayer={()=>setLayers(previous=>previous.map(value=>value===n?(n>2?n-2:n+2):value))}/></g>)}
     {/* mic column */}
     <g className="mixer">
       <rect x="373" y="9" width="44" height="9" fill="#17191b" stroke="#2a2d2f"/><T x={395} y={16} s={5.2} f="#e8ecee">MIC</T>{mic?.active&&mic.latency&&<T x={395} y={6.5} s={3.4} f="#7fd6b0" aria-label="Browser audio latency">{(()=>{const total=mic.latency.base==null&&mic.latency.output==null?null:(mic.latency.base||0)+(mic.latency.output||0);return total==null?'LAT n/a':`LAT ${(total*1000).toFixed(1)} ms`;})()}</T>}
@@ -578,7 +594,7 @@ export default function LandscapeDjController({stems:mainStems,mic,audioGraph,un
   <LoadPicker library={library} onPick={loadDeck}/>
   </div></div>
   <footer className="ddj-ai-footer" aria-label="Mixer AI DJ controls">
-    <DjAiTimingStrip getSnapshot={timingSnapshot} onAnalyze={()=>{const {deck}=timingSnapshot(),element=deck.n===1?audioGraph.current?.element:media.current[deck.n];analysisService().retry(deck.track,{duration:element?.duration});}}/>
+    <DjAiTimingStrip onTap={()=>tapDeckTempo(timingSnapshot().deck.n)} onClearTap={clearTappedTempo} getSnapshot={timingSnapshot} onAnalyze={()=>{const {deck}=timingSnapshot(),element=deck.n===1?audioGraph.current?.element:media.current[deck.n];analysisService().retry(deck.track,{duration:element?.duration});}}/>
     <div className="ddj-ai-footer-actions">
       <div className="ddj-ai-footer-group" role="group" aria-label="Auto DJ, equalizer and channel trims">
         <button type="button" className={aiState.enabled?'is-on':''} aria-pressed={aiState.enabled} onClick={toggleAi} title={aiState.message}>{aiState.enabled?'STOP AI DJ':'START AI DJ'}</button>

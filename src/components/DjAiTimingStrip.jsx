@@ -5,7 +5,7 @@ const bpm=value=>value?value.toFixed(1):'—';
 const seconds=value=>value==null?'—':`${value.toFixed(1)}s`;
 const stages=[['planning','Plan'],['loading','Load'],['tempo','Tempo'],['armed','Cue'],['mixing','Mix']];
 
-export default function DjAiTimingStrip({getSnapshot,onAnalyze}){
+export default function DjAiTimingStrip({getSnapshot,onAnalyze,onTap,onClearTap}){
  const evidence=useRef(null),rail=useRef(null),playhead=useRef(null),beatCells=useRef([]);
  const latest=useRef(getSnapshot);latest.current=getSnapshot;
  const [snapshot,setSnapshot]=useState(()=>getSnapshot());
@@ -61,6 +61,7 @@ export default function DjAiTimingStrip({getSnapshot,onAnalyze}){
     <div className="dj-timing-evidence"><span>{view.pulseBpm?`Live pulse estimate: ${bpm(view.pulseBpm)} BPM`:'Live pulse: waiting for consistent audio'}</span>{view.pulseConsistency!=null&&<span>{Math.round(view.pulseConsistency*100)}% pulse consistency <i role="meter" aria-label="Live pulse consistency" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(view.pulseConsistency*100)}><b style={{width:`${view.pulseConsistency*100}%`}}/></i></span>}</div>
    </div>
    <div className="dj-timing-tempo">
+    <div className="dj-timing-tap">{onTap&&<button type="button" disabled={!view.hasTrack} onClick={onTap} title="Tap along with the beat to set the playing track tempo">TAP BPM</button>}{snapshot.deck?.track?.manualBpm&&onClearTap&&<button type="button" onClick={onClearTap}>Reset tapped BPM</button>}</div>
     <div><span>Playing tempo</span><strong>{bpm(view.effective)} <small>BPM</small></strong></div>
     <div><span>Incoming tempo</span><strong>{bpm(view.incomingBpm)} <small>BPM</small></strong></div>
     <p>{view.delta==null?'Waiting for incoming track BPM':`${view.delta>0?'+':''}${view.delta.toFixed(2)} BPM · ${view.tempoMatched?'Tempo matched':'Tempo offset'}`}</p>

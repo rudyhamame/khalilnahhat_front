@@ -30,7 +30,7 @@ export function createAiDjAutopilot(adapter){
    const from=adapter.deck(active),to=adapter.deck(target);
    if(!from||!to||from.track.id!==current.track.id||to.track.id!==next.id)continue;
    const fromBpm=trackBpm(from.track)||120,toBpm=trackBpm(to.track)||plan.targetBpm||fromBpm;
-   const goal=from.track.audioBeatGrid?.tempoVerified?fromBpm*(from.rate?.()||1):plan.targetBpm||fromBpm;
+   const goal=from.track.manualBpm||from.track.audioBeatGrid?.tempoVerified?fromBpm*(from.rate?.()||1):plan.targetBpm||fromBpm;
    plan={...plan,targetBpm:goal};
    const rate=Math.max(.85,Math.min(1.15,goal/toBpm));
    adapter.rate(target,rate);

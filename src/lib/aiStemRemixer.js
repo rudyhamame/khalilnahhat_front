@@ -29,7 +29,7 @@ export function createStemRemixer(adapter,{schedule=setInterval,cancel=clearInte
    status('planning','Choosing a stem arrangement…');
    Promise.resolve().then(()=>adapter.plan({signal:abort.signal})).catch(()=>null).then(value=>{if(!enabled||generation!==token)return;plan=safeStemRemixPlan(value,adapter.style?.());planning=false;tick();});return;
   }
-  const bpm=trackBpm(track)||120,bar=240/bpm,position=adapter.position(),first=track.audioBeatGrid?.verified?track.audioBeatGrid.firstDownbeat:track.audioBeatGrid?.beatPhaseVerified?track.audioBeatGrid.beatOffset:0;
+  const bpm=trackBpm(track)||120,bar=240/bpm,position=adapter.position(),first=track.manualBpm?track.manualBeatOffset||0:track.audioBeatGrid?.verified?track.audioBeatGrid.firstDownbeat:track.audioBeatGrid?.beatPhaseVerified?track.audioBeatGrid.beatOffset:0;
   if(!Number.isFinite(position)||position<0)return;
   if(anchor==null||lastPosition!=null&&position<lastPosition-.5){anchor=first+Math.max(0,Math.ceil((position+.001-first)/bar))*bar;lastStep=-1;currentSection=null;adapter.restore(snapshot);}
   lastPosition=position;
