@@ -5,7 +5,7 @@ import {createElement} from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
 import {createEventOrder} from '../lib/eventOrderCore.mjs';
 import {sectionLines} from '../lib/bookingReviewModel.js';
-import {bookingGoal} from '../lib/bookingGoals.js';
+import {BOOKING_GOALS} from '../lib/bookingGoals.js';
 const server=await createServer({server:{middlewareMode:true,hmr:false},appType:'custom'});
 after(()=>server.close());
 const {default:MusicPreferenceValue}=await server.ssrLoadModule('/src/echo/MusicPreferenceValue.jsx');
@@ -14,11 +14,12 @@ const {AtomRow}=await server.ssrLoadModule('/src/echo/bookingReview.jsx');
 const songs=[{song:'Ahla Marra',artist:'Melhem Zein',phase:'Grand entrance',link:'https://www.youtube.com/watch?v=first'},{song:'Perfect',artist:'Ed Sheeran',phase:'First dance',link:'https://youtu.be/second'}];
 const render=(Component,props)=>renderToStaticMarkup(createElement(Component,props));
 test('review and map atoms preserve full songs, individual artists, moments and safe links',()=>{
- const order=createEventOrder();order.music.suggestedSongs=songs;
- const line=sectionLines(order,bookingGoal('music'),false).lines.find(line=>line.key==='music.suggestedSongs');
+ const order=createEventOrder();order.music.djRequested=true;order.music.suggestedSongs=songs;
+ const line=sectionLines(order,BOOKING_GOALS.find(goal=>goal.matches('music.suggestedSongs')),false).lines.find(line=>line.key==='music.suggestedSongs');
  assert.deepEqual(line.rawValue,songs);
  const html=render(AtomRow,{line,tr:(en)=>en});
- assert.equal((html.match(/class="music-song"/g)||[]).length,2);
+ assert.match(html,/class="mini-table"/);
+ assert.equal((html.match(/<tbody><tr>|<\/tr><tr>/g)||[]).length,2);
  for(const value of ['Ahla Marra','Melhem Zein','Grand entrance','Perfect','Ed Sheeran','First dance'])assert.ok(html.includes(value));
  assert.match(html,/href="https:\/\/youtu.be\/second"/);
  assert.doesNotMatch(html,/\(https:|<button/);
@@ -41,15 +42,25 @@ test('music fields render separate language pairs, list entries and preserved no
 });
 test('uploaded inspiration photos have stable visible numbers in review and concept-map atoms',()=>{
  const order=createEventOrder();order.references.photos=[{url:'https://res.cloudinary.com/demo/image/upload/one.jpg',name:'Entrance.jpg',comment:''},{url:'https://res.cloudinary.com/demo/image/upload/two.jpg',name:'Cake.png',comment:''}];
- const line=sectionLines(order,bookingGoal('references'),false).lines.find(row=>row.key==='references.photos');
+ const line=sectionLines(order,BOOKING_GOALS.find(goal=>goal.matches('references.photos')),false).lines.find(row=>row.key==='references.photos');
  const html=render(AtomRow,{line,tr:en=>en});
- assert.match(html,/reference-number[^>]*>1\.<\/b>/);assert.match(html,/reference-number[^>]*>2\.<\/b>/);
- assert.ok(html.indexOf('1.</b>')<html.indexOf('Entrance.jpg'));assert.ok(html.indexOf('2.</b>')<html.indexOf('Cake.png'));
+ assert.match(html,/class="mini-num">1<\/td>/);assert.match(html,/class="mini-num">2<\/td>/);
+ assert.ok(html.indexOf('>1</td>')<html.indexOf('Entrance.jpg'));assert.ok(html.indexOf('>2</td>')<html.indexOf('Cake.png'));
 });
 test('uploaded event documents have stable visible numbers in review and concept-map atoms',()=>{
  const order=createEventOrder();order.references.files=[{url:'https://res.cloudinary.com/demo/raw/upload/timeline.pdf',name:'Timeline.pdf',comment:''},{url:'https://res.cloudinary.com/demo/raw/upload/menu.docx',name:'Menu.docx',comment:''}];
- const line=sectionLines(order,bookingGoal('references'),false).lines.find(row=>row.key==='references.files');
+ const line=sectionLines(order,BOOKING_GOALS.find(goal=>goal.matches('references.photos')),false).lines.find(row=>row.key==='references.files');
  const html=render(AtomRow,{line,tr:en=>en});
- assert.match(html,/reference-number[^>]*>1\.<\/b>/);assert.match(html,/reference-number[^>]*>2\.<\/b>/);
- assert.ok(html.indexOf('1.</b>')<html.indexOf('Timeline.pdf'));assert.ok(html.indexOf('2.</b>')<html.indexOf('Menu.docx'));
+ assert.match(html,/class="mini-num">1<\/td>/);assert.match(html,/class="mini-num">2<\/td>/);
+ assert.ok(html.indexOf('>1</td>')<html.indexOf('Timeline.pdf'));assert.ok(html.indexOf('>2</td>')<html.indexOf('Menu.docx'));
+});
+
+
+test('all multi-value atoms use one table row per entry while single values retain their display',()=>{
+ const tr=en=>en;
+ const multi=render(AtomRow,{tr,line:{key:'services',label:'Services',reviewValue:['lighting','sound'],value:'Lighting, Sound'}});
+ assert.match(multi,/<table/);assert.match(multi,/>lighting</i);assert.match(multi,/>Sound systems</);
+ const single=render(AtomRow,{tr,line:{key:'services',label:'Services',reviewValue:['lighting'],value:'Lighting'}});assert.doesNotMatch(single,/<table/);assert.match(single,/Lighting/);
+ const gear=render(AtomRow,{tr,line:{key:'equipment',label:'Equipment',reviewValue:[{id:'a',name:'Speaker',quantity:2},{id:'b',name:'Light',quantity:4}],value:'Speaker × 2, Light × 4'}});
+ assert.match(gear,/>Qty</);assert.match(gear,/Speaker<\/td><td>2</);assert.match(gear,/Light<\/td><td>4</);
 });

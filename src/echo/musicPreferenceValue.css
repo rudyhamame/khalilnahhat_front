@@ -17,3 +17,11 @@
 .reference-links a{color:inherit;text-decoration:underline;text-underline-offset:2px}
 .reference-number{display:inline-block;min-width:2.1em;margin-inline-end:4px;color:#d9b970;font-weight:700;font-variant-numeric:tabular-nums}
 .reference-comment{opacity:.7}
+
+/* Multi-value atoms use the same compact table in every booking review. */
+.ea-data-value:has(>.mini-table){display:block;min-width:0;max-width:100%;overflow-x:auto}
+.ea-data-value>.mini-table{width:100%;border-collapse:collapse;font-size:12px;line-height:1.5;text-align:start}
+.ea-data-value>.mini-table :is(th,td){padding:9px 12px;border-bottom:1px solid var(--aw-line,#ffffff1f);text-align:start;vertical-align:top;overflow-wrap:anywhere}
+.ea-data-value>.mini-table th{color:var(--aw-muted,#9aaba2);font-size:10px;font-weight:600}
+.ea-data-value>.mini-table .mini-num{width:1%;white-space:nowrap;color:var(--aw-muted,#9aaba2);font-variant-numeric:tabular-nums}
+.ea-data-value>.mini-table a{color:inherit;text-decoration:underline;text-underline-offset:3px}
