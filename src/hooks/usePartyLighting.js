@@ -14,6 +14,7 @@ export default function usePartyLighting(audioRef, enabled, highRefresh = false)
     const current = graph.current;
     current?.filters?.[band]?.gain.setTargetAtTime(gain, current.context.currentTime, .025);
   }, []);
+  const rememberEqualizer=useCallback(values=>{equalizer.current={...values};},[]);
   const meter = useRef(null);
   const channelMeter = useRef(null);
   const player = useRef(null);
@@ -148,5 +149,5 @@ export default function usePartyLighting(audioRef, enabled, highRefresh = false)
     graph.current?.context.close().catch(() => {});
     graph.current = null;
   }, []);
-  return { lighting, unlock, meter, player, setEqualizerBand, channelMeter, audioGraph:graph };
+  return { lighting, unlock, meter, player, setEqualizerBand, channelMeter, audioGraph:graph, rememberEqualizer };
 }

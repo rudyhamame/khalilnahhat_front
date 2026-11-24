@@ -264,8 +264,8 @@ export default function LandscapeDjController({stems,mic,audioGraph,unlock:unloc
     }
     const element=media.current[n];
     if(!element||!decks[n]?.track)return;
-    if(type==='toggle'){
-      if(!element.paused){element.pause();return;}
+    if(type==='toggle'||type==='play'){
+      if(type==='toggle'&&!element.paused){element.pause();return true;}
       unlock();
       const graph=audioGraph.current;
       if(!graph?.mixInput){setNotice('Audio mixing is unavailable in this browser.');return;}
@@ -276,7 +276,7 @@ export default function LandscapeDjController({stems,mic,audioGraph,unlock:unloc
         for(const [name,initial] of Object.entries({hi:0,mid:0,low:0,trim:0,color:0,level:1,echo:0,delay:.375,feedback:.3,cue:0}))strip(n).set(name,dv(name+n,initial));
       }
       for(const channel of [1,2,3,4])applyBlend(channel,blend);
-      element.play().catch(error=>{if(error.name!=='AbortError')setNotice('Deck '+n+' could not play this recording.');});
+      return element.play().then(()=>true).catch(error=>{if(error.name!=='AbortError')setNotice('Deck '+n+' could not play this recording.');return false;});
     }else if(type==='rate'){element.playbackRate=value;}
     else if(type==='stop'){element.pause();element.currentTime=0;}
     else if(type==='seek'){element.currentTime=value;}
@@ -328,7 +328,7 @@ export default function LandscapeDjController({stems,mic,audioGraph,unlock:unloc
       loadWaiters.current[n]={resolve:finish,timer:setTimeout(()=>finish(false),15000)};
       loadDeck(n,track.id);
     }),
-    async play(n){const element=media.current[n];if(!element)return false;if(element.paused)command(n,'toggle');await new Promise(resolve=>setTimeout(resolve,80));return !element.paused;},
+    async play(n){const element=media.current[n];if(!element)return false;return Boolean(await command(n,'play'));},
     pause:n=>{if(n===1)archivePlayerCommand('pause');else media.current[n]?.pause();},
     rate:(n,value)=>command(n,'rate',value),
     bass:(n,value)=>strip(n)?.set('low',value),
@@ -336,14 +336,18 @@ export default function LandscapeDjController({stems,mic,audioGraph,unlock:unloc
   };
   if(!autopilot.current)autopilot.current=createAiDjAutopilot(new Proxy({}, {get:(_target,key)=>(...args)=>adapter.current[key](...args)}));
   const toggleAi=()=>{
-    if(autopilot.current.enabled){autopilot.current.stop();return;}
+    if(autopilot.current.enabled){autopilot.current.stop();archivePlayerCommand('autodj-transport',false);archivePlayerCommand('equalizer-auto',false);return;}
     if(!player.track){setNotice('Load a recording on Deck 1 before starting AI DJ.');return;}
     unlock();moveCrossfader(0);
     if(!player.playing)archivePlayerCommand('toggle');
+    archivePlayerCommand('autodj-transport',true);
+    archivePlayerCommand('equalizer-auto',true);
     autopilot.current.start(1);
   };
   useEffect(()=>()=>{
     autopilot.current?.stop();
+    archivePlayerCommand('autodj-transport',false);
+    archivePlayerCommand('equalizer-auto',false);
     for(const waiter of Object.values(loadWaiters.current)){clearTimeout(waiter.timer);waiter.resolve(false);}
   },[]);
   const setBand=(band,label,v)=>{archivePlayerCommand('equalizer',{band,gain:v});setLast(`${label} ${v>0?'+':''}${v} dB`);};
@@ -456,7 +460,7 @@ export default function LandscapeDjController({stems,mic,audioGraph,unlock:unloc
     <T x={JC.x} y={JC.y+21} s={5.5} f="#a4c8ba">{jogBpm?`${Math.round(jogBpm*jogRate)} BPM`:'TAP BPM'}</T>
   </svg>}
   <LoadPicker library={library} onPick={loadDeck}/>
-  <div className="ddj-ai-top"><button type="button" className="ddj-close-mixer" onClick={()=>window.dispatchEvent(new Event('echo:close-mixer'))}>CLOSE MIXER</button><button type="button" className={aiState.enabled?'is-on':''} aria-pressed={aiState.enabled} onClick={toggleAi} title={aiState.message}>{aiState.enabled?'STOP AI DJ':'START AI DJ'}</button>{(notice||player.error)&&<span role="status" className="ddj-ai-note">{notice||player.error}</span>}</div>
+  <div className="ddj-ai-top"><button type="button" className="ddj-close-mixer" onClick={()=>window.dispatchEvent(new Event('echo:close-mixer'))}>CLOSE MIXER</button><button type="button" className={aiState.enabled?'is-on':''} aria-pressed={aiState.enabled} onClick={toggleAi} title={aiState.message}>{aiState.enabled?'STOP AI DJ':'START AI DJ'}</button><button type="button" className={player.autoEqualizer?'is-on':''} aria-pressed={Boolean(player.autoEqualizer)} onClick={()=>archivePlayerCommand('equalizer-auto',!player.autoEqualizer)} title={player.autoEqStatus||'Gently balance the playing mix'}>AUTO EQ {player.autoEqualizer?'ON':'OFF'}</button>{player.autoEqualizer&&<span role="status" className="ddj-ai-note">{player.autoEqStatus}</span>}{(notice||player.error)&&<span role="status" className="ddj-ai-note">{notice||player.error}</span>}</div>
   </div></div>
   {footerStatus&&createPortal(status,footerStatus)}</div>;
 }

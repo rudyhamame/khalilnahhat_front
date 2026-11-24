@@ -1,3 +1,5 @@
+import {retainArchiveSource} from '../lib/archivePlaybackSource';
+import useAutoEqualizer from '../hooks/useAutoEqualizer';
 import {isMixerAvailable,MIXER_PHONE_MEDIA} from '../lib/mixerAvailability';
 import useMicChannel from '../hooks/useMicChannel';
 import { EQUALIZER_BANDS, flatEqualizer, equalizerGain } from '../lib/audioEqualizer';
@@ -52,6 +54,9 @@ function ArchiveMusicPlayer() {
     fade.current.raf = requestAnimationFrame(tick);
   };
   const [equalizer, setEqualizer] = useState(flatEqualizer);
+  const [autoEqualizer,setAutoEqualizer]=useState(false),[autoEqStatus,setAutoEqStatus]=useState('Auto EQ off');
+  const manualEqualizer=useRef(flatEqualizer());
+  const stopAutoEqualizer=useRef(null);
   const [tracks, setTracks] = useState([]);
   const archiveQueue = useRef(null);
   const archiveRequest = useRef(0);
@@ -84,12 +89,19 @@ function ArchiveMusicPlayer() {
   const [error, setError] = useState('');
   const [playbackRate, setPlaybackRate] = useState(1);
   const current = tracks.find((track) => track.id === selected) || tracks[0];
-  const currentUrl = current?.audioUrl || '';
-  const { unlock, setEqualizerBand, channelMeter, audioGraph } = usePartyLighting(audio, enabled, mixerOpen);
-  const stems = useStemPlayer({audio,track:current,audioGraph,unlock,master:volume,active:enabled&&mixerOpen});
+  const loadedSource=useRef(null);
+  loadedSource.current=retainArchiveSource(loadedSource.current,current);
+  const currentUrl=loadedSource.current.url;
+  const autoDjOwnsTransport=useRef(false);
+  const { unlock, setEqualizerBand, channelMeter, audioGraph, rememberEqualizer } = usePartyLighting(audio, enabled, mixerOpen);
+  const stems = useStemPlayer({audio,track:current?{...current,audioUrl:currentUrl}:current,audioGraph,unlock,master:volume,active:enabled&&mixerOpen});
   const mic = useMicChannel({ master: volume, minimized: false, masterMeter: channelMeter });
+  useAutoEqualizer({active:autoEqualizer&&enabled&&mixerOpen,audioGraph,base:manualEqualizer.current,onChange:values=>{rememberEqualizer(values);setEqualizer(values);},onStatus:message=>{setAutoEqStatus(message);if(message.startsWith('Auto EQ unavailable'))setAutoEqualizer(false);},stopRef:stopAutoEqualizer});
   const changeEqualizer = (band, value) => {
-    setEqualizer(current => ({ ...current, [band]: value }));
+    // Manual changes restore the manual curve before applying the user's movement.
+    stopAutoEqualizer.current?.();setAutoEqualizer(false);setAutoEqStatus('Auto EQ off · manual control');
+    manualEqualizer.current={...manualEqualizer.current,[band]:value};
+    setEqualizer({...manualEqualizer.current});
     setEqualizerBand(band, value);
   };
 
@@ -106,7 +118,13 @@ function ArchiveMusicPlayer() {
       const byId = new Map(catalog.songs.filter(song => song.audioUrl).map(song => [song.id, song]));
       const items = ids.map(id => byId.get(id)).filter(Boolean);
       if (!items.some(song => song.id === event.detail.id)) throw new Error('This recording is no longer published.');
-      const open = () => { setPlaying(false); setTracks(items); setSelected(event.detail.id); setEnabled(true); if(autoplay)beginPlayback({inline:event.detail.inline===true}); };
+      const open = () => {
+        const same=event.detail.id===currentIdRef.current;
+        setTracks(items);setSelected(event.detail.id);setEnabled(true);
+        // Reopening the current recording updates its queue, not its transport.
+        if(same){if(autoplay&&!playingRef.current)beginPlayback();return;}
+        setPlaying(false);if(autoplay)beginPlayback();
+      };
       if (event.detail.id !== currentIdRef.current) fadeOutThen(open); else open();
     } catch (error) { setError(error.message || 'Could not open this recording.'); }
   };
@@ -207,12 +225,17 @@ function ArchiveMusicPlayer() {
   const remoteControl=useRef(null);
   remoteControl.current=event=>{
     const {type,value}=event.detail||{};
-    if(type==='volume'){
+    if(type==='autodj-transport'){
+      autoDjOwnsTransport.current=Boolean(value);
+    }else if(type==='volume'){
       const next=Number(value);if(Number.isFinite(next))setVolume(Math.max(0,Math.min(1,next)));
     }else if(type==='rate'){
       const next=Number(value);if(Number.isFinite(next))setPlaybackRate(Math.max(.5,Math.min(1.5,next)));
     }else if(type==='equalizer'){
       if(EQUALIZER_BANDS.some(band=>band.key===value?.band)&&Number.isFinite(value.gain))changeEqualizer(value.band,equalizerGain(value.gain));
+    }else if(type==='equalizer-auto'){
+      const on=Boolean(value);if(on)unlock();else stopAutoEqualizer.current?.();
+      setAutoEqualizer(on);setAutoEqStatus(on?'Auto EQ listening…':'Auto EQ off');
     }else if(type==='equalizer-reset'){
       for(const band of EQUALIZER_BANDS)changeEqualizer(band.key,0);
     }else if(type==='scratch'){
@@ -253,15 +276,17 @@ function ArchiveMusicPlayer() {
     return()=>window.removeEventListener(ARCHIVE_PLAYER_COMMAND,handle);
   },[]);
   useEffect(()=>{
-    publishArchivePlayerState({track:current||null,tracks,playing,preparing,buffering,position,duration,volume,playbackRate,equalizer,error,enabled});
-  },[current,tracks,playing,preparing,buffering,position,duration,volume,playbackRate,equalizer,error,enabled]);
+    publishArchivePlayerState({track:current||null,tracks,playing,preparing,buffering,position,duration,volume,playbackRate,equalizer,autoEqualizer,autoEqStatus,error,enabled});
+  },[current,tracks,playing,preparing,buffering,position,duration,volume,playbackRate,equalizer,autoEqualizer,autoEqStatus,error,enabled]);
+
+  const handleEnded=()=>{if(autoDjOwnsTransport.current)setPlaying(false);else step(1);};
 
   return <>
     <audio data-track-id={current?.id} ref={audio} crossOrigin="anonymous" src={currentUrl || undefined} preload="metadata"
       onLoadedMetadata={(event) => { event.currentTarget.playbackRate = playbackRate; setDuration(event.currentTarget.duration); setBuffering(false); }}
       onTimeUpdate={(event) => setPosition(event.currentTarget.currentTime)}
       onWaiting={() => setBuffering(true)} onPlaying={() => setBuffering(false)} onCanPlay={() => setBuffering(false)}
-      onEnded={() => step(1)} onError={() => { if (currentUrl) { setError('Track unavailable. Choose another recording.'); setPlaying(false); setBuffering(false); } }} />
+      onEnded={handleEnded} onError={() => { if (currentUrl) { setError('Track unavailable. Choose another recording.'); setPlaying(false); setBuffering(false); } }} />
     {mixerOpen&&createPortal(
       <div className="wp-channels" role="dialog" aria-modal="true" aria-label="Mixer"><div className="home-archive-controller">
         <Suspense fallback={<div className="ddj-loading" role="status">Loading mixer…</div>}>

@@ -31,7 +31,10 @@ export function createAiDjAutopilot(adapter){
    status('armed',`${plan.source==='ai'?'AI':'LOCAL'} · ${next.title} armed for ${Math.round(timing.startAt)}s · ${plan.reason}`,{target,plan,startAt:timing.startAt});
    while(live(token)&&adapter.deck(active).position()<timing.startAt-.04)await sleep(80);
    if(!live(token))break;
-   await adapter.play(target);
+   const incoming=target;
+   const started=await adapter.play(incoming);
+   if(!live(token)){adapter.pause(incoming);break;}
+   if(!started){status('waiting','The next deck could not start. Keeping the current recording playing.',{target});await sleep(1000);continue;}
    const fromSide=active===2?1:0,toSide=target===2?1:0,began=performance.now();
    status('mixing',`Mixing to ${next.title}…`,{target,plan});
    while(live(token)){

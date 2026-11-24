@@ -11,7 +11,7 @@ export function usePlayer(){
     const on=event=>{
       const next=event.detail,previous=latest.current;
       latest.current=next;
-      const transportChanged=['track','playing','preparing','buffering','duration','volume','playbackRate','equalizer','error','enabled'].some(key=>!Object.is(previous?.[key],next?.[key]));
+      const transportChanged=['track','playing','preparing','buffering','duration','volume','playbackRate','equalizer','autoEqualizer','autoEqStatus','error','enabled'].some(key=>!Object.is(previous?.[key],next?.[key]));
       const elapsed=performance.now()-lastPaint.current;
       if(transportChanged||elapsed>=125){clearTimeout(timer.current);flush();}
       else if(!timer.current)timer.current=setTimeout(flush,125-elapsed);
