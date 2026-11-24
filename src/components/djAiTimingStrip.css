@@ -15,3 +15,5 @@
 @media(max-width:1000px){.dj-timing-main{grid-template-columns:minmax(0,1fr)}.dj-timing-tempo{grid-template-columns:repeat(2,minmax(0,1fr))}.dj-timing-basis{margin-inline-start:0}}
 
 .dj-timing-evidence{display:flex;flex-wrap:wrap;justify-content:space-between;gap:5px 12px;margin-top:5px;color:#8faab5;font-size:10px}.dj-timing-evidence>span{display:inline-flex;align-items:center;gap:7px}.dj-timing-evidence [role=meter]{display:inline-block;width:45px;height:4px;overflow:hidden;background:#263b46;border-radius:2px}.dj-timing-evidence [role=meter] b{display:block;height:100%;background:#77b9cc}
+
+.dj-timing-analysis{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin-top:6px;font-size:11px;color:#a3cad7;overflow-wrap:anywhere}.dj-timing-analysis progress{height:7px;max-width:160px;accent-color:#78cfab}

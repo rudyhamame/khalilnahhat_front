@@ -11,8 +11,9 @@ export function createAiDjAutopilot(adapter){
  const status=(phase,message,extra={})=>adapter.status({enabled,phase,message,active,...extra});
  const planLoop=async token=>{
   while(live(token)){
-   const current=adapter.deck(active),library=adapter.library().filter(track=>track.id!==current?.track?.id);
+   let current=adapter.deck(active);const library=adapter.library().filter(track=>track.id!==current?.track?.id);
    if(!current?.track||!library.length){status('waiting','Load a playing deck and at least one more recording.');await sleep(1000);continue;}
+   if(adapter.analyze){status('analyzing','Measuring the playing recording’s tempo and first beat…');await adapter.analyze(active);if(!live(token))break;current=adapter.deck(active);}
    target=active===1?2:active===2?3:2;
    status('planning','Choosing the next recording…',{target});
    let plan;
@@ -24,10 +25,17 @@ export function createAiDjAutopilot(adapter){
    status('loading',`Loading ${next.title} on Deck ${target}…`,{target,plan});
    const loaded=await adapter.load(target,next,plan.cueSeconds);
    if(!live(token)||!loaded)continue;
+   if(adapter.analyze){status('analyzing','Measuring the incoming recording’s beat grid…',{target,plan});await adapter.analyze(target);if(!live(token))break;}
    const from=adapter.deck(active),to=adapter.deck(target),fromBpm=trackBpm(from.track)||120,toBpm=trackBpm(to.track)||plan.targetBpm||fromBpm;
    const rate=Math.max(.85,Math.min(1.15,(plan.targetBpm||fromBpm)/toBpm));
    adapter.rate(target,rate);
-   const timing=nextPhraseStart({position:from.position(),duration:from.duration(),bpm:fromBpm*(from.rate?.()||1),transitionBars:plan.transitionBars});
+   const grid=from.track.audioBeatGrid,incomingGrid=to.track.audioBeatGrid;
+   if(incomingGrid?.verified&&Number.isFinite(incomingGrid.firstDownbeat)&&adapter.cue){
+    const bar=240/toBpm,first=incomingGrid.firstDownbeat;
+    const cue=first+Math.max(0,Math.ceil((plan.cueSeconds-first)/bar))*bar;
+    if(cue<to.duration()-.25)adapter.cue(target,cue);
+   }
+   const timing=nextPhraseStart({position:from.position(),duration:from.duration(),bpm:fromBpm,rate:from.rate?.()||1,transitionBars:plan.transitionBars,firstDownbeat:grid?.firstDownbeat,gridVerified:Boolean(grid?.verified)});
    status('armed',`${plan.source==='ai'?'AI':'LOCAL'} · ${next.title} armed for ${Math.round(timing.startAt)}s · ${plan.reason}`,{target,plan,startAt:timing.startAt});
    while(live(token)&&adapter.deck(active).position()<timing.startAt-.04)await sleep(80);
    if(!live(token))break;

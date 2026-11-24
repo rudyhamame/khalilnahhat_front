@@ -2,6 +2,8 @@ const number=value=>Number.isFinite(Number(value))?Number(value):0;
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 
 export function trackBpm(track){
+  const measured=track?.audioBeatGrid;
+  if(measured?.tempoVerified&&Number.isFinite(measured.bpm)&&measured.bpm>=50&&measured.bpm<=220)return measured.bpm;
   const direct=number(track?.bpm||track?.sound?.bpm);
   if(direct>=50&&direct<=220)return direct;
   const values=(track?.atoms||[]).map(atom=>number(atom?.sound?.bpm)).filter(value=>value>=50&&value<=220).sort((a,b)=>a-b);
@@ -34,13 +36,15 @@ export function safeDjPlan(value,{current,candidates,played=[]}){
   };
 }
 
-export function nextPhraseStart({position=0,duration=0,bpm=120,transitionBars=8}){
-  const bar=240/clamp(number(bpm)||120,60,200),transition=bar*clamp(transitionBars,4,32);
-  const phrase=bar*4;
+export function nextPhraseStart({position=0,duration=0,bpm=120,transitionBars=8,rate=1,firstDownbeat=0,gridVerified=false}){
+  const speed=Number.isFinite(rate)&&rate>0?rate:1;
+  const bar=240/clamp(number(bpm)||120,50,220),transition=bar*clamp(transitionBars,4,32),phrase=bar*4;
+  const origin=gridVerified&&Number.isFinite(firstDownbeat)?firstDownbeat:0;
   if(duration>0){
-    const finalPhrase=Math.max(0,Math.floor(Math.max(0,duration-transition)/phrase)*phrase);
-    const startAt=Math.max(position,finalPhrase);
-    return {startAt,duration:Math.max(.25,Math.min(transition,duration-startAt))};
+    const finalPhrase=origin+Math.max(0,Math.floor(Math.max(0,duration-origin-transition)/phrase))*phrase;
+    const currentCue=gridVerified?origin+Math.max(0,Math.ceil((position-origin)/bar))*bar:position;
+    const desired=Math.max(currentCue,finalPhrase),startAt=Math.min(Math.max(position,duration-.25),desired);
+    return {startAt,duration:Math.max(.25/speed,Math.min(transition,duration-startAt)/speed),...(gridVerified?{gridAligned:Math.abs((startAt-origin)/bar-Math.round((startAt-origin)/bar))<.001}:{})};
   }
-  return {startAt:Math.ceil((position+phrase)/phrase)*phrase,duration:transition};
+  return {startAt:origin+Math.ceil((position-origin+phrase)/phrase)*phrase,duration:transition/speed,...(gridVerified?{gridAligned:true}:{})};
 }

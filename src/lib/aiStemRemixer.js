@@ -29,9 +29,9 @@ export function createStemRemixer(adapter,{schedule=setInterval,cancel=clearInte
    status('planning','Choosing a stem arrangement…');
    Promise.resolve().then(()=>adapter.plan()).catch(()=>null).then(value=>{if(!enabled||generation!==token)return;plan=safeStemRemixPlan(value,adapter.style?.());planning=false;tick();});return;
   }
-  const bpm=trackBpm(track)||120,bar=240/bpm,position=adapter.position();
+  const bpm=trackBpm(track)||120,bar=240/bpm,position=adapter.position(),first=track.audioBeatGrid?.verified?track.audioBeatGrid.firstDownbeat:0;
   if(!Number.isFinite(position)||position<0)return;
-  if(anchor==null||lastPosition!=null&&position<lastPosition-.5){anchor=Math.ceil((position+.001)/bar)*bar;lastStep=-1;currentSection=null;adapter.restore(snapshot);}
+  if(anchor==null||lastPosition!=null&&position<lastPosition-.5){anchor=first+Math.max(0,Math.ceil((position+.001-first)/bar))*bar;lastStep=-1;currentSection=null;adapter.restore(snapshot);}
   lastPosition=position;
   if(position<anchor){status('armed',`Remix armed for the next bar${trackBpm(track)?'':' · estimated 120 BPM'}.`);return;}
   const cycle=plan.sequence.reduce((total,row)=>total+row.bars,0),barIndex=Math.floor((position-anchor)/bar),within=barIndex%cycle;

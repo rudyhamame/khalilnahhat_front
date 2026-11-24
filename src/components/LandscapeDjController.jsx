@@ -1,3 +1,4 @@
+import {createBeatGridAnalysis,measuredTrack} from '../lib/beatGridAnalysis';
 import {createDjAutoTrim,trimDecibels} from '../lib/djAutoTrim';
 import DjAiTimingStrip from './DjAiTimingStrip';
 import useStemPlayer from '../hooks/useStemPlayer';
@@ -166,6 +167,11 @@ export default function LandscapeDjController({stems:mainStems,mic,audioGraph,un
   const media=useRef({}), strips=useRef({}), scratchers=useRef({}),uiClock=useRef({}),loadWaiters=useRef({});
   const playerState=useRef(player),deckState=useRef(decks),libraryState=useRef(library);
   playerState.current=player;deckState.current=decks;libraryState.current=library;
+  const beatAnalysis=useRef(null);
+  const analysisService=()=>beatAnalysis.current||(beatAnalysis.current=createBeatGridAnalysis());
+  const withTiming=track=>measuredTrack(track,analysisService().get(track));
+  useEffect(()=>{const service=analysisService();return()=>{service.dispose();if(beatAnalysis.current===service)beatAnalysis.current=null;};},[]);
+  useEffect(()=>{if(player.track)analysisService().analyze(player.track,{duration:player.duration});},[player.track?.id,player.track?.audioUrl,player.duration]);
   const dv=(key,fallback=0)=>settings[key]??fallback;
   const sd=key=>value=>setSettings(previous=>({...previous,[key]:value}));
   const headphones=useRef(null), meters=useRef({}), masterLadder=useRef(null);
@@ -355,7 +361,7 @@ export default function LandscapeDjController({stems:mainStems,mic,audioGraph,un
   const selectedRemixTrack=remixDeck===1?player.track:decks[remixDeck]?.track;
   const selectedRemixElement=()=>remixDeck===1?audioGraph.current?.element:media.current[remixDeck];
   remixAdapter.current={
-    track:()=>selectedRemixTrack,
+    track:()=>withTiming(selectedRemixTrack),
     style:()=>remixStyle,
     ready:()=>Boolean(selectedStems?.mode),
     waitingMessage:()=>selectedStems?.notice||selectedStems?.status?.stage||'Preparing separated channels. The original recording keeps playing.',
@@ -367,9 +373,10 @@ export default function LandscapeDjController({stems:mainStems,mic,audioGraph,un
     restore:mix=>selectedStems?.restoreMix(mix),
     status:state=>setRemixState(state),
     async plan(){
+      await analysisService().analyze(selectedRemixTrack,{duration:selectedRemixElement()?.duration});
       let token='';const raw=localStorage.getItem('khalil-auth-token')||'';try{token=JSON.parse(raw)||'';}catch{token=raw;}
       if(!token)throw Error('Use local arrangement');
-      const bpm=trackBpm(selectedRemixTrack)||null;
+      const bpm=trackBpm(withTiming(selectedRemixTrack))||null;
       const result=await apiRequest('/admin/ai-dj/remix-plan',{method:'POST',token,timeoutMs:14000,body:{track:{id:selectedRemixTrack.id,title:selectedRemixTrack.title||'Untitled',bpm},style:remixStyle}});
       return result.plan;
     },
@@ -380,10 +387,12 @@ export default function LandscapeDjController({stems:mainStems,mic,audioGraph,un
   const autopilot=useRef(null);
   adapter.current={
     status:state=>{setAiState(state);if(state.target){const pair=[state.active,state.target];setLayers([pair.find(n=>n%2)??3,pair.find(n=>n%2===0)??2]);}},
-    library:()=>libraryState.current,
+    library:()=>libraryState.current.map(withTiming),
+    analyze:n=>{const state=n===1?playerState.current:deckState.current[n],element=n===1?audioGraph.current?.element:media.current[n];return analysisService().analyze(state?.track,{duration:element?.duration});},
+    cue:(n,seconds)=>{const element=media.current[n];if(!element||!element.paused)return false;element.currentTime=seconds;return true;},
     deck:n=>{
       const element=n===1?audioGraph.current?.element:media.current[n],state=n===1?playerState.current:deckState.current[n];
-      return state?.track&&element?{track:state.track,position:()=>element.currentTime||0,duration:()=>Number.isFinite(element.duration)?element.duration:state.duration||0,rate:()=>element.playbackRate||1}:null;
+      return state?.track&&element?{track:withTiming(state.track),position:()=>element.currentTime||0,duration:()=>Number.isFinite(element.duration)?element.duration:state.duration||0,rate:()=>element.playbackRate||1}:null;
     },
     async plan(state){
       let token='';try{const raw=localStorage.getItem('khalil-auth-token')||'';try{token=JSON.parse(raw)||'';}catch{token=raw;}}catch{/* Local fallback remains available. */}
@@ -440,9 +449,10 @@ export default function LandscapeDjController({stems:mainStems,mic,audioGraph,un
     const active=remixState.enabled?remixDeck:aiState.enabled?aiState.active||1:layers[0]||1;
     const readDeck=n=>{
       const state=n===1?playerState.current:deckState.current[n],element=n===1?audioGraph.current?.element:media.current[n];
-      return {n,track:state?.track,position:element?.currentTime??state?.position??0,rate:element?.playbackRate??state?.playbackRate??1,playing:Boolean(element&&!element.paused&&!element.ended)};
+      return {n,track:withTiming(state?.track),position:element?.currentTime??state?.position??0,rate:element?.playbackRate??state?.playbackRate??1,playing:Boolean(element&&!element.paused&&!element.ended)};
     };
-    return {deck:readDeck(active),incoming:aiState.enabled&&aiState.target&&aiState.phase!=='planning'?readDeck(aiState.target):null,ai:aiState,remix:remixer.current?.timing(),now:performance.now()};
+    const deck=readDeck(active);
+    return {deck,incoming:aiState.enabled&&aiState.target&&aiState.phase!=='planning'?readDeck(aiState.target):null,analysis:analysisService().get(deck.track),ai:aiState,remix:remixer.current?.timing(),now:performance.now()};
   };
   const setBand=(band,label,v)=>{archivePlayerCommand('equalizer',{band,gain:v});setLast(`${label} ${v>0?'+':''}${v} dB`);};
   const stemOn=Boolean(stems?.mode);
@@ -478,7 +488,7 @@ export default function LandscapeDjController({stems:mainStems,mic,audioGraph,un
     return()=>cancelAnimationFrame(frame);
   },[]);
   const view=[0,0,W,TH];
-  return <div className="ddj-host ddj-performance" dir="ltr">{[2,3,4].map(n=><audio key={n} ref={el=>{media.current[n]=el;}} crossOrigin="anonymous" preload="auto" src={playbackMediaUrl(decks[n]?.track?.audioUrl)} onLoadedMetadata={e=>{sync(n,e.currentTarget,true);loadWaiters.current[n]?.resolve(true);}} onTimeUpdate={e=>sync(n,e.currentTarget)} onRateChange={e=>sync(n,e.currentTarget,true)} onPlay={e=>sync(n,e.currentTarget,true)} onPause={e=>sync(n,e.currentTarget,true)} onEnded={e=>sync(n,e.currentTarget,true)} onError={()=>{loadWaiters.current[n]?.resolve(false);setNotice('Deck '+n+' could not load this recording.');}}/>)}
+  return <div className="ddj-host ddj-performance" dir="ltr">{[2,3,4].map(n=><audio key={n} ref={el=>{media.current[n]=el;}} crossOrigin="anonymous" preload="auto" src={playbackMediaUrl(decks[n]?.track?.audioUrl)} onLoadedMetadata={e=>{sync(n,e.currentTarget,true);analysisService().analyze(decks[n]?.track,{duration:e.currentTarget.duration});loadWaiters.current[n]?.resolve(true);}} onTimeUpdate={e=>sync(n,e.currentTarget)} onRateChange={e=>sync(n,e.currentTarget,true)} onPlay={e=>sync(n,e.currentTarget,true)} onPause={e=>sync(n,e.currentTarget,true)} onEnded={e=>sync(n,e.currentTarget,true)} onError={()=>{loadWaiters.current[n]?.resolve(false);setNotice('Deck '+n+' could not load this recording.');}}/>)}
     <div className="ddj-stage"><div className="ddj-frame" style={{aspectRatio:`${view[2]} / ${view[3]}`,'--ratio':view[2]/view[3]}}><svg className="ddj-svg" viewBox={view.join(" ")} role="group" aria-label="Performance DJ controller" preserveAspectRatio="xMidYMid meet">
     <defs>
       <linearGradient id="body" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#141618"/><stop offset="1" stopColor="#0a0b0c"/></linearGradient>
