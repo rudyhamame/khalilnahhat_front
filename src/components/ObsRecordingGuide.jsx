@@ -14,7 +14,7 @@ const SETTINGS=[
 const STEPS=[
  'Settings → Output → Output Mode: Advanced → Recording tab. Apply the table above, then click Apply and OK.',
  'Do a 10 second test recording and play it back: check picture and sound in the saved file.',
- 'For the real live: prepare OBS in Echo Live Studio, paste the server and bearer token into OBS, then start streaming in OBS. Press Go live in the Studio. If you want a local copy, also press Start Recording in OBS.',
+ 'For the real live: prepare OBS in Echo Live Studio, paste the server and bearer token into OBS, then start streaming in OBS. The Studio goes on air automatically once it receives the stream. If you want a local copy, also press Start Recording in OBS.',
  'When the live ends: disconnect OBS in the Studio and stop streaming in OBS. If you recorded locally, press Stop Recording in OBS too.',
  'Your .mkv stays in the Recording Path on your computer. The app does not record or upload live sessions.',
 ];
