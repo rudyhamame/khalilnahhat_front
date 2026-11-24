@@ -36,13 +36,14 @@ export function safeDjPlan(value,{current,candidates,played=[]}){
   };
 }
 
-export function nextPhraseStart({position=0,duration=0,bpm=120,transitionBars=8,rate=1,firstDownbeat=0,gridVerified=false}){
+export function nextPhraseStart({position=0,duration=0,bpm=120,transitionBars=8,rate=1,firstDownbeat=0,gridVerified=false,beatPhaseMeasured=false}){
   const speed=Number.isFinite(rate)&&rate>0?rate:1;
   const bar=240/clamp(number(bpm)||120,50,220),transition=bar*clamp(transitionBars,4,32),phrase=bar*4;
-  const origin=gridVerified&&Number.isFinite(firstDownbeat)?firstDownbeat:0;
+  const origin=(gridVerified||beatPhaseMeasured)&&Number.isFinite(firstDownbeat)?firstDownbeat:0;
   if(duration>0){
     const finalPhrase=origin+Math.max(0,Math.floor(Math.max(0,duration-origin-transition)/phrase))*phrase;
-    const currentCue=gridVerified?origin+Math.max(0,Math.ceil((position-origin)/bar))*bar:position;
+    const quantum=gridVerified?bar:bar/4;
+    const currentCue=gridVerified||beatPhaseMeasured?origin+Math.max(0,Math.ceil((position-origin)/quantum))*quantum:position;
     const desired=Math.max(currentCue,finalPhrase),startAt=Math.min(Math.max(position,duration-.25),desired);
     return {startAt,duration:Math.max(.25/speed,Math.min(transition,duration-startAt)/speed),...(gridVerified?{gridAligned:Math.abs((startAt-origin)/bar-Math.round((startAt-origin)/bar))<.001}:{})};
   }

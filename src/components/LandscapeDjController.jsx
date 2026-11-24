@@ -461,7 +461,7 @@ export default function LandscapeDjController({stems:mainStems,mic,audioGraph,un
   // The recording's artwork turns on the left record. It is a plain HTML image over the drawing (turned by the GPU, with a hole for the spindle), so the large SVG is never repainted while it spins.
   const jogArt=player.track?.coverImage?displayImageUrl(player.track.coverImage):'';
   const TH=H+LABEL_H,JC={x:189,y:194};
-  const jogBpm=Number(player.track?.sound?.bpm||player.track?.bpm)||recordingBeatGrid({trackId:player.track?.id,audioUrl:player.track?.audioUrl,time:0})?.bpm;
+  const jogBpm=trackBpm(withTiming(player.track))||recordingBeatGrid({trackId:player.track?.id,audioUrl:player.track?.audioUrl,time:0})?.bpm;
   const jogRate=Number(player.playbackRate)||1;
   const jogPosition=Number(player.position)||0;
   const jogTime=`${Math.floor(jogPosition/60)}:${String(Math.floor(jogPosition%60)).padStart(2,'0')}`;
@@ -470,7 +470,7 @@ export default function LandscapeDjController({stems:mainStems,mic,audioGraph,un
   const art=useRef({angle:0,held:false,el:null,playing:false,rate:1});
   const visibleDeck2=layers[1]||2,deck2=decks[visibleDeck2]||{},jogArt2=deck2.track?.coverImage?displayImageUrl(deck2.track.coverImage):'';
   const jogPosition2=Number(deck2.position)||0,jogRate2=Number(deck2.playbackRate)||1;
-  const jogBpm2=Number(deck2.track?.sound?.bpm||deck2.track?.bpm)||recordingBeatGrid({trackId:deck2.track?.id,audioUrl:deck2.track?.audioUrl,time:0})?.bpm;
+  const jogBpm2=trackBpm(withTiming(deck2.track))||recordingBeatGrid({trackId:deck2.track?.id,audioUrl:deck2.track?.audioUrl,time:0})?.bpm;
   const art2=useRef({angle:0,held:false,el:null,playing:false,rate:1});
   art.current.playing=Boolean(player.playing);art.current.rate=Number(player.playbackRate)||1;
   art2.current.playing=Boolean(deck2.playing);art2.current.rate=Number(deck2.playbackRate)||1;
@@ -564,7 +564,7 @@ export default function LandscapeDjController({stems:mainStems,mic,audioGraph,un
   <LoadPicker library={library} onPick={loadDeck}/>
   </div></div>
   <footer className="ddj-ai-footer" aria-label="Mixer AI DJ controls">
-    <DjAiTimingStrip getSnapshot={timingSnapshot}/>
+    <DjAiTimingStrip getSnapshot={timingSnapshot} onAnalyze={()=>{const {deck}=timingSnapshot(),element=deck.n===1?audioGraph.current?.element:media.current[deck.n];analysisService().retry(deck.track,{duration:element?.duration});}}/>
     <div className="ddj-ai-footer-actions">
       <div className="ddj-ai-footer-group" role="group" aria-label="Auto DJ, equalizer and channel trims">
         <button type="button" className={aiState.enabled?'is-on':''} aria-pressed={aiState.enabled} onClick={toggleAi} title={aiState.message}>{aiState.enabled?'STOP AI DJ':'START AI DJ'}</button>

@@ -72,10 +72,12 @@ export function analyzeAudioBeatGrid(samples,sampleRate,progress=()=>{}){
  const span=last.index-first.index+1,coverage=hits.length/Math.max(1,span),jitter=median(hits.map(hit=>hit.error));
  const split=(first.time+last.time)/2,training=hits.filter(hit=>hit.time<split),validation=hits.filter(hit=>hit.time>=split);
  const validationSpan=validation.length?validation.at(-1).index-validation[0].index+1:Infinity;
- const tempoVerified=consistent>=.8&&coverage>=.75&&validation.length/validationSpan>=.7&&jitter<=.025&&hits.length>=32;
+ const tempoVerified=consistent>=.8&&readings.length>=2;
+ const beatPhaseVerified=tempoVerified&&coverage>=.7&&validation.length/validationSpan>=.65&&jitter<=.03&&hits.length>=32;
  const confidence=clamp(consistent*coverage*(1-jitter/.08));
- const result={method:'spectral-onset-4/4',bpm:60/fitted.period,tempoVerified,verified:false,beatOffset:fitted.phase,confidence,coverage,jitter,tempoConsistency:consistent,beatsPerBar:4,analyzedFrom:first.time,analyzedTo:last.time,duration};
- if(!tempoVerified)return {...result,reason:'Tempo or beat phase changes across the recording.'};
+ const result={method:'spectral-onset-4/4',bpm:60/fitted.period,tempoVerified,beatPhaseVerified,verified:false,beatOffset:fitted.phase,confidence,coverage,jitter,tempoConsistency:consistent,beatsPerBar:4,analyzedFrom:first.time,analyzedTo:last.time,duration};
+ if(!tempoVerified)return {...result,reason:'Tempo changes across the recording.'};
+ if(!beatPhaseVerified)return {...result,reason:'Audio tempo detected, but beat phase is not consistent enough to verify.'};
  progress('Checking the first beat across bars',.8);
  const all=phaseScores(hits),train=phaseScores(training),check=phaseScores(validation);
  const margin=all[0].score/Math.max(.001,all[1].score),trainMargin=train[0].score/Math.max(.001,train[1].score),checkMargin=check[0].score/Math.max(.001,check[1].score);

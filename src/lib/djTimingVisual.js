@@ -7,11 +7,11 @@ const valid=value=>Number.isFinite(value)&&value>=0;
 // Read-only evidence for the footer. A tempo match is never presented as a downbeat lock.
 export function djTimingVisual({deck,incoming,ai={},remix=null,pulse=null,analysis=null,now=0}={}){
  const track=deck?.track,position=valid(deck?.position)?deck.position:0,rate=Number.isFinite(deck?.rate)&&deck.rate>0?deck.rate:1;
- const known=recordingBeatGrid({trackId:track?.id,audioUrl:track?.audioUrl,time:position});
- const measured=track?.audioBeatGrid,verified=verifiedGridAt(track,position);
+ const reference=recordingBeatGrid({trackId:track?.id,audioUrl:track?.audioUrl,time:position});
+ const measured=track?.audioBeatGrid,verified=verifiedGridAt(track,position),known=measured?.tempoVerified?null:reference;
  const metadata=trackBpm(track),assumed=Boolean(track&&!metadata&&!known);
  const bpm=known?.bpm||metadata||(track?120:0),effective=bpm*rate;
- const origin=measured?.verified?measured.firstDownbeat:measured?.tempoVerified?measured.beatOffset||0:0;
+ const origin=measured?.verified?measured.firstDownbeat:measured?.beatPhaseVerified?measured.beatOffset||0:0;
  const beats=bpm?Math.max(0,(position-origin)*bpm/60):0,beatIndex=Math.floor(beats+1e-8),phase=Math.max(0,beats-beatIndex);
  const nextBeatSeconds=bpm?(1-phase)*60/bpm/rate:null;
  const nextBarSeconds=bpm?(position<origin?(origin-position)/rate:(4-(beatIndex%4)-phase)*60/bpm/rate):null;
@@ -27,7 +27,7 @@ export function djTimingVisual({deck,incoming,ai={},remix=null,pulse=null,analys
   countdown=Math.max(0,(ai.startAt-position)/rate);progressLabel='Waiting for transition cue';
  }else if(remix?.anchor!=null&&position<remix.anchor){countdown=(remix.anchor-position)/rate;progressLabel='Waiting for remix cue';}
  return {hasTrack:Boolean(track),playing:Boolean(deck?.playing),position,bpm,effective,rate,assumed,
-  basis:verified?'Audio-verified 4/4 grid':known?'Reference grid':['queued','analyzing'].includes(analysis?.status)?'Analyzing recording audio…':measured?.tempoVerified?'Audio BPM detected · first beat ambiguous':metadata?'Track BPM · estimated beat phase':track?'Estimated 120 BPM · beat phase unverified':'Load a recording',
+  basis:verified?'Audio-verified 4/4 grid':known?'Reference grid':['queued','analyzing'].includes(analysis?.status)?'Analyzing recording audio…':measured?.tempoVerified?(measured.beatPhaseVerified?'Audio BPM detected · first beat ambiguous':'Audio BPM detected · beat phase unclear'):metadata?'Track BPM · estimated beat phase':track?'Estimated 120 BPM · beat phase unverified':'Load a recording',
   analysis,gridEvidence:measured?.coverage??null,gridReason:measured?.reason||analysis?.stage||'',
   firstBeatVerified:Boolean(verified||known),audioVerified:Boolean(verified),beat:beatIndex%4+1,bar:Math.floor(beatIndex/4)+1,phraseBeat:beatIndex%16,phase,railPosition:((beatIndex%16)+phase)/16,
   nextBeatSeconds,nextBarSeconds,incomingBpm:incomingBpm?incomingBpm*incomingRate:null,delta,

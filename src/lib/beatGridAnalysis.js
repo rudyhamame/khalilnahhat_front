@@ -35,7 +35,7 @@ export async function browserBeatAnalysis(track,{signal,progress}){
   for(let c=0;c<decoded.numberOfChannels;c++){const values=decoded.getChannelData(c);for(let i=from;i<Math.min(from+65536,mono.length);i++)mono[i]+=values[i]/decoded.numberOfChannels;}
   await new Promise(done=>setTimeout(done,0));
  }
- decoded=null;
+ decoded=null;if(signal.aborted)throw cancelled();
  return new Promise((resolve,reject)=>{
   const worker=new Worker(new URL('../workers/audioBeatGrid.worker.js',import.meta.url),{type:'module'});
   let finished=false;
@@ -68,11 +68,13 @@ export function createBeatGridAnalysis({run=browserBeatAnalysis,resultCache=cach
    const key=beatAnalysisKey(track);if(!key||disposed)return Promise.resolve({status:'unavailable',stage:'No recording to analyze'});
    if(resultCache.has(key))return Promise.resolve(resultCache.get(key));
    if(jobs.has(key))return jobs.get(key).promise;
+   if(queue.length>=8)return Promise.resolve({status:'unavailable',stage:'The analysis queue is busy. Try again shortly.'});
    if(!Number.isFinite(duration)||duration<=0)return Promise.resolve({status:'waiting',stage:'Waiting for recording duration'});
    if(duration>GRID_MAX_SECONDS){const state={status:'unavailable',stage:'Recording exceeds the 10-minute analysis limit.'};jobs.set(key,{state,promise:Promise.resolve(state)});return Promise.resolve(state);}
    let resolve;const promise=new Promise(done=>{resolve=done;}),job={key,track,promise,resolve,state:{status:'queued',stage:'Queued for audio analysis'}};
    jobs.set(key,job);queue.push(job);pump();return promise;
   },
+  retry(track,options){const key=beatAnalysisKey(track),job=jobs.get(key);if(job&&['queued','analyzing'].includes(job.state.status))return job.promise;jobs.delete(key);resultCache.delete(key);return this.analyze(track,options);},
   dispose(){disposed=true;if(active){active.state={status:'cancelled',stage:'Analysis cancelled'};active.controller?.abort();active.resolve(active.state);}for(const job of queue.splice(0)){job.state={status:'cancelled',stage:'Analysis cancelled'};job.resolve(job.state);}},
  };
 }

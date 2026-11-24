@@ -30,12 +30,12 @@ export function createAiDjAutopilot(adapter){
    const rate=Math.max(.85,Math.min(1.15,(plan.targetBpm||fromBpm)/toBpm));
    adapter.rate(target,rate);
    const grid=from.track.audioBeatGrid,incomingGrid=to.track.audioBeatGrid;
-   if(incomingGrid?.verified&&Number.isFinite(incomingGrid.firstDownbeat)&&adapter.cue){
-    const bar=240/toBpm,first=incomingGrid.firstDownbeat;
+   if((incomingGrid?.verified||incomingGrid?.beatPhaseVerified)&&adapter.cue){
+    const bar=(incomingGrid.verified?240:60)/toBpm,first=incomingGrid.verified?incomingGrid.firstDownbeat:incomingGrid.beatOffset;
     const cue=first+Math.max(0,Math.ceil((plan.cueSeconds-first)/bar))*bar;
-    if(cue<to.duration()-.25)adapter.cue(target,cue);
+    if(cue<to.duration()-.25&&cue<=incomingGrid.analyzedTo)adapter.cue(target,cue);
    }
-   const timing=nextPhraseStart({position:from.position(),duration:from.duration(),bpm:fromBpm,rate:from.rate?.()||1,transitionBars:plan.transitionBars,firstDownbeat:grid?.firstDownbeat,gridVerified:Boolean(grid?.verified)});
+   const timing=nextPhraseStart({position:from.position(),duration:from.duration(),bpm:fromBpm,rate:from.rate?.()||1,transitionBars:plan.transitionBars,firstDownbeat:grid?.verified?grid.firstDownbeat:grid?.beatOffset,gridVerified:Boolean(grid?.verified),beatPhaseMeasured:Boolean(grid?.beatPhaseVerified)});
    status('armed',`${plan.source==='ai'?'AI':'LOCAL'} · ${next.title} armed for ${Math.round(timing.startAt)}s · ${plan.reason}`,{target,plan,startAt:timing.startAt});
    while(live(token)&&adapter.deck(active).position()<timing.startAt-.04)await sleep(80);
    if(!live(token))break;

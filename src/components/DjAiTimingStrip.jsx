@@ -5,7 +5,7 @@ const bpm=value=>value?value.toFixed(1):'—';
 const seconds=value=>value==null?'—':`${value.toFixed(1)}s`;
 const stages=[['planning','Plan'],['loading','Load'],['tempo','Tempo'],['armed','Cue'],['mixing','Mix']];
 
-export default function DjAiTimingStrip({getSnapshot}){
+export default function DjAiTimingStrip({getSnapshot,onAnalyze}){
  const evidence=useRef(null);
  const latest=useRef(getSnapshot);latest.current=getSnapshot;
  const [snapshot,setSnapshot]=useState(()=>getSnapshot());
@@ -27,7 +27,7 @@ export default function DjAiTimingStrip({getSnapshot}){
      {view.hasTrack&&<i className="dj-timing-playhead" style={{insetInlineStart:`${view.railPosition*100}%`}}/>}
     </div>
     <div className="dj-timing-caption dj-timing-countdown"><span>Next {view.firstBeatVerified?'':'estimated '}first beat: {seconds(view.nextBarSeconds)}</span><span>{view.audioVerified?'First beat verified from recurring audio accents':view.firstBeatVerified?'Reference timing':'First beat not verified from audio'}</span></div>
-    {view.analysis&&<div className="dj-timing-analysis"><span>{view.analysis.status==='verified'?'Audio grid verified':view.analysis.stage}{view.gridEvidence!=null?` · ${Math.round(view.gridEvidence*100)}% beat support`:''}</span>{['queued','analyzing'].includes(view.analysis.status)&&<progress aria-label="Audio beat-grid analysis" max="1" {...(view.analysis.progress!=null?{value:view.analysis.progress}:{})}/>}</div>}
+    {view.analysis&&<div className="dj-timing-analysis">{onAnalyze&&<button type="button" onClick={onAnalyze} disabled={!view.hasTrack||['queued','analyzing'].includes(view.analysis.status)}>Analyze audio</button>}<span>{view.analysis.status==='verified'?'Audio grid verified':view.analysis.stage}{view.gridEvidence!=null?` · ${Math.round(view.gridEvidence*100)}% beat support`:''}</span>{['queued','analyzing'].includes(view.analysis.status)&&<progress aria-label="Audio beat-grid analysis" max="1" {...(view.analysis.progress!=null?{value:view.analysis.progress}:{})}/>}</div>}
     <div className="dj-timing-evidence"><span>{view.pulseBpm?`Live pulse estimate: ${bpm(view.pulseBpm)} BPM`:'Live pulse: waiting for consistent audio'}</span>{view.pulseConsistency!=null&&<span>{Math.round(view.pulseConsistency*100)}% pulse consistency <i role="meter" aria-label="Live pulse consistency" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(view.pulseConsistency*100)}><b style={{width:`${view.pulseConsistency*100}%`}}/></i></span>}</div>
    </div>
    <div className="dj-timing-tempo">
