@@ -327,3 +327,15 @@ html body .admin-workspace[data-area=services] article.admin-service-request-car
 .booking-ai-summary .secondary-button{padding:5px 12px;font-size:12px}
 .booking-ai-summary .is-loading{color:var(--aw-muted);animation:bai-pulse 1.4s ease-in-out infinite}
 @keyframes bai-pulse{50%{opacity:.45}}
+/* Booking requests column: just a list of booking codes. */
+.admin-booking-list-item.admin-booking-list-code{display:block;width:100%;text-align:start;padding:11px 14px;font:600 12.5px/1.4 ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace;letter-spacing:.02em;overflow-wrap:anywhere}
+/* AI summary: no background, no border. */
+.booking-ai-summary{background:none!important;border:0!important;padding:0!important}
+/* Every card in the Quote column looks like the Booking info cards (same tint, dashed border, square corners). */
+.admin-workspace[data-area=services] .booking-quote-aside :is(.bqe-editor,.bqe-summary,.bqe-adjustments,.bqe-sidebar>*,.admin-service-request-terms){background:color-mix(in srgb,var(--aw-text) 8%,transparent)!important;border:1px dashed color-mix(in srgb,var(--aw-text) 40%,transparent)!important;border-radius:0!important}
+/* Header of the Booking details column, same as the Quote column's header. */
+.admin-booking-detail-body .booking-column-heading{padding:16px 0 12px;border:0;background:none}
+.admin-booking-detail-body .booking-column-heading h3{margin:0;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--aw-muted)}
+/* The Quote column uses the very same header (markup, padding, alignment) as the Booking details column. */
+.admin-workspace[data-area=services] .admin-booking-detail-body .booking-quote-aside{padding:24px!important}
+.booking-quote-aside>.booking-column-heading{padding:16px 0 12px}

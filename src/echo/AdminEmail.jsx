@@ -1,4 +1,5 @@
 import { AlertTriangle, CheckCircle2, ChevronDown, Clock3, Inbox, Mail, PenLine, RefreshCw, Send, ShieldCheck } from "lucide-react";
+import { apiRequest } from "../lib/api";
 import { useMailbox } from "./mail/useMailbox";
 import { useMailboxDraft } from "./mail/useMailboxDraft";
 import { BOOKINGS, hasContent } from "./mail/mailPresentation";
@@ -132,6 +133,7 @@ function EmailWorkspace({ token, user }) {
       )}
       <MailComposer
         composer={composer}
+        polish={(body) => apiRequest("/admin/ai/email-polish", { method: "POST", token, body })}
         onReview={() => mail.chooseFolder("4")}
       />
     </section>

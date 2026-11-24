@@ -1,14 +1,26 @@
-import { useEffect, useRef } from "react";
-import { ArrowLeft, CheckCircle2, Send, Trash2, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ArrowLeft, CheckCircle2, Send, Sparkles, Trash2, X } from "lucide-react";
 import { addresses, BOOKINGS, hasContent } from "./mailPresentation";
 
-export default function MailComposer({ composer, onReview }) {
+export default function MailComposer({ composer, onReview, polish }) {
   const dialog = useRef(null);
+  const [polishing, setPolishing] = useState(false), [before, setBefore] = useState(null), [aiError, setAiError] = useState("");
   const { draft, open, sending, reviewing, error, edit, close, discard, review, backToEdit, send, checking, recover, prepareRetry } = composer;
   useEffect(() => {
     if (open) dialog.current?.showModal();
     else dialog.current?.close();
   }, [open]);
+  // AI rewrites the message formally and politely and writes the subject; the admin reads it and can undo before sending.
+  const runPolish = async () => {
+    if (!draft?.text?.trim() || polishing) return;
+    setPolishing(true); setAiError("");
+    try {
+      const result = await polish({ text: draft.text, subject: draft.subject });
+      setBefore({ subject: draft.subject, text: draft.text });
+      edit("subject", result.subject); edit("text", result.body);
+    } catch (failure) { setAiError(failure.message || "AI could not polish the email."); }
+    finally { setPolishing(false); }
+  };
   if (!draft) return null;
   const locked = sending || checking || draft.submitted;
   return (
@@ -97,6 +109,11 @@ export default function MailComposer({ composer, onReview }) {
             placeholder="Write your message…"
           />
         </label>
+        {polish && <div className="ae-ai-row">
+          <button type="button" className="ae-secondary" disabled={locked || polishing || !draft.text.trim()} onClick={runPolish}><Sparkles size={15} aria-hidden="true" /> {polishing ? "Writing…" : "Polish with AI · subject & body"}</button>
+          {before && <button type="button" className="ae-secondary" disabled={locked} onClick={() => { edit("subject", before.subject); edit("text", before.text); setBefore(null); }}>Undo</button>}
+          {aiError && <span role="alert" className="ae-ai-error">{aiError}</span>}
+        </div>}
         </>}
         {error && (
           <div className="ae-alert" role="alert">

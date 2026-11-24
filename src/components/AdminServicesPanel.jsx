@@ -20,6 +20,10 @@ import BookingDraftConversation from './BookingDraftConversation';
 import { Send, MapPin } from 'lucide-react';
 import { apiRequest } from '../lib/api';
 import { useEffect, useMemo, useState } from 'react';
+import {createMailApi} from '../echo/mail/mailApi';
+import {useMailboxDraft} from '../echo/mail/useMailboxDraft';
+import MailComposer from '../echo/mail/MailComposer';
+import '../echo/adminEmail.css';
 
 
 
@@ -78,9 +82,7 @@ function buildDraft(request, currentDraft) {
  *  the stage's hint as a sub-paragraph under the current step. "Deposit paid" sits before "Booked". */
 function StatusPipeline({request,ar,tr}){
   const j=request.journey||{},path=(j.path||[]).map(step=>{const own=journeyContract.clientStages[step.status]||step; return {key:step.status,label:ar?own.labelAr||own.label:own.label};}); // wording from the shared contract, not from a possibly older running server
-  const at=path.findIndex(step=>step.key==='booked');
-  if(at>=0)path.splice(at,0,{key:'deposit_paid',label:tr('Deposit paid')});
-  const stage=j.clientStatus!=='booked'&&request.depositPaidCents>0?'deposit_paid':j.clientStatus;
+  const stage=request.bookingStatus||j.clientStatus; // the real, stored booking status
   const now=path.findIndex(step=>step.key===stage);
   if(!path.length)return null;
   // Admin-side hints (the client app shows its own wording under its stepper).
@@ -113,6 +115,10 @@ function AiBookingSummary({request,token,tr}){
 function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmedBookings = [], token, ar=false }) {
   const {catalog:treeCatalog,equipment:treeEquipment}=useTree(); // the same live catalogue the Booking page numbers its equipment from
   const tr=text=>bookingText(text,ar),money=value=>bookingMoney(value,ar);
+  // The same compose popup as the Email area: clicking a client's address opens it addressed to them (no native mail app).
+  const mailApi=useMemo(()=>createMailApi(token),[token]);
+  const composer=useMailboxDraft({owner:'admin-booking-requests',api:mailApi,onSent:()=>{}});
+  const composeTo=address=>{if(!composer.draft){composer.compose();composer.edit('to',address);}else composer.compose();};
   const [selectedId,setSelectedId]=useState(null);
   const selectedRequest=requests.find(request=>request.id===selectedId)||requests[0];
   const [drafts, setDrafts] = useState({});
@@ -265,11 +271,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
         <aside className="admin-booking-list" aria-label={tr("Booking requests")}>
           <header><h2>{tr("Booking requests")}</h2><span className="admin-services-count">{requestCountLabel}</span></header>
           <nav aria-label={tr("Choose a booking request")}>
-            {requests.map(request=><button key={request.id} type="button" className="admin-booking-list-item" aria-current={selectedRequest?.id===request.id?'true':undefined} aria-controls="admin-booking-detail" onClick={()=>setSelectedId(request.id)}>
-              <span className="admin-booking-list-top"><strong>{request.customerName}</strong><span className={`admin-service-request-status is-${request.status}`}>{bookingStatusLabel(request,ar)}</span></span>
-              <small className="abl-number">{[request.requestNumber||request.id,request.createdAt&&new Date(request.createdAt).toLocaleString(bookingLocale(ar),{dateStyle:'medium',timeStyle:'short'})].filter(Boolean).join(' · ')}</small>
-              <BookingCardSummary request={request} ar={ar} admin/>
-            </button>)}
+            {requests.map(request=><button key={request.id} type="button" className="admin-booking-list-item admin-booking-list-code" aria-current={selectedRequest?.id===request.id?'true':undefined} aria-controls="admin-booking-detail" onClick={()=>setSelectedId(request.id)}>{request.requestNumber||request.id}</button>)}
             {!requests.length&&<p className="admin-booking-list-empty">{tr("No booking requests yet.")}</p>}
           </nav>
         </aside>
@@ -278,7 +280,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
           {selectedRequest&&(()=>{
             // Header actions follow the booking's stage and the open tab: Booking info -> availability decisions, Quote -> publishing.
             const r=selectedRequest,stage=r.journey?.clientStatus,repr=r.journey.repriceable,busy=Boolean(publishingId||availabilityBusy),back=stepBackTarget(r);
-            const informAvailable=repr&&['requested','unavailable'].includes(stage),canPublish=repr&&isAvailable(r)&&['available','quote_ready'].includes(stage);
+            const informAvailable=repr&&['requested','unavailable'].includes(stage),canPublish=repr&&isAvailable(r)&&['available','quote_ready','deposit_paid'].includes(stage);
             const closeMenu=event=>event.currentTarget.closest('details')?.removeAttribute('open');
             // One primary action for the stage, secondary corrections beside it, and the destructive ones tucked in "More".
             return <div className="booking-publish-action" data-stage={stage}>
@@ -301,13 +303,14 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
             return (
               <div key={request.id} className="admin-booking-detail-body">
               <article className={`admin-service-request-card`} aria-busy={publishingId===request.id}>
+                <header className="booking-column-heading"><h3>{tr("Booking details")}</h3></header>
                 <header className="booking-brief-heading booking-summary" aria-label={tr("Booking summary")}>
                   <StatusPipeline request={request} ar={ar} tr={tr}/>
                   <div className="booking-summary-main">
                   <div className="booking-summary-who">
                     <h3>{request.customerName}</h3>
                     <span className={`admin-service-request-status is-${request.status}`}>{bookingStatusLabel(request,ar)}</span>
-                    <a href={`mailto:${request.customerEmail}`}>{request.customerEmail}</a>
+                    <a href="#compose" onClick={event=>{event.preventDefault();composeTo(request.customerEmail);}}>{request.customerEmail}</a>
                     {(request.order?.customer?.phone||request.event?.phone)&&<a href={`tel:${request.order?.customer?.phone||request.event?.phone}`}>{request.order?.customer?.phone||request.event?.phone}</a>}
                   </div>
                   <div className="booking-summary-foot">
@@ -332,7 +335,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                   </p>
                 ) : null}
               </article>
-              <aside className="booking-conversation-aside booking-quote-aside" aria-label={tr("Quote")}><header><h3>{tr("Quote")}</h3></header>
+              <aside className="booking-conversation-aside booking-quote-aside" aria-label={tr("Quote")}><header className="booking-column-heading"><h3>{tr("Quote")}</h3></header>
                 <div className="booking-quote-panel">
                 <OfferReview ar={ar} request={request} onAdopt={request.journey.repriceable ? offer=>setDrafts(current=>({...current,[request.id]:{...buildDraft(request,current[request.id]),proposalRevision:offer.revision,items:offer.items,prices:Object.fromEntries(offer.items.map(item=>[item.serviceId,item.unitPrice]))}})) : undefined}/>
                 {draft.proposalRevision&&<p role="status">Editing client offer {draft.proposalRevision}. Publishing sends a new quote for the client to accept or decline.</p>}
@@ -387,6 +390,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
         )}
       </section>
       </div>
+      <div className="admin-email" style={{display:'contents'}}><MailComposer composer={composer} onReview={()=>{}} polish={body=>apiRequest('/admin/ai/email-polish',{method:'POST',token,body})}/></div>
       {unavailableRequest&&<UnavailableReasonDialog request={unavailableRequest} token={token} ar={ar} onClose={()=>setUnavailableRequest(null)} onConfirm={reason=>informAvailability(unavailableRequest,'unavailable',reason)}/>}
     </>
   );
