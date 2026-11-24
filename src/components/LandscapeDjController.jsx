@@ -537,14 +537,19 @@ export default function LandscapeDjController({stems:mainStems,mic,audioGraph,un
   </div></div>
   <footer className={`ddj-ai-footer${footerExpanded?'':' is-collapsed'}`} aria-label="Mixer audio and remix controls">
     <div className="ddj-footer-heading">
-      <button type="button" className="ddj-footer-toggle" aria-expanded={footerExpanded} aria-controls={footerId} onClick={()=>setFooterExpanded(value=>!value)} title={footerExpanded?'Collapse mixer controls':'Expand mixer controls'}>
-        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m5 7 5 5 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
-        <strong>Mixer controls</strong><span>{footerExpanded?'Collapse':'Expand'}</span>
-      </button>
+      <strong className="ddj-footer-title">Mixer controls</strong>
       <div className="ddj-footer-indicators" aria-label="Active audio controls">
         {player.autoEqualizer&&<span>Auto EQ</span>}{aiTrimEnabled&&<span>AI trim</span>}{remixState.enabled&&<span>Remix · Deck {remixDeck}</span>}{(notice||player.error)&&<span className="is-notice">Notice</span>}
       </div>
-      <button type="button" className="ddj-close-mixer" onClick={()=>window.dispatchEvent(new Event('echo:close-mixer'))}>Close mixer</button>
+      <select className="ddj-footer-menu" aria-label="Mixer header actions" aria-controls={footerId} value="" onChange={event=>{
+        const action=event.target.value;
+        if(action==='toggle')setFooterExpanded(value=>!value);
+        else if(action==='close')window.dispatchEvent(new Event('echo:close-mixer'));
+      }}>
+        <option value="" disabled>Actions</option>
+        <option value="toggle">{footerExpanded?'Collapse controls':'Expand controls'}</option>
+        <option value="close">Close mixer</option>
+      </select>
     </div>
     <div className="ddj-footer-body" id={footerId} hidden={!footerExpanded}>
     <div className="ddj-footer-workspace">

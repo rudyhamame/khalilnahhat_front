@@ -73,6 +73,19 @@ function buildDraft(request, currentDraft) {
   };
 }
 
+/** Booking status as a stepper: tick on completed stages, dot on the current one, a line linking the nodes. "Deposit paid" sits before "Booked". */
+function StatusPipeline({request,ar,tr}){
+  const j=request.journey||{},path=(j.path||[]).map(step=>({key:step.status,label:ar?step.labelAr||step.label:step.label}));
+  const at=path.findIndex(step=>step.key==='booked');
+  if(at>=0)path.splice(at,0,{key:'deposit_paid',label:tr('Deposit paid')});
+  const stage=j.clientStatus!=='booked'&&request.depositPaidCents>0?'deposit_paid':j.clientStatus;
+  const now=path.findIndex(step=>step.key===stage);
+  if(!path.length)return null;
+  return <section className="booking-status-band" aria-label={tr('Booking status')}><h4>{tr('Booking status')}</h4>
+    <ol>{path.map((step,i)=>{const last=i===path.length-1,done=i<now||(i===now&&last),here=i===now&&!done;
+      return <li key={step.key} className={done?'is-done':here?'is-here':i<now?'':'is-next'} aria-current={here?'step':undefined}><span className="node" aria-hidden="true">{done?'✓':here?'●':''}</span><span className="label">{step.label}</span></li>;})}</ol></section>;
+}
+
 function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmedBookings = [], token, ar=false }) {
   const {catalog:treeCatalog,equipment:treeEquipment}=useTree(); // the same live catalogue the Booking page numbers its equipment from
   const tr=text=>bookingText(text,ar),money=value=>bookingMoney(value,ar);
@@ -85,6 +98,12 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
   const informAvailability=async(request,decision,reason)=>{
     setAvailabilityBusy(request.id);setStatuses(current=>({...current,[request.id]:''}));
     try{const result=await onQuoteAction(request.id,'admin-review',{decision,quoteRevision:request.quoteRevision||0,...(reason?{reason}:{})});setStatuses(current=>({...current,[request.id]:result.notificationSent?tr('Availability saved and emailed to the customer.'):tr('Availability saved on the customer dashboard, but the email could not be sent.')}));return result;}catch(error){setStatuses(current=>({...current,[request.id]:error.message}));throw error;}finally{setAvailabilityBusy('');}
+  };
+  // Step a booking back one stage (the server refuses once a payment is recorded).
+  const stepBackTarget=request=>request.journey?.clientStatus==='quote_ready'?['available',tr('Back to availability')]:['available','unavailable'].includes(request.journey?.clientStatus)?['requested',tr('Back to requested')]:null;
+  const stepBack=async(request,to)=>{
+    setAvailabilityBusy(request.id);setStatuses(current=>({...current,[request.id]:''}));
+    try{await onQuoteAction(request.id,'step-back',{to,quoteRevision:request.quoteRevision||0});setStatuses(current=>({...current,[request.id]:tr('Booking moved back.')}));}catch(error){setStatuses(current=>({...current,[request.id]:error.message}));}finally{setAvailabilityBusy('');}
   };
   const [detailTab, setDetailTab] = useState('info'); // Booking details: 'info' (the brief) or 'quote' (pricing, terms and payments)
   useEffect(() => { setDetailTab('info'); }, [selectedRequest?.id]);
@@ -233,29 +252,23 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
           </nav>
         </aside>
       <section id="admin-booking-detail" className="admin-booking-detail-column" aria-labelledby="admin-booking-detail-title">
-        <header className="admin-booking-detail-heading"><div className="booking-detail-title"><h2 id="admin-booking-detail-title">{tr("Booking details")}</h2>{selectedRequest&&<span>{selectedRequest.requestNumber||selectedRequest.id}</span>}</div>
+        <header className="admin-booking-detail-heading"><div className="booking-detail-title"><h2 id="admin-booking-detail-title">{tr("Booking details")}</h2>{selectedRequest&&<span>{selectedRequest.requestNumber||selectedRequest.id}</span>}{selectedRequest&&<strong className="booking-detail-stage">{bookingStatusLabel(selectedRequest,ar)}</strong>}</div>
           {selectedRequest&&<div className="booking-detail-tabs" role="tablist" aria-label={tr("Booking details sections")}>
             {[['info',tr("Booking info")],['quote',tr("Quote")]].map(([id,label])=><button key={id} type="button" role="tab" id={`booking-tab-${id}`} aria-selected={detailTab===id} aria-controls="booking-tab-panel" tabIndex={detailTab===id?0:-1} className={detailTab===id?'is-active':''} onClick={()=>setDetailTab(id)}>{label}</button>)}
           </div>}
-          {selectedRequest&&<div className="booking-publish-action">
-                  <button type="button" className="secondary-button" disabled={Boolean(publishingId||availabilityBusy)||!selectedRequest.journey.repriceable||isAvailable(selectedRequest)} onClick={()=>{void informAvailability(selectedRequest,'accept').catch(()=>{});}}>{availabilityBusy===selectedRequest.id?tr('Informing…'):isAvailable(selectedRequest)?tr('Availability informed'):tr('Inform Availability')}</button>
-                  <button type="button" className="secondary-button" disabled={Boolean(publishingId||availabilityBusy)||!selectedRequest.journey.repriceable} onClick={()=>setUnavailableRequest(selectedRequest)}>{tr('Not available')}</button>
-                  <button
-                    type="button"
-                    className="primary-button"
-                    onClick={() => publishQuote(selectedRequest)}
-                    disabled={Boolean(publishingId||availabilityBusy)||!selectedRequest.journey.repriceable||!isAvailable(selectedRequest)}
-                    title={!isAvailable(selectedRequest)?tr("Inform availability before publishing the quote."):undefined}
-                  >
-                    <Send size={15} />
-                    {publishingId === selectedRequest.id
-                      ? tr("Publishing...")
-                      : selectedRequest.journey.awaitingClient
-                        ? tr("Update Published Quote")
-                        : tr("Publish to Customer")}
-                  </button>
-                  {selectedRequest.journey.cancellable ? <button type="button" className="secondary-button" onClick={() => window.confirm(tr("Cancel this request?")) && runAction(selectedRequest, 'cancel')}>{tr("Cancel request")}</button> : null}
-            <button type="button" className="secondary-button is-danger" onClick={async () => { if (!window.confirm(tr("Delete this booking permanently? It is removed from the database and from the client's dashboard, and cannot be undone."))) return; await runAction(selectedRequest, 'delete', { confirmation: 'DELETE' }); setSelectedId(null); }}>{tr("Delete")}</button></div>}</header>
+          {selectedRequest&&(()=>{
+            // Header actions follow the booking's stage and the open tab: Booking info -> availability decisions, Quote -> publishing.
+            const r=selectedRequest,stage=r.journey?.clientStatus,repr=r.journey.repriceable,busy=Boolean(publishingId||availabilityBusy),back=stepBackTarget(r);
+            const informAvailable=repr&&['requested','unavailable'].includes(stage),canPublish=repr&&isAvailable(r)&&['available','quote_ready'].includes(stage);
+            return <div className="booking-publish-action" data-tab={detailTab} data-stage={stage}>
+              {detailTab==='info'&&informAvailable&&<button type="button" className="secondary-button" disabled={busy} onClick={()=>{void informAvailability(r,'accept').catch(()=>{});}}>{availabilityBusy===r.id?tr('Informing…'):tr('Booking date available')}</button>}
+              {detailTab==='info'&&repr&&stage!=='unavailable'&&<button type="button" className="secondary-button" disabled={busy} onClick={()=>setUnavailableRequest(r)}>{tr('Booking date not available')}</button>}
+              {detailTab==='quote'&&canPublish&&<button type="button" className="primary-button" disabled={busy} onClick={()=>publishQuote(r)}><Send size={15}/>{publishingId===r.id?tr("Publishing..."):r.journey.awaitingClient?tr("Update Published Quote"):tr("Publish to Customer")}</button>}
+              {back&&repr&&!(r.depositPaidCents>0)&&<button type="button" className="secondary-button" disabled={busy} onClick={()=>window.confirm(back[1]+'?')&&stepBack(r,back[0])}>{back[1]}</button>}
+              {r.journey.cancellable?<button type="button" className="secondary-button" onClick={()=>window.confirm(tr("Cancel this request?"))&&runAction(r,'cancel')}>{tr("Cancel request")}</button>:null}
+              <button type="button" className="secondary-button is-danger" onClick={async()=>{if(!window.confirm(tr("Delete this booking permanently? It is removed from the database and from the client's dashboard, and cannot be undone.")))return;await runAction(r,'delete',{confirmation:'DELETE'});setSelectedId(null);}}>{tr("Delete")}</button>
+            </div>;
+          })()}</header>
         {requests.length ? (
           [selectedRequest].map((request) => {
             const draft = drafts[request.id] || buildDraft(request);
@@ -263,7 +276,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
 
             return (
               <div key={request.id} className="admin-booking-detail-body">
-              {request.journey.repriceable&&<section className="booking-availability-step" aria-label={tr('Availability before quote')}><strong>{tr('1. Inform Availability → 2. Publish quote')}</strong>{request.availability?.status==='unavailable'?<><p>{tr('Not available. The client is invited to book an optional meeting to discuss date and time options.')}</p><p>{request.availability.reason}</p></>:<p>{isAvailable(request)?tr('Availability confirmed. You can now publish the quote.'):tr('Confirm availability or explain why the requested date and time are not available.')}</p>}</section>}
+              <StatusPipeline request={request} ar={ar} tr={tr}/>{request.journey.repriceable&&<section className="booking-availability-step" aria-label={tr('Availability before quote')}>{request.availability?.status==='unavailable'?<><p>{tr('Not available. The client is invited to book an optional meeting to discuss date and time options.')}</p><p>{request.availability.reason}</p></>:<p>{isAvailable(request)?tr('Availability confirmed. You can now publish the quote.'):tr('Confirm availability or explain why the requested date and time are not available.')}</p>}</section>}
               <article className={`admin-service-request-card${detailTab==='quote'?' is-quote-open':''}`} aria-busy={publishingId===request.id}>
                 <header className="booking-brief-heading booking-summary" aria-label={tr("Booking summary")}>
                   <div className="booking-summary-who">

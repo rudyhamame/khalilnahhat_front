@@ -250,3 +250,24 @@
 .venue-distance-note{color:var(--aw-muted);font-size:12px}
 .venue-distance.is-hint{color:var(--aw-muted);font-size:12px}
 .venue-distance a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+
+/* Flat booking page, same logic as the Android apps: square full-width blocks, a status band with a ticked stepper. */
+.admin-booking-list-item,.admin-booking-detail-body .booking-detail-section,.admin-booking-detail-body .booking-availability-step{border-radius:0}
+.booking-status-band{margin:0 0 18px;padding:16px 24px 18px;background:color-mix(in srgb,var(--aw-text) 7%,transparent);border-top:1px solid var(--aw-line);border-bottom:1px solid var(--aw-line)}
+.booking-status-band h4{margin:0 0 12px;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--aw-muted)}
+.booking-status-band ol{list-style:none;margin:0;padding:0}
+.booking-status-band li{position:relative;display:flex;align-items:flex-start;gap:12px;padding-bottom:18px;font-size:14px;color:var(--aw-muted)}
+.booking-status-band li:last-child{padding-bottom:0}
+.booking-status-band li::after{content:"";position:absolute;inset-inline-start:10px;top:22px;bottom:0;width:2px;background:var(--aw-line)}
+.booking-status-band li:last-child::after{display:none}
+.booking-status-band li.is-done::after{background:var(--aw-text)}
+.booking-status-band .node{flex:0 0 22px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px;line-height:1;background:var(--aw-line);color:var(--aw-bg,#000)}
+.booking-status-band :is(.is-done,.is-here) .node{background:var(--aw-text)}
+.booking-status-band li:is(.is-done,.is-here){color:var(--aw-text)}
+.booking-status-band .is-here .label{font-weight:700}
+.booking-status-band .label{padding-top:2px}
+/* Header: the stage chip shows where the booking is; actions change with the stage and the open tab. */
+.admin-booking-detail-heading .booking-detail-stage{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;border:1px solid color-mix(in srgb,var(--aw-text) 35%,transparent);font:600 11px/1.4 inherit;white-space:nowrap}
+.admin-booking-detail-heading .booking-detail-title{flex-wrap:nowrap}
+.admin-booking-detail-heading .booking-detail-title h2{white-space:nowrap}
+.admin-booking-detail-heading .booking-publish-action{flex-wrap:nowrap}
