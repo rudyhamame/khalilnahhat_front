@@ -92,12 +92,22 @@ function StatusPipeline({request,ar,tr}){
         <span className="label">{step.label}{here&&hint&&<small>{hint}</small>}</span></li>;})}</ol></section>;
 }
 
-/** AI summary of the booking for the reviewing admin; generated on demand (it costs an AI call) and kept per booking. */
+/** AI summary of the booking for the reviewing admin. Written automatically when a booking is opened (and again when it changes); kept per booking version so reopening costs nothing. */
+const summaryCache=new Map();
 function AiBookingSummary({request,token,tr}){
-  const [summary,setSummary]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState('');
-  const run=async()=>{setBusy(true);setError('');try{setSummary((await apiRequest('/admin/ai/booking-summary',{method:'POST',token,body:{id:request.id}})).summary);}catch(failure){setError(failure.message||tr('AI could not summarize the booking.'));}finally{setBusy(false);}};
-  return <section className="booking-ai-summary" aria-label={tr('AI summary')}><header><h4>{tr('AI summary')}</h4><button type="button" className="secondary-button" disabled={busy} onClick={run}>{busy?tr('Summarizing…'):summary?tr('Refresh'):tr('Summarize with AI')}</button></header>
-    {summary&&<p>{summary}</p>}{error&&<p role="alert">{error}</p>}</section>;
+  const version=`${request.id}:${request.updatedAt||''}:${request.quoteRevision||0}:${request.status}`;
+  const [state,setState]=useState({version,summary:summaryCache.get(version)||'',error:''});
+  useEffect(()=>{
+    if(summaryCache.has(version)){setState({version,summary:summaryCache.get(version),error:''});return undefined;}
+    let live=true;setState({version,summary:'',error:''});
+    apiRequest('/admin/ai/booking-summary',{method:'POST',token,body:{id:request.id}})
+      .then(result=>{summaryCache.set(version,result.summary);if(live)setState({version,summary:result.summary,error:''});})
+      .catch(failure=>{if(live)setState({version,summary:'',error:failure.message||tr('AI could not summarize the booking.')});});
+    return()=>{live=false;};
+  },[version]); // eslint-disable-line react-hooks/exhaustive-deps
+  const current=state.version===version?state:{summary:'',error:''};
+  return <section className="booking-ai-summary" aria-label={tr('AI summary')} aria-busy={!current.summary&&!current.error}><h4>{tr('AI summary')}</h4>
+    {current.summary?<p>{current.summary}</p>:current.error?<p role="alert">{current.error}</p>:<p className="is-loading">{tr('Summarizing…')}</p>}</section>;
 }
 
 function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmedBookings = [], token, ar=false }) {

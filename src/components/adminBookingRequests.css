@@ -325,3 +325,5 @@ html body .admin-workspace[data-area=services] article.admin-service-request-car
 .booking-ai-summary h4{margin:0;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--aw-muted)}
 .booking-ai-summary p{margin:0;font-size:13px;line-height:1.6;color:var(--aw-text)}
 .booking-ai-summary .secondary-button{padding:5px 12px;font-size:12px}
+.booking-ai-summary .is-loading{color:var(--aw-muted);animation:bai-pulse 1.4s ease-in-out infinite}
+@keyframes bai-pulse{50%{opacity:.45}}
