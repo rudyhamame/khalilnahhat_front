@@ -253,21 +253,75 @@
 
 /* Flat booking page, same logic as the Android apps: square full-width blocks, a status band with a ticked stepper. */
 .admin-booking-list-item,.admin-booking-detail-body .booking-detail-section,.admin-booking-detail-body .booking-availability-step{border-radius:0}
-.booking-status-band{margin:0 0 18px;padding:16px 24px 18px;background:color-mix(in srgb,var(--aw-text) 7%,transparent);border-top:1px solid var(--aw-line);border-bottom:1px solid var(--aw-line)}
-.booking-status-band h4{margin:0 0 12px;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--aw-muted)}
-.booking-status-band ol{list-style:none;margin:0;padding:0}
-.booking-status-band li{position:relative;display:flex;align-items:flex-start;gap:12px;padding-bottom:18px;font-size:14px;color:var(--aw-muted)}
+/* Let long statuses and actions wrap instead of forcing a fixed-height bar. */
+.admin-workspace[data-area=services] .admin-booking-detail-heading{height:auto;min-height:56px;flex-wrap:wrap;gap:12px;padding:12px 20px}
+.admin-booking-detail-heading .booking-detail-title{display:flex;flex:1 1 360px;min-width:0;flex-wrap:wrap;align-items:center;gap:8px 12px}
+.admin-booking-detail-heading .booking-detail-title h2{white-space:normal}
+.admin-booking-detail-heading .booking-detail-stage{display:inline-flex;max-width:100%;box-sizing:border-box;padding:5px 10px;border:1px solid var(--aw-line);border-radius:8px;font:600 11px/1.6 system-ui;white-space:normal;overflow-wrap:anywhere;color:var(--aw-muted)}
+.admin-booking-detail-heading .booking-publish-action{min-width:0;flex-wrap:wrap;gap:8px}
+.admin-booking-detail-heading .booking-publish-action :is(.primary-button,.secondary-button){min-height:34px;height:auto;max-width:100%;padding:7px 12px;white-space:normal;text-align:center;line-height:1.5}
+.admin-booking-detail-body .booking-summary-who>.admin-service-request-status{max-width:100%;white-space:normal;overflow-wrap:anywhere;line-height:1.6;border-radius:10px;letter-spacing:.03em}
+.admin-booking-detail-body .booking-summary-who>.admin-service-request-status::before{flex-shrink:0}
+/* The right column is the Quote (prices, terms, payments); it replaces the Echo AI conversation. */
+.admin-booking-detail-body{grid-template-columns:minmax(0,1fr) minmax(400px,44%)}
+.admin-booking-detail-body .booking-quote-aside{min-width:0;overflow:auto;padding:0 20px 24px;overscroll-behavior:contain;scrollbar-width:thin}
+.booking-quote-aside>header{padding:16px 0 12px}
+.booking-quote-aside>header h3{margin:0;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--aw-muted)}
+@media(max-width:1100px){.admin-booking-detail-body{grid-template-columns:minmax(0,1fr)}}
+/* Header actions: primary first, corrections next, destructive ones in the "More" menu. */
+.admin-booking-detail-heading .booking-publish-action{position:relative;gap:8px}
+.admin-booking-detail-heading .booking-publish-action .primary-button{order:0}
+.admin-booking-detail-heading .booking-publish-action .secondary-button{order:1}
+.bpa-more{order:2;position:relative}
+.bpa-more>summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;min-width:34px;padding:0 10px;user-select:none}
+.bpa-more>summary::-webkit-details-marker{display:none}
+.bpa-more>div{position:absolute;inset-inline-end:0;top:calc(100% + 6px);z-index:20;min-width:190px;display:grid;padding:6px;border:1px solid var(--aw-line,#ffffff24);border-radius:8px;background:var(--aw-sidebar,#121216);box-shadow:0 10px 28px #0007}
+.bpa-more>div button{all:unset;box-sizing:border-box;cursor:pointer;padding:9px 12px;border-radius:6px;font-size:13px;color:var(--aw-text)}
+.bpa-more>div button:hover{background:var(--aw-raised,#ffffff10)}
+.bpa-more>div button.is-danger{color:#e08a85}
+/* Title on one side, actions at the opposite end (the tabs that used to sit between them are gone). */
+.admin-booking-detail-heading{grid-template-columns:minmax(0,1fr) auto!important}
+.admin-booking-detail-heading .booking-publish-action{grid-column:2;justify-self:end;margin-inline-start:auto}
+.admin-workspace[data-area=services] .admin-booking-detail-body .booking-quote-aside{background:#121216}
+/* The status stepper stands vertically at the left of the Booking header, the summary to its right. */
+.admin-booking-detail-body .booking-brief-heading.booking-summary{display:grid;grid-template-columns:minmax(210px,26%) minmax(0,1fr);align-items:start;gap:0 24px}
+.booking-summary .booking-summary-main{display:grid;gap:14px;min-width:0}
+@media(max-width:900px){.admin-booking-detail-body .booking-brief-heading.booking-summary{grid-template-columns:minmax(0,1fr)}}
+/* Booking status: a vertical stepper (not cards). Filled circle + white tick = done, white dot = current, grey = upcoming, one line linking every step. */
+.booking-status-band{margin:0;padding:16px 18px;background:color-mix(in srgb,var(--aw-text) 8%,transparent);grid-row:1 / span 4}
+.booking-status-band h4{margin:0 0 14px;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--aw-muted)}
+.booking-status-band ol{list-style:none;margin:0;padding:0;display:block}
+.booking-status-band li{position:relative;display:flex;align-items:flex-start;gap:12px;padding:0 0 20px;border:0;background:none;font-size:14px;color:var(--aw-muted)}
 .booking-status-band li:last-child{padding-bottom:0}
-.booking-status-band li::after{content:"";position:absolute;inset-inline-start:10px;top:22px;bottom:0;width:2px;background:var(--aw-line)}
+.booking-status-band li::after{content:"";position:absolute;inset-inline-start:10px;top:22px;bottom:0;width:2px;background:color-mix(in srgb,var(--aw-text) 22%,transparent)}
 .booking-status-band li:last-child::after{display:none}
-.booking-status-band li.is-done::after{background:var(--aw-text)}
-.booking-status-band .node{flex:0 0 22px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px;line-height:1;background:var(--aw-line);color:var(--aw-bg,#000)}
-.booking-status-band :is(.is-done,.is-here) .node{background:var(--aw-text)}
-.booking-status-band li:is(.is-done,.is-here){color:var(--aw-text)}
-.booking-status-band .is-here .label{font-weight:700}
-.booking-status-band .label{padding-top:2px}
-/* Header: the stage chip shows where the booking is; actions change with the stage and the open tab. */
-.admin-booking-detail-heading .booking-detail-stage{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;border:1px solid color-mix(in srgb,var(--aw-text) 35%,transparent);font:600 11px/1.4 inherit;white-space:nowrap}
-.admin-booking-detail-heading .booking-detail-title{flex-wrap:nowrap}
-.admin-booking-detail-heading .booking-detail-title h2{white-space:nowrap}
-.admin-booking-detail-heading .booking-publish-action{flex-wrap:nowrap}
+.booking-status-band li.is-done::after{background:#2f4f9e}
+.booking-status-band .node{position:relative;z-index:1;flex:0 0 22px;width:22px;height:22px;border:0;border-radius:50%;display:grid;place-items:center;color:#fff;background:color-mix(in srgb,var(--aw-text) 22%,transparent)}
+.booking-status-band li.is-done .node,.booking-status-band li.is-here .node{background:#2f4f9e}
+.booking-status-band .node i{width:8px;height:8px;border-radius:50%;background:#fff}
+.booking-status-band li.is-done,.booking-status-band li.is-here{color:var(--aw-text)}
+.booking-status-band .label{padding-top:2px;min-width:0;overflow-wrap:anywhere}
+.booking-status-band li.is-here .label{font-weight:700}
+.booking-status-band .label small{display:block;margin-top:4px;font-size:12.5px;font-weight:400;color:var(--aw-muted);line-height:1.45}
+.booking-status-band{border:1px dashed color-mix(in srgb,var(--aw-text) 40%,transparent)}
+#booking-tab-panel{background:none!important}
+/* Every Booking info section looks like the Booking status block: same tint, dashed border, square corners. */
+.admin-booking-detail-body .bdr-section,.admin-booking-detail-body .booking-status-band{background:color-mix(in srgb,var(--aw-text) 8%,transparent)!important;border:1px dashed color-mix(in srgb,var(--aw-text) 40%,transparent)!important;border-radius:0!important}
+.admin-workspace[data-area=services] #booking-tab-panel{background:#121216!important}
+/* Booking details has no background of its own: the gray came from the column (--aw-main). */
+.admin-workspace[data-area=services] :is(.admin-booking-detail-column,.admin-booking-detail-body,#booking-tab-panel,.booking-detail-sections){background:none!important}
+/* Booking details: no background on any wrapper between the column and the sections (only the sections keep the tinted look). */
+.admin-workspace[data-area=services] .admin-booking-detail-column>:not(.admin-booking-detail-heading),
+.admin-workspace[data-area=services] .admin-booking-detail-body>*:not(.booking-quote-aside),
+.admin-workspace[data-area=services] .admin-booking-detail-body .admin-service-request-card,
+.admin-workspace[data-area=services] #booking-tab-panel,
+.admin-workspace[data-area=services] #booking-tab-panel :is(div,section,article,ul,ol,dl):not(.bdr-section):not(.booking-status-band):not([class*="node"]){background:none!important}
+html body .admin-workspace[data-area=services] article.admin-service-request-card.admin-service-request-card{background:transparent!important;background-image:none!important;box-shadow:none!important}
+html body .admin-workspace[data-area=services] article.admin-service-request-card.admin-service-request-card{background:#121216!important}
+.admin-workspace[data-area=services] .admin-booking-detail-body .booking-brief-heading.booking-summary{border-bottom:0!important;border-top:0!important}
+/* AI summary in the booking header. */
+.booking-ai-summary{display:grid;gap:8px;padding:12px 14px;border:1px dashed color-mix(in srgb,var(--aw-text) 40%,transparent);background:color-mix(in srgb,var(--aw-text) 6%,transparent)}
+.booking-ai-summary>header{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.booking-ai-summary h4{margin:0;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--aw-muted)}
+.booking-ai-summary p{margin:0;font-size:13px;line-height:1.6;color:var(--aw-text)}
+.booking-ai-summary .secondary-button{padding:5px 12px;font-size:12px}

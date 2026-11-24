@@ -5,3 +5,6 @@
 .booking-availability-notice{margin:16px 0;padding:20px;border:1px solid var(--line,#45474b);border-radius:12px;background:var(--panel2,#232528)}.booking-availability-notice h3{margin:0 0 10px}.booking-availability-notice form{display:grid;gap:12px}.booking-availability-notice fieldset{display:flex;flex-wrap:wrap;gap:12px;padding:0;border:0}.booking-availability-notice label{display:grid;gap:6px;flex:1 1 150px}.booking-availability-notice input{padding:9px;min-width:0;background:var(--bg,#16181c);color:inherit;border:1px solid var(--line,#45474b);border-radius:8px;font:inherit}.booking-availability-notice form>button{justify-self:start}.booking-availability-reason{white-space:pre-wrap}
 
 .booking-availability-options{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}.booking-availability-options+section{margin-top:16px}
+/* Centered in the window (a global margin reset had pushed the modal to a corner). */
+.booking-availability-dialog[open]{position:fixed;inset:0;margin:auto;height:fit-content;max-height:calc(100dvh - 32px);overflow:auto}
+.booking-availability-ai{display:flex;flex-wrap:wrap;gap:8px}
