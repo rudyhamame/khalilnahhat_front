@@ -54,7 +54,7 @@ export function createBeatGridAnalysis({run=browserBeatAnalysis,resultCache=cach
  const pump=async()=>{
   if(active||disposed)return;const job=queue.shift();if(!job)return;active=job;
   const controller=new AbortController();job.controller=controller;
-  const progress=(stage,value)=>{if(!disposed)job.state={status:'analyzing',stage,progress:value};};
+  const progress=(stage,value)=>{if(!disposed&&!job.timedOut)job.state={status:'analyzing',stage,progress:value};};
   try{
    const grid=await run(job.track,{signal:controller.signal,progress});
    if(job.timedOut)job.state={status:'unavailable',stage:'Audio analysis timed out. Existing playback timing is retained.'};
