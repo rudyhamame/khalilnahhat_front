@@ -1,3 +1,4 @@
+import {fetchStemAudio} from '../lib/stemAudioFetch';
 import RecordingLoadingHint from './RecordingLoadingHint';
 import {useCallback,useEffect,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
@@ -24,6 +25,7 @@ export default function StemLanes({audioUrl,fingerprint,savedStems,onStems,ensur
  const laneBuffer=bufferFor(view.s,view.z,duration||1);
  const [status,setStatus]=useState({state:'idle',stage:'',channels:[]});
  const [peaks,setPeaks]=useState({}),[mix,setMix]=useState(initialMix),[chosen,setChosen]=useState(readChoice),[loadingLane,setLoadingLane]=useState({}),[monitoring,setMonitoring]=useState(false);
+ const [laneErrors,setLaneErrors]=useState({}),[laneRetry,setLaneRetry]=useState(0);
  const stems=useRef({}),box=useRef(null),poll=useRef(0),source=useRef('');
  const [elapsed,setElapsed]=useState(0);
  useEffect(()=>{
@@ -42,8 +44,8 @@ export default function StemLanes({audioUrl,fingerprint,savedStems,onStems,ensur
  // The separated channels are kept in this browser until the recording is saved; the server copy is then dropped.
  const fromFiles=files=>Object.entries(files).map(([name,blob])=>{const url=URL.createObjectURL(blob);blobUrls.current.push(url);return {name,url};});
  const stash=async(url,channels,value)=>{
-  const base=apiBaseUrl.replace(/\/api$/,''),files={};
-  for(const channel of channels){const response=await fetch(`${base}${channel.url}`,{headers:{Authorization:`Bearer ${token}`}});if(!response.ok)throw Error('The channels could not be downloaded.');files[channel.name]=await response.blob();}
+  const files={};
+  for(const channel of channels){const response=await fetchStemAudio(channel.url,{apiBaseUrl,token});if(!response.ok)throw Error('The channels could not be downloaded.');files[channel.name]=await response.blob();}
   await putStems(url,files,{duration:value.duration??null});
   apiRequest(query(url),{method:'DELETE',token,confirmedDelete:true}).catch(()=>{});
   return files;
@@ -124,25 +126,26 @@ export default function StemLanes({audioUrl,fingerprint,savedStems,onStems,ensur
  const files=useRef({}),pending=useRef(new Set());
  useEffect(()=>{
   if(status.state!=='ready')return;
-  const base=apiBaseUrl.replace(/\/api$/,''),Context=window.OfflineAudioContext||window.webkitOfflineAudioContext;
+  const Context=window.OfflineAudioContext||window.webkitOfflineAudioContext;
   for(const name of Object.keys(files.current))if(!chosen.includes(name)){const file=files.current[name];file.element.pause();file.element.removeAttribute('src');file.element.load();URL.revokeObjectURL(file.url);delete files.current[name];delete stems.current[name];setPeaks(current=>{const {[name]:_gone,...rest}=current;return rest;});}
   for(const channel of status.channels){
    const name=channel.name;
    if(!chosen.includes(name)||files.current[name]||pending.current.has(name))continue;
-   pending.current.add(name);setLoadingLane(current=>({...current,[name]:true}));
+   pending.current.add(name);setLoadingLane(current=>({...current,[name]:true}));setLaneErrors(current=>({...current,[name]:''}));
    (async()=>{
     try{
-     const response=/^(https|blob):/.test(channel.url)?await fetch(channel.url):await fetch(`${base}${channel.url}`,{headers:{Authorization:`Bearer ${token}`}});if(!response.ok)return;
+     const response=await fetchStemAudio(channel.url,{apiBaseUrl,token});
      const data=await response.arrayBuffer(),url=URL.createObjectURL(new Blob([data],{type:'audio/flac'}));
      if(!mounted.current){URL.revokeObjectURL(url);return;}
      const element=new Audio();element.preload='auto';element.src=url;element.volume=stemGain(mixRef.current,name,masterRef.current);
      files.current[name]={element,url};stems.current[name]=element;
-     if(Context){try{const buffer=await new Context(1,1,RECORDING_WAVE_SAMPLE_RATE).decodeAudioData(data.slice(0));if(mounted.current)setPeaks(current=>({...current,[name]:buildPyramid(buffer.getChannelData(0),buffer.sampleRate)}));}catch{/* lane stays empty; monitoring still works */}}
-    }catch{/* skip this lane */}
+     if(!Context)throw Error('Waveform decoding is unavailable in this browser.');
+     const buffer=await new Context(1,1,RECORDING_WAVE_SAMPLE_RATE).decodeAudioData(data.slice(0));if(mounted.current)setPeaks(current=>({...current,[name]:buildPyramid(buffer.getChannelData(0),buffer.sampleRate)}));
+    }catch(error){if(mounted.current)setLaneErrors(current=>({...current,[name]:error instanceof TypeError?'Channel audio could not be downloaded.':error.message||'Channel waveform could not be loaded.'}));}
     finally{pending.current.delete(name);if(mounted.current)setLoadingLane(current=>({...current,[name]:false}));}
    })();
   }
- },[status,chosen,token]);
+ },[status,chosen,token,laneRetry]);
  const mounted=useRef(true),mixRef=useRef(mix);mixRef.current=mix;
  useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;for(const file of Object.values(files.current)){file.element.pause();file.element.removeAttribute('src');file.element.load();URL.revokeObjectURL(file.url);}files.current={};stems.current={};};},[]);
 
@@ -218,13 +221,17 @@ export default function StemLanes({audioUrl,fingerprint,savedStems,onStems,ensur
   setMonitoring(true);setMix(value=>Object.fromEntries(Object.entries(value).map(([other,item])=>[other,{...item,solo:other===name,muted:other===name?false:item.muted}])));
   main.play().catch(()=>{});
  };
+ const retryLane=name=>{
+  if(pending.current.has(name))return;
+  const file=files.current[name];if(file){file.element.pause();file.element.removeAttribute('src');file.element.load();URL.revokeObjectURL(file.url);delete files.current[name];delete stems.current[name];}
+  setLaneRetry(value=>value+1);
+ };
  const downloadLane=async name=>{
   const channel=status.channels.find(item=>item.name===name);if(!channel)return;
   try{
-   const base=apiBaseUrl.replace(/\/api$/,''),response=/^(https|blob):/.test(channel.url)?await fetch(channel.url):await fetch(`${base}${channel.url}`,{headers:{Authorization:`Bearer ${token}`}});
-   if(!response.ok)throw Error('download');
+   const response=await fetchStemAudio(channel.url,{apiBaseUrl,token});
    const link=document.createElement('a');link.href=URL.createObjectURL(await response.blob());link.download=`${name}.flac`;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(link.href),1500);
-  }catch{/* the channel could not be fetched; nothing to save */}
+  }catch(error){setLaneErrors(current=>({...current,[name]:error.message||'Channel download failed.'}));}
  };
  // Click or drag anywhere on a lane to move the playhead (the pointer stays captured while dragging).
  const scrub=event=>{const rect=event.currentTarget.getBoundingClientRect();seek?.(Math.max(0,Math.min(1,(view.live??view.s)+(event.clientX-rect.left)/rect.width/view.z))*duration);};
@@ -261,7 +268,7 @@ const slot=useDomSlot('recording-stem-slot'),[menu,setMenu]=useState(false);
  }
  return <div className="stem-lanes" ref={box}>{head}<div className="stem-lanes-grid">{CHANNELS.filter(name=>chosen.includes(name)&&status.channels.some(channel=>channel.name===name)).map(name=>{const channel=mix[name];return <div className="stem-lane" key={name} style={{'--lane':`hsl(${HUES[name]} 55% 60%)`}}>
   <div className="stem-lane-strip"><strong>{LABELS[name]}</strong><div className="stem-lane-buttons"><button type="button" className="is-round" aria-label={playing&&soloing(name)?`Pause ${LABELS[name]}`:`Play ${LABELS[name]} alone`} title={playing&&soloing(name)?'Pause':'Play this channel alone'} onClick={()=>playLane(name)}>{playing&&soloing(name)?<Pause size={11} fill="currentColor"/>:<Play size={11} fill="currentColor"/>}</button><button type="button" className="is-round" aria-label={`Download ${LABELS[name]}`} title="Download this channel" onClick={()=>downloadLane(name)}><Download size={11}/></button><button type="button" aria-label={`Mute ${LABELS[name]}`} aria-pressed={channel.muted} onClick={()=>change(name,{muted:!channel.muted})}>M</button><button type="button" aria-label={`Solo ${LABELS[name]}`} aria-pressed={channel.solo} onClick={()=>change(name,{solo:!channel.solo})}>S</button></div><input type="range" min="0" max="1" step=".01" value={channel.volume} style={{'--v':`${channel.volume*100}%`}} aria-label={`${LABELS[name]} volume`} onChange={event=>change(name,{volume:Number(event.target.value)})}/><output className="stem-lane-volume" aria-label={`${LABELS[name]} volume percentage`}>{Math.round(channel.volume*100)}%</output></div>
-  <div className="stem-lane-wave" onPointerDown={laneSeek} onPointerMove={laneDrag}><svg viewBox={`${viewBoxX(view.live??view.s,duration||1,laneBuffer)} 0 1000 80`} data-wave-from={laneBuffer.from} data-wave-span={laneBuffer.span} preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="40" x2={laneBuffer.units} y2="40" className="audio-tape-baseline"/><path className="audio-tape-wave" d={peaks[name]&&duration?recordingWaveformPath(peaks[name],laneBuffer):''}/></svg><div className="stem-lane-zoom" style={{width:`${view.z*100}%`,transform:`translateX(-${(view.live??view.s)*100}%)`}}>{duration>0&&regions.map(region=><span key={region.id} className={`stem-lane-region${region.id===currentRegionId?' is-current':''}${playing?' is-playing':''}`} style={{left:`${region.start/duration*100}%`,width:`${(region.end-region.start)/duration*100}%`,'--atom-color':`hsl(${(region.index*67+145)%360} 48% 55%)`}}/>)}<i className="stem-lane-head" aria-hidden="true"/></div></div>
+  <div className="stem-lane-wave" onPointerDown={laneSeek} onPointerMove={laneDrag}><svg viewBox={`${viewBoxX(view.live??view.s,duration||1,laneBuffer)} 0 1000 80`} data-wave-from={laneBuffer.from} data-wave-span={laneBuffer.span} preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="40" x2={laneBuffer.units} y2="40" className="audio-tape-baseline"/><path className="audio-tape-wave" d={peaks[name]&&duration?recordingWaveformPath(peaks[name],laneBuffer):''}/></svg><div className="stem-lane-zoom" style={{width:`${view.z*100}%`,transform:`translateX(-${(view.live??view.s)*100}%)`}}>{duration>0&&regions.map(region=><span key={region.id} className={`stem-lane-region${region.id===currentRegionId?' is-current':''}${playing?' is-playing':''}`} style={{left:`${region.start/duration*100}%`,width:`${(region.end-region.start)/duration*100}%`,'--atom-color':`hsl(${(region.index*67+145)%360} 48% 55%)`}}/>)}<i className="stem-lane-head" aria-hidden="true"/></div>{laneErrors[name]&&!loadingLane[name]&&<div className="stem-lane-error" role="alert" onPointerDown={event=>event.stopPropagation()}><span>{laneErrors[name]}</span><button type="button" onClick={()=>retryLane(name)}>Retry {LABELS[name]}</button></div>}</div>
  </div>;})}</div></div>;
  })();
  const loadingChannels=CHANNELS.filter(name=>loadingLane[name]&&!peaks[name]).map(name=>LABELS[name].toLowerCase());

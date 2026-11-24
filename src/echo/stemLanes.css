@@ -275,3 +275,6 @@
 .admin-workspace .transcription-audio-tape .stem-lanes-grid::-webkit-scrollbar-thumb:hover{background:linear-gradient(#ffffff99,#ffffff70)!important;background-clip:padding-box}
 .admin-workspace .transcription-audio-tape .stem-lanes-grid::-webkit-scrollbar-thumb:active{background:linear-gradient(#8fe6c0,#5fcf9f)!important;background-clip:padding-box}
 .admin-workspace .transcription-audio-tape .stem-lanes-grid::-webkit-scrollbar-corner,.admin-workspace .transcription-audio-tape .stem-lanes-grid::-webkit-scrollbar-button{display:none;width:0;height:0}
+
+.stem-lane-error{position:absolute;inset:4px;z-index:3;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:4px 10px;padding:4px 8px;background:#171d23ed;color:#efc391;font:11px/1.5 system-ui;cursor:default;overflow-wrap:anywhere;text-align:center}
+.stem-lane-error button{flex:none;padding:4px 9px;border:1px solid #8a795f;border-radius:5px;background:#28251e;color:#ffe0b3;font:600 11px/1.4 system-ui;cursor:pointer}
