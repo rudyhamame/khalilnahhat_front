@@ -27,3 +27,15 @@ test('audio analysis supplies real BPM and first-beat cue offsets before automat
  conductor.start();await flush();assert.ok(events.some(row=>row[0]==='plannedBpm'&&row[1]===100));assert.ok(events.some(row=>row[0]==='rate'&&Math.abs(row[2]-100/110)<1e-6));assert.ok(events.some(row=>row[0]==='cue'&&row[2]===.37));
  const timing=events.find(row=>row[0]==='schedule')[1];assert.equal(timing.bpm,100);assert.equal(timing.firstDownbeat,.25);assert.equal(timing.gridVerified,true);conductor.stop();
 });
+
+test('partial-song Auto DJ starts the incoming deck and overlaps audio before pausing the outgoing deck',async()=>{
+ const {trackBpm,nextPhraseStart}=await import('./aiDjPlanner.js');
+ const source=fs.readFileSync(__dirname+'/aiDjAutopilot.js','utf8').replace(/^import .*;\n/gm,'').replace('export function','function');
+ let now=0,conductor;const events=[],positions={1:0,2:0},playing={1:true,2:false},tracks={1:{id:'a',bpm:120},2:{id:'b',bpm:120}};
+ const create=vm.runInNewContext(source+';createAiDjAutopilot',{performance:{now:()=>now},trackBpm,nextPhraseStart,setTimeout:fn=>setImmediate(()=>{now+=1000;for(const n of [1,2])if(playing[n])positions[n]++;fn();})});
+ const finished=new Promise(resolve=>{
+  conductor=create({status(){},mixAfter:()=>60,library:()=>Object.values(tracks),deck:n=>({track:tracks[n],position:()=>positions[n],duration:()=>300,rate:()=>1}),plan:async()=>({nextTrackId:'b',transitionBars:8,cueSeconds:0,targetBpm:120}),load:async()=>true,rate(){},bass(){},
+   play:async n=>{events.push(['play',positions[1]]);playing[n]=true;return true;},crossfader:value=>{if(playing[1]&&playing[2])events.push(['overlap',value]);},pause:n=>{playing[n]=false;events.push(['pause',positions[1]]);conductor.stop();resolve();}});
+ });
+ conductor.start();await finished;assert.equal(events[0][0],'play');assert.equal(events[0][1],64);assert.ok(events.some(row=>row[0]==='overlap'&&row[1]>0&&row[1]<1));assert.equal(events.at(-1)[0],'pause');assert.ok(events.at(-1)[1]<100);
+});

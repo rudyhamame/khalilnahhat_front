@@ -31,3 +31,14 @@ test('verified downbeat offsets schedule media-grid cues while playback speed co
  const timing=nextPhraseStart({position:17,duration:300,bpm:100,rate:2,transitionBars:8,firstDownbeat:.37,gridVerified:true});
  assert.ok(Math.abs((timing.startAt-.37)/2.4-Math.round((timing.startAt-.37)/2.4))<1e-6);assert.equal(timing.gridAligned,true);assert.ok(Math.abs(timing.duration-9.6)<1e-6);
 });
+
+test('partial-song mode cues the next phrase early, allowing both decks to overlap',()=>{
+ const timing=nextPhraseStart({position:10,duration:300,bpm:120,transitionBars:8,mixAt:70});
+ assert.equal(timing.startAt,72);assert.equal(timing.duration,16);assert.ok(timing.startAt+timing.duration<300);
+});
+test('partial-song timing honors measured downbeats, playback speed and short-track headroom',()=>{
+ const timing=nextPhraseStart({position:10,duration:300,bpm:100,rate:2,transitionBars:8,mixAt:130,firstDownbeat:.37,gridVerified:true});
+ assert.ok(timing.startAt>=130&&timing.startAt<140);assert.ok(timing.gridAligned);assert.equal(timing.duration,9.6);
+ const short=nextPhraseStart({position:10,duration:40,bpm:120,transitionBars:8,mixAt:70});assert.equal(short.startAt,24);assert.equal(short.startAt+short.duration,40);
+ const late=nextPhraseStart({position:290,duration:300,bpm:120,mixAt:60});assert.equal(late.startAt,290);assert.equal(late.duration,10);
+});

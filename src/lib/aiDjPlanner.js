@@ -37,10 +37,16 @@ export function safeDjPlan(value,{current,candidates,played=[]}){
   };
 }
 
-export function nextPhraseStart({position=0,duration=0,bpm=120,transitionBars=8,rate=1,firstDownbeat=0,gridVerified=false,beatPhaseMeasured=false}){
+export function nextPhraseStart({position=0,duration=0,bpm=120,transitionBars=8,rate=1,firstDownbeat=0,gridVerified=false,beatPhaseMeasured=false,mixAt=null}){
   const speed=Number.isFinite(rate)&&rate>0?rate:1;
   const bar=240/clamp(number(bpm)||120,50,220),transition=bar*clamp(transitionBars,4,32),phrase=bar*4;
   const origin=(gridVerified||beatPhaseMeasured)&&Number.isFinite(firstDownbeat)?firstDownbeat:0;
+  if(Number.isFinite(mixAt)){
+    const desired=origin+Math.max(0,Math.ceil((Math.max(position,mixAt)-origin)/phrase))*phrase;
+    const latest=duration>0?Math.max(position,duration-transition):desired;
+    const startAt=Math.max(position,Math.min(desired,latest));
+    return {startAt,duration:Math.max(.25/speed,Math.min(transition,duration>0?Math.max(0,duration-startAt):transition)/speed),...(gridVerified?{gridAligned:Math.abs((startAt-origin)/bar-Math.round((startAt-origin)/bar))<.001}:{})};
+  }
   if(duration>0){
     const finalPhrase=origin+Math.max(0,Math.floor(Math.max(0,duration-origin-transition)/phrase))*phrase;
     const quantum=gridVerified?bar:bar/4;

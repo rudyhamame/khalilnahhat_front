@@ -269,6 +269,7 @@ function ArchiveMusicPlayer() {
       if(audio.current){audio.current.pause();if(audio.current.readyState>0)audio.current.currentTime=0;}
       setPosition(0);
       archiveQueue.current=[];setTracks([]);setEnabled(false);setSelected('');
+    }else if(type==='play'&&current&&enabled){cancelPreparation();setError('');unlock();setPlaying(true);
     }else if(type==='pause'){cancelPreparation();setPlaying(false);}
   };
   useEffect(()=>{

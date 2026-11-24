@@ -6,7 +6,7 @@ const summary=track=>({id:track.id,title:String(track.title||'Untitled'),artist:
 // AI chooses a bounded plan; this deterministic conductor owns every realtime
 // command. A late/disconnected model can never interrupt the audio thread.
 export function createAiDjAutopilot(adapter){
- let enabled=false,generation=0,active=1,target=0,played=[];
+ let enabled=false,generation=0,active=1,target=0,played=[],segmentStart=0;
  const live=token=>enabled&&token===generation;
  const status=(phase,message,extra={})=>adapter.status({enabled,phase,message,active,...extra});
  const planLoop=async token=>{
@@ -40,10 +40,22 @@ export function createAiDjAutopilot(adapter){
     const cue=first+Math.max(0,Math.ceil((Math.max(plan.cueSeconds,incomingGrid.analyzedFrom-.1)-first)/bar))*bar;
     if(cue<to.duration()-.25&&cue<=incomingGrid.analyzedTo)adapter.cue(target,cue);
    }
-   let timing=nextPhraseStart({position:from.position(),duration:from.duration(),bpm:fromBpm,rate:from.rate?.()||1,transitionBars:plan.transitionBars,firstDownbeat:grid?.verified?grid.firstDownbeat:grid?.beatOffset,gridVerified:Boolean(grid?.verified),beatPhaseMeasured:Boolean(grid?.beatPhaseVerified)});
-   if(grid?.verified&&(timing.startAt<grid.analyzedFrom-.1||timing.startAt>grid.analyzedTo+.1))timing=nextPhraseStart({position:from.position(),duration:from.duration(),bpm:fromBpm,rate:from.rate?.()||1,transitionBars:plan.transitionBars});
-   status('armed',`${plan.source==='ai'?'AI':'LOCAL'} · ${next.title} armed for ${Math.round(timing.startAt)}s · ${plan.reason}`,{target,plan,startAt:timing.startAt});
-   while(live(token)&&adapter.deck(active).position()<timing.startAt-.04)await sleep(80);
+   let chosenInterval=adapter.mixAfter?.();
+   const scheduleTiming=()=>{
+    const options={position:from.position(),duration:from.duration(),bpm:fromBpm,rate:from.rate?.()||1,transitionBars:plan.transitionBars,firstDownbeat:grid?.verified?grid.firstDownbeat:grid?.beatOffset,gridVerified:Boolean(grid?.verified),beatPhaseMeasured:Boolean(grid?.beatPhaseVerified),mixAt:chosenInterval>0?segmentStart+chosenInterval*(from.rate?.()||1):null};
+    let timing=nextPhraseStart(options);
+    if(grid?.verified&&(timing.startAt<grid.analyzedFrom-.1||timing.startAt>grid.analyzedTo+.1))timing=nextPhraseStart({...options,gridVerified:false,beatPhaseMeasured:false});
+    return timing;
+   };
+   let timing=scheduleTiming();
+   const armed=()=>status('armed',`${plan.source==='ai'?'AI':'LOCAL'} · ${next.title} armed for ${Math.round(timing.startAt)}s · ${plan.reason}`,{target,plan,startAt:timing.startAt});
+   armed();
+   while(live(token)){
+    const interval=adapter.mixAfter?.();
+    if(interval!==chosenInterval){chosenInterval=interval;timing=scheduleTiming();armed();}
+    if(adapter.deck(active).position()>=timing.startAt-.04)break;
+    await sleep(80);
+   }
    if(!live(token))break;
    const incoming=target;
    const started=await adapter.play(incoming);
@@ -62,12 +74,12 @@ export function createAiDjAutopilot(adapter){
    }
    if(!live(token))break;
    adapter.pause(active);adapter.bass(active,0);adapter.bass(target,0);
-   played=[...played,current.track.id].slice(-24);active=target;
+   played=[...played,current.track.id].slice(-24);active=target;segmentStart=adapter.deck(active)?.position()||0;
    status('playing',`${next.title} is live. Planning the following mix…`,{plan});
   }
  };
  return {
-  start(deck=1){if(enabled)return;enabled=true;active=deck;played=[];const token=++generation;status('starting','AI DJ is starting…');void planLoop(token);},
+  start(deck=1){if(enabled)return;enabled=true;active=deck;segmentStart=adapter.deck(active)?.position()||0;played=[];const token=++generation;status('starting','AI DJ is starting…');void planLoop(token);},
   stop(){if(!enabled)return;enabled=false;generation++;adapter.bass(active,0);if(target)adapter.bass(target,0);target=0;status('off','AI DJ stopped. Manual controls remain live.');},
   get enabled(){return enabled;},
  };
