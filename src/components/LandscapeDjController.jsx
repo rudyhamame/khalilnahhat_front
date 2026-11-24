@@ -1,3 +1,5 @@
+import {createDjAutoTrim,trimDecibels} from '../lib/djAutoTrim';
+import DjAiTimingStrip from './DjAiTimingStrip';
 import useStemPlayer from '../hooks/useStemPlayer';
 import {createStemDeckGraph} from '../lib/stemDeckGraph';
 import {createStemRemixer} from '../lib/aiStemRemixer';
@@ -9,7 +11,6 @@ import {fetchDjWorkTypes} from '../lib/musicOntology';
 import {djWorkTypeText} from '../lib/djWorkTypeText';
 import {createDjChannelStrip} from '../lib/djChannelStrip';
 import {useEffect,useMemo,useRef,useState} from 'react';
-import {createPortal} from 'react-dom';
 import {archivePlayerCommand} from '../lib/archivePlayerBridge';
 import {EQUALIZER_BANDS} from '../lib/audioEqualizer';
 import {recordingBeatGrid} from '../lib/recordingBeatGrid';
@@ -158,6 +159,9 @@ export default function LandscapeDjController({stems:mainStems,mic,audioGraph,un
   const [remixDeck,setRemixDeck]=useState(1),[remixStyle,setRemixStyle]=useState('balanced');
   const [remixState,setRemixState]=useState({enabled:false,phase:'off',message:''});
   const deckGraphs=useRef({}),remixer=useRef(null),remixAdapter=useRef({});
+  const [aiTrimEnabled,setAiTrimEnabled]=useState(false),[aiTrimStatus,setAiTrimStatus]=useState('AI trim off');
+  const [manualTrimChannels,setManualTrimChannels]=useState([]);
+  const manualTrims=useRef({1:0,2:0,3:0,4:0}),autoTrims=useRef(null),trimAdapter=useRef({});
   const [aiState,setAiState]=useState({enabled:false,phase:'off',message:'AI DJ is off.'});
   const media=useRef({}), strips=useRef({}), scratchers=useRef({}),uiClock=useRef({}),loadWaiters=useRef({});
   const playerState=useRef(player),deckState=useRef(decks),libraryState=useRef(library);
@@ -211,6 +215,27 @@ export default function LandscapeDjController({stems:mainStems,mic,audioGraph,un
     }catch(error){if(alive.current&&error.name!=='AbortError')setNotice('Headphone output could not be opened.');}
   };
   const strip=n=>n===1?audioGraph.current?.stripA:strips.current[n];
+  trimAdapter.current={
+    channel:n=>{
+      const element=n===1?audioGraph.current?.element:media.current[n],state=n===1?playerState.current:deckState.current[n];
+      return state?.track?{strip:strip(n),trackId:state.track.id,manualTrim:manualTrims.current[n],playing:Boolean(element&&!element.paused&&!element.ended)}:null;
+    },
+    master:()=>playerState.current.volume??.75,
+    changed:(n,value)=>setSettings(previous=>Math.abs((previous['trim'+n]??0)-value)<.002?previous:{...previous,['trim'+n]:value}),
+    status:setAiTrimStatus,
+  };
+  useEffect(()=>{
+    if(!aiTrimEnabled)return;
+    setManualTrimChannels([]);
+    const controller=createDjAutoTrim(new Proxy({},{get:(_target,key)=>(...args)=>trimAdapter.current[key](...args)}));
+    autoTrims.current=controller;controller.start();
+    return ()=>{controller.stop();if(autoTrims.current===controller)autoTrims.current=null;};
+  },[aiTrimEnabled]);
+  const toggleTrimChannel=n=>{
+    if(!autoTrims.current?.enabled)return;
+    if(manualTrimChannels.includes(n)){autoTrims.current.resume(n);setManualTrimChannels(previous=>previous.filter(value=>value!==n));}
+    else{manualTrims.current[n]=dv('trim'+n);autoTrims.current.manual(n);setManualTrimChannels(previous=>[...previous,n]);}
+  };
   const assign=n=>dv('assign'+n,n%2?'A':'B');
   const applyBlend=(n,value,side=assign(n))=>{
     const volume=side==='THRU'?1:side==='A'?Math.cos(value*Math.PI/2):Math.sin(value*Math.PI/2);
@@ -273,6 +298,10 @@ export default function LandscapeDjController({stems:mainStems,mic,audioGraph,un
   },[audioGraph]);
   const changeStrip=(n,name)=>value=>{
     unlock();
+    if(name==='trim'){
+      manualTrims.current[n]=value;
+      if(autoTrims.current?.enabled){autoTrims.current.manual(n);setManualTrimChannels(previous=>previous.includes(n)?previous:[...previous,n]);}
+    }
     strip(n)?.set(name,value);
     sd(name+n)(value);
   };
@@ -379,16 +408,17 @@ export default function LandscapeDjController({stems:mainStems,mic,audioGraph,un
   };
   if(!autopilot.current)autopilot.current=createAiDjAutopilot(new Proxy({}, {get:(_target,key)=>(...args)=>adapter.current[key](...args)}));
   const toggleAi=()=>{
-    if(autopilot.current.enabled){autopilot.current.stop();archivePlayerCommand('autodj-transport',false);archivePlayerCommand('equalizer-auto',false);return;}
+    if(autopilot.current.enabled){autopilot.current.stop();setAiTrimEnabled(false);archivePlayerCommand('autodj-transport',false);archivePlayerCommand('equalizer-auto',false);return;}
     remixer.current?.stop();
     if(!player.track){setNotice('Load a recording on Deck 1 before starting AI DJ.');return;}
     unlock();moveCrossfader(0);
     if(!player.playing)archivePlayerCommand('toggle');
     archivePlayerCommand('autodj-transport',true);
-    archivePlayerCommand('equalizer-auto',true);
+    archivePlayerCommand('equalizer-auto',true);setAiTrimEnabled(true);
     autopilot.current.start(1);
   };
   useEffect(()=>()=>{
+    autoTrims.current?.stop();
     remixer.current?.stop();
     autopilot.current?.stop();
     archivePlayerCommand('autodj-transport',false);
@@ -396,20 +426,27 @@ export default function LandscapeDjController({stems:mainStems,mic,audioGraph,un
     for(const waiter of Object.values(loadWaiters.current)){clearTimeout(waiter.timer);waiter.resolve(false);}
   },[]);
   useEffect(()=>{if(!remixState.enabled&&!autopilot.current.enabled)archivePlayerCommand('autodj-transport',false);},[remixState.enabled]);
+  useEffect(()=>{if(!aiState.enabled&&!remixState.enabled)setAiTrimEnabled(false);},[aiState.enabled,remixState.enabled]);
   const toggleRemix=()=>{
-    if(remixer.current.enabled){remixer.current.stop();return;}
+    if(remixer.current.enabled){remixer.current.stop();setAiTrimEnabled(false);return;}
     if(!selectedRemixTrack){setNotice('Load a recording on the selected deck first.');return;}
     autopilot.current.stop();unlock();
     if(remixDeck!==1)ensureDeckGraph(remixDeck);
     archivePlayerCommand('autodj-transport',remixDeck===1);
-    remixer.current.start();
+    setAiTrimEnabled(true);remixer.current.start();
   };
   const chooseRemixDeck=n=>{remixer.current.stop();if(n!==1)ensureDeckGraph(n);setRemixDeck(n);setLayers(previous=>n%2?[n,previous[1]]:[previous[0],n]);};
+  const timingSnapshot=()=>{
+    const active=remixState.enabled?remixDeck:aiState.enabled?aiState.active||1:layers[0]||1;
+    const readDeck=n=>{
+      const state=n===1?playerState.current:deckState.current[n],element=n===1?audioGraph.current?.element:media.current[n];
+      return {n,track:state?.track,position:element?.currentTime??state?.position??0,rate:element?.playbackRate??state?.playbackRate??1,playing:Boolean(element&&!element.paused&&!element.ended)};
+    };
+    return {deck:readDeck(active),incoming:aiState.enabled&&aiState.target&&aiState.phase!=='planning'?readDeck(aiState.target):null,ai:aiState,remix:remixer.current?.timing(),now:performance.now()};
+  };
   const setBand=(band,label,v)=>{archivePlayerCommand('equalizer',{band,gain:v});setLast(`${label} ${v>0?'+':''}${v} dB`);};
   const stemOn=Boolean(stems?.mode);
   const micLevel=mic?.micMeter;
-  // The status line (separating progress, notices) lives in the mixer face's footer when that footer exists.
-  const footerStatus=document.getElementById('echo-channels-overlay-status')||document.getElementById('home-archive-mixer-status');
   const status=<div className="ddj-msg" role="status">{stemOn?`Deck ${remixDeck} stems: faders, CUE (solo) and the A·THRU·B switch (mute) control Vocals, Drums, Bass and Music.`:stems?<StemChannelControls stems={stems}/>:''}{mic?.notice?` ${mic.notice}`:''}</div>;
   // The recording's artwork turns on the left record. It is a plain HTML image over the drawing (turned by the GPU, with a hole for the spindle), so the large SVG is never repainted while it spins.
   const jogArt=player.track?.coverImage?displayImageUrl(player.track.coverImage):'';
@@ -515,8 +552,34 @@ export default function LandscapeDjController({stems:mainStems,mic,audioGraph,un
     <T x={JC.x} y={JC.y+21} s={5.5} f="#a4c8ba">{jogBpm?`${Math.round(jogBpm*jogRate)} BPM`:'TAP BPM'}</T>
   </svg>}
   <LoadPicker library={library} onPick={loadDeck}/>
-  <div className="ddj-ai-top"><button type="button" className="ddj-close-mixer" onClick={()=>window.dispatchEvent(new Event('echo:close-mixer'))}>CLOSE MIXER</button><button type="button" className={aiState.enabled?'is-on':''} aria-pressed={aiState.enabled} onClick={toggleAi} title={aiState.message}>{aiState.enabled?'STOP AI DJ':'START AI DJ'}</button><button type="button" className={player.autoEqualizer?'is-on':''} aria-pressed={Boolean(player.autoEqualizer)} onClick={()=>archivePlayerCommand('equalizer-auto',!player.autoEqualizer)} title={player.autoEqStatus||'Gently balance the playing mix'}>AUTO EQ {player.autoEqualizer?'ON':'OFF'}</button>{player.autoEqualizer&&<span role="status" className="ddj-ai-note">{player.autoEqStatus}</span>}{(notice||player.error)&&<span role="status" className="ddj-ai-note">{notice||player.error}</span>}</div>
   </div></div>
-  <div className="ddj-remix-toolbar"><select aria-label="Deck to remix" value={remixDeck} onChange={event=>chooseRemixDeck(Number(event.target.value))}>{[1,2,3,4].map(n=><option key={n} value={n} disabled={n===1?!player.track:!decks[n]?.track}>Remix Deck {n}</option>)}</select><select aria-label="Remix style" value={remixStyle} onChange={event=>{remixer.current.stop();setRemixStyle(event.target.value);}}><option value="balanced">Balanced remix</option><option value="instrumental">Instrumental focus</option><option value="vocal">Vocal focus</option></select><button type="button" className={remixState.enabled?'is-on':''} aria-pressed={remixState.enabled} onClick={toggleRemix} disabled={!selectedRemixTrack}>{remixState.enabled?'STOP REMIX':'REMIX SONG'}</button><button type="button" disabled={!selectedStems?.mode} onClick={()=>{remixer.current.stop();selectedStems.applyRemix({vocals:1,drums:1,bass:1,other:1});}}>ORIGINAL MIX</button>{remixState.enabled&&<span role="status" className="ddj-ai-note">{remixState.message}</span>}</div>
-  {footerStatus&&createPortal(status,footerStatus)}</div>;
+  <footer className="ddj-ai-footer" aria-label="Mixer AI DJ controls">
+    <DjAiTimingStrip getSnapshot={timingSnapshot}/>
+    <div className="ddj-ai-footer-actions">
+      <div className="ddj-ai-footer-group" role="group" aria-label="Auto DJ, equalizer and channel trims">
+        <button type="button" className={aiState.enabled?'is-on':''} aria-pressed={aiState.enabled} onClick={toggleAi} title={aiState.message}>{aiState.enabled?'STOP AI DJ':'START AI DJ'}</button>
+        <button type="button" className={player.autoEqualizer?'is-on':''} aria-pressed={Boolean(player.autoEqualizer)} onClick={()=>archivePlayerCommand('equalizer-auto',!player.autoEqualizer)} title={player.autoEqStatus||'Gently balance the playing mix'}>AUTO EQ {player.autoEqualizer?'ON':'OFF'}</button>
+        <button type="button" className={aiTrimEnabled?'is-on':''} aria-pressed={aiTrimEnabled} onClick={()=>{unlock();setAiTrimEnabled(value=>!value);}} title="Automatically match audible deck levels using channel trims">AI TRIM {aiTrimEnabled?'ON':'OFF'}</button>
+      </div>
+      <div className="ddj-ai-footer-group" role="group" aria-label="Song remix controls">
+        <label><span>Deck</span><select aria-label="Deck to remix" value={remixDeck} onChange={event=>chooseRemixDeck(Number(event.target.value))}>{[1,2,3,4].map(n=><option key={n} value={n} disabled={n===1?!player.track:!decks[n]?.track}>Deck {n}</option>)}</select></label>
+        <label><span>Remix style</span><select aria-label="Remix style" value={remixStyle} onChange={event=>{remixer.current.stop();setRemixStyle(event.target.value);}}><option value="balanced">Balanced</option><option value="instrumental">Instrumental focus</option><option value="vocal">Vocal focus</option></select></label>
+        <button type="button" className={remixState.enabled?'is-on':''} aria-pressed={remixState.enabled} onClick={toggleRemix} disabled={!selectedRemixTrack}>{remixState.enabled?'STOP REMIX':'REMIX SONG'}</button>
+        <button type="button" disabled={!selectedStems?.mode} onClick={()=>{remixer.current.stop();selectedStems.applyRemix({vocals:1,drums:1,bass:1,other:1});}}>ORIGINAL MIX</button>
+      </div>
+      <button type="button" className="ddj-close-mixer" onClick={()=>window.dispatchEvent(new Event('echo:close-mixer'))}>CLOSE MIXER</button>
+    </div>
+    <div className="ddj-ai-trims" role="group" aria-label="Channel trim automation">
+      {[1,2,3,4].map(n=><button key={n} type="button" disabled={!aiTrimEnabled} aria-label={`Channel ${n} ${manualTrimChannels.includes(n)?'enable automatic trim':'hold trim manually'}`} aria-pressed={aiTrimEnabled&&!manualTrimChannels.includes(n)} className={aiTrimEnabled&&!manualTrimChannels.includes(n)?'is-on':''} onClick={()=>toggleTrimChannel(n)}><span>CH {n} TRIM</span><strong>{trimDecibels(dv('trim'+n)).toFixed(1)} dB</strong><small>{aiTrimEnabled&&!manualTrimChannels.includes(n)?'AUTO':'MANUAL'}</small></button>)}
+    </div>
+    <div className="ddj-ai-footer-status" role="status" aria-live="polite">
+      {aiState.enabled&&<span>{aiState.message}</span>}
+      {aiTrimEnabled&&<span>{aiTrimStatus}</span>}
+      {remixState.enabled&&<span>{remixState.message}</span>}
+      {player.autoEqualizer&&<span>{player.autoEqStatus}</span>}
+      {(notice||player.error)&&<span className="ddj-ai-footer-warning">{notice||player.error}</span>}
+    </div>
+    {status}
+  </footer>
+  </div>;
 }

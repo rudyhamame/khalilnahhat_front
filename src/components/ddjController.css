@@ -63,10 +63,6 @@
 .wp-channels:has(.ddj-performance) .wp-meta-title{min-width:0;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* The AI DJ button sits at the top of the mixer's middle column. */
-.ddj-ai-top{position:absolute;z-index:3;left:50%;top:1.5%;transform:translateX(-50%);display:grid;justify-items:center;gap:4px;max-width:30%}
-.ddj-ai-top button{min-height:26px;padding:4px 14px;border:1px solid #64727a;border-radius:999px;background:#182126;color:#e8eef1;font:800 10px/1 system-ui;letter-spacing:.08em;cursor:pointer;box-shadow:0 2px 8px #0008;white-space:nowrap}
-.ddj-ai-top button:hover{background:#223038}.ddj-ai-top button.is-on{border-color:#5fe0a7;background:#123d2d;color:#caffea;box-shadow:0 0 12px #5fe0a755}
-.ddj-ai-top span{padding:3px 8px;border-radius:6px;background:#000b;color:#ffd19c;font:10px/1.3 system-ui;text-align:center}
 
 .ddj-picker{position:absolute;z-index:5;left:50%;top:9%;transform:translateX(-50%);width:min(320px,60%);max-height:78%;display:grid;grid-template-rows:auto minmax(0,1fr);border:1px solid #64727a;border-radius:10px;background:#0d1114f2;box-shadow:0 14px 40px #000c;overflow:hidden;font:12px/1.3 system-ui;color:#e8eef1}
 .ddj-picker header{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid #2c363b}
@@ -76,15 +72,26 @@
 .ddj-picker li button{width:100%;padding:8px 10px;border:0;border-radius:6px;background:transparent;color:inherit;text-align:start;font:inherit;cursor:pointer}.ddj-picker li button:hover{background:#223038}
 .ddj-picker li.is-empty{padding:10px;color:#8fa2ab}
 
-.ddj-ai-top{display:flex;flex-wrap:wrap;justify-content:center;max-width:44%;width:max-content}
-.ddj-ai-top .ddj-ai-note{flex-basis:100%;text-align:center}
-.ddj-ai-top .ddj-close-mixer{border-color:#8a5a5a;background:#2a1a1c}.ddj-ai-top .ddj-close-mixer:hover{background:#40262a}
-.ddj-remix-toolbar select{min-width:0;max-width:155px;min-height:28px;padding:4px 8px;border:1px solid #64727a;border-radius:8px;background:#182126;color:#e8eef1;font:600 10px/1.4 system-ui}
-.ddj-ai-top button:disabled{opacity:.5;cursor:not-allowed}
 
-.ddj-remix-toolbar{flex:none;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px;padding:10px 14px;border:1px solid #34434a;border-radius:12px;background:#111b20;color:#e8eef1}
-.ddj-remix-toolbar :is(button,select){min-height:38px;font:600 12px/1.5 system-ui}
-.ddj-remix-toolbar button{padding:8px 16px;border:1px solid #64727a;border-radius:8px;background:#182126;color:#e8eef1;cursor:pointer}
-.ddj-remix-toolbar button.is-on{border-color:#5fe0a7;background:#123d2d;color:#caffea}
-.ddj-remix-toolbar button:disabled{opacity:.5;cursor:not-allowed}
-.ddj-remix-toolbar .ddj-ai-note{flex-basis:100%;text-align:center;font:12px/1.5 system-ui;color:#c4d6db;overflow-wrap:anywhere}
+
+/* One footer owns the AI controls; the controller drawing has no control overlay. */
+.ddj-ai-footer{flex:none;box-sizing:border-box;min-width:0;max-height:45%;overflow-y:auto;padding:12px 16px;border:1px solid #34434a;border-radius:12px;background:#111b20;color:#e8eef1}
+.ddj-ai-footer-actions{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 20px}
+.ddj-ai-footer-group{display:flex;flex-wrap:wrap;align-items:center;gap:10px;min-width:0}
+.ddj-ai-footer label{display:flex;align-items:center;gap:8px;min-width:0;color:#b8cbd5;font:12px/1.5 system-ui}
+.ddj-ai-footer :is(button,select){box-sizing:border-box;min-height:40px;max-width:100%;padding:8px 12px;border:1px solid #64727a;border-radius:8px;background:#182126;color:#e8eef1;font:600 12px/1.5 system-ui}
+.ddj-ai-footer select{min-width:0;max-width:180px}
+.ddj-ai-footer button{cursor:pointer;white-space:normal}
+.ddj-ai-footer button:hover{background:#223038}
+.ddj-ai-footer button.is-on{border-color:#5fe0a7;background:#123d2d;color:#caffea}
+.ddj-ai-footer button:disabled{opacity:.5;cursor:not-allowed}
+.ddj-ai-footer .ddj-close-mixer{border-color:#8a5a5a;background:#2a1a1c;margin-inline-start:auto}
+.ddj-ai-footer-status{display:flex;flex-wrap:wrap;gap:6px 18px;color:#c4d6db;font:12px/1.5 system-ui;overflow-wrap:anywhere}
+.ddj-ai-footer-status:not(:empty){margin-top:10px;padding-top:10px;border-top:1px solid #34434a}
+.ddj-ai-footer-warning{color:#ffd19c}
+.ddj-ai-footer>.ddj-msg:has(> :not(:empty)),.ddj-ai-footer>.ddj-msg:not(:empty){margin-top:8px;font:12px/1.5 system-ui;color:#a9bac2;overflow-wrap:anywhere}
+@media(max-width:1100px){.ddj-ai-footer-actions{justify-content:flex-start}.ddj-ai-footer-group{gap:8px}.ddj-ai-footer{padding:10px 12px}}
+
+.ddj-ai-trims{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid #34434a}
+.ddj-ai-trims button{display:flex;align-items:center;gap:10px;padding:6px 10px;min-height:34px;font-size:11px;font-variant-numeric:tabular-nums}
+.ddj-ai-trims button span{color:#b5c9d3;letter-spacing:.04em}.ddj-ai-trims button strong{color:#e8f6fb;font-size:12px}.ddj-ai-trims button small{font-size:9px;color:#80c6a0}.ddj-ai-trims button:disabled{opacity:.75}

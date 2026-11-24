@@ -36,7 +36,7 @@ export function createAiDjAutopilot(adapter){
    if(!live(token)){adapter.pause(incoming);break;}
    if(!started){status('waiting','The next deck could not start. Keeping the current recording playing.',{target});await sleep(1000);continue;}
    const fromSide=active===2?1:0,toSide=target===2?1:0,began=performance.now();
-   status('mixing',`Mixing to ${next.title}…`,{target,plan});
+   status('mixing',`Mixing to ${next.title}…`,{target,plan,mixBegan:began,mixDuration:timing.duration,startAt:timing.startAt});
    while(live(token)){
     const progress=Math.min(1,(performance.now()-began)/(timing.duration*1000));
     const eased=progress*progress*(3-2*progress);

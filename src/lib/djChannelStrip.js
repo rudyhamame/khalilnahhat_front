@@ -1,3 +1,4 @@
+import {trimGain} from './djAutoTrim.js';
 // Both decks use the same signal chain, with the crossfader after channel processing.
 export function createDjChannelStrip(context, input, destination) {
   const trim = context.createGain();
@@ -32,12 +33,14 @@ export function createDjChannelStrip(context, input, destination) {
   const cue = context.createGain();
   cue.gain.value = 0;
   color.connect(cue);
+  const inputMeter=context.createAnalyser();inputMeter.fftSize=2048;input.connect(inputMeter);
+  const trimMeter=context.createAnalyser();trimMeter.fftSize=2048;color.connect(trimMeter);
   const meter = context.createAnalyser();
   meter.fftSize = 256;
   level.connect(meter);
   return {
-    gain, cue, meter,
-    set(name, value) {
+    gain, cue, meter, inputMeter, trimMeter, trim, context,
+    set(name, value, smoothing=.015) {
       const time = context.currentTime;
       if (name === 'color') {
         color.type = value < 0 ? 'lowpass' : value > 0 ? 'highpass' : 'allpass';
@@ -45,11 +48,11 @@ export function createDjChannelStrip(context, input, destination) {
         return;
       }
       const param = { echo:wet.gain, delay:echo.delayTime, feedback:feedback.gain, cue:cue.gain, trim: trim.gain, low: filters[0].gain, mid: filters[1].gain, hi: filters[2].gain, level: level.gain }[name];
-      param?.setTargetAtTime(name === 'trim' ? 2 ** (value * 2) : value, time, .015);
+      param?.setTargetAtTime(name === 'trim' ? trimGain(value) : value, time, smoothing);
     },
     disconnect() {
-      input.disconnect(trim);
-      [...nodes, echo, feedback, wet, cue, meter].forEach(node => node.disconnect());
+      input.disconnect(trim);input.disconnect(inputMeter);
+      [...nodes, echo, feedback, wet, cue, meter, inputMeter, trimMeter].forEach(node => node.disconnect());
     }
   };
 }
