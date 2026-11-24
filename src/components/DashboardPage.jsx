@@ -1,3 +1,4 @@
+import BookingCardSummary from './BookingCardSummary';
 import {ClientAvailabilityNotice} from './BookingAvailability';
 import {bookingText,bookingLocale,bookingMoney} from '../lib/bookingUiText';
 import BookingNegotiation from './BookingNegotiation';
@@ -103,9 +104,10 @@ function RequestedServices({ requests, onQuoteAction, authToken, ar=false }) {
             <nav>
               {requests.map((request) => (
                 <button key={request.id} type="button" aria-current={request.id === selected.id ? 'true' : undefined} onClick={() => setSelectedId(request.id)}>
+                  <strong>{request.requestNumber || tr("Request received")}</strong>
                   <span className={`dashboard-service-status is-${request.status}`}>{request.journey.label}</span>
-                  <strong>{request.requestNumber || (request.journey.awaitingClient ? tr("Your quote is ready") : tr("Request received"))}</strong>
-                  <small>{new Date(request.createdAt).toLocaleDateString(bookingLocale(ar))}</small>
+                  <BookingCardSummary request={request} ar={ar}/>
+                  <small className="booking-card-received">{tr("Requested on")} {new Date(request.createdAt).toLocaleDateString(bookingLocale(ar))}</small>
                 </button>
               ))}
             </nav>

@@ -1,3 +1,4 @@
+import BookingCardSummary from './BookingCardSummary';
 import {UnavailableReasonDialog} from './BookingAvailability';
 import BookingQuoteEditor from './BookingQuoteEditor';
 import {bookingStatusLabel} from '../lib/clientBookingJourney';
@@ -226,13 +227,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
             {requests.map(request=><button key={request.id} type="button" className="admin-booking-list-item" aria-current={selectedRequest?.id===request.id?'true':undefined} aria-controls="admin-booking-detail" onClick={()=>setSelectedId(request.id)}>
               <span className="admin-booking-list-top"><strong>{request.customerName}</strong><span className={`admin-service-request-status is-${request.status}`}>{bookingStatusLabel(request,ar)}</span></span>
               <small className="abl-number">{[request.requestNumber||request.id,request.createdAt&&new Date(request.createdAt).toLocaleString(bookingLocale(ar),{dateStyle:'medium',timeStyle:'short'})].filter(Boolean).join(' · ')}</small>
-              <span className="abl-facts">
-                <span><em>{tr("Event")}</em>{readable((request.order?.event?.type==='other'?request.order.event.title:request.order?.event?.type)||request.event?.eventType)||'—'}</span>
-                <span><em>{tr("Date")}</em>{eventDate(request.order?.event?.date||request.event?.eventDate,ar)}</span>
-                <span><em>{tr("Venue")}</em>{request.order?.event?.venue?.name||request.event?.venueName||'—'}</span>
-                <span><em>{tr("Quote")}</em>{Number(request.total)>0?money(Number(request.total)):'—'}</span>
-              </span>
-              {!!(request.items||[]).length&&<span className="abl-requested"><em>{tr("Requested")}</em>{[...new Set(request.items.map(line=>quoteLineName(line,treeCatalog)))].join(' · ')}</span>}
+              <BookingCardSummary request={request} ar={ar} admin/>
             </button>)}
             {!requests.length&&<p className="admin-booking-list-empty">{tr("No booking requests yet.")}</p>}
           </nav>
