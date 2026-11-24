@@ -22,3 +22,12 @@ test('transition starts on a phrase boundary without running past the recording'
  assert.equal(ending.startAt,290);
  assert.equal(ending.duration,10);
 });
+
+test('measured audio BPM takes precedence over conflicting metadata only after tempo validation',()=>{
+ assert.equal(trackBpm({bpm:120,audioBeatGrid:{tempoVerified:true,bpm:103}}),103);
+ assert.equal(trackBpm({bpm:120,audioBeatGrid:{tempoVerified:false,bpm:103}}),120);
+});
+test('verified downbeat offsets schedule media-grid cues while playback speed controls real fade duration',()=>{
+ const timing=nextPhraseStart({position:17,duration:300,bpm:100,rate:2,transitionBars:8,firstDownbeat:.37,gridVerified:true});
+ assert.ok(Math.abs((timing.startAt-.37)/2.4-Math.round((timing.startAt-.37)/2.4))<1e-6);assert.equal(timing.gridAligned,true);assert.ok(Math.abs(timing.duration-9.6)<1e-6);
+});

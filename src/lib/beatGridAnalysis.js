@@ -4,7 +4,7 @@ export const GRID_MAX_SECONDS=600,GRID_MAX_BYTES=32*1024*1024;
 const cancelled=()=>new DOMException('Analysis cancelled','AbortError');
 const cache=new Map();
 export const beatAnalysisKey=track=>track?.id&&track?.audioUrl?`${track.id}|${archiveAudioIdentity(track.audioUrl)}`:'';
-export function measuredTrack(track,state){return track&&state?.grid?{...track,audioBeatGrid:state.grid}:track;}
+export function measuredTrack(track,state){return track?{...track,audioBeatGrid:state?.grid||null}:track;}
 export function verifiedGridAt(track,position){
  const grid=track?.audioBeatGrid;
  return grid?.verified&&grid.tempoVerified&&Number.isFinite(grid.firstDownbeat)&&position>=grid.firstDownbeat-.05&&position>=grid.analyzedFrom-.1&&position<=grid.analyzedTo+.1?grid:null;
@@ -49,7 +49,7 @@ export async function browserBeatAnalysis(track,{signal,progress}){
 }
 
 // One bounded background job at a time; results are tied to exact media, never just the track ID.
-export function createBeatGridAnalysis({run=browserBeatAnalysis,resultCache=cache}={}){
+export function createBeatGridAnalysis({run=browserBeatAnalysis,resultCache=cache,timeoutMs=30000}={}){
  const jobs=new Map(),queue=[];let active=null,disposed=false;
  const pump=async()=>{
   if(active||disposed)return;const job=queue.shift();if(!job)return;active=job;
@@ -57,10 +57,11 @@ export function createBeatGridAnalysis({run=browserBeatAnalysis,resultCache=cach
   const progress=(stage,value)=>{if(!disposed)job.state={status:'analyzing',stage,progress:value};};
   try{
    const grid=await run(job.track,{signal:controller.signal,progress});
-   if(disposed||controller.signal.aborted)job.state={status:'cancelled',stage:'Analysis cancelled'};
+   if(job.timedOut)job.state={status:'unavailable',stage:'Audio analysis timed out. Existing playback timing is retained.'};
+   else if(disposed||controller.signal.aborted)job.state={status:'cancelled',stage:'Analysis cancelled'};
    else{job.state={status:grid.verified?'verified':grid.tempoVerified?'tempo-only':'uncertain',stage:grid.reason,progress:1,grid};resultCache.set(job.key,job.state);while(resultCache.size>16)resultCache.delete(resultCache.keys().next().value);}
-  }catch(error){job.state={status:disposed||error.name==='AbortError'?'cancelled':'unavailable',stage:error.name==='AbortError'?'Analysis cancelled':error.message};}
-  finally{job.resolve(job.state);active=null;pump();}
+  }catch(error){job.state=job.timedOut?{status:'unavailable',stage:'Audio analysis timed out. Existing playback timing is retained.'}:{status:disposed||error.name==='AbortError'?'cancelled':'unavailable',stage:error.name==='AbortError'?'Analysis cancelled':error.message};}
+  finally{clearTimeout(job.timer);job.resolve(job.state);active=null;pump();}
  };
  return {
   get(track){const key=beatAnalysisKey(track);return jobs.get(key)?.state||resultCache.get(key)||{status:'idle',stage:'Awaiting audio analysis'};},
@@ -72,9 +73,10 @@ export function createBeatGridAnalysis({run=browserBeatAnalysis,resultCache=cach
    if(!Number.isFinite(duration)||duration<=0)return Promise.resolve({status:'waiting',stage:'Waiting for recording duration'});
    if(duration>GRID_MAX_SECONDS){const state={status:'unavailable',stage:'Recording exceeds the 10-minute analysis limit.'};jobs.set(key,{state,promise:Promise.resolve(state)});return Promise.resolve(state);}
    let resolve;const promise=new Promise(done=>{resolve=done;}),job={key,track,promise,resolve,state:{status:'queued',stage:'Queued for audio analysis'}};
+   job.timer=setTimeout(()=>{job.timedOut=true;job.state={status:'unavailable',stage:'Audio analysis timed out. Existing playback timing is retained.'};job.controller?.abort();const index=queue.indexOf(job);if(index>=0)queue.splice(index,1);job.resolve(job.state);},timeoutMs);
    jobs.set(key,job);queue.push(job);pump();return promise;
   },
   retry(track,options){const key=beatAnalysisKey(track),job=jobs.get(key);if(job&&['queued','analyzing'].includes(job.state.status))return job.promise;jobs.delete(key);resultCache.delete(key);return this.analyze(track,options);},
-  dispose(){disposed=true;if(active){active.state={status:'cancelled',stage:'Analysis cancelled'};active.controller?.abort();active.resolve(active.state);}for(const job of queue.splice(0)){job.state={status:'cancelled',stage:'Analysis cancelled'};job.resolve(job.state);}},
+  dispose(){disposed=true;if(active){clearTimeout(active.timer);active.state={status:'cancelled',stage:'Analysis cancelled'};active.controller?.abort();active.resolve(active.state);}for(const job of queue.splice(0)){clearTimeout(job.timer);job.state={status:'cancelled',stage:'Analysis cancelled'};job.resolve(job.state);}},
  };
 }

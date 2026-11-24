@@ -82,6 +82,6 @@ export function analyzeAudioBeatGrid(samples,sampleRate,progress=()=>{}){
  const all=phaseScores(hits),train=phaseScores(training),check=phaseScores(validation);
  const margin=all[0].score/Math.max(.001,all[1].score),trainMargin=train[0].score/Math.max(.001,train[1].score),checkMargin=check[0].score/Math.max(.001,check[1].score);
  const verified=all.every(slot=>slot.count>=8)&&all[0].phase===train[0].phase&&all[0].phase===check[0].phase&&margin>=1.3&&trainMargin>=1.2&&checkMargin>=1.2;
- const index=first.index+mod(all[0].phase-mod(first.index,4),4),firstDownbeat=fitted.phase+index*fitted.period;
+ const index=first.index+mod(all[0].phase-mod(first.index,4),4),firstDownbeat=Math.max(0,fitted.phase+index*fitted.period);
  return {...result,verified,firstDownbeat:verified?firstDownbeat:null,downbeatContrast:margin,reason:verified?'Stable tempo and recurring first-beat accents confirmed in both halves.':'Tempo detected, but the first beat of the bar is ambiguous.'};
 }

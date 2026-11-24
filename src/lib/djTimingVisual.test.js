@@ -37,3 +37,9 @@ test('only a matching reference recording can display a reference first-beat gri
  assert.equal(djTimingVisual({deck:{track,position:0,rate:1}}).firstBeatVerified,true);
  assert.equal(djTimingVisual({deck:{track:{...track,audioUrl:'replacement.mp3'},position:0,rate:1}}).firstBeatVerified,false);
 });
+
+test('only validated audio beat grids verify the footer and use the detected offset',()=>{
+ const grid={bpm:100,tempoVerified:true,beatPhaseVerified:true,verified:true,firstDownbeat:.37,analyzedFrom:.37,analyzedTo:200,coverage:.94};
+ const v=djTimingVisual({deck:{...deck(2.77),track:{id:'one',bpm:120,audioBeatGrid:grid}}});assert.equal(v.firstBeatVerified,true);assert.equal(v.audioVerified,true);assert.equal(v.bpm,100);assert.equal(v.beat,1);assert.match(v.basis,/Audio-verified/);
+ const ambiguous=djTimingVisual({deck:{...deck(10),track:{id:'one',bpm:120,audioBeatGrid:{...grid,verified:false,firstDownbeat:null}}}});assert.equal(ambiguous.firstBeatVerified,false);assert.equal(ambiguous.bpm,100);
+});

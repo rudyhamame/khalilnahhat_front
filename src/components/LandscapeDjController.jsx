@@ -1,4 +1,4 @@
-import {createBeatGridAnalysis,measuredTrack} from '../lib/beatGridAnalysis';
+import {createBeatGridAnalysis,measuredTrack,beatAnalysisKey} from '../lib/beatGridAnalysis';
 import {createDjAutoTrim,trimDecibels} from '../lib/djAutoTrim';
 import DjAiTimingStrip from './DjAiTimingStrip';
 import useStemPlayer from '../hooks/useStemPlayer';
@@ -372,12 +372,13 @@ export default function LandscapeDjController({stems:mainStems,mic,audioGraph,un
     apply:volumes=>selectedStems?.applyRemix(volumes),
     restore:mix=>selectedStems?.restoreMix(mix),
     status:state=>setRemixState(state),
-    async plan(){
+    async plan({signal}={}){
       await analysisService().analyze(selectedRemixTrack,{duration:selectedRemixElement()?.duration});
+      if(signal?.aborted||!alive.current||beatAnalysisKey(remixAdapter.current.track())!==beatAnalysisKey(selectedRemixTrack))throw new DOMException('Remix stopped','AbortError');
       let token='';const raw=localStorage.getItem('khalil-auth-token')||'';try{token=JSON.parse(raw)||'';}catch{token=raw;}
       if(!token)throw Error('Use local arrangement');
       const bpm=trackBpm(withTiming(selectedRemixTrack))||null;
-      const result=await apiRequest('/admin/ai-dj/remix-plan',{method:'POST',token,timeoutMs:14000,body:{track:{id:selectedRemixTrack.id,title:selectedRemixTrack.title||'Untitled',bpm},style:remixStyle}});
+      const result=await apiRequest('/admin/ai-dj/remix-plan',{method:'POST',token,signal,timeoutMs:14000,body:{track:{id:selectedRemixTrack.id,title:selectedRemixTrack.title||'Untitled',bpm},style:remixStyle}});
       return result.plan;
     },
   };

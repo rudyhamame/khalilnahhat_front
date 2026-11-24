@@ -2,10 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createStemRemixer,safeStemRemixPlan,REMIX_PRESETS} from './aiStemRemixer.js';
 const flush=async()=>{for(let i=0;i<5;i++)await new Promise(resolve=>setImmediate(resolve));};
-function fixture({ready=true,plan}={}){
+function fixture({ready=true,plan,grid}={}){
  let position=11,playing=true,ended=false,id='song',cancelled=0,pausedReady=ready;
  const applied=[],restored=[],statuses=[],snapshot={vocals:{volume:.8},drums:{volume:1},bass:{volume:.7},other:{volume:1}};
- const adapter={track:()=>({id,bpm:120}),ready:()=>pausedReady,playing:()=>playing,ended:()=>ended,position:()=>position,snapshot:()=>snapshot,apply:value=>applied.push(value),restore:value=>restored.push(value),status:value=>statuses.push(value),plan:plan|| (async()=>({sequence:[{preset:'instrumental',bars:4},{preset:'full',bars:4}],source:'ai'}))};
+ const adapter={track:()=>({id,bpm:120,audioBeatGrid:grid}),ready:()=>pausedReady,playing:()=>playing,ended:()=>ended,position:()=>position,snapshot:()=>snapshot,apply:value=>applied.push(value),restore:value=>restored.push(value),status:value=>statuses.push(value),plan:plan|| (async()=>({sequence:[{preset:'instrumental',bars:4},{preset:'full',bars:4}],source:'ai'}))};
  const remix=createStemRemixer(adapter,{schedule:()=>7,cancel:()=>cancelled++});
  return {remix,applied,restored,statuses,snapshot,get cancelled(){return cancelled;},set position(value){position=value;},set playing(value){playing=value;},set ready(value){pausedReady=value;},set id(value){id=value;},set ended(value){ended=value;}};
 }
@@ -32,4 +32,9 @@ test('untrusted plans use bounded presets and a labelled local fallback',()=>{
  assert.equal(safeStemRemixPlan({sequence:[null,null]}).source,'local');
  const fallback=safeStemRemixPlan({sequence:[{preset:'silence',bars:1}]});assert.equal(fallback.source,'local');assert.equal(fallback.sequence.at(-1).preset,'full');
  for(const preset of Object.values(REMIX_PRESETS)){const gains=['vocals','drums','bass','other'].map(key=>preset[key]);assert.ok(gains.every(value=>value>=0&&value<=1));assert.ok(gains.some(value=>value>=.5));}
+});
+
+test('remix changes align to the measured downbeat and BPM, not the metadata or time zero',async()=>{
+ const f=fixture({grid:{bpm:100,tempoVerified:true,beatPhaseVerified:true,verified:true,firstDownbeat:.37}});f.position=10;f.remix.start();await flush();assert.ok(Math.abs(f.remix.timing().anchor-12.37)<1e-6);
+ f.position=12.36;f.remix.tick();assert.equal(f.applied.length,0);f.position=12.37;f.remix.tick();assert.equal(f.applied.length,1);f.remix.stop();
 });

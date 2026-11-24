@@ -19,3 +19,8 @@ test('duration and memory guardrails leave playback untouched and never launch o
 test('verification is valid only inside the analyzed recording span',()=>{
  const measured=measuredTrack(track,{grid});assert.equal(verifiedGridAt(measured,2),grid);assert.equal(verifiedGridAt(measured,60),null);assert.equal(verifiedGridAt(measured,0),null);assert.equal(verifiedGridAt({...track,audioBeatGrid:{...grid,verified:false}},2),null);
 });
+
+test('a stalled analysis has a bounded wait and cannot later publish a stale verification',async()=>{
+ let finish;const resultCache=new Map();const service=createBeatGridAnalysis({resultCache,timeoutMs:10,run:()=>new Promise(resolve=>{finish=resolve;})});
+ const state=await service.analyze(track,{duration:48});assert.equal(state.status,'unavailable');assert.match(state.stage,/timed out/);finish(grid);await new Promise(resolve=>setImmediate(resolve));assert.equal(resultCache.size,0);service.dispose();
+});

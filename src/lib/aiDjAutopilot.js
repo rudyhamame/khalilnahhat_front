@@ -1,7 +1,7 @@
 import {nextPhraseStart,trackBpm} from './aiDjPlanner';
 
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
-const summary=track=>({id:track.id,title:String(track.title||'Untitled'),artist:String(track.artist||''),bpm:trackBpm(track)||null,key:String(track.key||track.sound?.key||''),duration:Number(track.durationSeconds)||0,energy:Number(track.energy)||.5});
+const summary=track=>({id:track.id,title:String(track.title||'Untitled'),artist:String(track.artist||''),bpm:trackBpm(track)||null,key:String(track.key||track.sound?.key||''),duration:Number(track.audioBeatGrid?.duration||track.durationSeconds)||0,energy:Number(track.energy)||.5});
 
 // AI chooses a bounded plan; this deterministic conductor owns every realtime
 // command. A late/disconnected model can never interrupt the audio thread.
@@ -20,22 +20,28 @@ export function createAiDjAutopilot(adapter){
    try{plan=await adapter.plan({current:summary(current.track),candidates:library.map(summary),played});}
    catch{plan=await adapter.fallback({current:current.track,candidates:library,played});}
    if(!live(token)||!plan){await sleep(1000);continue;}
+   if(adapter.deck(active)?.track?.id!==current.track.id)continue;
    const next=library.find(track=>track.id===plan.nextTrackId);
    if(!next){await sleep(500);continue;}
    status('loading',`Loading ${next.title} on Deck ${target}…`,{target,plan});
    const loaded=await adapter.load(target,next,plan.cueSeconds);
    if(!live(token)||!loaded)continue;
-   if(adapter.analyze){status('analyzing','Measuring the incoming recording’s beat grid…',{target,plan});await adapter.analyze(target);if(!live(token))break;}
-   const from=adapter.deck(active),to=adapter.deck(target),fromBpm=trackBpm(from.track)||120,toBpm=trackBpm(to.track)||plan.targetBpm||fromBpm;
-   const rate=Math.max(.85,Math.min(1.15,(plan.targetBpm||fromBpm)/toBpm));
+   if(adapter.analyze){status('analyzing','Measuring the incoming recording’s beat grid…',{target,plan});await adapter.analyze(active);if(!live(token))break;await adapter.analyze(target);if(!live(token))break;}
+   const from=adapter.deck(active),to=adapter.deck(target);
+   if(!from||!to||from.track.id!==current.track.id||to.track.id!==next.id)continue;
+   const fromBpm=trackBpm(from.track)||120,toBpm=trackBpm(to.track)||plan.targetBpm||fromBpm;
+   const goal=from.track.audioBeatGrid?.tempoVerified?fromBpm*(from.rate?.()||1):plan.targetBpm||fromBpm;
+   plan={...plan,targetBpm:goal};
+   const rate=Math.max(.85,Math.min(1.15,goal/toBpm));
    adapter.rate(target,rate);
    const grid=from.track.audioBeatGrid,incomingGrid=to.track.audioBeatGrid;
    if((incomingGrid?.verified||incomingGrid?.beatPhaseVerified)&&adapter.cue){
     const bar=(incomingGrid.verified?240:60)/toBpm,first=incomingGrid.verified?incomingGrid.firstDownbeat:incomingGrid.beatOffset;
-    const cue=first+Math.max(0,Math.ceil((plan.cueSeconds-first)/bar))*bar;
+    const cue=first+Math.max(0,Math.ceil((Math.max(plan.cueSeconds,incomingGrid.analyzedFrom-.1)-first)/bar))*bar;
     if(cue<to.duration()-.25&&cue<=incomingGrid.analyzedTo)adapter.cue(target,cue);
    }
-   const timing=nextPhraseStart({position:from.position(),duration:from.duration(),bpm:fromBpm,rate:from.rate?.()||1,transitionBars:plan.transitionBars,firstDownbeat:grid?.verified?grid.firstDownbeat:grid?.beatOffset,gridVerified:Boolean(grid?.verified),beatPhaseMeasured:Boolean(grid?.beatPhaseVerified)});
+   let timing=nextPhraseStart({position:from.position(),duration:from.duration(),bpm:fromBpm,rate:from.rate?.()||1,transitionBars:plan.transitionBars,firstDownbeat:grid?.verified?grid.firstDownbeat:grid?.beatOffset,gridVerified:Boolean(grid?.verified),beatPhaseMeasured:Boolean(grid?.beatPhaseVerified)});
+   if(grid?.verified&&(timing.startAt<grid.analyzedFrom-.1||timing.startAt>grid.analyzedTo+.1))timing=nextPhraseStart({position:from.position(),duration:from.duration(),bpm:fromBpm,rate:from.rate?.()||1,transitionBars:plan.transitionBars});
    status('armed',`${plan.source==='ai'?'AI':'LOCAL'} · ${next.title} armed for ${Math.round(timing.startAt)}s · ${plan.reason}`,{target,plan,startAt:timing.startAt});
    while(live(token)&&adapter.deck(active).position()<timing.startAt-.04)await sleep(80);
    if(!live(token))break;

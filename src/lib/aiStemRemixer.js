@@ -9,10 +9,10 @@ export function safeStemRemixPlan(value,style='balanced'){
 
 // The audio playhead schedules the arrangement. This controller never plays, pauses, seeks or reloads media.
 export function createStemRemixer(adapter,{schedule=setInterval,cancel=clearInterval}={}){
- let enabled=false,generation=0,timer=null,trackId='',snapshot=null,plan=null,anchor=null,lastPosition=null,lastStep=-1,planning=false,lastStatus=null,currentSection=null;
+ let enabled=false,generation=0,timer=null,trackId='',snapshot=null,plan=null,anchor=null,lastPosition=null,lastStep=-1,planning=false,lastStatus=null,currentSection=null,abort=null;
  const status=(phase,message)=>{if(lastStatus?.enabled===enabled&&lastStatus.phase===phase&&lastStatus.message===message)return;lastStatus={enabled,phase,message};adapter.status(lastStatus);};
  const stop=(message='Remix stopped. Previous stem mix restored.',restore=true)=>{
-  if(!enabled)return;enabled=false;generation++;if(timer!=null)cancel(timer);timer=null;
+  if(!enabled)return;enabled=false;generation++;abort?.abort();if(timer!=null)cancel(timer);timer=null;
   if(restore&&snapshot&&adapter.track()?.id===trackId)adapter.restore(snapshot);
   snapshot=null;currentSection=null;status('off',message);
  };
@@ -27,7 +27,7 @@ export function createStemRemixer(adapter,{schedule=setInterval,cancel=clearInte
   if(!plan){
    if(planning)return;planning=true;const token=generation;
    status('planning','Choosing a stem arrangement…');
-   Promise.resolve().then(()=>adapter.plan()).catch(()=>null).then(value=>{if(!enabled||generation!==token)return;plan=safeStemRemixPlan(value,adapter.style?.());planning=false;tick();});return;
+   Promise.resolve().then(()=>adapter.plan({signal:abort.signal})).catch(()=>null).then(value=>{if(!enabled||generation!==token)return;plan=safeStemRemixPlan(value,adapter.style?.());planning=false;tick();});return;
   }
   const bpm=trackBpm(track)||120,bar=240/bpm,position=adapter.position(),first=track.audioBeatGrid?.verified?track.audioBeatGrid.firstDownbeat:track.audioBeatGrid?.beatPhaseVerified?track.audioBeatGrid.beatOffset:0;
   if(!Number.isFinite(position)||position<0)return;
@@ -45,5 +45,5 @@ export function createStemRemixer(adapter,{schedule=setInterval,cancel=clearInte
   adapter.apply({vocals:preset.vocals,drums:preset.drums,bass:preset.bass,other:preset.other});
   status('remixing',`${plan.source==='ai'?'AI':'LOCAL'} · ${preset.label} · ${row.bars} bars${trackBpm(track)?'':' · estimated tempo'}`);
  };
- return {start(){if(enabled)return;const track=adapter.track();if(!track?.id)return;enabled=true;generation++;trackId=track.id;snapshot=null;plan=null;anchor=null;lastPosition=null;lastStep=-1;planning=false;currentSection=null;status('waiting','Preparing remix…');timer=schedule(tick,120);tick();},stop,tick,timing(){return enabled?{trackId,anchor,phase:lastStatus?.phase,source:plan?.source||null,...currentSection}:null;},get enabled(){return enabled;}};
+ return {start(){if(enabled)return;const track=adapter.track();if(!track?.id)return;enabled=true;generation++;abort=new AbortController();trackId=track.id;snapshot=null;plan=null;anchor=null;lastPosition=null;lastStep=-1;planning=false;currentSection=null;status('waiting','Preparing remix…');timer=schedule(tick,120);tick();},stop,tick,timing(){return enabled?{trackId,anchor,phase:lastStatus?.phase,source:plan?.source||null,...currentSection}:null;},get enabled(){return enabled;}};
 }

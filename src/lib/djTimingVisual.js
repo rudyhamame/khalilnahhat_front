@@ -27,7 +27,7 @@ export function djTimingVisual({deck,incoming,ai={},remix=null,pulse=null,analys
   countdown=Math.max(0,(ai.startAt-position)/rate);progressLabel='Waiting for transition cue';
  }else if(remix?.anchor!=null&&position<remix.anchor){countdown=(remix.anchor-position)/rate;progressLabel='Waiting for remix cue';}
  return {hasTrack:Boolean(track),playing:Boolean(deck?.playing),position,bpm,effective,rate,assumed,
-  basis:verified?'Audio-verified 4/4 grid':known?'Reference grid':['queued','analyzing'].includes(analysis?.status)?'Analyzing recording audio…':measured?.tempoVerified?(measured.beatPhaseVerified?'Audio BPM detected · first beat ambiguous':'Audio BPM detected · beat phase unclear'):metadata?'Track BPM · estimated beat phase':track?'Estimated 120 BPM · beat phase unverified':'Load a recording',
+  basis:verified?'Audio-verified 4/4 grid':known?'Reference grid':['queued','analyzing'].includes(analysis?.status)?'Analyzing recording audio…':measured?.verified?(position<measured.firstDownbeat?'Audio grid ready · awaiting first beat':'Outside the verified rhythm span'):measured?.tempoVerified?(measured.beatPhaseVerified?'Audio BPM detected · first beat ambiguous':'Audio BPM detected · beat phase unclear'):metadata?'Track BPM · estimated beat phase':track?'Estimated 120 BPM · beat phase unverified':'Load a recording',
   analysis,gridEvidence:measured?.coverage??null,gridReason:measured?.reason||analysis?.stage||'',
   firstBeatVerified:Boolean(verified||known),audioVerified:Boolean(verified),beat:beatIndex%4+1,bar:Math.floor(beatIndex/4)+1,phraseBeat:beatIndex%16,phase,railPosition:((beatIndex%16)+phase)/16,
   nextBeatSeconds,nextBarSeconds,incomingBpm:incomingBpm?incomingBpm*incomingRate:null,delta,
