@@ -354,3 +354,52 @@ html body .admin-workspace[data-area=services] article.admin-service-request-car
 /* Smaller Amount / Percent tabs. */
 .bqe-mini-tabs{gap:2px;padding:2px}
 .bqe-mini-tabs button{padding:2px 9px!important;font-size:10.5px!important;line-height:1.5!important;min-height:0!important;height:auto!important}
+/* Publish to Customer lives at the bottom of the Quote column. */
+.booking-quote-publish{position:sticky;bottom:0;padding:14px 0 4px;background:#121216;margin-top:16px}
+.booking-quote-publish .primary-button{width:100%;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 22px;font-weight:600}
+/* Revert to the previous step, inside the Booking status stepper. */
+.booking-status-band .bsp-back{display:block;margin-top:8px;padding:0;border:0;background:none;color:var(--aw-muted);font:600 12px/1.4 inherit;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.booking-status-band .bsp-back:hover{color:var(--aw-text)}
+/* Smaller, to the right of the current step. */
+.booking-status-band li .label{flex:1}
+.booking-status-band .bsp-back{display:inline-block;margin:0 0 0 auto;padding:2px 8px;border:1px solid color-mix(in srgb,var(--aw-text) 30%,transparent);border-radius:999px;font:600 10.5px/1.5 inherit;text-decoration:none;white-space:nowrap;align-self:flex-start}
+/* Wider Booking status column. */
+.admin-booking-detail-body .booking-brief-heading.booking-summary{grid-template-columns:minmax(300px,42%) minmax(0,1fr)!important}
+@media(max-width:900px){.admin-booking-detail-body .booking-brief-heading.booking-summary{grid-template-columns:minmax(0,1fr)!important}}
+.booking-status-band .bsp-back{display:inline-flex;align-items:center;gap:4px;padding:1px 7px;font-size:10px;line-height:1.5}
+/* Revert control styled as a badge. */
+.booking-status-band .bsp-back{border:0;border-radius:6px;padding:2px 8px;background:color-mix(in srgb,var(--aw-text) 14%,transparent);color:var(--aw-text);font-weight:650;letter-spacing:.04em;text-transform:uppercase;font-size:9.5px;transition:background .15s}
+.booking-status-band .bsp-back:hover{background:color-mix(in srgb,var(--aw-text) 26%,transparent)}
+.booking-status-band .bsp-back{background:#d6ad5929;color:#e8c675}
+.booking-status-band .bsp-back:hover{background:#d6ad5947}
+html body .admin-workspace .booking-status-band li button.bsp-back{background:#d6ad5933!important;color:#f0cd7c!important;border:1px solid #d6ad5966!important;border-radius:6px!important;padding:2px 8px!important;font-size:9.5px!important;font-weight:700!important;letter-spacing:.05em!important;text-transform:uppercase!important;text-decoration:none!important;box-shadow:none!important}
+html body .admin-workspace .booking-status-band li button.bsp-back:hover{background:#d6ad5955!important}
+html body .admin-workspace .booking-status-band li button.bsp-back{background:none!important;border:0!important;padding:2px 0!important}
+html body .admin-workspace .booking-status-band li button.bsp-back:hover{background:none!important;text-decoration:underline!important}
+/* Revert text sits at the opposite (far) end of the current step's row. */
+html body .admin-workspace .booking-status-band li.is-here{display:flex!important;align-items:flex-start;justify-content:space-between;gap:12px}
+html body .admin-workspace .booking-status-band li.is-here .label{flex:1 1 auto!important;min-width:0}
+html body .admin-workspace .booking-status-band li.is-here button.bsp-back{flex:none!important;margin-inline-start:auto!important;align-self:flex-start;white-space:nowrap}
+/* Publish to Customer sits opposite the Quote title, in the column header. */
+.booking-quote-aside>.booking-quote-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.booking-quote-heading .booking-quote-publish{position:static;width:auto;margin:0;padding:6px 14px;font-size:12px;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;background:none}
+.booking-quote-heading .booking-quote-publish.primary-button{background:var(--aw-text);color:var(--aw-main,#101514)}
+/* Payment options: the methods the client may use, under Payment instructions. */
+.bqe-payment-options{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0;padding:0;border:0;min-width:0}
+.bqe-payment-options legend{padding:0;margin-bottom:8px;font-size:12px;color:var(--aw-muted)}
+.bqe-payment-options label{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border:1px solid var(--aw-line);border-radius:999px;font-size:12.5px;cursor:pointer}
+.bqe-payment-options label.is-on{border-color:var(--aw-text);background:color-mix(in srgb,var(--aw-text) 10%,transparent)}
+.bqe-payment-options input{width:auto;min-height:0;margin:0}
+/* Payment options as proper toggle chips (the native checkbox is hidden; the chip shows a tick when on). */
+.admin-booking-detail-body .bqe-payment-options{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0;padding:0;border:0}
+.admin-booking-detail-body .bqe-payment-options legend{width:100%;margin:0 0 8px;padding:0;font-size:12px;color:var(--aw-muted)}
+.admin-booking-detail-body .bqe-payment-options>label{position:relative;display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border:1px solid var(--aw-line);border-radius:999px;font-size:12.5px;line-height:1.2;cursor:pointer;user-select:none;transition:background .15s,border-color .15s}
+.admin-booking-detail-body .bqe-payment-options>label:hover{background:color-mix(in srgb,var(--aw-text) 8%,transparent)}
+.admin-booking-detail-body .bqe-payment-options>label.is-on{border-color:var(--aw-text);background:color-mix(in srgb,var(--aw-text) 14%,transparent);font-weight:600}
+.admin-booking-detail-body .bqe-payment-options>label.is-on::before{content:"✓";font-size:11px}
+.admin-booking-detail-body .bqe-payment-options>label:focus-within{outline:2px solid var(--aw-text);outline-offset:2px}
+.admin-booking-detail-body .bqe-payment-options>label>input[type=checkbox]{position:absolute;inset:0;width:100%;height:100%;min-height:0;margin:0;padding:0;opacity:0;cursor:pointer}
+.admin-booking-detail-body .bqe-payment-options>label.bqe-etransfer-email{flex:1 1 100%;display:grid;gap:6px;padding:0;border:0;border-radius:0;font-size:12px;cursor:default;background:none;font-weight:400}
+.admin-booking-detail-body .bqe-payment-options>label.bqe-etransfer-email:hover{background:none}
+.admin-booking-detail-body .bqe-payment-options>label.bqe-etransfer-email>input[type=email]{position:static;opacity:1;width:100%;height:auto;min-height:36px;padding:9px 10px}
+.admin-workspace[data-area=services] .booking-summary .booking-summary-foot{border-top:0!important;border:0!important;padding-top:0!important}

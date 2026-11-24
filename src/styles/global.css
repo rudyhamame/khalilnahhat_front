@@ -7502,3 +7502,8 @@ html[dir=rtl] body :is(input,textarea)::placeholder{direction:rtl;text-align:rig
 /* No native browser back/forward swipe (sideways overscroll) on any page, dashboards included. */
 html,body{overscroll-behavior-x:none}
 :is(.client-workspace,.admin-workspace),:is(.client-workspace,.admin-workspace) *{overscroll-behavior-x:none}
+
+/* No focus outline on any text field, select or textarea. A border-colour change still shows where the cursor is. */
+input:focus,input:focus-visible,textarea:focus,textarea:focus-visible,select:focus,select:focus-visible,
+[contenteditable]:focus,[contenteditable]:focus-visible{outline:none!important;outline-offset:0!important;box-shadow:none!important}
+input:focus:not([type=checkbox]):not([type=radio]):not([type=range]),textarea:focus,select:focus{border-color:color-mix(in srgb,currentColor 55%,transparent)!important}

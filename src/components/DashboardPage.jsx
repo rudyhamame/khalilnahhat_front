@@ -47,6 +47,8 @@ function DepositInstructions({ request, ar=false }) {
   return (
     <div className="dashboard-quote-actions">
       <p>{ar?`تم قبول العرض. لتأكيد الحجز وحجز الموعد، ادفع العربون البالغ ${money(request.deposit)} بتحويل إلكتروني أو شيك أو تحويل مصرفي (لا يُقبل النقد).`:`Accepted. To confirm your booking and reserve your date, pay the deposit of ${money(request.deposit)} by e-transfer, cheque or bank transfer (cash is not accepted).`}</p>
+      {request.paymentOptions?.length ? <p>{`${tr('Payment options')}: ${request.paymentOptions.map(method=>tr(({etransfer:'E-transfer',cheque:'Cheque',bank_transfer:'Bank transfer',other:'Other'})[method]||method)).join(', ')}`}</p> : null}
+      {request.paymentOptions?.includes('etransfer') && request.etransferEmail ? <p>{`${tr('Send the e-transfer to')}: ${request.etransferEmail}`}</p> : null}
       {request.paymentInstructions ? <p>{`${tr('How to pay')}: ${request.paymentInstructions}`}</p> : <p>{tr("We will send you the payment details shortly.")}</p>}
       <p>{tr("Your date is confirmed once we record your deposit.")}</p>
     </div>

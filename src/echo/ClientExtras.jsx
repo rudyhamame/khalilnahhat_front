@@ -15,6 +15,8 @@ export function PaymentsBlock({ request, token, ar=false }) {
   return (
     <div className="dashboard-quote-actions">
       <p>{`${ar?'المدفوع':'Paid'}: ${money(paid)} · ${tr('Remaining balance')}: ${money(balance)}`}</p>
+      {balance > 0 && request.paymentOptions?.length ? <p>{`${tr('Payment options')}: ${request.paymentOptions.map(method=>tr(({etransfer:'E-transfer',cheque:'Cheque',bank_transfer:'Bank transfer',other:'Other'})[method]||method)).join(', ')}`}</p> : null}
+      {balance > 0 && request.paymentOptions?.includes('etransfer') && request.etransferEmail ? <p>{`${tr('Send the e-transfer to')}: ${request.etransferEmail}`}</p> : null}
       {balance > 0 && request.paymentInstructions ? <p>{`${tr('How to pay')}: ${request.paymentInstructions}`}</p> : null}
       {entries.length ? (
         <ul>

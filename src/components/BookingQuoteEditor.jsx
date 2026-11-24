@@ -74,6 +74,11 @@ export default function BookingQuoteEditor({request,draft,totals,catalog=[],equi
      <label><span>{tr('Valid days')}</span><input type="number" min="1" max="60" step="1" inputMode="numeric" value={draft.validDays} onChange={event=>onFieldChange('validDays',event.target.value)}/></label>
     </div>
     <label className="bqe-payment-note"><span>{tr('Payment instructions')}</span><textarea rows={3} value={draft.paymentInstructions||''} onChange={event=>onFieldChange('paymentInstructions',event.target.value)} placeholder={ar?'التفاصيل التي يحتاجها العميل للدفع':'Details the customer needs to make a payment'}/></label>
+    <fieldset className="bqe-payment-options"><legend>{tr('Payment options')}</legend>
+     {[['etransfer',tr('E-transfer')],['cheque',tr('Cheque')],['bank_transfer',tr('Bank transfer')],['other',tr('Other')]].map(([method,label])=>{const picked=(draft.paymentOptions||[]).includes(method);
+      return <label key={method} className={picked?'is-on':''}><input type="checkbox" checked={picked} onChange={()=>onFieldChange('paymentOptions',picked?(draft.paymentOptions||[]).filter(item=>item!==method):[...(draft.paymentOptions||[]),method])}/><span>{label}</span></label>;})}
+     {(draft.paymentOptions||[]).includes('etransfer')&&<label className="bqe-etransfer-email"><span>{tr('E-transfer: email address that receives the payment')}</span><input type="email" inputMode="email" autoComplete="off" placeholder="payments@example.com" value={draft.etransferEmail||''} onChange={event=>onFieldChange('etransferEmail',event.target.value)}/></label>}
+    </fieldset>
     {request.expiresAt&&<p className="bqe-expiry">{ar?'تنتهي صلاحية العرض الحالي':'Current quote expires'} <time dateTime={request.expiresAt}>{new Date(request.expiresAt).toLocaleString(bookingLocale(ar),{dateStyle:'medium',timeStyle:'short'})}</time></p>}
    </fieldset>
    {!editable&&<p className="bqe-review-note">{ar?'عرض السعر هذا للقراءة فقط في مرحلته الحالية.':'This quote is read-only at its current stage.'}</p>}

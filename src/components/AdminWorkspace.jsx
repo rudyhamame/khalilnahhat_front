@@ -1,3 +1,4 @@
+import {useAdminAltText} from './useAdminAltText';
 import {bookingText} from '../lib/bookingUiText';
 import AndroidAppBadge from '../echo/AndroidAppBadge';
 import { Fragment,useEffect, useRef, useState } from 'react';
@@ -79,6 +80,8 @@ export default function AdminWorkspace({ activeKey = 'live-stream', username, on
     window.addEventListener(administratorDataChanged,refresh);
     return()=>window.removeEventListener(administratorDataChanged,refresh);
   },[activeKey]);
+  const workspaceRef=useRef(null);
+  useAdminAltText(workspaceRef,ar);
   const menuButton = useRef(null);
   useEffect(() => {
     document.documentElement.classList.add('echo-admin-visible');
@@ -92,7 +95,7 @@ export default function AdminWorkspace({ activeKey = 'live-stream', username, on
     const close = (event) => { if (event.key === 'Escape' && menuOpen) { setMenuOpen(false); menuButton.current?.focus(); } };
     window.addEventListener('keydown', close); return () => window.removeEventListener('keydown', close);
   }, [menuOpen]);
-  return <div dir={ar?'rtl':'ltr'} lang={ar?'ar':'en'} data-area={activeKey} className={`admin-workspace ${variant}-workspace${secondary ? ' aw-has-secondary' : ''}${light ? ' aw-light' : ''}${collapsed ? ' aw-collapsed' : ''}${menuOpen ? ' aw-menu-open' : ''}${hasAssistant&&showAssistant?' aw-with-ai':''}`}>
+  return <div ref={workspaceRef} dir={ar?'rtl':'ltr'} lang={ar?'ar':'en'} data-area={activeKey} className={`admin-workspace ${variant}-workspace${secondary ? ' aw-has-secondary' : ''}${light ? ' aw-light' : ''}${collapsed ? ' aw-collapsed' : ''}${menuOpen ? ' aw-menu-open' : ''}${hasAssistant&&showAssistant?' aw-with-ai':''}`}>
     <a className="aw-skip" href="#admin-workspace-main">{tr('Skip to workspace')}</a>
     <header className="aw-topbar">
       <div className="aw-brand"><button ref={menuButton} className="aw-mobile-menu aw-icon-button" type="button" aria-label={menuOpen ? tr("Close workspace navigation") : tr("Open workspace navigation")} aria-expanded={menuOpen} aria-controls="admin-workspace-sidebar" onClick={() => setMenuOpen((value) => !value)}>{menuOpen ? <X size={18} /> : <Menu size={18} />}</button><a className="aw-brand-mark" href="/" aria-label={tr("Echo — return to website")}>KN</a><span>{workspaceLabel}</span></div>
