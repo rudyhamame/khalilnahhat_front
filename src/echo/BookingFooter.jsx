@@ -1,6 +1,6 @@
 import {useEffect,useState} from 'react';
 import {useTree,useTreeSteps} from '../lib/tree';
-import {ChevronUp,X} from 'lucide-react';
+import {ChevronUp,Trash2,X} from 'lucide-react';
 import {useEventOrder} from './eventOrderContext';
 import {PUBLIC_PAGE_PATHS} from '../lib/publicPages';
 import {effectiveMissing} from '../lib/bookingNextStep';
@@ -54,6 +54,9 @@ export default function BookingFooter({ar=false}){
       <i className="booking-footer-bar" aria-hidden="true"><b style={{width:`${percent}%`}}/></i>
     </div>
     <dl className="booking-footer-next"><div><dt>{tr('Next required:','المطلوب التالي:')}</dt><dd>{link(required)}</dd></div><div><dt>{tr('Next optional:','الاختياري التالي:')}</dt><dd>{link(optional)}</dd></div></dl>
-    <a className="booking-footer-button" href={PUBLIC_PAGE_PATHS.assistant}><SmartCartIcon size={18} strokeWidth={1.8} aria-hidden="true"/>{tr('Open Echo Smart Cart','افتح عربة إيكو الذكية')}</a>
+    <div className="booking-footer-actions">
+      <button type="button" className="booking-footer-delete" disabled={ctx.clearing} onClick={()=>{void ctx.clear();}}><Trash2 size={16} strokeWidth={1.8} aria-hidden="true"/>{tr('Delete Booking','حذف الحجز')}</button>
+      <a className="booking-footer-button" href={PUBLIC_PAGE_PATHS.assistant}><SmartCartIcon size={18} strokeWidth={1.8} aria-hidden="true"/>{tr('Open Echo Smart Cart','افتح عربة إيكو الذكية')}</a>
+    </div>
   </footer></>;
 }

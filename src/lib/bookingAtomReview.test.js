@@ -43,6 +43,7 @@ test('rejected entries get a replacement question and a real manual-edit destina
  assert.match(reply.content,/What would you like to use instead/);
  assert.equal(reply.actions[0].goto,'event.type');
  assert.equal(manualBookingFieldHref('event.type'),'/booking?field=event.type#booking-date');
+ assert.equal(manualBookingFieldHref('additional.voucherCode'),'/booking?field=additional.voucherCode#voucher');
  assert.equal(manualBookingFieldHref('references.photos'),'/rentals?field=references.photos#references');
  assert.equal(manualBookingFieldHref('customer.email'),'/dashboard/profile');
  const arabic=bookingAtomCorrectionReply('additional.notes','ملاحظات',true);

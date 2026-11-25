@@ -1,0 +1,7 @@
+.booking-voucher-label{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;color:#eef4ef;font-size:14px}
+.booking-voucher-label>small{color:#9fb5a8;font-size:12px;font-weight:400}
+.booking-services .booking-voucher-input{box-sizing:border-box;display:block;width:100%;min-height:48px;padding:12px 14px;border:1px solid #c3dfcd30;border-radius:12px;background:#ffffff05;color:#eef4ef;font:400 15px/1.5 'IBM Plex Mono',monospace;letter-spacing:.04em}
+.booking-voucher-input::placeholder{color:#9fb5a8;letter-spacing:normal}
+.booking-voucher-input:focus-visible{outline:2px solid #a6e3ce;outline-offset:2px}
+.booking-voucher-input:disabled{opacity:.5;cursor:default}
+.booking-services .booking-voucher-help{margin:12px 0 0;color:#9fb5a8;font-size:12px;line-height:1.6}

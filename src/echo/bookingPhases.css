@@ -71,11 +71,11 @@ html body .echo[data-page=home][data-theme] .booking-services .dj-service-step.i
 html body .echo[data-page=home][data-theme] .booking-services .dj-service-step.is-prefs-open>.booking-step-card{grid-row:2}
 
 /* Additional info: no lines inside it (between the attachment blocks, or under the card titles). */
-html body .echo[data-page=home][data-theme] :is(#references,#additional-notes) .ref-block{border-top:0;padding-top:0}
-html body .echo[data-page=home][data-theme] :is(#references,#additional-notes) .booking-card-title{border-bottom:0;padding-bottom:0}
+html body .echo[data-page=home][data-theme] :is(#references,#additional-notes,#voucher) .ref-block{border-top:0;padding-top:0}
+html body .echo[data-page=home][data-theme] :is(#references,#additional-notes,#voucher) .booking-card-title{border-bottom:0;padding-bottom:0}
 /* Room under the service / equipment grid in Services & equipment. */
 html body .echo[data-page=home][data-theme] .workbench-step :is(.rw-service-grid,.rw-eq-grid){margin-bottom:clamp(28px,3vw,44px)}
-html body .echo[data-page=home][data-theme] :is(#references,#additional-notes) .booking-step-card>.booking-card-title{border-bottom:0!important;padding-bottom:0!important;margin-bottom:16px!important}
+html body .echo[data-page=home][data-theme] :is(#references,#additional-notes,#voucher) .booking-step-card>.booking-card-title{border-bottom:0!important;padding-bottom:0!important;margin-bottom:16px!important}
 /* Room under the "03.01 DJ SERVICE *" label, above the Yes / Skip choices. */
 html body .echo[data-page=home][data-theme] .dj-choice>.avail-kicker{display:block;margin-bottom:14px}
 

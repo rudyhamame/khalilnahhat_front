@@ -204,3 +204,22 @@
 .notification-ai-review small{font-size:11px;color:var(--ne-muted)}
 .admin-workspace .notification-admin .notification-ai-review>footer>button{background:var(--ne-raised);font-size:12px}
 @media(max-width:760px){.notification-message>.notification-field-label{flex-wrap:wrap}.notification-message-actions{gap:10px}}
+
+/* Configuration status stays visible above both notification views. */
+.notification-page-header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex:none;border-bottom:1px solid var(--ne-line)}
+.notification-page-header .notification-page-tabs{border-bottom:0;align-self:stretch;align-items:flex-end;min-width:0}
+.notification-service-status{display:flex;align-items:center;gap:10px;padding:10px 16px;color:var(--ne-muted);flex-shrink:0}
+.notification-service-indicators{display:flex;align-items:flex-start;gap:22px}
+.notification-service{display:flex;align-items:flex-start;gap:7px;min-width:0}
+.notification-service-dot{width:6px;height:6px;margin-top:6px;flex:none;border-radius:50%;background:var(--ne-muted)}
+.notification-service.is-ready .notification-service-dot{background:var(--ne-green)}
+.notification-service:is(.is-partial,.is-setup) .notification-service-dot{background:var(--ne-warning)}
+.notification-service>div{display:grid;gap:2px}
+.notification-service strong{font-size:10px;font-weight:500;color:var(--ne-text);overflow-wrap:anywhere}
+.notification-service>div>span{display:block;font-size:10px;line-height:1.5}
+.notification-service.is-ready>div>span{color:var(--ne-green)}
+.notification-service:is(.is-partial,.is-setup)>div>span{color:var(--ne-warning)}
+.notification-service small{display:block;font-size:9px;color:var(--ne-muted)}
+.admin-workspace .notification-admin .notification-service-refresh{min-height:30px;padding:6px;border:0;color:var(--ne-muted);flex:none}
+@media(max-width:1100px){.notification-page-header{flex-wrap:wrap;gap:0}.notification-service-status{padding:10px 20px}.notification-service-indicators{gap:16px}}
+@media(max-width:760px){.notification-page-header{align-items:stretch;flex-direction:column}.notification-service-status{padding:12px 16px;justify-content:space-between}.notification-service-indicators{flex-wrap:wrap;gap:10px 18px}.notification-service small{display:none}}

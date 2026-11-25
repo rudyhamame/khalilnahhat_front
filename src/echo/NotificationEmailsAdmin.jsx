@@ -3,6 +3,7 @@ import {useEffect,useRef,useState} from 'react';
 import {Mail,Save,Eye,Check,CheckCircle2,Search,RefreshCw,X,ChevronRight,Clock3,Users,ArrowLeft,PenLine,AlertCircle,PanelsTopLeft,Sparkles} from 'lucide-react';
 import {apiRequest} from '../lib/api';
 import SharedEmailDesign from './SharedEmailDesign';
+import NotificationServiceStatus from './NotificationServiceStatus';
 import EmailTextEditor from './EmailTextEditor';
 import {emailDetailLabel,missingEmailDetails,templateSegments} from './emailTemplateEditor';
 import {editableEmail,emailHasChanges,filterNotificationEmails,validateEmailDraft,reminderTiming} from './notificationEmailSettings.mjs';
@@ -102,7 +103,10 @@ export default function NotificationEmailsAdmin({token}){
  const fieldError=key=>invalid[key]&&<p className="notification-field-error" id={`notification-${key}-error`}>{invalid[key]}</p>;
 
  return <section className={`notification-admin${mobileEditor?' is-editing':''}`} aria-label="Notification emails" onKeyDown={event=>{if((event.ctrlKey||event.metaKey)&&event.key==='s'){event.preventDefault();if(section==='messages'&&dirty&&!busy)save(event);}}}>
+  <header className="notification-page-header">
   <div className="notification-page-tabs" role="group" aria-label="Notification settings"><button type="button" aria-pressed={section==='messages'} onClick={()=>setSection('messages')}><Mail size={15}/>Email messages{dirtyCount>0&&<i aria-hidden="true" title="Unsaved email changes"/>}</button><button ref={designTab} type="button" aria-pressed={section==='design'} onClick={openDesign}><PanelsTopLeft size={15}/>Shared design{designDirty&&<i aria-hidden="true" title="Unsaved design changes"/>}</button></div>
+  <NotificationServiceStatus token={token}/>
+  </header>
   {designVisited&&<div id="notification-shared-design" className="notification-design-wrap" hidden={section!=='design'}><SharedEmailDesign token={token} onDirtyChange={setDesignDirty} onSaved={()=>setPreview(null)}/></div>}
   <div className="notification-messages-wrap" hidden={section!=='messages'}>
   {loading?<div className="notification-loading" role="status"><RefreshCw size={20} className="notification-spinner"/>Loading notification emails…</div>:!items.length?<div className="notification-empty" role={error?'alert':undefined}><Mail size={30} strokeWidth={1.3}/><h3>{error?'Emails couldn’t be loaded':'No notification emails yet'}</h3><p>{error||'Email events will appear here when they are available.'}</p><button type="button" className="notification-button" onClick={()=>setRetry(value=>value+1)}><RefreshCw size={15}/>Try again</button></div>:<div className="notification-workspace">
@@ -144,7 +148,7 @@ export default function NotificationEmailsAdmin({token}){
        {fieldError('body')}
        {missing.length>0&&<div className="notification-required"><span><AlertCircle size={14}/>Keep these details in the message</span><div>{missing.map(variable=><button type="button" key={variable} disabled={busy} onMouseDown={event=>event.preventDefault()} onClick={()=>message.current?.insert(variable)}>+ {emailDetailLabel(variable)}</button>)}</div></div>}
       </div>
-      <button type="button" className="notification-shared-link" aria-label="Edit shared photo and branding" aria-describedby="notification-shared-help" aria-controls="notification-shared-design" onClick={()=>{openDesign();designTab.current?.focus();}}><PanelsTopLeft size={18}/><span><strong>Edit shared photo and branding</strong><small id="notification-shared-help">Applies to every automated email</small></span><ChevronRight size={16}/></button>
+      <button type="button" className="notification-shared-link" aria-label="Edit shared photo and branding" aria-describedby="notification-shared-help" aria-controls="notification-shared-design" onClick={()=>{openDesign();designTab.current?.focus();}}><PanelsTopLeft size={18}/><span><strong>Edit shared photo and branding</strong><small id="notification-shared-help">Applies to notification and bookings emails</small></span><ChevronRight size={16}/></button>
      </div>:<div id="notification-preview-panel" className="notification-preview-panel" role="tabpanel" aria-labelledby="notification-preview-tab">
       <div className="notification-preview-caption"><Eye size={15}/><span>Sample preview · No email is sent</span></div>
       {action==='preview'?<div className="notification-loading" role="status"><RefreshCw size={20} className="notification-spinner"/>Preparing preview…</div>:preview?<div className="notification-email-canvas"><iframe title="Email preview" sandbox="" srcDoc={emailPreviewHtml(preview.html)}/></div>:<div className="notification-empty"><Eye size={26}/><p>The preview couldn’t be generated.</p><button type="button" className="notification-button" disabled={busy} onClick={showPreview}>Try preview again</button></div>}
