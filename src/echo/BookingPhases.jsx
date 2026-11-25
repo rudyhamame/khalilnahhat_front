@@ -8,16 +8,16 @@ import './bookingPhases.css';
 // The step names and texts come from the shared step definitions (lib/bookingFlow.mjs), so the Booking page, the Booking review and the Booking draft can never differ.
 const PHASE_STEPS=[['personal','customer'],['event','event'],['dj','music'],['rental','equipment'],['additional','additional']];
 const ALL_PHASES=PHASE_STEPS.map(([phase,step])=>{const definition=bookingStepDefinition(step);return [phase,definition.title,definition.ar,definition.description,definition.descriptionAr];});
-// Steps exist only while their service is in the catalogue; step 3 carries the name the admin gave the DJ service (id dj).
-const usePhases=(ar=false)=>{const dj=useTreeService('dj',ar),steps=useTreeSteps();return ALL_PHASES.filter(row=>(row[0]!=='dj'||steps.dj)&&(row[0]!=='rental'||steps.rental)).map(row=>row[0]==='dj'&&dj.name?[row[0],dj.name,dj.name,row[3].replace('DJ Khalil',dj.name),row[4].replace('دي جي خليل',dj.name)]:row);};
+// Steps exist only while their service is in the catalogue.
+const usePhases=(ar=false)=>{const steps=useTreeSteps();return ALL_PHASES.filter(row=>(row[0]!=='dj'||steps.dj)&&(row[0]!=='rental'||steps.rental));}; // step 3 is always "Echo Services" (the step definition), whatever the DJ service is called
 // Longer headings for the page; the step bar keeps the short names above.
-const HEADINGS={personal:['Personal info: who we are planning with','المعلومات الشخصية: مع من نخطط'],event:['Event info: your occasion, date, guests and venue','معلومات الفعالية: المناسبة والموعد والضيوف والمكان'],dj:['DJ Khalil Service: live music for your night','خدمة دي جي خليل: موسيقى حية لسهرتك'],rental:['Rental equipments','معدات التأجير'],additional:['Additional info: inspiration, documents and notes','معلومات إضافية: أفكار ومستندات وملاحظات']};
+const HEADINGS={personal:['Personal info: who we are planning with','المعلومات الشخصية: مع من نخطط'],event:['Event info: your occasion, date, guests and venue','معلومات الفعالية: المناسبة والموعد والضيوف والمكان'],dj:['Echo Services','خدمات إيكو'],rental:['Rental equipments','معدات التأجير'],additional:['Additional info: inspiration, documents and notes','معلومات إضافية: أفكار ومستندات وملاحظات']};
 
 export function PhaseHeading({id,ar=false}){
  const phases=usePhases(ar),dj=useTreeService('dj',ar),index=phases.findIndex(([key])=>key===id);
  if(index<0)return null;
  const [,en,arabic,subEn,subAr]=phases[index],n=index+1;
- return <div className="booking-phase" id={`booking-phase-${n}`} data-phase={id} dir={ar?'rtl':'ltr'}><span>{ar?`الخطوة ${n} من ${phases.length}`:`STEP ${n} OF ${phases.length}`}</span><h2>{id==='dj'&&dj.name?`${dj.name}: ${ar?'موسيقى حية لسهرتك':'live music for your night'}`:HEADINGS[id]?.[ar?1:0]||(ar?arabic:en)}</h2>{subEn&&<p className="booking-phase-sub">{ar?subAr:subEn}</p>}</div>;
+ return <div className="booking-phase" id={`booking-phase-${n}`} data-phase={id} dir={ar?'rtl':'ltr'}><span>{ar?`الخطوة ${n} من ${phases.length}`:`STEP ${n} OF ${phases.length}`}</span><h2>{id==='dj'?(ar?'خدمات إيكو':'Echo Services'):HEADINGS[id]?.[ar?1:0]||(ar?arabic:en)}</h2>{subEn&&<p className="booking-phase-sub">{ar?subAr:subEn}</p>}</div>;
 }
 
 export function PhaseBar({ar=false}){

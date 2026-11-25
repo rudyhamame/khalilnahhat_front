@@ -11,15 +11,15 @@ test('rental decision stays visible, decline gates browsing and preserves saved 
  const order=createEventOrder();order.rental.requested=false;
  const goal=bookingGoal('rentals');
  let lines=sectionLines(order,goal,false,rentals).lines;
- assert.equal(lines.find(row=>row.key==='rental.requested').value,'No');
+ assert.equal(lines.some(row=>row.key==='rental.requested'),false); // the rental question is UI only, not a numbered atom
  assert.equal(lines.some(row=>row.category),false);
  order.equipment=[{id:'speaker',name:'Speaker',quantity:2}];
  lines=sectionLines(order,goal,false,rentals).lines;
- assert.match(lines.find(row=>row.key==='rental.requested').value,/still saved/);
+ assert.equal(lines.some(row=>row.key==='rental.requested'),false);
  assert.equal(lines.find(row=>row.category).items[0].reviewValue,2);
- assert.equal(submittedSectionLines(order,goal).lines.find(row=>row.key==='rental.requested').value,'No');
+ assert.equal(submittedSectionLines(order,goal).lines.some(row=>row.key==='rental.requested'),false);
  const reviewable=unconfirmedReviewAtoms({},lines.flatMap(row=>[row,...row.items||[]]));
- assert.deepEqual(reviewable.map(row=>row.key),['rental.requested','equipment:sound:speaker']);
+ assert.deepEqual(reviewable.map(row=>row.key),['equipment:sound:speaker']);
 });
 test('saved equipment missing from the current catalogue remains visible, also in submitted snapshots',()=>{
  const order=createEventOrder();order.equipment=[{id:'retired',name:'Saved speaker',quantity:3}];
