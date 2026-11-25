@@ -2,6 +2,7 @@ import {useEffect,useState} from 'react';
 import {useTree,useTreeSteps} from '../lib/tree';
 import {ChevronUp,Trash2,X} from 'lucide-react';
 import {useEventOrder} from './eventOrderContext';
+import {confirmDeletion} from '../lib/confirmDeletion';
 import {PUBLIC_PAGE_PATHS} from '../lib/publicPages';
 import {effectiveMissing} from '../lib/bookingNextStep';
 import {NAMES,SKIP,stepOfKey,REQUIRED_KEYS,REQUIRED_ALL,answered,nextRequiredKey,nextOptionalKey} from '../lib/footerAtoms';
@@ -29,7 +30,7 @@ export default function BookingFooter({ar=false}){
   const close=()=>{setClosed(true);try{sessionStorage.setItem('echo-booking-footer','closed');}catch{/* private mode: closes for this view only */}};
   // Visible while scrolling down, hidden while scrolling up.
   // It also stays hidden in the first viewport: it appears once step 1 has scrolled into view (no step 1 on the page = no wait).
-  const [shown,setShown]=useState(false);
+  const [shown,setShown]=useState(false),[emptyFailed,setEmptyFailed]=useState(false);
   useEffect(()=>{let last=window.scrollY,up=false;const reached=()=>{const top=document.getElementById('booking-phase-1')?.getBoundingClientRect().top;return top===undefined||top<window.innerHeight*.6;};const apply=()=>setShown(reached()&&!up);apply();const onScroll=()=>{const y=window.scrollY,delta=y-last;if(Math.abs(delta)>=6){up=delta<0;last=y;}apply();};window.addEventListener('scroll',onScroll,{passive:true});return()=>window.removeEventListener('scroll',onScroll);},[]);
   const open=()=>{setClosed(false);try{sessionStorage.removeItem('echo-booking-footer');}catch{/* ignore */}};
   if(!ctx?.order)return null;
@@ -38,15 +39,25 @@ export default function BookingFooter({ar=false}){
   const required=nextRequiredKey(ctx.order),optional=nextOptionalKey(ctx.order);
   const link=key=>key?<a href={manualBookingFieldHref(key)} data-field={key} onClick={go}>{label(key)}</a>:<span className="booking-footer-done">{tr('All done','اكتمل')}</span>;
   const missingKeys=effectiveMissing(ctx.order).map(field=>field.key).filter(key=>key!=='services'),stepOf=key=>parseInt(String(fieldCode(key)||'').slice(0,2),10);
-  const steps=STEPS.map(([en,arabic],index)=>{const n=index+1,optionalKeys=ATOM_KEYS.filter(key=>stepOfKey(key)===n&&!SKIP.has(key)&&!REQUIRED_ALL.has(key)),left=missingKeys.filter(key=>stepOf(key)===n).length,reqTotal=Math.max(REQUIRED_KEYS(n).length,left),reqDone=reqTotal-left,chosen=ctx.order.equipment?.length||0,rest=optionalKeys.filter(key=>key!=='equipment'),optDone=rest.filter(key=>answered(ctx.order,key)).length+(n===4?chosen:0),optTotal=n===4?Math.max(catalogEquipment.length,chosen):rest.length,all=reqTotal+optTotal,percent=all?Math.round((reqDone+optDone)/all*100):0;
+  const steps=STEPS.map(([en,arabic],index)=>{const n=index+1,optionalKeys=ATOM_KEYS.filter(key=>stepOfKey(key)===n&&!SKIP.has(key)&&!REQUIRED_ALL.has(key)),unansweredAsked=n===3?['music.djRequested','music.mcRequested'].filter(key=>!answered(ctx.order,key)).length:0,left=missingKeys.filter(key=>stepOf(key)===n).length+unansweredAsked, // the DJ and MC questions are asked in step 3: they count as done only once answered
+  reqTotal=Math.max(REQUIRED_KEYS(n).length,left),reqDone=reqTotal-left,chosen=ctx.order.equipment?.length||0,rest=optionalKeys.filter(key=>key!=='equipment'),optDone=rest.filter(key=>answered(ctx.order,key)).length+(n===3?chosen:0),optTotal=n===3?rest.length+Math.max(catalogEquipment.length,chosen):rest.length, // the rental equipment atoms belong to step 3, Echo Services
+  all=reqTotal+optTotal,percent=all?Math.round((reqDone+optDone)/all*100):0;
    return {n,name:ar?arabic:en,left,reqDone,reqTotal,optDone,optTotal,percent,state:left>0?'todo':reqTotal>0||optDone>0?'done':'optional'};});
-  const visible=steps.filter(step=>(step.n!==3||avail.dj)&&(step.n!==4||avail.rental)).map((step,at)=>({...step,pos:at+1})); // steps that exist in the catalogue, numbered as the page numbers them
+  const visible=steps.filter(step=>step.n!==3||avail.dj||avail.rental).map((step,at)=>({...step,pos:at+1})); // steps that exist in the catalogue, numbered as the page numbers them
   const goStep=n=>{const el=document.getElementById(`booking-phase-${n}`);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});else window.location.assign(`/booking#booking-phase-${n}`);}; // off the steps tab: open it at that step
   // Every data atom of the booking contract counts: total = the contract's atoms.
   // Every piece of catalogue equipment is its own atom, replacing the single `equipment` entry.
   const chosenItems=ctx.order.equipment?.length||0,others=ATOM_KEYS.filter(key=>key!=='equipment'),total=others.length+Math.max(catalogEquipment.length,chosenItems),count=others.filter(key=>answered(ctx.order,key)).length+chosenItems,percent=Math.min(100,Math.round(count/total*100));
+  // Empties the whole draft (details, equipment, conversation), then reloads the page so every form starts blank.
+  const emptyDraft=async()=>{
+    setEmptyFailed(false);
+    if(!await confirmDeletion(tr('Empty this booking draft? Every detail, equipment choice and the conversation will be removed.','إفراغ مسودة الحجز؟ ستُزال كل التفاصيل والمعدات والمحادثة.'),{title:tr('Empty booking draft?','إفراغ مسودة الحجز؟'),confirmLabel:tr('Empty draft','إفراغ المسودة'),irreversible:false}))return;
+    const cleared=await ctx.clear(true);
+    if(cleared)window.location.reload();else setEmptyFailed(true);
+  };
   return <><div className="booking-footer-spacer" aria-hidden="true"/><footer className={`booking-footer${shown?'':' is-hidden'}`} dir={ar?'rtl':'ltr'} aria-label={tr('Booking status','حالة الحجز')}>
     <button type="button" className="booking-footer-close" onClick={close} aria-label={tr('Close booking status','إغلاق حالة الحجز')} title={tr('Close','إغلاق')}><X size={16} aria-hidden="true"/></button>
+    <div className="booking-footer-main">
     <ol className="booking-footer-steps" aria-label={tr('Step progress','تقدم الخطوات')}>{visible.map(step=><li key={step.n}><button type="button" className={`is-${step.state}`} onClick={()=>goStep(step.pos)} aria-label={`${tr('Step','الخطوة')} ${step.pos} ${step.name}: ${tr('required','مطلوب')} ${step.reqDone}/${step.reqTotal}, ${tr('optional','اختياري')} ${step.optDone}/${step.optTotal}`}><span className="step-line"><b>{step.pos}</b><em>{step.name}</em><i aria-hidden="true">{step.state==='done'&&step.percent===100?'✓':`${step.percent}%`}</i></span><u className="step-bar" aria-hidden="true"><s style={{width:`${step.percent}%`}}/></u><small className="step-counts">{step.reqTotal>0&&<span>{tr('Required','مطلوب')} {step.reqDone}/{step.reqTotal}</span>}{step.optTotal>0&&<span>{tr('Optional','اختياري')} {step.optDone}/{step.optTotal}</span>}</small></button></li>)}</ol>
     <div className="booking-footer-status" role="status">
       <span>{tr('Booking status','حالة الحجز')}</span>
@@ -54,8 +65,10 @@ export default function BookingFooter({ar=false}){
       <i className="booking-footer-bar" aria-hidden="true"><b style={{width:`${percent}%`}}/></i>
     </div>
     <dl className="booking-footer-next"><div><dt>{tr('Next required:','المطلوب التالي:')}</dt><dd>{link(required)}</dd></div><div><dt>{tr('Next optional:','الاختياري التالي:')}</dt><dd>{link(optional)}</dd></div></dl>
+    </div>
     <div className="booking-footer-actions">
-      <button type="button" className="booking-footer-delete" disabled={ctx.clearing} onClick={()=>{void ctx.clear();}}><Trash2 size={16} strokeWidth={1.8} aria-hidden="true"/>{tr('Delete Booking','حذف الحجز')}</button>
+      <button type="button" className="booking-footer-delete" disabled={ctx.clearing} onClick={emptyDraft}><Trash2 size={16} strokeWidth={1.8} aria-hidden="true"/>{tr('Empty Booking Draft','إفراغ مسودة الحجز')}</button>
+      {emptyFailed&&<small className="booking-footer-error" role="alert">{tr('The draft could not be emptied. Check your connection and try again.','تعذر إفراغ المسودة. تحقق من الاتصال وحاول مجدداً.')}</small>}
       <a className="booking-footer-button" href={PUBLIC_PAGE_PATHS.assistant}><SmartCartIcon size={18} strokeWidth={1.8} aria-hidden="true"/>{tr('Open Echo Smart Cart','افتح عربة إيكو الذكية')}</a>
     </div>
   </footer></>;

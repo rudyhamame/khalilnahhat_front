@@ -1,3 +1,4 @@
+import {bookingAtom} from '../lib/bookingAtoms.mjs';
 import {FieldCode} from './BookingPhases';
 import {useTree} from '../lib/tree';
 import {useEffect,useRef} from 'react';
@@ -10,7 +11,7 @@ const EVENT_ICONS={wedding:Heart,engagement:Gem,birthday:Cake,corporate:Briefcas
 export default function EventTypeColumn({ar=false}){
   const order=useEventOrder(),tr=(en,arabic)=>ar?arabic:en;
   const {catalog}=useTree();
-  const events=catalog.filter(item=>item.kind==='event'&&item.isActive),current=order?.order.event?.type||'';
+  const events=catalog.filter(item=>item.kind==='event'&&item.isActive&&bookingAtom('event.type').options.includes(item.bookingType)),current=order?.order.event?.type||'';
   const choices=useRef(null),lastHint=useRef(0),cancelHint=useRef(()=>{});
   const eventIds=events.map(event=>event.id).join('|');
   useEffect(()=>{

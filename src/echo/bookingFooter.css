@@ -73,3 +73,14 @@ html body .echo .booking-footer-next a:hover{color:#fff}
 .booking-footer-delete:hover:not(:disabled){background:#e07a6a;color:#1b0a07}
 .booking-footer-delete:disabled{opacity:.5;cursor:default}
 .booking-footer-delete:focus-visible{outline:2px solid #e07a6a;outline-offset:3px}
+/* Same size as the Open Echo Smart Cart button below it. */
+.booking-footer-delete{min-height:44px;padding:0 22px;gap:10px;font:700 13px/1 'Manrope','Noto Sans Arabic',sans-serif}
+@media(max-width:560px){.booking-footer-delete{padding:0 14px;font-size:12px}}
+.booking-footer-error{color:#f2a69a;font-size:11.5px;line-height:1.4;text-align:center}
+
+/* The steps, the status and the next-atom links form one block on the left; the two buttons stand to the right of that whole block. */
+.booking-footer{flex-wrap:nowrap;align-items:center}
+.booking-footer-main{display:flex;flex-wrap:wrap;align-items:center;flex:1;min-width:0;gap:0 16px}
+.booking-footer-main .booking-footer-steps{order:-1;flex-basis:100%;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);grid-template-columns:none}
+.booking-footer-actions{margin-inline-start:auto}
+@media(max-width:700px){.booking-footer{flex-wrap:wrap}.booking-footer-main{flex-basis:100%}.booking-footer-actions{flex-direction:row;flex-basis:100%;justify-content:flex-end}}

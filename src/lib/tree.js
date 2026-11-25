@@ -56,5 +56,5 @@ export function useTreeService(id,ar=false){
 // Which booking steps exist. Neither is mounted until the tree has loaded and confirms its service.
 export function useTreeSteps(){
  const {loading,steps}=useTree();
- return {dj:!loading&&steps.dj,rental:!loading&&steps.rental};
+ return {dj:!loading&&steps.dj,mc:!loading&&steps.mc,rental:!loading&&steps.rental};
 }

@@ -1,4 +1,3 @@
-import SetupNotes from './SetupNotes';
 import {useTree} from '../lib/tree';
 import {rentalServices,rentalServiceEquipment} from '../lib/numberedRentalCatalog';
 import RentalWorkbench from './RentalWorkbench';
@@ -55,5 +54,5 @@ export default function ServiceVinyl({lang}) {
   const previewEquipment=equipmentSelection===undefined?(suggested[0]||null):equipmentSelection&&suggested.find(item=>item.id===equipmentSelection.id)||null;
   return <><section ref={page} id="services" className="echo-section echo-service-vinyl setup-showcase rental-workbench" dir={ar?'rtl':'ltr'} aria-label={ar?'خدمات التأجير والمعدات':'Rental services and equipment'}>
     <RentalWorkbench services={services} sections={serviceSections} service={service} items={suggested} selectedItem={previewEquipment||suggested[0]||null} onService={item=>{setSelected(item.id);setPreviewEquipment(undefined);}} onEquipment={setPreviewEquipment} cart={cart} onQuantity={changeQuantity} ar={ar} failed={failed}/>
-  </section><SetupNotes ar={ar}/></>;
+  </section></>;
 }

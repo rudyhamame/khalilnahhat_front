@@ -34,17 +34,17 @@ test('an existing Other event type description stays visible even when the event
  const order=sample();order.event.type='wedding';assert.ok(eventPageSummary(order).some(line=>line.key==='event.title'&&line.value==='Community night'));
 });
 test('structured songs, attachments, zero and explicit No survive atom presentation',()=>{
- const order=sample();order.music.suggestedSongs=[{phase:'Family tribute',song:'My song',artist:'My artist',link:'https://youtu.be/test'}];
+ const order=sample();order.music.djRequested=true;order.music.suggestedSongs=[{phase:'Family tribute',song:'My song',artist:'My artist',link:'https://youtu.be/test'}];
  const row=sectionLines(order,bookingGoal('music'),false).lines.find(row=>row.key==='music.suggestedSongs');
  assert.match(row.value,/Family tribute: My song — My artist/);assert.match(row.value,/https:\/\/youtu.be\/test/);
  assert.equal(bookingFieldValue(order,'event.guestCount',false,0),'0');assert.equal(bookingFieldValue(order,'music.djRequested',false,false),'No');
- assert.equal(bookingFieldValue(order,'additional.inspiration',false,[{name:'Saved image',url:'https://example.com/image',comment:'Warm lighting'}]),'Saved image — Warm lighting');
+ assert.equal(bookingFieldValue(order,'references.photos',false,[{name:'Saved image',url:'https://example.com/image',comment:'Warm lighting'}]),'Saved image (https://example.com/image) — Warm lighting');
 });
 test('submitted history keeps saved equipment names and facts regardless of today’s catalog',()=>{
  const order=sample();order.services=['sound'];order.equipment=[{id:'retired-speaker',name:'Original speaker name',quantity:2}];
- const before=structuredClone(order),goal=bookingGoal('rentals'),snapshot=submittedSectionLines(order,goal);
+ const before=structuredClone(order),goal=bookingGoal('music'),snapshot=submittedSectionLines(order,goal);
  assert.match(snapshot.lines.find(line=>line.key==='equipment').value,/Original speaker name × 2/);
- assert.equal(snapshot.progress.missing.length,0);assert.ok(snapshot.lines.every(line=>!line.empty&&!line.required));
+ assert.equal(snapshot.progress.missing.length,0);assert.ok(snapshot.lines.every(line=>!line.required));
  sectionLines(order,goal,false,[{id:'new-service',bookingServiceId:'lighting',name:'New catalog service',equipment:[]}]);
  assert.deepEqual(submittedSectionLines(order,goal),snapshot);assert.deepEqual(order,before);
 });

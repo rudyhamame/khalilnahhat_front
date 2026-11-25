@@ -1,6 +1,7 @@
+import {bookingAtomApplies} from './bookingAtoms.mjs';
 import {fields,getPath,isAnswered} from './eventOrderCore.mjs';
 import {bookingNextStep,effectiveMissing} from './bookingNextStep.js';
-import {bookingStepDefinition,bookingStepForField} from './bookingFlow.mjs';
+import {bookingStepDefinition,bookingStepForField,hasBookingServices} from './bookingFlow.mjs';
 import {fieldQuestion} from './fieldQuestion.js';
 import {treeSteps} from './treeCore.js';
 
@@ -11,11 +12,11 @@ export const BOOKING_GOALS=GOAL_STEPS.map(([id,stepId])=>{const step=bookingStep
 // BOOKING_GOALS stays the full list for the AI, submitted snapshots and dashboards.
 export function activeGoals(){
  const present=treeSteps();
- return BOOKING_GOALS.filter(goal=>goal.id!=='music'||present.dj||present.rental);
+ return BOOKING_GOALS.filter(goal=>goal.id!=='music'||hasBookingServices(present));
 }
 export const bookingGoal=id=>BOOKING_GOALS.find(goal=>goal.id===id)||null;
-// "Your event type" (event.title) exists only when the client chose the type Other and types their own.
-export const ownTypeApplies=(order,key)=>key!=='event.title'||order?.event?.type==='other';
+// Apply the same gates as the page; keep a saved custom event description visible for correction.
+export const ownTypeApplies=(order,key)=>bookingAtomApplies(order,key);
 export function goalFields(goal){return fields.filter(field=>goal.matches(field.key)&&!['coordinate'].includes(field.type)&&!['event.venue.source','event.venue.sourceId','event.venue.sourceAttribution'].includes(field.key));}
 export function goalProgress(order,goal){
  const relevant=goalFields(goal).filter(field=>ownTypeApplies(order,field.key)),missing=effectiveMissing(order).filter(field=>goal.matches(field.key));
@@ -26,7 +27,7 @@ export function goalNextStep(order,ar,id){
  const goal=bookingGoal(id);if(!goal)return bookingNextStep(order,ar);
  const {missing}=goalProgress(order,goal),global=bookingNextStep(order,ar);
  const present=treeSteps();
- const candidate=goal.id==='music'?['music.djRequested',...(present.mc!==false?['music.mcRequested']:[]),...(present.rental?['rental.requested']:[])]:[];
+ const candidate=goal.id==='music'?[...(present.dj?['music.djRequested']:[]),...(present.mc!==false?['music.mcRequested']:[]),...(present.rental?['rental.requested']:[])]:[];
  const optionalKey=candidate.find(key=>getPath(order,key)==null);
  const optional=optionalKey?{key:optionalKey}:null;
  const field=optional||missing.find(field=>field.key===global.path)||missing[0];

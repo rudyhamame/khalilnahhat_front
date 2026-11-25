@@ -20,6 +20,7 @@ export function manualBookingFieldHref(path){
  if(path.startsWith('event.venue.'))return '/booking'+field+'#booking-venue';
  if(path==='event.guestCount')return '/booking'+field+'#booking-guests';
  if(['event.type','event.title','event.date','event.startTime','event.endTime'].includes(path))return '/booking'+field+'#booking-date';
+ if(path==='event.setup.requirements')return '/booking'+field+'#setup-notes';
  if(path==='additional.voucherCode')return '/booking'+field+'#voucher';
  if(path.startsWith('references.'))return '/rentals'+field+'#references';
  if(path==='additional.notes')return '/rentals'+field+'#additional-notes';

@@ -15,7 +15,7 @@ export function UnavailableReasonDialog({request,onConfirm,onClose,token,ar=fals
 
 export function ClientAvailabilityNotice({request,onQuoteAction,token,ar=false}){
  const tr=(en,arabic)=>ar?arabic:en,event=request.order?.event||{},legacy=request.event||{};
- const [showMeeting,setShowMeeting]=useState(()=>{const params=new URLSearchParams(window.location.search);return params.get('meeting')==='availability'&&params.get('booking')===request.id;}),[showSchedule,setShowSchedule]=useState(false);
+ const [showMeeting,setShowMeeting]=useState(()=>{if(typeof window==='undefined')return false;const params=new URLSearchParams(window.location.search);return params.get('meeting')==='availability'&&params.get('booking')===request.id;}),[showSchedule,setShowSchedule]=useState(false);
  const [date,setDate]=useState(event.date||legacy.eventDate||''),[startTime,setStartTime]=useState(event.startTime||legacy.startTime||''),[endTime,setEndTime]=useState(event.endTime||legacy.endTime||''),[busy,setBusy]=useState(false),[error,setError]=useState('');
  if(request.availability?.status!=='unavailable'||!request.journey?.canDiscussAvailability)return null;
  const submit=async e=>{e.preventDefault();setBusy(true);setError('');try{await onQuoteAction(request.id,'reschedule-request',{date,startTime,endTime,quoteRevision:request.quoteRevision||0});}catch(e){setError(e.message);}finally{setBusy(false);}};

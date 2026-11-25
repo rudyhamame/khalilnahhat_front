@@ -1,6 +1,6 @@
-import {bookingStepDefinition} from '../lib/bookingFlow.mjs';
+import {bookingStepDefinition,hasBookingServices} from '../lib/bookingFlow.mjs';
 import {useEffect,useState} from 'react';
-import {useTreeService,useTreeSteps} from '../lib/tree';
+import {useTreeSteps} from '../lib/tree';
 import {fieldCode} from '../lib/eventPageModel';
 import './bookingPhases.css';
 
@@ -9,19 +9,19 @@ import './bookingPhases.css';
 const PHASE_STEPS=[['personal','customer'],['event','event'],['dj','music'],['additional','additional']];
 const ALL_PHASES=PHASE_STEPS.map(([phase,step])=>{const definition=bookingStepDefinition(step);return [phase,definition.title,definition.ar,definition.description,definition.descriptionAr];});
 // Steps exist only while their service is in the catalogue.
-const usePhases=(ar=false)=>{const steps=useTreeSteps();return ALL_PHASES.filter(row=>row[0]!=='dj'||steps.dj||steps.rental);}; // step 3 is always "Echo Services" (the step definition), whatever the DJ service is called
+const usePhases=()=>{const steps=useTreeSteps();return ALL_PHASES.filter(row=>row[0]!=='dj'||hasBookingServices(steps));}; // step 3 is always "Echo Services" (the step definition), whatever the DJ service is called
 // Longer headings for the page; the step bar keeps the short names above.
 const HEADINGS={personal:['Personal info: who we are planning with','المعلومات الشخصية: مع من نخطط'],event:['Event info: your occasion, date, guests and venue','معلومات الفعالية: المناسبة والموعد والضيوف والمكان'],dj:['Echo Services','خدمات إيكو'],rental:['Rental equipments','معدات التأجير'],additional:['Additional info: inspiration, documents and notes','معلومات إضافية: أفكار ومستندات وملاحظات']};
 
 export function PhaseHeading({id,ar=false}){
- const phases=usePhases(ar),dj=useTreeService('dj',ar),index=phases.findIndex(([key])=>key===id);
+ const phases=usePhases(),index=phases.findIndex(([key])=>key===id);
  if(index<0)return null;
  const [,en,arabic,subEn,subAr]=phases[index],n=index+1;
  return <div className="booking-phase" id={`booking-phase-${n}`} data-phase={id} dir={ar?'rtl':'ltr'}><span>{ar?`الخطوة ${n} من ${phases.length}`:`STEP ${n} OF ${phases.length}`}</span><h2>{id==='dj'?(ar?'خدمات إيكو':'Echo Services'):HEADINGS[id]?.[ar?1:0]||(ar?arabic:en)}</h2>{subEn&&<p className="booking-phase-sub">{ar?subAr:subEn}</p>}</div>;
 }
 
 export function PhaseBar({ar=false}){
- const phases=usePhases(ar),count=phases.length;
+ const phases=usePhases(),count=phases.length;
  const [state,setState]=useState({active:1,show:false});
  // Like the footer: only while scrolling down.
  const [down,setDown]=useState(true);

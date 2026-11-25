@@ -95,7 +95,7 @@ function BookingMenu({ request, onQuoteAction, ar=false }) {
 function RequestedServices({ requests, onQuoteAction, authToken, ar=false }) {
   const tr=text=>bookingText(text,ar),money=value=>bookingMoney(value,ar),dateTime=value=>new Intl.DateTimeFormat(bookingLocale(ar),{dateStyle:'long',timeStyle:'short'}).format(value);
   // Left aside: one card per booking. Right main: the details of the selected booking.
-  const [selectedId, setSelectedId] = useState(()=>new URLSearchParams(window.location.search).get('booking')||'');
+  const [selectedId, setSelectedId] = useState(()=>typeof window==='undefined'?'':new URLSearchParams(window.location.search).get('booking')||'');
   const selected = requests.find((request) => request.id === selectedId) || requests[0];
   return (
     <section className={`dashboard-services-view${requests.length ? ' is-split' : ''}`} aria-label={tr("Requests and quotes")}>

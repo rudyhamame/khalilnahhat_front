@@ -36,3 +36,5 @@ export function venueSelectionChanges(place){
  const fields={name:String(place.name||'').slice(0,160),address:String(place.address||'').slice(0,240),city:String(place.city||'').slice(0,80),postalCode:place.postalCode||'',country:place.country||'Canada',addressDetails:place.details||null,latitude:place.latitude??null,longitude:place.longitude??null,source:place.source||null,sourceId:place.sourceId||null,sourceAttribution:place.sourceAttribution||null};
  return Object.entries(fields).map(([key,value])=>({path:'event.venue.'+key,value}));
 }
+
+export const hasBookingServices=present=>Boolean(present?.dj||present?.mc||present?.rental);

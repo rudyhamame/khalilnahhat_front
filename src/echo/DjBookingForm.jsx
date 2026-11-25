@@ -1,27 +1,28 @@
+import {validValue} from '../lib/eventOrderCore.mjs';
+import {bookingSectionAtoms,bookingAtom} from '../lib/bookingAtoms.mjs';
 import {reconcileSuggestedSongRows,savedSuggestedSongs} from '../lib/suggestedSongRows';
 import BookingStep from './BookingStep';
 import {FieldCode} from './BookingPhases';
 import {useState} from 'react';
 import {ArrowDown,ArrowUp,Check,Plus,Search,Trash2,X} from 'lucide-react';
-import {SONG_PHASES,optionLabel} from '../lib/djOptions';
 import {useWorkVocabulary} from '../lib/workVocabulary';
 import FavouriteSongsEditor from './FavouriteSongsEditor';
 import YouTubeSongSearch from './YouTubeSongSearch';
 import {isYouTubeLink} from '../lib/favouriteSongs.mjs';
 import TagInput from './TagInput';
-import {favouriteSongEntries} from '../lib/favouriteSongs.mjs';
 import {dialectsOf,languagesOf,makeMain,withDialect,withLanguage} from '../lib/languagePairs.mjs';
 import './djBookingForm.css';
 
-const MUSIC_PREFERENCE_ATOMS={1:'music.languagePairs',2:'music.genres',3:'music.suggestedSongs',4:'music.favouriteSongs',5:'music.favouriteArtists'};
+const MUSIC_PREFERENCE_ATOMS=Object.fromEntries(bookingSectionAtoms('03.02').map((key,index)=>[index+1,key]));
 
 // Replaces the DJ Khalil's Work content with the inputs of the DJ service section of the Booking summary.
-export default function DjBookingForm({ar=false,ctx,djAdded,onClose,backLabel}){
+export default function DjBookingForm({ar=false,ctx}){
  const tr=(en,arabic)=>ar?arabic:en;
  const music=ctx?.order?.music||{};
  const canEdit=Boolean(ctx?.draftEditable);
  const note=!ctx?.cloudReady?tr('Loading your saved draft…','جارٍ تحميل مسودتك…'):!canEdit?tr('This draft changed elsewhere. Reload it from the Booking summary.','تغيّرت المسودة في مكان آخر. أعد تحميلها من ملخص الحجز.'):'';
- const set=(path,value)=>ctx.setField(path,value);
+ const [atomError,setAtomError]=useState('');
+ const set=(path,value)=>{if(!validValue(bookingAtom(path),value)){setAtomError(tr('This list has reached its limit, or an entry is incomplete. Check your entries before adding more.','بلغت القائمة حدها الأقصى أو أن أحد الإدخالات غير مكتمل. تحقق من الإدخالات قبل إضافة المزيد.'));return false;}setAtomError('');return ctx.setField(path,value);};
 
  // These choices come from the admin's Work Elements lists: languages, dialects and genres.
  const vocab=useWorkVocabulary(),lists=vocab.data;
@@ -60,11 +61,9 @@ export default function DjBookingForm({ar=false,ctx,djAdded,onClose,backLabel}){
  }
  const setRows=update=>setSongState(current=>({...current,rows:typeof update==='function'?update(current.rows):update}));
  const [nextKey,setNextKey]=useState(1000);
- const artistOptions=[...(lists?.artists||[]),...rows.map(row=>row.artist||'').filter(Boolean)];
  const validLink=link=>/^https:\/\/\S+$/i.test(String(link||'').trim());
- const commit=next=>{const saved=savedSuggestedSongs(next);setSongState({signature:JSON.stringify(saved),draftId,songs:saved,rows:next});set('music.suggestedSongs',saved);};
+ const commit=next=>{const saved=savedSuggestedSongs(next);if(set('music.suggestedSongs',saved)===false)return;setSongState({signature:JSON.stringify(saved),draftId,songs:saved,rows:next});};
  // A song found on YouTube needs nothing else: its name, artist and link come from the video.
- const addFound=entry=>{if(rows.length>=30)return;setNextKey(value=>value+1);commit([...rows,{key:`s${nextKey}`,phase:'',...entry}]);};
  const patchRow=(key,patch)=>commit(rows.map(row=>row.key===key?{...row,...patch}:row));
  const addRow=mode=>{setNextKey(value=>value+1);setRows(current=>[...current,{key:`s${nextKey}`,phase:'',song:'',artist:'',mode}]);};
  // Several songs can share one moment: a follower row repeats the moment above it (same non-empty moment, or added with "another song").
@@ -79,7 +78,6 @@ export default function DjBookingForm({ar=false,ctx,djAdded,onClose,backLabel}){
  const norm=value=>String(value||'').trim().toLowerCase();
  const usedElsewhere=(s,value)=>norm(value)!==''&&rows.some((row,at)=>!follows(at)&&at!==s&&norm(row.phase)===norm(value));
  const moveGroup=(s,step)=>{const groups=[];rows.forEach((_,at)=>{if(follows(at))groups[groups.length-1].push(rows[at]);else groups.push([rows[at]]);});const g=groups.findIndex(list=>list[0]===rows[s]),to=g+step;if(g<0||to<0||to>=groups.length)return;[groups[g],groups[to]]=[groups[to],groups[g]];commit(groups.flat());};
- const removeDj=()=>{ctx.removeService('dj');onClose();};
  // The sections are collected here, then shown as a left column (the list) and a main component (the open section).
  const cards=[];
  const section=(number,title,hint,children,action=null)=>{cards.push({number,title,hint,children,action});return null;};
@@ -123,15 +121,14 @@ export default function DjBookingForm({ar=false,ctx,djAdded,onClose,backLabel}){
     </>,<div className="djf-song-adders"><button type="button" className="djf-add" disabled={rows.length>=30} onClick={()=>addRow('choose')}><Plus size={15} aria-hidden="true"/>{tr('Add moment','إضافة لحظة')}</button></div>)}
     {section(4,tr('Favourite songs','الأغاني المفضلة'),tr('The songs you simply cannot do without, whatever the moment. Search YouTube and pick them, or add them by hand with the song name and artist. We will build the set around them and make sure they are played.','الأغاني التي لا غنى عنها مهما كانت اللحظة. ابحث عنها في يوتيوب واختَرها، أو أضفها يدوياً باسم الأغنية والفنان. سنبني الأمسية حولها ونحرص على تشغيلها.'),<FavouriteSongsEditor ar={ar} token={ctx?.token} disabled={!canEdit} value={music.favouriteSongs} onChange={next=>set('music.favouriteSongs',next)}/>)}
     {section(5,tr('Favourite artists','الفنانون المفضلون'),tr('Name the artists whose sound you want to hear more of. Type each name and press Enter. They help us understand your taste, so we can play your favourites and similar voices you may not have thought of.','اذكر الفنانين الذين تريد سماع المزيد من أسلوبهم. اكتب كل اسم واضغط Enter. تساعدنا أسماؤهم على فهم ذوقك، لنقدم مفضلاتك وأصواتاً مشابهة قد لا تكون فكرت بها.'),<>
-     <TagInput ar={ar} disabled={!canEdit} label={tr('Favourite artists','الفنانون المفضلون')} placeholder={tr('Type an artist and press Enter…','اكتب اسم فنان واضغط Enter…')} values={asList(music.favouriteArtists)} onChange={next=>set('music.favouriteArtists',next)}/>
+     <TagInput ar={ar} disabled={!canEdit} max={40} label={tr('Favourite artists','الفنانون المفضلون')} placeholder={tr('Type an artist and press Enter…','اكتب اسم فنان واضغط Enter…')} values={asList(music.favouriteArtists)} onChange={next=>set('music.favouriteArtists',next)}/>
          </>)}
    </div>
   </div>
    {(()=>{
-    const counts={1:chosenLanguages.length,2:genres.length,3:rows.length,4:favouriteSongEntries(music.favouriteSongs).length,5:asList(music.favouriteArtists).length};
     // Every section is its own card, one under the other (no tabs): language & dialect, genres, event moments, favourite songs, favourite artists.
-    return <div className="djf-cards">
-     {cards.map(card=><BookingStep key={card.number} number={9+card.number} side={card.number%2?'left':'right'} className="djf-step" title={card.title} copy={card.hint||''} cardTitle={<><FieldCode k={MUSIC_PREFERENCE_ATOMS[card.number]}/>{card.title}</>}><div id={`djf-section-${card.number}`} className="djf-card-body">{card.action&&<div className="djf-card-action">{card.action}</div>}{card.children}</div></BookingStep>)}
+    return <div className="djf-cards">{atomError&&<p className="djf-empty" role="alert">{atomError}</p>}
+     {cards.map(card=><BookingStep key={card.number} number={9+card.number} side={card.number%2?'left':'right'} className="djf-step" title={card.title} copy={card.hint||''} cardTitle={<><FieldCode k={MUSIC_PREFERENCE_ATOMS[card.number]}/>{card.title}</>}><div id={`djf-section-${card.number}`} className="djf-card-body" data-booking-field={MUSIC_PREFERENCE_ATOMS[card.number]}>{card.action&&<div className="djf-card-action">{card.action}</div>}{card.children}</div></BookingStep>)}
     </div>;
    })()}
   </fieldset></div>
