@@ -66,7 +66,7 @@ export default function RentalWorkbench({services,sections,service,items,selecte
     let sectionIndex=serviceSections.findIndex(section=>section.service.id===serviceId&&section.items.some(entry=>entry.id===row.id));
     if(sectionIndex<0)sectionIndex=serviceSections.findIndex(section=>section.items.some(entry=>entry.id===row.id));
     const section=serviceSections[sectionIndex],itemIndex=section?.items.findIndex(entry=>entry.id===row.id)??-1;
-    return `03.${String(Math.max(0,sectionIndex)+4).padStart(2,'0')}.${String(Math.max(0,itemIndex)+1).padStart(2,'0')}`;
+    return `03.${String(Math.max(0,sectionIndex)+5).padStart(2,'0')}.${String(Math.max(0,itemIndex)+1).padStart(2,'0')}`;
   };
   const quantity=item?(cart[item.id]?.quantity||0):0;
   const heading=name(service||{name:tr('Category items','عناصر الفئة'),nameAr:'عناصر الخدمة'});

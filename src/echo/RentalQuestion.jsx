@@ -1,6 +1,7 @@
 import {ArrowDown,Boxes} from 'lucide-react';
 import {useTree,useTreeService} from '../lib/tree';
 import BookingStep from './BookingStep';
+import {FieldCode} from './BookingPhases';
 import {useEventOrder} from './eventOrderContext';
 import {rentalServices} from '../lib/numberedRentalCatalog';
 
@@ -16,7 +17,7 @@ export default function RentalQuestion({ar=false}){
     <BookingStep number={7} side="right" className="dj-service-step rental-question-step" title={tr('Do you need equipment to rent?','هل تحتاج إلى معدات للتأجير؟')} cardTitle={<>{tr('Rental equipment','معدات التأجير')}</>}
       copy={tr(`${dj.name?`Besides ${dj.name}, we`:'We'} rent equipment: ${names}. Tell us if your event needs any equipment; if it does, the equipment list opens below.`,`${dj.name?`إلى جانب ${dj.name}، نؤجر`:'نؤجر'} معدات: ${names}. أخبرنا إن كانت فعاليتك تحتاج إلى معدات، وإن كانت كذلك تُفتح قائمة المعدات أدناه.`)}>
       <aside className="event-type-column dj-choice">
-        <span className="avail-kicker">{tr('RENTAL EQUIPMENT *','معدات التأجير *')}</span>
+        <span className="avail-kicker"><FieldCode k="rental.requested"/>{tr('RENTAL EQUIPMENT *','معدات التأجير *')}</span>
         <div role="group" aria-label={tr('Do you need equipment to rent?','هل تحتاج إلى معدات للتأجير؟')}>
           <button type="button" data-event-choice disabled={locked} aria-pressed={answer===true} onClick={()=>ctx.setField('rental.requested',true)}><Boxes size={17} strokeWidth={1.6} aria-hidden="true"/><span>{tr('Yes, show the equipment','نعم، اعرض المعدات')}</span></button>
           <button type="button" data-event-choice disabled={locked||hasItems} aria-pressed={answer===false} title={hasItems?tr('Remove your selected equipment first','أزل المعدات المحددة أولاً'):undefined} onClick={()=>ctx.setField('rental.requested',false)}><ArrowDown size={17} strokeWidth={1.6} aria-hidden="true"/><span>{tr('No, I do not need equipment','لا، لا أحتاج إلى معدات')}</span></button>

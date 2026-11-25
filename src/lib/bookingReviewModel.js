@@ -22,15 +22,15 @@ export function sectionLines(order,goal,ar,rentals=[],catalogLoading=false){
  const tree=goal.id==='music'&&rentals.length>0,loading=goal.id==='music'&&catalogLoading&&!rentals.length;
  if(loading)return {progress,lines:[{key:'services',label:ar?'خدمات التأجير':'Rental services',value:ar?'جارٍ التحميل…':'Loading…',empty:true,required:false,group:2}]};
  // Rental equipment is listed as a tree: every equipment category with all of its equipment under it.
- const all=goalFields(goal).filter(field=>ownTypeApplies(order,field.key)&&(!field.gate||getPath(order,field.gate)===true)&&field.key!=='services'&&field.key!=='rental.requested'); // services and the rental question are UI/internal logic, not numbered atoms: the equipment list below holds the real atoms; services is internal logic, not a booking atom: DJ and MC have their own lines
+ const all=goalFields(goal).filter(field=>ownTypeApplies(order,field.key)&&(!field.gate||getPath(order,field.gate)===true)&&field.key!=='services'); // services is internal logic, not a booking atom: DJ and MC have their own lines
  // Every field of the section is listed with its value; fields not answered yet read "Not set yet".
  const lines=all.filter(field=>field.key!=='event.setup.requirements'||order.rental?.requested===true||isAnswered(getPath(order,field.key))).map(field=>({key:field.key,reviewValue:draftValue(order,field.key),label:(fieldName(field.key,ar)||(ar?field.ar||field.label:field.label)).replace(/\s*[(（](?:optional|only if|اختياري)[^)）]*[)）]/i,''),value:bookingFieldValue(order,field.key,ar,draftValue(order,field.key)),...(field.key.startsWith('music.')||field.key.startsWith('references.')?{rawValue:draftValue(order,field.key)}:{}),empty:!isAnswered(draftValue(order,field.key)),required:progress.missing.some(item=>item.key===field.key)}));
  if(tree&&order.rental?.requested===false&&order.equipment?.length){const decision=lines.find(line=>line.key==='rental.requested');if(decision)decision.value+=tr(' — selected equipment is still saved; remove it or enable rentals.',' — المعدات المختارة ما زالت محفوظة؛ احذفها أو فعّل التأجير.');}
  if(tree&&(order.rental?.requested===true||order.equipment?.length)){
   const needs=progress.missing.some(item=>item.key==='services'),name=item=>ar?item.nameAr||item.name:item.name;
-  // Codes match the Booking page cards: categories 03.04, 03.05… (MC is a real service, not a category) and their individual equipment 03.0X.01…
+  // Codes match the Booking page cards: categories 03.05, 03.06… (MC is a real service, not a category) and their individual equipment 03.0X.01…
   // MC hosting is a real service of Step 3 (music.mcRequested has its own line there), so it is not part of the rental tree.
-  const categories=bookingSections(order,rentals).rentals.filter(service=>service.id!=='mc'&&service.selectionField!=='music.mcRequested');let categoryNumber=3;
+  const categories=bookingSections(order,rentals).rentals.filter(service=>service.id!=='mc'&&service.selectionField!=='music.mcRequested');let categoryNumber=4;
   const listed=new Set();
  for(const service of categories){
    const code=`03.${String(++categoryNumber).padStart(2,'0')}`;let itemNumber=0;
