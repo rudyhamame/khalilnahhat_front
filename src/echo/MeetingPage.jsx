@@ -65,7 +65,7 @@ export default function MeetingPage({ lang, user, token, isSessionReady }) {
                   setMoving('');
                 })}>
                   <option value="" disabled>{L('Choose a new time', 'اختر وقتاً جديداً')}</option>
-                  {slots.map((s) => <option key={s.id} value={s.id}>{fmt(s.start)}</option>)}
+                  {slots.map((s) => <option key={s.id} value={s.id} disabled={s.tooSoon}>{fmt(s.start)}{s.tooSoon ? ` — ${L('too soon to book', 'قريب جداً للحجز')}` : ''}</option>)}
                 </select>
               )}
             </div>
