@@ -166,7 +166,7 @@
 .notification-design-body{display:grid;grid-template-columns:minmax(230px,290px) minmax(0,1fr);flex:1;min-height:0;overflow:auto;scrollbar-width:thin}
 .notification-design-settings{display:flex;flex-direction:column;gap:22px;margin:0;padding:26px 24px;border:0;border-inline-end:1px solid var(--ne-line);min-width:0}
 .notification-design-photo{display:flex;align-items:center;gap:15px}
-.notification-design-photo>img{display:block;width:72px;height:100px;object-fit:cover;border-radius:0;background:#192a25}
+.notification-design-photo>img{display:block;width:72px;height:100px;object-fit:contain;border-radius:0;background:transparent}
 .notification-design-photo strong{font-size:12px;font-weight:500}
 .notification-design-photo p{font-size:11px;color:var(--ne-muted);margin:4px 0 10px}
 .admin-workspace .notification-admin .notification-design-photo button{font-size:11px;padding:6px 9px;min-height:31px}

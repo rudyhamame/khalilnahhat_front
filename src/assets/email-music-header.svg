@@ -1,0 +1,6 @@
+<!-- Music page: #0d1418 with the shared 180px, 0.8-frequency film grain at 20% opacity. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 180 180">
+  <defs><filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter></defs>
+  <path fill="#0d1418" d="M0 0h180v180H0z"/>
+  <path opacity=".2" fill="#fff" filter="url(#grain)" d="M0 0h180v180H0z"/>
+</svg>

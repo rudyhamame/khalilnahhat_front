@@ -1,3 +1,4 @@
+import {emailPreviewHtml} from './emailPreviewHtml';
 import {useEffect,useRef,useState} from 'react';
 import {Mail,Save,Eye,Check,CheckCircle2,Search,RefreshCw,X,ChevronRight,Clock3,Users,ArrowLeft,PenLine,AlertCircle,PanelsTopLeft,Sparkles} from 'lucide-react';
 import {apiRequest} from '../lib/api';
@@ -146,7 +147,7 @@ export default function NotificationEmailsAdmin({token}){
       <button type="button" className="notification-shared-link" aria-label="Edit shared photo and branding" aria-describedby="notification-shared-help" aria-controls="notification-shared-design" onClick={()=>{openDesign();designTab.current?.focus();}}><PanelsTopLeft size={18}/><span><strong>Edit shared photo and branding</strong><small id="notification-shared-help">Applies to every automated email</small></span><ChevronRight size={16}/></button>
      </div>:<div id="notification-preview-panel" className="notification-preview-panel" role="tabpanel" aria-labelledby="notification-preview-tab">
       <div className="notification-preview-caption"><Eye size={15}/><span>Sample preview · No email is sent</span></div>
-      {action==='preview'?<div className="notification-loading" role="status"><RefreshCw size={20} className="notification-spinner"/>Preparing preview…</div>:preview?<div className="notification-email-canvas"><iframe title="Email preview" sandbox="" srcDoc={preview.html}/></div>:<div className="notification-empty"><Eye size={26}/><p>The preview couldn’t be generated.</p><button type="button" className="notification-button" disabled={busy} onClick={showPreview}>Try preview again</button></div>}
+      {action==='preview'?<div className="notification-loading" role="status"><RefreshCw size={20} className="notification-spinner"/>Preparing preview…</div>:preview?<div className="notification-email-canvas"><iframe title="Email preview" sandbox="" srcDoc={emailPreviewHtml(preview.html)}/></div>:<div className="notification-empty"><Eye size={26}/><p>The preview couldn’t be generated.</p><button type="button" className="notification-button" disabled={busy} onClick={showPreview}>Try preview again</button></div>}
      </div>}
      <footer><p>{dirty?'Changes apply after saving.':'Saved settings are used for future emails.'}</p><div><button type="button" className="notification-discard" disabled={busy||!dirty} onClick={discard}>Discard changes</button><button type="submit" className="notification-save" disabled={busy||!dirty}>{action==='save'?<RefreshCw size={15} className="notification-spinner"/>:<Save size={15}/>} {action==='save'?'Saving…':'Save changes'}</button></div></footer>
     </form>}
