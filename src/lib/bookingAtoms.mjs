@@ -25,7 +25,7 @@ export function bookingAtomRange(keys){
 export const sectionCode=key=>fieldCode(key).split('.').slice(0,2).join('.');
 export const bookingSectionAtoms=code=>BOOKING_ATOM_SECTIONS.find(section=>section.code===code)?.keys||[];
 // The " *" shown after a question: present only while the atom is required (admin rules included).
-export const requiredMark=key=>bookingAtom(key).required?' *':'';
+export const requiredMark=key=>byKey.get(key)?.required?' *':'';
 export function bookingAtom(key){
  const field=byKey.get(key);
  if(!field)throw new Error(`Unknown booking atom: ${key}`);

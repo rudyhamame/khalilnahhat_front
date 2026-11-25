@@ -3,7 +3,7 @@ import {useTree,useTreeSteps} from '../lib/tree';
 import {ChevronUp,Trash2,X} from 'lucide-react';
 import {useEventOrder} from './eventOrderContext';
 import {confirmDeletion} from '../lib/confirmDeletion';
-import {BOOKING_TREE_STEPS} from '../lib/bookingAtoms.mjs';
+import {BOOKING_TREE_STEPS,requiredMark} from '../lib/bookingAtoms.mjs';
 import {PUBLIC_PAGE_PATHS} from '../lib/publicPages';
 import {effectiveMissing} from '../lib/bookingNextStep';
 import {NAMES,SKIP,stepOfKey,REQUIRED_KEYS,REQUIRED_ALL,answered,nextRequiredKey,nextOptionalKey} from '../lib/footerAtoms';
@@ -36,7 +36,7 @@ export default function BookingFooter({ar=false}){
   const open=()=>{setClosed(false);try{sessionStorage.removeItem('echo-booking-footer');}catch{/* ignore */}};
   if(!ctx?.order)return null;
   if(closed)return <button type="button" className={`booking-footer-tab${shown?'':' is-hidden'}`} dir={ar?'rtl':'ltr'} onClick={open} aria-label={tr('Open booking status','فتح حالة الحجز')}><ChevronUp size={16} aria-hidden="true"/>{tr('Booking status','حالة الحجز')}</button>;
-  const label=(key)=>{const code=fieldCode(key),name=NAMES[key]?NAMES[key][ar?1:0]:fieldName(key,ar)||key;return `${code?code+' ':''}${name}`;};
+  const label=(key)=>{const code=fieldCode(key),name=NAMES[key]?NAMES[key][ar?1:0]:fieldName(key,ar)||key;return `${code?code+' ':''}${name}${requiredMark(key)}`;};
   const required=nextRequiredKey(ctx.order),optional=nextOptionalKey(ctx.order);
   const link=key=>key?<a href={manualBookingFieldHref(key)} data-field={key} onClick={go}>{label(key)}</a>:<span className="booking-footer-done">{tr('All done','اكتمل')}</span>;
   const missingKeys=effectiveMissing(ctx.order).map(field=>field.key).filter(key=>key!=='services'),stepOf=key=>parseInt(String(fieldCode(key)||'').slice(0,2),10);
