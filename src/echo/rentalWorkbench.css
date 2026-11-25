@@ -289,3 +289,6 @@ html body .echo[data-page=home][data-theme] .rental-question-step{margin-bottom:
  html body .echo #services .rental-booking .setup-quantity-picker input{width:36px;height:32px;font-size:14px}
  html body .echo #services .rental-booking .setup-add-booking{flex:1 1 0;min-width:0;height:34px;min-height:34px;padding:0 12px;gap:6px;font-size:13px;white-space:nowrap}
 }
+
+/* A category section (Sound Systems, Lighting…) is never narrower than one equipment item (the width of one card in its row). */
+html body .rw-service-section-step .booking-step-card{min-width:clamp(210px,23vw,280px)}

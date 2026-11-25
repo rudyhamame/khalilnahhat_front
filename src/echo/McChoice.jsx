@@ -1,6 +1,9 @@
 import {Check,X} from 'lucide-react';
-import {useState} from 'react';
+import {useEffect,useRef,useState} from 'react';
+import {createPortal} from 'react-dom';
+import {ChevronDown} from 'lucide-react';
 import BookingStep from './BookingStep';
+import {useWorkVocabulary} from '../lib/workVocabulary';
 import {useTreeService} from '../lib/tree';
 import {FieldCode} from './BookingPhases';
 import {useEventOrder} from './eventOrderContext';
@@ -9,11 +12,17 @@ import {useEventOrder} from './eventOrderContext';
 export default function McRow({ar=false}){
   const tr=(en,arabic)=>ar?arabic:en,svc=useTreeService('mc',ar),order=useEventOrder(),value=order?.order?.music?.mcRequested,locked=!order?.draftEditable;
   const set=next=>order?.setField('music.mcRequested',next);
-  const pairs=order?.order?.music?.mcLanguagePairs||[],[language,setLanguage]=useState(''),[dialect,setDialect]=useState('');
-  const addPair=()=>{const name=language.trim();if(!name||locked)return;order?.setField('music.mcLanguagePairs',[...pairs.filter(row=>!(row.language===name&&row.dialect===dialect.trim())),{language:name,dialect:dialect.trim()}]);setLanguage('');setDialect('');};
+  const pairs=order?.order?.music?.mcLanguagePairs||[],lists=useWorkVocabulary().data;
+  // One select from the admin's Work Elements lists: every language, then each of its dialects ("Arabic · Lebanese").
+  const options=(lists?.languages||[]).flatMap(row=>[{key:row.name+'|',language:row.name,dialect:''},...(lists?.dialects||[]).filter(item=>item.languageIds.includes(row.id)).map(item=>({key:row.name+'|'+item.name,language:row.name,dialect:item.name}))]);
+  const addPair=key=>{const pick=options.find(option=>option.key===key);if(!pick||locked||pairs.some(row=>row.language===pick.language&&row.dialect===pick.dialect))return;order?.setField('music.mcLanguagePairs',[...pairs,{language:pick.language,dialect:pick.dialect}]);};
+  const [open,setOpen]=useState(false),[place,setPlace]=useState(null),menu=useRef(null),listRef=useRef(null);
+  // The list is fixed to the page (portal), so no card or section can clip it.
+  useEffect(()=>{if(!open)return undefined;const measure=()=>{const box=menu.current?.getBoundingClientRect();if(!box)return;const below=window.innerHeight-box.bottom-12,above=box.top-12,up=below<220&&above>below;setPlace({left:box.left,width:box.width,...(up?{bottom:window.innerHeight-box.top+6,maxHeight:Math.min(320,above)}:{top:box.bottom+6,maxHeight:Math.min(320,below)})});};measure();window.addEventListener('resize',measure);window.addEventListener('scroll',measure,true);return()=>{window.removeEventListener('resize',measure);window.removeEventListener('scroll',measure,true);};},[open]);
+  useEffect(()=>{if(!open)return undefined;const away=event=>{if(!menu.current?.contains(event.target)&&!listRef.current?.contains(event.target))setOpen(false);},esc=event=>{if(event.key==='Escape')setOpen(false);};document.addEventListener('pointerdown',away);document.addEventListener('keydown',esc);return()=>{document.removeEventListener('pointerdown',away);document.removeEventListener('keydown',esc);};},[open]);
   const removePair=index=>order?.setField('music.mcLanguagePairs',pairs.filter((_,at)=>at!==index));
   if(!svc.exists)return null; // the MC question exists only while an `mc` service is in the catalogue
-  return <BookingStep number={61} side="right" className="dj-service-step mc-service-step" title={tr(`Would you like ${svc.name} at your event?`,`هل تريد ${svc.name} في فعاليتك؟`)} cardTitle={<>{tr(`Add ${svc.name}`,`إضافة ${svc.name}`)}</>} copy={tr('Note: the MC is a third-party host, not DJ Khalil. Tell us if you want a host to announce and guide your night.','ملاحظة: مقدّم الحفل طرف ثالث وليس دي جي خليل. أخبرنا إن كنت تريد مقدّماً يعلن ويدير سهرتك.')}>
+  return <BookingStep number={61} side="left" className="dj-service-step mc-service-step" title={tr(`Would you like ${svc.name} at your event?`,`هل تريد ${svc.name} في فعاليتك؟`)} cardTitle={<>{tr(`Add ${svc.name}`,`إضافة ${svc.name}`)}</>} copy={tr('Note: the MC is a third-party host, not DJ Khalil. Tell us if you want a host to announce and guide your night.','ملاحظة: مقدّم الحفل طرف ثالث وليس دي جي خليل. أخبرنا إن كنت تريد مقدّماً يعلن ويدير سهرتك.')}>
   <aside className="event-type-column mc-choice">
     <span className="avail-kicker"><FieldCode k="music.mcRequested"/>{svc.name.toUpperCase()} *</span>
     {svc.description&&<p className="mc-choice-copy">{svc.description}</p>}
@@ -24,7 +33,10 @@ export default function McRow({ar=false}){
   </aside>
   {value===true&&<aside className="event-type-column mc-language">
     <span className="avail-kicker"><FieldCode k="music.mcLanguagePairs"/>{tr('MC LANGUAGE AND DIALECT','لغة ولهجة المقدّم')}</span>
-    <div className="mc-language-add"><input value={language} disabled={locked} maxLength={80} placeholder={tr('Language (for example Arabic)','اللغة (مثل العربية)')} onChange={event=>setLanguage(event.target.value)}/><input value={dialect} disabled={locked} maxLength={80} placeholder={tr('Dialect (optional)','اللهجة (اختياري)')} onChange={event=>setDialect(event.target.value)}/><button type="button" disabled={locked||!language.trim()} onClick={addPair}>{tr('Add','إضافة')}</button></div>
+    <div className="mc-language-menu" ref={menu}>
+      <button type="button" className="mc-language-trigger" aria-haspopup="listbox" aria-expanded={open} disabled={locked||!options.length} onClick={()=>setOpen(on=>!on)}><span>{options.length?tr('Choose a language and dialect','اختر لغة ولهجة'):tr('Loading the lists…','جارٍ تحميل القوائم…')}</span><ChevronDown size={16} aria-hidden="true"/></button>
+      {open&&place&&createPortal(<ul ref={listRef} className="mc-language-options" style={place} dir={ar?'rtl':'ltr'} role="listbox" aria-label={tr('Language and dialect','اللغة واللهجة')}>{options.map(option=>{const taken=pairs.some(row=>row.language===option.language&&row.dialect===option.dialect);return <li key={option.key} role="option" aria-selected={taken} className={`${option.dialect?'is-dialect':'is-language'}${taken?' is-taken':''}`}><button type="button" disabled={taken} onClick={()=>{addPair(option.key);setOpen(false);}}>{option.dialect||option.language}</button></li>;})}</ul>,document.body)}
+    </div>
     {pairs.length>0&&<ul className="mc-language-list">{pairs.map((row,index)=><li key={`${row.language}-${row.dialect}`}><span>{row.dialect?`${row.language} (${row.dialect})`:row.language}</span><button type="button" disabled={locked} aria-label={tr('Remove','إزالة')} onClick={()=>removePair(index)}><X size={14} aria-hidden="true"/></button></li>)}</ul>}
   </aside>}
   </BookingStep>;

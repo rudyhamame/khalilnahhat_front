@@ -13,7 +13,7 @@ export const rentalAnswer=order=>{
 export default function RentalQuestion({ar=false}){
   const tr=(en,arabic)=>ar?arabic:en,ctx=useEventOrder(),{catalog}=useTree(),dj=useTreeService('dj',ar),names=rentalServices(catalog).map(row=>(ar&&row.nameAr)||row.name).join(ar?'، ':', '),order=ctx?.order,answer=rentalAnswer(order),hasItems=answer===true&&(order?.equipment?.length>0||order?.services?.some(id=>!['dj','mc'].includes(id))),locked=!ctx?.draftEditable;
   return <div className="booking-services rental-question-wrap" dir={ar?'rtl':'ltr'}>
-    <BookingStep number={7} side="left" className="dj-service-step rental-question-step" title={tr('Do you need equipment to rent?','هل تحتاج إلى معدات للتأجير؟')} cardTitle={<>{tr('Rental equipment','معدات التأجير')}</>}
+    <BookingStep number={7} side="right" className="dj-service-step rental-question-step" title={tr('Do you need equipment to rent?','هل تحتاج إلى معدات للتأجير؟')} cardTitle={<>{tr('Rental equipment','معدات التأجير')}</>}
       copy={tr(`${dj.name?`Besides ${dj.name}, we`:'We'} rent equipment: ${names}. Tell us if your event needs any equipment; if it does, the equipment list opens below.`,`${dj.name?`إلى جانب ${dj.name}، نؤجر`:'نؤجر'} معدات: ${names}. أخبرنا إن كانت فعاليتك تحتاج إلى معدات، وإن كانت كذلك تُفتح قائمة المعدات أدناه.`)}>
       <aside className="event-type-column dj-choice">
         <span className="avail-kicker">{tr('RENTAL EQUIPMENT *','معدات التأجير *')}</span>

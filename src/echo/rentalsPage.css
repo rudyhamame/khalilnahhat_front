@@ -219,3 +219,78 @@ html body .rw-drawer .rental-youtube-link strong{color:#f4f7f3;font:700 13px/1.3
 html body .rw-drawer .rental-youtube-link small{color:#c9b3b3;font:500 12px/1.3 'Manrope','Noto Sans Arabic',sans-serif}
 html body .rw-drawer .rental-youtube-link>svg:last-child{flex:none;color:#f0a3a3}
 html body .rw-drawer .rental-youtube-link:hover{background:#ff5a5a22;border-color:#ff5a5a99}
+
+/* "Quantity" at the start, its availability (Available · remove) at the opposite end of the same row. */
+html body .rw-drawer .setup-quantity-picker>span{flex-direction:row!important;align-items:center!important;justify-content:space-between!important;flex-wrap:wrap}
+html body .rw-drawer .setup-quantity-picker>span .rental-stock-actions{display:inline-flex;width:auto!important;margin-inline-start:auto;justify-content:flex-end!important;flex-wrap:wrap}
+
+/* The equipment viewer drawer is black, not the olive/green theme. */
+html body .rw-drawer{background:#000!important;--rw-glass:#000000d9;--rw-line:#ffffff1f;box-shadow:0 0 90px #000}
+html body .rw-drawer .rw-drawer-head,html body .rw-drawer .rw-drawer-scroll,html body .rw-drawer .rw-drawer-body{background:#000}
+html body .rw-drawer .rw-drawer-stage{background:radial-gradient(circle at 50% 40%,#1c1c1c,#000)!important;border-color:#ffffff1f}
+html body .rw-drawer .rental-booking{background:#000!important;border-top-color:#ffffff1f}
+html body .rw-drawer .rental-quantity-controls>input{background:#0d0d0d!important}
+/* No border and no background on the 3D stage container. */
+html body .rw-drawer .rw-drawer-stage{border:0!important;background:transparent!important;box-shadow:none!important;border-radius:0}
+/* No visible borders anywhere in the equipment drawer. */
+html body .rw-drawer,html body .rw-drawer *{border-color:transparent!important;outline-color:transparent}
+html body .rw-drawer :focus-visible{outline-color:#e3d3a3}
+/* The drawer runs the full height of the screen, over the site header, so its edge reaches the very top. */
+html body .rw-scrim{z-index:100000}
+html body .rw-drawer{z-index:100001;top:0!important;bottom:0!important;height:100dvh;max-height:100dvh;margin:0;border-radius:0}
+/* No gap between the drawer header and the 3D viewer. */
+html body .rw-drawer .rw-drawer-head{padding-bottom:0;margin-bottom:0}
+html body .rw-drawer .rw-drawer-head p:last-child{margin-bottom:0}
+html body .rw-drawer .rw-drawer-scroll{padding-top:0;margin-top:0}
+html body .rw-drawer .rw-drawer-stage{margin-top:0;margin-bottom:0}
+/* The 3D viewer runs edge to edge: no side margin, square corners. */
+html body .rw-drawer .rw-drawer-stage{margin-inline:0!important;border-radius:0!important}
+html body .rw-drawer .rw-drawer-stage>*{border-radius:0!important}
+/* Header padding: room around the title, only a little below it so the viewer stays close. */
+html body .rw-drawer .rw-drawer-head{padding:28px 24px 10px!important}
+/* Smaller header text in the equipment drawer. */
+html body .rw-drawer .rw-drawer-head h3{font-size:clamp(17px,1.5vw,20px);margin-top:4px}
+html body .rw-drawer .rw-drawer-head p{font-size:12.5px}
+html body .rw-drawer .rw-drawer-head .rw-kicker{font-size:10.5px}
+/* The whole drawer header is compact: tighter padding, smaller close button. */
+html body .rw-drawer .rw-drawer-head{padding:16px 18px 8px!important;gap:8px}
+html body .rw-drawer .rw-drawer-head>button{width:32px;height:32px;min-width:0;min-height:0;padding:0}
+html body .rw-drawer .rw-drawer-head>button svg{width:16px;height:16px}
+html body .rw-drawer .rw-drawer-head h3{font-size:16px;line-height:1.25;margin:2px 0 0}
+html body .rw-drawer .rw-drawer-head p{margin:2px 0 0;font-size:12px}
+/* The drawer footer (quantity and booking) is compact too. */
+html body .rw-drawer .rental-booking{padding:12px 18px 14px!important;gap:10px!important}
+html body .rw-drawer .setup-quantity-picker{gap:10px}
+html body .rw-drawer .setup-quantity-picker>span{font-size:11px;margin:0 0 4px}
+html body .rw-drawer .rental-quantity-controls{grid-template-columns:40px minmax(0,1fr) 40px!important;gap:8px!important}
+html body .rw-drawer .rental-quantity-controls>button{width:40px!important;height:40px!important;border-radius:10px!important}
+html body .rw-drawer .rental-quantity-controls>input{height:40px!important;font-size:16px!important;border-radius:10px!important}
+html body .rw-drawer .rental-stock-actions .rental-quantity-note{font-size:11px;padding:3px 8px}
+html body .rw-drawer .rental-stock-actions .setup-add-booking{width:30px!important;height:30px!important}
+
+/* Drawer theme: black on black, no gold, olive or green. Text is white and grey, the accents are white. */
+html body .rw-drawer{--rw-ink:#fff;--rw-mute:#9a9a9a;--rw-gold:#fff;--rw-accent:#fff;--rw-line:#ffffff1a;color:#fff}
+html body .rw-drawer .rw-kicker,html body .rw-drawer .rw-kicker b{color:#9a9a9a}
+html body .rw-drawer .rw-drawer-head h3{color:#fff}
+html body .rw-drawer .rental-item-info dt,html body .rw-drawer .rental-item-info dd{color:#d8d8d8}
+html body .rw-drawer .rental-item-info dt{color:#8c8c8c}
+html body .rw-drawer .rental-stock-actions .rental-quantity-note{background:#ffffff14;color:#d8d8d8}
+html body .rw-drawer .setup-quantity-picker>span{color:#9a9a9a}
+html body .rw-drawer .rental-quantity-controls>button{background:#ffffff12!important;color:#fff!important}
+html body .rw-drawer .rental-quantity-controls>input{background:#0a0a0a!important;color:#fff}
+html body .rw-drawer :focus-visible{outline-color:#fff}
+
+/* Drawer colors, second pass: clearer contrast and a little depth instead of flat grey on pure black. */
+html body .rw-drawer{background:#0a0a0b!important;--rw-mute:#b4b4b8;--rw-line:#ffffff14}
+html body .rw-drawer .rw-drawer-head{background:#0a0a0b}
+html body .rw-drawer .rw-drawer-head p,html body .rw-drawer .rw-kicker,html body .rw-drawer .rw-kicker b{color:#b4b4b8}
+html body .rw-drawer .rental-item-info dt{color:#a0a0a6;letter-spacing:.12em}
+html body .rw-drawer .rental-item-info dd{color:#f2f2f4}
+html body .rw-drawer .rw-drawer-scroll,html body .rw-drawer .rw-drawer-body{background:#0a0a0b}
+html body .rw-drawer .rental-booking{background:#131316!important;border-top:0}
+html body .rw-drawer .setup-quantity-picker>span{color:#d6d6da}
+html body .rw-drawer .rental-quantity-controls>button{background:#26262a!important;color:#fff!important}
+html body .rw-drawer .rental-quantity-controls>button:hover:not(:disabled){background:#34343a!important}
+html body .rw-drawer .rental-quantity-controls>input{background:#1b1b1f!important;color:#fff}
+html body .rw-drawer .rental-stock-actions .rental-quantity-note,html body .rw-drawer .rental-availability,html body .rw-drawer [class*=availability]{background:#ffffff1f;color:#fff}
+html body .rw-drawer .rw-drawer-head>button{background:#26262a;color:#fff}
