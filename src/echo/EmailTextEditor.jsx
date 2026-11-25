@@ -1,7 +1,7 @@
 import {forwardRef,useEffect,useImperativeHandle,useRef} from 'react';
 import {emailDetailLabel,readEmailEditor,templateSegments} from './emailTemplateEditor';
 
-export default forwardRef(function EmailTextEditor({id,label,value,onChange,disabled=false,singleLine=false,onFocus},ref){
+export default forwardRef(function EmailTextEditor({id,label,value,onChange,disabled=false,singleLine=false,onFocus,invalid=false,describedBy},ref){
  const root=useRef(null),selection=useRef(null);
  const remember=()=>{const current=window.getSelection();if(current?.rangeCount&&root.current?.contains(current.anchorNode))selection.current=current.getRangeAt(0).cloneRange();};
  const chip=key=>{const node=document.createElement('span');node.dataset.emailDetail=key;node.className='notification-detail-chip';node.contentEditable='false';node.textContent=emailDetailLabel(key);return node;};
@@ -15,5 +15,5 @@ export default forwardRef(function EmailTextEditor({id,label,value,onChange,disa
   const element=root.current;if(!element||readEmailEditor(element)===value)return;
   const fragment=document.createDocumentFragment();for(const part of templateSegments(value))fragment.append(part.variable?chip(part.variable):document.createTextNode(part.text));element.replaceChildren(fragment);selection.current=null;
  },[value]);
- return <div ref={root} id={id} className={`notification-text-editor${singleLine?' is-subject':''}`} role="textbox" aria-label={label} aria-multiline={!singleLine} aria-required="true" aria-disabled={disabled} contentEditable={!disabled} suppressContentEditableWarning spellCheck tabIndex={disabled?-1:0} onFocus={onFocus} onInput={()=>{remember();onChange(readEmailEditor(root.current));}} onKeyUp={remember} onMouseUp={remember} onKeyDown={event=>{if(singleLine&&event.key==='Enter')event.preventDefault();}} onPaste={event=>{event.preventDefault();remember();const text=event.clipboardData.getData('text/plain');insertNode(document.createTextNode(singleLine?text.replace(/[\r\n]+/g,' '):text));}}/>;
+ return <div ref={root} id={id} className={`notification-text-editor${singleLine?' is-subject':''}`} role="textbox" aria-label={label} aria-multiline={!singleLine} aria-required="true" aria-invalid={invalid} aria-describedby={describedBy} aria-disabled={disabled} contentEditable={!disabled} suppressContentEditableWarning spellCheck tabIndex={disabled?-1:0} onFocus={onFocus} onInput={()=>{remember();onChange(readEmailEditor(root.current));}} onKeyUp={remember} onMouseUp={remember} onKeyDown={event=>{if(singleLine&&event.key==='Enter')event.preventDefault();}} onPaste={event=>{event.preventDefault();remember();const text=event.clipboardData.getData('text/plain');insertNode(document.createTextNode(singleLine?text.replace(/[\r\n]+/g,' '):text));}}/>;
 });
