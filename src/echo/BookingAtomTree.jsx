@@ -1,7 +1,7 @@
 import {useEffect,useId,useState} from 'react';
 import {Network,Search} from 'lucide-react';
 import {apiRequest} from '../lib/api';
-import {applyBookingRules} from '../lib/eventOrderCore.mjs';
+import {setBookingRules} from '../lib/bookingRules';
 import {ATOM_KEYS} from '../lib/bookingAtoms.mjs';
 import {bookingAtomTree,filterAtomTree} from './docs/bookingAtomTree';
 import {bookingDataAtomsGuideRoute} from './docs/bookingDataAtomsGuide';
@@ -19,7 +19,7 @@ export default function BookingAtomTree({token}){
  const [rules,setRules]=useState({}),[draft,setDraft]=useState(null),[busy,setBusy]=useState(false),[message,setMessage]=useState('');
  useEffect(()=>{let alive=true;apiRequest('/booking-rules').then(({rules:saved})=>{if(alive)setRules(saved||{});}).catch(()=>{});return()=>{alive=false;};},[]);
  const edit=Boolean(draft),shown=draft||rules,onRule=(key,patch)=>setDraft(current=>({...current,[key]:{...current[key],...patch}}));
- const save=async()=>{setBusy(true);setMessage('');try{const {rules:saved}=await apiRequest('/admin/booking-rules',{method:'PUT',token,body:{rules:draft}});setRules(saved);applyBookingRules(saved);setDraft(null);setMessage('Saved. The Booking page now uses these rules.');}catch(error){setMessage(error.message);}finally{setBusy(false);}};
+ const save=async()=>{setBusy(true);setMessage('');try{const {rules:saved}=await apiRequest('/admin/booking-rules',{method:'PUT',token,body:{rules:draft}});setRules(saved);setBookingRules(saved);setDraft(null);setMessage('Saved. The Booking page now uses these rules.');}catch(error){setMessage(error.message);}finally{setBusy(false);}};
  const [query,setQuery]=useState(''),[closed,setClosed]=useState(new Set()),id=useId();
  const {steps,support}=filterAtomTree(query),searching=Boolean(query.trim()),count=steps.reduce((total,step)=>total+step.sections.reduce((sum,section)=>sum+section.atoms.length,0),0);
  const isOpen=key=>searching||!closed.has(key);
