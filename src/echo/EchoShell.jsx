@@ -4,7 +4,6 @@ import {cloudAsset} from '../lib/cloudAsset';
 import { UserRound, Languages } from 'lucide-react';
 import AccountMenu from './AccountMenu';
 import './headerNav.css';
-import ClientAppBadge from './ClientAppBadge';
 import HeaderMiniPlayer from './HeaderMiniPlayer';
 import LanguageOverlay from './LanguageOverlay';
 import {useBrowserChromeTheme} from './useBrowserChromeTheme';
@@ -150,7 +149,6 @@ export default function EchoShell({ lang, user, onLogout, children }) {
           </a>
         </div>
       </footer>}
-      <div className="echo-rotate" role="note"><p>{tr('Please use your phone in portrait mode.','يرجى استخدام الهاتف بشكل عمودي.')}</p><p>{tr('Or download the app instead:','أو حمّل التطبيق بدلاً من ذلك:')}</p><ClientAppBadge tr={tr} className="client-app-badge--access"/></div>
     </div>
   );
 }

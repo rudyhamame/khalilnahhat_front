@@ -568,3 +568,30 @@ html body .echo-access:not(.echo-order-access) .access-pair .google-bridge-butto
  html body .echo-access:not(.echo-order-access) .access-pair .access-submit{min-height:54px;padding-block:13px;font-size:1.05rem}
  html body .echo-access:not(.echo-order-access) .access-pair .access-field>span:first-child{font-size:.85rem}
 }
+
+/* Recovery has one form, not the login page's two-card character scene. */
+html.echo-access-open body .echo-access.access-recovery{gap:0;justify-content:center;align-items:center;min-height:calc(var(--echo-access-height,100svh) - var(--echo-header-height,80px))}
+html.echo-access-open body .echo-access.access-recovery .access-content{position:relative;z-index:3;flex:none;min-width:0;max-width:100%;transform:translateY(calc(-1 * var(--echo-kb-lift,0px)))}
+html.echo-access-open body .echo-access.access-recovery .access-form-wrap{box-sizing:border-box;width:100%;margin:0;background:linear-gradient(155deg,#151222f5,#0d0a18f0)}
+@media(max-width:1000px) and (orientation:portrait){
+ html.echo-access-open body .echo-access.access-recovery{padding:24px 20px!important}
+ html.echo-access-open body .echo-access.access-recovery .access-content{width:min(440px,100%);padding:0}
+ html.echo-access-open body .echo-access.access-recovery .access-hero-photo{z-index:0;left:50%;opacity:.18;clip-path:none;animation:none}
+}
+/* Keep each recovery-heading phrase intact, with a deliberate second line. */
+html body .echo-access.access-recovery .access-form-wrap h1{font-size:clamp(24px,5.8vw,36px);line-height:1.18;letter-spacing:-.02em;white-space:normal;overflow-wrap:normal;word-break:normal;margin-bottom:12px}
+html body .echo-access.access-recovery .access-form-wrap h1 em{display:block;margin-inline:0;white-space:nowrap}
+
+/* Native scrolling must stay available as soon as a field is focused,
+   including browsers that do not report the keyboard's viewport resize. */
+html.echo-access-open[data-access-editing]{height:auto!important;min-height:100%;overflow-y:auto!important;overflow-x:clip;overscroll-behavior-y:auto}
+html.echo-access-open[data-access-editing] body{position:static!important;inset:auto!important;height:auto!important;min-height:100%;overflow:visible!important}
+html.echo-access-open[data-access-editing] :is(#root,.echo-page-surface){height:auto!important;min-height:0;overflow:visible!important}
+html.echo-access-open[data-access-editing] .echo{height:auto!important;min-height:var(--echo-access-visible-height,100dvh);overflow:visible!important}
+html.echo-access-open[data-access-editing] #echo-main{flex:none;height:auto!important;min-height:0;overflow:visible!important}
+html.echo-access-open[data-access-editing] body .echo-access:not(.echo-order-access){flex:none;height:auto!important;min-height:0!important;max-height:none!important;padding-top:12px!important;padding-bottom:calc(32px + var(--echo-access-keyboard-inset,0px))!important;overflow:visible!important;align-items:center;justify-content:flex-start;touch-action:pan-y pinch-zoom}
+html.echo-access-open[data-access-editing] body .echo-access:not(.echo-order-access) .access-pair{flex:none!important;width:100%!important;height:auto!important;min-height:0!important;margin:0!important;padding-block:0!important;transform:none!important;translate:none!important;transition:none;align-self:stretch!important;align-items:start!important}
+html.echo-access-open[data-access-editing] body .echo-access:not(.echo-order-access) .access-content{flex:none;height:auto!important;min-height:0;max-height:none!important;overflow:visible!important;transform:none!important;translate:none!important;padding-block:0!important;align-items:flex-start!important}
+html.echo-access-open[data-access-editing] body .echo-access:not(.echo-order-access) .access-form-wrap{margin-block:0!important}
+html.echo-access-open[data-access-editing] body .echo-access .access-hero-photo{opacity:.12!important;animation:none!important}
+html.echo-access-open[data-access-editing] body .echo-access .access-field{scroll-margin-block:24px}

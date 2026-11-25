@@ -60,5 +60,5 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   </React.StrictMode>,
 );
 
-// Rotating the device reloads the page so every layout is rebuilt for the new orientation.
-matchMedia("(orientation:portrait)").addEventListener("change", () => location.reload());
+// Orientation and keyboard changes are handled by responsive layout, without
+// reloading the page or discarding in-progress forms.
