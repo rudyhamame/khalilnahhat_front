@@ -38,3 +38,10 @@
 .admin-workspace[data-area="availability"] .aav-side{align-self:stretch;overflow:auto}
 @media(max-width:900px){.aav-layout{grid-template-columns:minmax(0,1fr)}.admin-availability .aav-day{min-height:64px;padding:5px}.aav-day small{display:none}.aav-day.is-blocked::after,.aav-day.is-booked::after{content:'';width:8px;height:8px;border-radius:50%;background:currentColor}}
 @media(max-width:900px){.admin-workspace[data-area="availability"] .aav-layout{flex:initial;grid-template-columns:minmax(0,1fr);align-items:start}.admin-workspace[data-area="availability"] .aav-calendar{min-height:480px}.admin-workspace[data-area="availability"] .aav-grid{grid-template-rows:28px repeat(6,minmax(64px,1fr))}.admin-workspace[data-area="availability"] .aav-side{align-self:auto}}
+
+html body .admin-workspace .admin-availability{padding:20px!important}
+html body .admin-workspace .aav-side{gap:14px;padding:20px;border:0;border-radius:16px;background:var(--aav-surface);box-shadow:0 1px 0 color-mix(in srgb,var(--aav-line) 60%,transparent) inset}
+html body .admin-workspace .aav-side h3{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--aav-muted)}
+html body .admin-workspace .aav-side h3:not(:first-child){margin-top:10px;padding-top:16px;border-top:1px solid var(--aav-line)}
+html body .admin-workspace .aav-side input{padding:10px 12px;border-radius:10px;background:color-mix(in srgb,var(--aav-text) 5%,transparent)}
+html body .admin-workspace .aav-side button{border-radius:10px;min-height:36px}

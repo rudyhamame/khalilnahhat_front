@@ -308,7 +308,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
           {selectedRequest&&(()=>{
             // Header actions follow the booking's stage and the open tab: Booking info -> availability decisions, Quote -> publishing.
             const r=selectedRequest,stage=r.journey?.clientStatus,repr=r.journey.repriceable,busy=Boolean(publishingId||availabilityBusy);
-            const informAvailable=repr&&['requested','unavailable'].includes(stage);
+            const informAvailable=repr&&['requested','modified','unavailable'].includes(stage);
             const closeMenu=event=>event.currentTarget.closest('details')?.removeAttribute('open');
             // One primary action for the stage, secondary corrections beside it, and the destructive ones tucked in "More".
             return <div className="booking-publish-action" data-stage={stage}>
@@ -333,7 +333,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                 <header className="booking-column-heading"><h3>{tr("Booking details")}</h3></header>
                 <header className="booking-brief-heading booking-summary" aria-label={tr("Booking summary")}>
                   <StatusPipeline request={request} ar={ar} tr={tr} onNext={(()=>{const idle=request.journey.repriceable&&!publishingId&&!availabilityBusy,stage=request.bookingStatus||request.journey?.clientStatus;
-                    if(['requested','unavailable'].includes(stage)&&idle)return {label:tr('Confirm availability'),run:()=>{void informAvailability(request,'accept').catch(()=>{});}};
+                    if(['requested','modified','unavailable'].includes(stage)&&idle)return {label:tr('Confirm availability'),run:()=>{void informAvailability(request,'accept').catch(()=>{});}};
                     if(stage==='quote_ready'&&request.journey.canRecordDeposit)return {label:tr('Record deposit'),run:()=>{const form=document.getElementById('booking-payment-form');form?.scrollIntoView({behavior:'smooth',block:'center'});form?.querySelector('input')?.focus();}};
                     return null;})()} onBack={(()=>{const back=stepBackTarget(request);return back&&request.journey.repriceable&&!(request.depositPaidCents>0)&&!publishingId&&!availabilityBusy?()=>{const target=journeyContract.clientStages[back[0]];if(window.confirm(`${tr('Move this booking back to')} “${ar?target.labelAr||target.label:target.label}”?`))void stepBack(request,back[0]);}:null;})()}/>
                   <div className="booking-summary-main">
