@@ -6,37 +6,30 @@
 .notification-admin *{box-sizing:border-box}
 .notification-admin :is(h2,h3,h4,p){margin:0}
 .notification-admin :is(button,input,select,textarea){font:inherit;letter-spacing:normal;text-transform:none}
-.admin-workspace .notification-admin button,.notification-admin .notification-button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:8px 12px;border:1px solid var(--ne-line);border-radius:7px;background:transparent;color:var(--ne-text);font-size:12px;font-weight:500;line-height:1.5;box-shadow:none;cursor:pointer;transition:background .15s,border-color .15s}
+.admin-workspace .notification-admin button,.notification-admin .notification-button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:8px 12px;border:1px solid transparent;border-radius:0;background:transparent;color:var(--ne-text);font-size:12px;font-weight:500;line-height:1.5;box-shadow:none;cursor:pointer;transition:background .15s,border-color .15s}
 .admin-workspace .notification-admin button:hover:not(:disabled){background:var(--ne-hover);transform:none}
 .notification-admin button:disabled{opacity:.45;cursor:default}
 .notification-admin :is(button,input,select,summary,[contenteditable=true]):focus-visible{outline:2px solid var(--ne-green);outline-offset:3px}
 .notification-admin svg{flex-shrink:0}
-.notification-toolbar{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:0 0 24px;flex:none}
 .notification-eyebrow{display:block;color:var(--ne-muted);font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase}
-.admin-workspace .notification-toolbar h2{margin:4px 0 3px;font-size:25px;line-height:1.4;font-weight:600;letter-spacing:-.6px}
-.notification-toolbar p{font-size:13px;color:var(--ne-muted)}
-.notification-provider{max-width:260px;display:grid;gap:3px;text-align:end;color:var(--ne-warning)}
-.notification-provider>span{display:flex;gap:7px;align-items:center;justify-content:flex-end;font-size:12px}
-.notification-provider.is-connected>span{color:var(--ne-green)}
-.notification-provider small{font-size:11px;overflow-wrap:anywhere;color:var(--ne-muted)}
-.notification-workspace{display:grid;grid-template-columns:280px minmax(0,1fr);flex:1;min-height:0;border:1px solid var(--ne-line);border-radius:12px;overflow:hidden;background:var(--ne-panel)}
+.notification-workspace{display:grid;grid-template-columns:280px minmax(0,1fr);flex:1;min-height:0;border:0;border-radius:0;overflow:hidden;background:var(--ne-panel)}
 .notification-email-list{display:flex;flex-direction:column;min-height:0;min-width:0;border-inline-end:1px solid var(--ne-line)}
-.notification-list-tools{padding:19px 16px 15px;display:grid;gap:13px;border-bottom:1px solid var(--ne-line);flex:none}
+.notification-list-tools{padding:19px 16px 15px;display:grid;gap:13px;border:0;flex:none}
 .notification-list-title{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .admin-workspace .notification-list-title h3{font-size:13px;font-weight:600}
 .notification-list-title h3>span{margin-inline-start:5px;color:var(--ne-muted);font-weight:400}
 .notification-unsaved-count{color:var(--ne-warning);font-size:11px}
-.admin-workspace .notification-admin .notification-search{display:flex;align-items:center;gap:9px;border:1px solid var(--ne-line);border-radius:7px;background:var(--ne-bg);padding:0 10px;color:var(--ne-muted)}
+.admin-workspace .notification-admin .notification-search{display:flex;align-items:center;gap:9px;border:1px solid var(--ne-line);border-radius:0;background:var(--ne-bg);padding:0 10px;color:var(--ne-muted)}
 .admin-workspace .notification-admin .notification-search input{width:100%;min-width:0;min-height:37px;padding:8px 0;border:0;outline:0;border-radius:0;background:transparent;color:var(--ne-text);font-size:12px;box-shadow:none}
 .notification-search:focus-within{outline:2px solid var(--ne-green);outline-offset:2px}
 .admin-workspace .notification-admin .notification-search button{min-height:24px;padding:3px;border:0}
 .notification-filters{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:7px}
-.admin-workspace .notification-admin .notification-filters select{min-height:33px;padding:6px 20px 6px 8px;background:transparent;border:1px solid var(--ne-line);color:var(--ne-muted);font-size:11px;width:100%;border-radius:6px;cursor:pointer}
+.admin-workspace .notification-admin .notification-filters select{min-height:33px;padding:6px 20px 6px 8px;background:transparent;border:1px solid var(--ne-line);color:var(--ne-muted);font-size:11px;width:100%;border-radius:0;cursor:pointer}
 .notification-email-list>nav{min-height:0;overflow:auto;scrollbar-width:thin;padding:8px}
 .admin-workspace .notification-email-list h4{display:flex;justify-content:space-between;align-items:center;margin:17px 9px 6px;color:var(--ne-muted);font-size:11px;letter-spacing:.03em;font-weight:500}
 .notification-email-list h4>span{font-variant-numeric:tabular-nums;font-weight:400;opacity:.7}
-.admin-workspace .notification-admin .notification-email-list nav button{position:relative;display:flex;gap:8px;width:100%;padding:11px 10px;margin:3px 0;border:1px solid transparent;border-radius:7px;text-align:start;justify-content:flex-start;background:transparent;min-height:64px}
-.admin-workspace .notification-admin .notification-email-list nav button[aria-current=true]{background:var(--ne-raised);border-color:var(--ne-line)}
+.admin-workspace .notification-admin .notification-email-list nav button{position:relative;display:flex;gap:8px;width:100%;padding:11px 10px;margin:3px 0;border:1px solid transparent;border-radius:0;text-align:start;justify-content:flex-start;background:transparent;min-height:64px}
+.admin-workspace .notification-admin .notification-email-list nav button[aria-current=true]{background:var(--ne-raised)}
 .notification-list-copy{display:grid;gap:3px;min-width:0;flex:1}
 .notification-list-copy>strong{font-size:12px;font-weight:500;line-height:1.5;overflow-wrap:anywhere}
 .notification-list-copy>small{font-size:11px;font-weight:400;color:var(--ne-muted)}
@@ -44,21 +37,24 @@
 .notification-list-status.is-on{color:var(--ne-green)}
 .notification-unsaved-dot{width:4px;height:4px;border-radius:50%;background:var(--ne-warning)}
 .notification-list-arrow{display:none;color:var(--ne-muted)}
-.notification-list-foot{display:flex;align-items:center;gap:7px;padding:13px 18px;border-top:1px solid var(--ne-line);margin-top:auto;color:var(--ne-muted);font-size:11px;flex:none}
+.notification-list-foot{display:flex;align-items:center;gap:7px;padding:13px 18px;border:0;margin-top:auto;color:var(--ne-muted);font-size:11px;flex:none}
 .notification-status-dot{width:5px;height:5px;border-radius:50%;background:var(--ne-green)}
 .notification-panel{display:flex;min-height:0;min-width:0;background:var(--ne-bg)}
 .notification-editor{display:flex;flex-direction:column;flex:1;min-height:0;min-width:0;padding:0;margin:0}
 .notification-event-row{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding:28px 32px 14px;flex:none}
 .admin-workspace .notification-event-row h3{font-size:21px;line-height:1.45;font-weight:600;letter-spacing:-.4px;margin:4px 0 6px;outline:none}
 .notification-event-row p{font-size:12px;color:var(--ne-muted);max-width:65ch}
-.admin-workspace .notification-admin .notification-toggle{display:flex;align-items:center;gap:9px;color:var(--ne-text);font-size:12px;position:relative;cursor:pointer;margin-top:5px;flex:none}
-.admin-workspace .notification-admin .notification-toggle>input{position:absolute;opacity:0;width:36px;height:22px;min-height:22px;inset-inline-start:0;inset-block-start:0;cursor:pointer;margin:0}
-.notification-switch{width:34px;height:20px;border:1px solid var(--ne-line);border-radius:20px;background:var(--ne-raised);padding:3px;transition:background .15s}
-.notification-switch:before{content:'';display:block;width:12px;height:12px;border-radius:50%;background:var(--ne-muted);transition:transform .15s}
-.notification-toggle input:checked+.notification-switch{background:var(--ne-green);border-color:var(--ne-green)}
-.notification-toggle input:checked+.notification-switch:before{background:var(--ne-panel);transform:translateX(14px)}
-[dir=rtl] .notification-toggle input:checked+.notification-switch:before{transform:translateX(-14px)}
-.notification-toggle input:focus-visible+.notification-switch{outline:2px solid var(--ne-green);outline-offset:3px}
+/* A native switch button keeps the full control clickable and keyboard accessible. */
+.admin-workspace .notification-admin button.notification-toggle{display:inline-flex;align-items:center;gap:9px;min-height:44px;padding:6px 2px;border:0;background:transparent;color:var(--ne-text);font-size:12px;flex:none}
+.admin-workspace .notification-admin button.notification-toggle:hover:not(:disabled){background:transparent}
+.notification-toggle>span:last-child{min-width:22px;text-align:start}
+.notification-switch{display:inline-flex;align-items:center;flex:none;width:44px;height:24px;padding:3px;border:0;border-radius:999px;background:var(--ne-raised);transition:background .22s ease}
+.notification-switch-thumb{display:block;flex:none;width:18px;height:18px;border-radius:50%;background:var(--ne-text);transition:transform .22s ease,background .22s ease}
+.notification-toggle[aria-checked=true] .notification-switch{background:var(--ne-green)}
+.notification-toggle[aria-checked=true] .notification-switch-thumb{background:var(--ne-panel);transform:translateX(20px)}
+.notification-toggle:dir(rtl)[aria-checked=true] .notification-switch-thumb{transform:translateX(-20px)}
+.notification-admin button.notification-toggle:focus-visible{outline:0}
+.notification-toggle:focus-visible .notification-switch{outline:2px solid var(--ne-green);outline-offset:3px}
 .notification-context{display:flex;flex-wrap:wrap;align-items:center;gap:8px 22px;padding:0 32px 22px;color:var(--ne-muted);font-size:11px;flex:none}
 .notification-context>span{display:inline-flex;align-items:center;gap:7px}.notification-context b{font-weight:400}
 .notification-off-note{margin:0 32px 12px!important;padding:9px 12px;border-inline-start:2px solid var(--ne-warning);color:var(--ne-warning);font-size:12px;background:var(--ne-green-bg);flex:none}
@@ -72,28 +68,28 @@
 .notification-field-label{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:20px}
 .admin-workspace .notification-admin .notification-field-label>label{color:var(--ne-text);font-size:12px;font-weight:500}
 .notification-field-label>small,.notification-message-help small{font-size:10px;color:var(--ne-muted);font-variant-numeric:tabular-nums}
-.notification-text-editor{min-height:250px;flex:1;white-space:pre-wrap;overflow-wrap:anywhere;padding:18px 20px;border:1px solid var(--ne-line);border-radius:8px;background:var(--ne-panel);color:var(--ne-text);font:400 14px/1.9 ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;cursor:text;outline-offset:2px}
+.notification-text-editor{min-height:250px;flex:1;white-space:pre-wrap;overflow-wrap:anywhere;padding:18px 20px;border:1px solid var(--ne-line);border-radius:0;background:var(--ne-panel);color:var(--ne-text);font:400 14px/1.9 ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;cursor:text;outline-offset:2px}
 .notification-text-editor.is-subject{min-height:46px;padding:11px 14px;font-size:13px;line-height:1.7}
 .notification-text-editor[aria-disabled=true]{opacity:.65;cursor:default}
 .notification-text-editor[aria-invalid=true]{border-color:var(--ne-error)}
-.notification-detail-chip{display:inline;box-decoration-break:clone;-webkit-box-decoration-break:clone;padding:2px 5px;margin:0 1px;border:1px solid color-mix(in srgb,var(--ne-green) 24%,transparent);border-radius:4px;background:var(--ne-green-bg);color:var(--ne-green);font-size:.88em;font-weight:500;white-space:nowrap}
+.notification-detail-chip{display:inline;box-decoration-break:clone;-webkit-box-decoration-break:clone;padding:2px 5px;margin:0 1px;border:0;border-radius:0;background:var(--ne-green-bg);color:var(--ne-green);font-size:.88em;font-weight:500;white-space:nowrap}
 .notification-message-help{display:flex;align-items:baseline;justify-content:space-between;gap:14px;color:var(--ne-muted);font-size:11px}
 .notification-message-help small{flex:none}
 .notification-details{position:relative;flex:none;z-index:3}
 .notification-details>summary{display:flex;align-items:center;gap:8px;list-style:none;cursor:pointer;color:var(--ne-muted);font-size:11px;line-height:1.6}
 .notification-details summary::-webkit-details-marker{display:none}
 .notification-details>summary>span{font-size:14px}
-.notification-detail-menu{position:absolute;top:calc(100% + 10px);inset-inline-end:0;width:300px;max-width:calc(100vw - 72px);padding:14px;background:var(--ne-panel);border:1px solid var(--ne-line);border-radius:9px;box-shadow:0 12px 32px #0003}
+.notification-detail-menu{position:absolute;top:calc(100% + 10px);inset-inline-end:0;width:300px;max-width:calc(100vw - 72px);padding:14px;background:var(--ne-panel);border:1px solid var(--ne-line);border-radius:0;box-shadow:0 12px 32px #0003}
 .notification-detail-menu>p{font-size:11px;color:var(--ne-muted);margin-bottom:10px}
 .notification-detail-menu>div{display:grid;gap:3px;max-height:270px;overflow:auto;scrollbar-width:thin}
-.admin-workspace .notification-admin .notification-detail-menu button{display:flex;justify-content:space-between;padding:8px 7px;border:0;border-radius:4px;font-size:12px;text-align:start}
+.admin-workspace .notification-admin .notification-detail-menu button{display:flex;justify-content:space-between;padding:8px 7px;border:0;border-radius:0;font-size:12px;text-align:start}
 .notification-detail-menu button small{font-size:9px;color:var(--ne-muted)}
-.notification-required{display:grid;gap:8px;padding:11px 13px;border:1px solid var(--ne-line);border-radius:7px}
+.notification-required{display:grid;gap:8px;padding:11px 13px;border:0;border-radius:0}
 .notification-required>span{display:flex;align-items:center;gap:6px;color:var(--ne-warning);font-size:11px}
 .notification-required>div{display:flex;flex-wrap:wrap;gap:6px}
 .admin-workspace .notification-admin .notification-required button{min-height:29px;padding:4px 8px;font-size:11px}
 .notification-field-error{color:var(--ne-error);font-size:12px;line-height:1.6}
-.notification-reminder{display:grid;gap:12px;padding:16px;border:1px solid var(--ne-line);border-radius:8px;background:var(--ne-panel)}
+.notification-reminder{display:grid;gap:12px;padding:16px;border:0;border-radius:0;background:var(--ne-panel)}
 .notification-reminder>div:first-child{display:flex;gap:10px;align-items:center;color:var(--ne-muted)}
 .admin-workspace .notification-reminder h4{font-size:12px;font-weight:500;color:var(--ne-text)}
 .notification-reminder p{font-size:11px;color:var(--ne-muted)}
@@ -103,13 +99,13 @@
 .notification-reminder-presets{display:flex;gap:4px}
 .admin-workspace .notification-admin .notification-reminder-presets button{padding:5px 9px;min-height:31px;color:var(--ne-muted);font-size:11px}
 .admin-workspace .notification-admin .notification-reminder-presets button[aria-pressed=true]{color:var(--ne-green);border-color:var(--ne-green)}
-.notification-editor>footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 24px;border-top:1px solid var(--ne-line);background:var(--ne-bg);flex:none}
+.notification-editor>footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 24px;border:0;background:var(--ne-bg);flex:none}
 .notification-editor>footer>p{font-size:11px;color:var(--ne-muted)}
 .notification-editor>footer>div{display:flex;gap:9px;flex:none}
 .admin-workspace .notification-admin button.notification-save{background:var(--ne-text);border-color:var(--ne-text);color:var(--ne-bg);font-weight:600}
 .admin-workspace .notification-admin button.notification-save:hover:not(:disabled){background:var(--ne-text);filter:brightness(.94)}
 .admin-workspace .notification-admin button.notification-discard{border-color:transparent;color:var(--ne-muted)}
-.notification-feedback{display:flex;align-items:flex-start;gap:9px;margin:14px 32px 0!important;padding:10px 12px;border:1px solid var(--ne-line);border-radius:7px;color:var(--ne-green);font-size:12px;flex:none}
+.notification-feedback{display:flex;align-items:flex-start;gap:9px;margin:0!important;padding:10px 12px;border:0;border-radius:0;color:var(--ne-green);font-size:12px;flex:none}
 .notification-feedback svg{margin-top:2px}
 .notification-feedback.is-error{color:var(--ne-error)}
 .notification-feedback small{display:block;margin-top:7px;font-size:11px;color:var(--ne-muted)}
@@ -129,13 +125,9 @@
 .notification-list-empty p{font-size:11px}
 .admin-workspace .notification-admin .notification-back{display:none}
 .notification-sr-only{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
-@media(max-width:1150px){.notification-workspace{grid-template-columns:240px minmax(0,1fr)}.notification-event-row{padding:22px 22px 12px}.notification-context{padding-inline:22px}.notification-editor-tabs{padding-inline:22px}.notification-edit-content,.notification-preview-panel{padding:22px}.notification-feedback{margin-inline:22px!important}.notification-event-row h3{font-size:19px}.notification-editor>footer>p{display:none}.notification-editor>footer{justify-content:flex-end}.notification-off-note{margin-inline:22px!important}}
+@media(max-width:1150px){.notification-workspace{grid-template-columns:240px minmax(0,1fr)}.notification-event-row{padding:22px 22px 12px}.notification-context{padding-inline:22px}.notification-editor-tabs{padding-inline:22px}.notification-edit-content,.notification-preview-panel{padding:22px}.notification-feedback{margin:0!important}.notification-event-row h3{font-size:19px}.notification-editor>footer>p{display:none}.notification-editor>footer{justify-content:flex-end}.notification-off-note{margin-inline:22px!important}}
 @media(max-width:760px){
  .admin-workspace[data-area=notifications] .aw-content{padding:20px 16px 20px}
- .notification-toolbar{padding:0 2px 20px;gap:12px;align-items:flex-start}
- .admin-workspace .notification-toolbar h2{font-size:21px}.notification-toolbar p{font-size:12px}
- .notification-toolbar .notification-eyebrow{display:none}
- .notification-provider{max-width:130px;padding-top:6px}.notification-provider small{display:none}.notification-provider>span{font-size:10px;text-align:start}
  .notification-workspace{grid-template-columns:minmax(0,1fr)}
  .notification-panel{display:none}.notification-admin.is-editing .notification-panel{display:flex}
  .notification-admin.is-editing .notification-email-list{display:none}
@@ -149,21 +141,24 @@
  .notification-edit-content,.notification-preview-panel{padding:20px 18px;gap:20px}
  .notification-text-editor{min-height:260px;padding:14px;font-size:13px}.notification-text-editor.is-subject{min-height:44px}
  .notification-message-help{align-items:flex-start}.notification-message-help>p{max-width:75%}
- .notification-feedback{margin:12px 18px 0!important}.notification-off-note{margin-inline:18px!important}
+ .notification-feedback{margin:0!important}.notification-off-note{margin-inline:18px!important}
  .notification-editor>footer{padding:12px 14px}.notification-editor>footer>div{justify-content:space-between;width:100%}
  .notification-editor-tabs>span svg{display:none}
 }
 /* Shared design is separate from the wording of individual emails. */
 .notification-messages-wrap,.notification-design-wrap{display:flex;flex:1;min-height:0;min-width:0}
 .notification-admin [hidden]{display:none!important}
-.notification-page-tabs{display:flex;gap:22px;border-bottom:1px solid var(--ne-line);margin-bottom:24px;flex:none}
+.notification-page-tabs{display:flex;gap:22px;padding:14px 20px 0;border-bottom:1px solid var(--ne-line);margin-bottom:0;flex:none}
 .admin-workspace .notification-admin .notification-page-tabs>button{padding:0 0 12px;border:0;border-radius:0;border-bottom:2px solid transparent;background:transparent;color:var(--ne-muted);font-size:12px;min-height:35px}
 .admin-workspace .notification-admin .notification-page-tabs>button[aria-pressed=true]{color:var(--ne-text);border-bottom-color:var(--ne-green)}
 .notification-page-tabs>button i{width:4px;height:4px;background:var(--ne-warning);border-radius:50%}
-.admin-workspace .notification-admin .notification-shared-link{display:flex;justify-content:flex-start;gap:9px;min-height:40px;padding:14px 0 0;border:0;border-top:1px solid var(--ne-line);border-radius:0;color:var(--ne-muted);font-size:11px;text-align:start}
-.notification-shared-link span{flex:1}
-.notification-design{display:flex;flex-direction:column;flex:1;min-width:0;min-height:0;border:1px solid var(--ne-line);border-radius:12px;overflow:hidden;background:var(--ne-bg)}
-.notification-design-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding:24px 28px;border-bottom:1px solid var(--ne-line);flex:none}
+.admin-workspace .notification-admin .notification-shared-link{display:flex;align-items:center;justify-content:flex-start;gap:12px;flex:none;width:100%;min-height:64px;padding:14px 16px;border:0;border-radius:0;background:var(--ne-panel);color:var(--ne-muted);text-align:start}
+.notification-shared-link>span{display:grid;gap:3px;flex:1;min-width:0}
+.notification-shared-link strong{font-size:12px;font-weight:500;color:var(--ne-text)}
+.notification-shared-link small{font-size:11px;font-weight:400;color:var(--ne-muted)}
+.notification-shared-link:dir(rtl)>svg:last-child{transform:rotate(180deg)}
+.notification-design{display:flex;flex-direction:column;flex:1;min-width:0;min-height:0;border:0;border-radius:0;overflow:hidden;background:var(--ne-bg)}
+.notification-design-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding:24px 28px;border:0;flex:none}
 .admin-workspace .notification-design-heading h3{margin:5px 0 6px;font-size:21px;letter-spacing:-.4px}
 .notification-design-heading p{font-size:12px;color:var(--ne-muted)}
 .notification-design-state{font-size:11px;color:var(--ne-muted);white-space:nowrap}
@@ -171,28 +166,41 @@
 .notification-design-body{display:grid;grid-template-columns:minmax(230px,290px) minmax(0,1fr);flex:1;min-height:0;overflow:auto;scrollbar-width:thin}
 .notification-design-settings{display:flex;flex-direction:column;gap:22px;margin:0;padding:26px 24px;border:0;border-inline-end:1px solid var(--ne-line);min-width:0}
 .notification-design-photo{display:flex;align-items:center;gap:15px}
-.notification-design-photo>img{display:block;width:72px;height:100px;object-fit:cover;border-radius:7px;background:#192a25}
+.notification-design-photo>img{display:block;width:72px;height:100px;object-fit:cover;border-radius:0;background:#192a25}
 .notification-design-photo strong{font-size:12px;font-weight:500}
 .notification-design-photo p{font-size:11px;color:var(--ne-muted);margin:4px 0 10px}
 .admin-workspace .notification-admin .notification-design-photo button{font-size:11px;padding:6px 9px;min-height:31px}
 .admin-workspace .notification-admin .notification-design-settings>label{display:flex;flex-direction:column;gap:7px;color:var(--ne-text);font-size:12px;font-weight:500}
 .admin-workspace .notification-admin .notification-design-settings input{font-size:12px;border:1px solid var(--ne-line);background:var(--ne-panel);padding:9px 10px;min-height:39px;color:var(--ne-text);width:100%}
 .notification-design-settings label>small{font-size:11px;font-weight:400;color:var(--ne-muted)}
-.notification-design-explainer{display:flex;gap:9px;padding-top:20px;border-top:1px solid var(--ne-line);color:var(--ne-green)}
+.notification-design-explainer{display:flex;gap:9px;padding-top:20px;border:0;color:var(--ne-green)}
 .notification-design-explainer strong{font-size:12px;font-weight:500;color:var(--ne-text)}
 .notification-design-explainer p{font-size:11px;color:var(--ne-muted);margin-top:5px}
 .notification-design-preview{padding:20px 24px;background:var(--ne-panel);min-width:0}
 .notification-design-preview-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;font-size:12px;color:var(--ne-text)}
 .notification-design-preview-toolbar small{display:block;color:var(--ne-muted);font-size:10px}
-.notification-design-preview-toolbar>div{display:flex;gap:2px;padding:2px;border:1px solid var(--ne-line);border-radius:6px}
-.admin-workspace .notification-admin .notification-design-preview-toolbar button{min-height:28px;padding:5px 8px;border:0;border-radius:4px;color:var(--ne-muted)}
+.notification-design-preview-toolbar>div{display:flex;gap:2px;padding:2px;border:0;border-radius:0}
+.admin-workspace .notification-admin .notification-design-preview-toolbar button{min-height:28px;padding:5px 8px;border:0;border-radius:0;color:var(--ne-muted)}
 .admin-workspace .notification-admin .notification-design-preview-toolbar button[aria-pressed=true]{background:var(--ne-raised);color:var(--ne-text)}
-.notification-email-canvas{margin-inline:auto;width:100%;max-width:680px;min-width:0;background:#f2f1ed;border:1px solid var(--ne-line);border-radius:8px;overflow:hidden}
+.notification-email-canvas{margin-inline:auto;width:100%;max-width:680px;min-width:0;background:#f2f1ed;border:0;border-radius:0;overflow:hidden}
 .notification-email-canvas.is-mobile{max-width:360px}
 .notification-email-canvas iframe{display:block;width:100%;height:870px;border:0;background:#f2f1ed}
 .notification-design-preview-note{font-size:10px;color:var(--ne-muted);text-align:center;margin-top:14px!important}
-.notification-design>footer{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:16px 24px;border-top:1px solid var(--ne-line);flex:none}
+.notification-design>footer{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:16px 24px;border:0;flex:none}
 .notification-design>footer>p{font-size:11px;color:var(--ne-muted)}
 .notification-design>footer>div{display:flex;gap:8px}
 @media(max-width:1150px){.notification-design-body{grid-template-columns:minmax(210px,.75fr) minmax(0,1fr)}.notification-design-settings{padding:22px 18px}.notification-design-preview{padding:18px}.notification-design-photo{gap:10px}.notification-design-photo>img{width:55px;height:82px}.notification-design-photo button svg{display:none}}
-@media(max-width:760px){.notification-page-tabs{margin-bottom:18px}.notification-page-tabs>button{font-size:12px}.notification-design-heading{padding:20px 18px}.admin-workspace .notification-design-heading h3{font-size:19px}.notification-design-state{font-size:10px}.notification-design-body{display:block}.notification-design-settings{border-inline-end:0;border-bottom:1px solid var(--ne-line);gap:18px}.notification-design-photo>img{width:65px;height:97px}.notification-design>footer{padding:12px 14px}.notification-design>footer>p{display:none}.notification-design>footer>div{justify-content:space-between;width:100%}.notification-email-canvas iframe{height:1050px}}
+@media(max-width:760px){.notification-page-tabs{padding:12px 16px 0;margin-bottom:0}.notification-page-tabs>button{font-size:12px}.notification-design-heading{padding:20px 18px}.admin-workspace .notification-design-heading h3{font-size:19px}.notification-design-state{font-size:10px}.notification-design-body{display:block}.notification-design-settings{border-inline-end:0;border-bottom:1px solid var(--ne-line);gap:18px}.notification-design-photo>img{width:65px;height:97px}.notification-design>footer{padding:12px 14px}.notification-design>footer>p{display:none}.notification-design>footer>div{justify-content:space-between;width:100%}.notification-email-canvas iframe{height:1050px}}
+
+.admin-workspace .notification-admin :is(input,select,textarea,dialog){border-radius:0}
+
+.notification-message-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:flex-end}
+.admin-workspace .notification-admin .notification-ai-suggest{padding:5px 8px;min-height:30px;border:0;color:var(--ne-green);font-size:11px}
+.notification-ai-review{padding:16px;background:var(--ne-panel);display:grid;gap:14px;min-width:0}
+.notification-ai-review>header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.notification-ai-review>header>span{display:flex;align-items:center;gap:7px;color:var(--ne-green);font-size:12px}
+.notification-ai-review>p{white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;line-height:1.8;max-height:300px;overflow:auto}
+.notification-ai-review>footer{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.notification-ai-review small{font-size:11px;color:var(--ne-muted)}
+.admin-workspace .notification-admin .notification-ai-review>footer>button{background:var(--ne-raised);font-size:12px}
+@media(max-width:760px){.notification-message>.notification-field-label{flex-wrap:wrap}.notification-message-actions{gap:10px}}
