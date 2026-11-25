@@ -10,12 +10,16 @@ test('every data atom is a node of the tree: an id, a step, a section and a sour
  assert.deepEqual(atomSource('music.djRequested'),{branch:'services',ref:'dj'});
 });
 
-test('atoms of a step exist only while the tree has that step',()=>{
- const noDj=treeAtoms({dj:false,rental:true}),noRental=treeAtoms({dj:true,rental:false});
- const djAtom=atom=>atom.step===3&&[1,2].includes(Number(atom.section.split('.')[1])),rentalAtom=atom=>atom.step===3&&Number(atom.section.split('.')[1])>=4; // step 3 holds both: DJ sections 03.01–03.02, MC 03.03, rental sections 03.04+
- assert.ok(noDj.filter(djAtom).every(atom=>!atom.mounted)&&noDj.filter(atom=>!djAtom(atom)).every(atom=>atom.mounted));
- assert.ok(noRental.filter(rentalAtom).every(atom=>!atom.mounted)&&noRental.filter(atom=>!rentalAtom(atom)).every(atom=>atom.mounted));
- assert.equal(stepMounted(3,{dj:false,rental:false}),false);assert.equal(stepMounted(2,{dj:false,rental:false}),true);
+test('atoms of a step exist only while the tree has the service of their section',()=>{
+ // The Booking Tree says which section needs which service (sectionDefinitions.requiresAny): 03.01–03.02 the DJ, 03.03 the MC, 03.04 rentals. Everything else always exists.
+ const sectionOf=atom=>atom.section,mounted=steps=>new Set(treeAtoms(steps).filter(atom=>atom.mounted).map(sectionOf));
+ const all=mounted({dj:true,mc:true,rental:true});
+ assert.ok(['03.01','03.02','03.03','03.04','03.09','01.01','04.01'].every(code=>all.has(code)));
+ const noDj=mounted({dj:false,mc:true,rental:true}),noMc=mounted({dj:true,mc:false,rental:true}),noRental=mounted({dj:true,mc:true,rental:false});
+ assert.ok(!noDj.has('03.01')&&!noDj.has('03.02')&&noDj.has('03.03')&&noDj.has('03.04'));
+ assert.ok(!noMc.has('03.03')&&noMc.has('03.01'));
+ assert.ok(!noRental.has('03.04')&&noRental.has('03.01')&&noRental.has('03.03'));
+ assert.equal(stepMounted(3,{dj:false,mc:false,rental:false}),false);assert.equal(stepMounted(2,{dj:false,mc:false,rental:false}),true);
 });
 
 test('steps follow the service ids, equipment follows equipmentCategoryId, removed ids keep their place',()=>{

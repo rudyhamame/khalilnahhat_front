@@ -3,6 +3,7 @@ import {useTree,useTreeSteps} from '../lib/tree';
 import {ChevronUp,Trash2,X} from 'lucide-react';
 import {useEventOrder} from './eventOrderContext';
 import {confirmDeletion} from '../lib/confirmDeletion';
+import {BOOKING_TREE_STEPS} from '../lib/bookingAtoms.mjs';
 import {PUBLIC_PAGE_PATHS} from '../lib/publicPages';
 import {effectiveMissing} from '../lib/bookingNextStep';
 import {NAMES,SKIP,stepOfKey,REQUIRED_KEYS,REQUIRED_ALL,answered,nextRequiredKey,nextOptionalKey} from '../lib/footerAtoms';
@@ -13,7 +14,7 @@ import SmartCartIcon from './SmartCartIcon';
 import './bookingFooter.css';
 
 // The five steps. Required atoms come from the contract; every other atom of the step is optional.
-const STEPS=[['Personal','الشخصية'],['Event','الفعالية'],['Echo Services','خدمات إيكو'],['Extras','إضافات']];
+const STEPS=BOOKING_TREE_STEPS.map(step=>[step.short,step.shortAr]); // the step names come from the Booking Tree
 // Not typed in by the client (map data) or not on this page (conditional title, room setup).
 // Required atoms per step: the contract's required fields, the DJ decision (step 3) and .
 // Every piece of rental equipment is its own data atom (the Rental step counts the chosen items against all items); everything else is a plain answered check.

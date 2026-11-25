@@ -1,6 +1,7 @@
 import {useState} from 'react';
 import {ChevronLeft,ChevronRight} from 'lucide-react';
 import {BOOKING_GOALS} from '../lib/bookingGoals';
+import {bookingTreeViewerName} from '../lib/bookingAtoms.mjs';
 import {useTree} from '../lib/tree';
 import {numberedRentalCatalog} from '../lib/numberedRentalCatalog';
 import {AtomGroups} from '../echo/bookingReview';
@@ -11,10 +12,9 @@ import './bookingDraftReview.css';
 // the same sections, the same data atoms, grouped Entered / Needs attention / Optional, with each service's equipment in a table.
 export default function BookingDraftReview({order,snapshot=false,tabbed=false,ar=false}){
  const tr=(en,arabic)=>ar?arabic:en,{catalog,equipment,loading}=useTree(),rentals=numberedRentalCatalog(catalog,equipment),[active,setActive]=useState(0);
- // Dashboard wording only (the Booking page keeps its own): step 3 is "Echo Services" and its two service atoms use the service names.
- const GOAL_NAME={music:['Echo Services','خدمات إيكو']},ATOM_NAME={'music.djRequested':['DJ Khalil Nahhat','دي جي خليل نحات'],'music.mcRequested':['MC Hosting','تقديم الحفل']};
- const goalTitle=goal=>(GOAL_NAME[goal.id]||[goal.title,goal.ar])[ar?1:0];
- const sections=BOOKING_GOALS.map(goal=>{const result=snapshot?submittedSectionLines(order,goal,ar):sectionLines(order,goal,ar,rentals,loading);return {...result,lines:result.lines.map(line=>ATOM_NAME[line.key]?{...line,label:ATOM_NAME[line.key][ar?1:0]}:line)};});
+ // Dashboard wording comes from the Booking Tree: the step titles and the two service atom names.
+ const goalTitle=goal=>ar?goal.ar:goal.title;
+ const sections=BOOKING_GOALS.map(goal=>{const result=snapshot?submittedSectionLines(order,goal,ar):sectionLines(order,goal,ar,rentals,loading);return {...result,lines:result.lines.map(line=>bookingTreeViewerName(line.key,ar)?{...line,label:bookingTreeViewerName(line.key,ar)}:line)};});
  return <>
   {tabbed&&<div className="bdr-tabs" role="group" aria-label={tr("Booking steps","خطوات الحجز")} dir={ar?"rtl":"ltr"}>
    <button type="button" className="bdr-arrow" onClick={()=>setActive(at=>(at-1+BOOKING_GOALS.length)%BOOKING_GOALS.length)} aria-label={tr("Previous step","الخطوة السابقة")} title={tr("Previous step","الخطوة السابقة")}><ChevronLeft size={18} aria-hidden="true"/></button>

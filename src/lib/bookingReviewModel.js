@@ -3,6 +3,7 @@ import {getPath,isAnswered,fieldName} from './eventOrderCore.mjs';
 import {bookingSections} from './bookingSections.js';
 import {goalFields,goalProgress,goalValue,ownTypeApplies} from './bookingGoals.js';
 import {ATOM_KEYS} from './eventPageModel.js';
+import {rentalCategoryCode} from './bookingAtoms.mjs';
 
 // Review lines follow the booking contract order (its codes 01.01.01 → 04.03.01); the rental tree sits where the `equipment` atom is.
 // The rental tree (categories with their equipment) sits right after the rental question, before the setup notes: the same place as in the apps.
@@ -32,10 +33,10 @@ export function sectionLines(order,goal,ar,rentals=[],catalogLoading=false,{ever
   const needs=progress.missing.some(item=>item.key==='services'),name=item=>ar?item.nameAr||item.name:item.name;
   // Codes match the Booking page cards: categories 03.05, 03.06… (MC is a real service, not a category) and their individual equipment 03.0X.01…
   // MC hosting is a real service of Step 3 (music.mcRequested has its own line there), so it is not part of the rental tree.
-  const categories=bookingSections(order,rentals).rentals.filter(service=>service.id!=='mc'&&service.selectionField!=='music.mcRequested');let categoryNumber=4;
+  const categories=bookingSections(order,rentals).rentals.filter(service=>service.id!=='mc'&&service.selectionField!=='music.mcRequested');let categoryIndex=0;
   const listed=new Set();
  for(const service of categories){
-   const code=`03.${String(++categoryNumber).padStart(2,'0')}`;let itemNumber=0;
+   const code=rentalCategoryCode(categoryIndex++);let itemNumber=0;
    const group=service.on?0:needs?1:2;
   service.equipment.forEach(item=>listed.add(item.id));
    lines.push({key:`service:${service.id}`,category:true,reviewValue:service.on,reviewPath:service.selectionField||'services',label:name(service),value:service.on?tr('Added','مضاف'):goalValue(null,ar),empty:!service.on,required:false,group,items:service.equipment.map(item=>({key:`equipment:${service.id}:${item.id}`,code:`${code}.${String(++itemNumber).padStart(2,'0')}`,reviewValue:item.quantity||null,reviewPath:'equipment',label:name(item),value:item.quantity?`× ${item.quantity}`:'—',stock:stockLabel(item,ar),empty:!item.quantity}))});

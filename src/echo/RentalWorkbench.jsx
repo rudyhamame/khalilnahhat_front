@@ -6,6 +6,7 @@ import {createPortal} from 'react-dom';
 import {useEffect,useRef,useState} from 'react';
 import {ArrowUp,ArrowUpRight,Box,ChevronLeft,ChevronRight,Play,X} from 'lucide-react';
 import {isYouTubeLink} from '../lib/favouriteSongs.mjs';
+import {rentalCategoryCode} from '../lib/bookingAtoms.mjs';
 import GeneratedModelViewer from '../components/GeneratedModelViewer';
 import EquipmentAvailability from './EquipmentAvailability';
 import EquipmentQuantityPicker, {RemoveFromBookingButton} from './EquipmentQuantityPicker';
@@ -66,7 +67,7 @@ export default function RentalWorkbench({services,sections,service,items,selecte
     let sectionIndex=serviceSections.findIndex(section=>section.service.id===serviceId&&section.items.some(entry=>entry.id===row.id));
     if(sectionIndex<0)sectionIndex=serviceSections.findIndex(section=>section.items.some(entry=>entry.id===row.id));
     const section=serviceSections[sectionIndex],itemIndex=section?.items.findIndex(entry=>entry.id===row.id)??-1;
-    return `03.${String(Math.max(0,sectionIndex)+5).padStart(2,'0')}.${String(Math.max(0,itemIndex)+1).padStart(2,'0')}`;
+    return `${rentalCategoryCode(Math.max(0,sectionIndex))}.${String(Math.max(0,itemIndex)+1).padStart(2,'0')}`;
   };
   const quantity=item?(cart[item.id]?.quantity||0):0;
   const heading=name(service||{name:tr('Category items','عناصر الفئة'),nameAr:'عناصر الخدمة'});

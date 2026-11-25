@@ -3,6 +3,10 @@ import {fields,getPath,isAnswered,missingOrderFields} from './eventOrderCore.mjs
 
 const byKey=new Map(fields.map(field=>[field.key,field]));
 export const BOOKING_TREE=atomContract;
+// Rental categories and their equipment are numbered from the tree: category N is section 03.(first+N-1), its equipment 03.(section).NN.
+export const rentalCategoryCode=(index)=>`${atomContract.rentalCategories.step}.${String(atomContract.rentalCategories.firstSection+index).padStart(2,'0')}`;
+// Names the viewers (dashboards, apps) show for two atoms; the Booking page keeps the question wording.
+export const bookingTreeViewerName=(key,ar=false)=>atomContract.viewerNames?.[key]?.[ar?1:0]||null;
 export const BOOKING_TREE_STEPS=Object.freeze(atomContract.steps.map(step=>Object.freeze({...step})));
 export const bookingTreeStepForField=key=>atomContract.ownership[key]?.step||atomContract.pathOwners.find(([prefix])=>key?.startsWith(prefix))?.[1]||'additional';
 export const bookingTreeSource=key=>{const {branch='client',ref=''}=atomContract.ownership[key]||{};return {branch,ref};};
