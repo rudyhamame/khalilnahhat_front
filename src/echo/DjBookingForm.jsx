@@ -1,5 +1,5 @@
 import {validValue} from '../lib/eventOrderCore.mjs';
-import {bookingSectionAtoms,bookingAtom} from '../lib/bookingAtoms.mjs';
+import {bookingSectionAtoms,bookingAtom,requiredMark} from '../lib/bookingAtoms.mjs';
 import {reconcileSuggestedSongRows,savedSuggestedSongs} from '../lib/suggestedSongRows';
 import BookingStep from './BookingStep';
 import {FieldCode} from './BookingPhases';
@@ -128,7 +128,7 @@ export default function DjBookingForm({ar=false,ctx}){
    {(()=>{
     // Every section is its own card, one under the other (no tabs): language & dialect, genres, event moments, favourite songs, favourite artists.
     return <div className="djf-cards">{atomError&&<p className="djf-empty" role="alert">{atomError}</p>}
-     {cards.map(card=><BookingStep key={card.number} number={9+card.number} side={card.number%2?'left':'right'} className="djf-step" title={card.title} copy={card.hint||''} cardTitle={<><FieldCode k={MUSIC_PREFERENCE_ATOMS[card.number]}/>{card.title}</>}><div id={`djf-section-${card.number}`} className="djf-card-body" data-booking-field={MUSIC_PREFERENCE_ATOMS[card.number]}>{card.action&&<div className="djf-card-action">{card.action}</div>}{card.children}</div></BookingStep>)}
+     {cards.map(card=><BookingStep key={card.number} number={9+card.number} side={card.number%2?'left':'right'} className="djf-step" title={card.title} copy={card.hint||''} cardTitle={<><FieldCode k={MUSIC_PREFERENCE_ATOMS[card.number]}/>{card.title}{requiredMark(MUSIC_PREFERENCE_ATOMS[card.number])}</>}><div id={`djf-section-${card.number}`} className="djf-card-body" data-booking-field={MUSIC_PREFERENCE_ATOMS[card.number]}>{card.action&&<div className="djf-card-action">{card.action}</div>}{card.children}</div></BookingStep>)}
     </div>;
    })()}
   </fieldset></div>

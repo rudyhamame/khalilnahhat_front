@@ -1,6 +1,7 @@
 import {bookingStepDefinition,hasBookingServices} from '../lib/bookingFlow.mjs';
 import {useEffect,useState} from 'react';
 import {useTreeSteps} from '../lib/tree';
+import {requiredMark} from '../lib/bookingAtoms.mjs';
 import {fieldCode} from '../lib/eventPageModel';
 import './bookingPhases.css';
 
@@ -48,4 +49,5 @@ export function PhaseBar({ar=false}){
 }
 
 // The STEP.SEC.ATOM number in front of a form label (pass a field `k`, or a ready-made `code` for a whole section).
-export function FieldCode({k,code}){return <i className="ysf-order" aria-hidden="true" data-booking-atom={k}>{code||fieldCode(k)}</i>;}
+// star: put the required mark (from the Tree's live rule) right after a name that sits before the badge.
+export function FieldCode({k,code,star=false}){return <>{star&&requiredMark(k)}<i className="ysf-order" aria-hidden="true" data-booking-atom={k}>{code||fieldCode(k)}</i></>;}

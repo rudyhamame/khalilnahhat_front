@@ -1,4 +1,4 @@
-import {bookingAtomInputProps} from '../lib/bookingAtoms.mjs';
+import {bookingAtomInputProps,requiredMark} from '../lib/bookingAtoms.mjs';
 import {Check,X} from 'lucide-react';
 import {useEffect,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
@@ -25,7 +25,7 @@ export default function McRow({ar=false}){
   if(!svc.exists)return null; // the MC question exists only while an `mc` service is in the catalogue
   return <BookingStep number={61} side="left" className="dj-service-step mc-service-step" title={tr(`Would you like ${svc.name} at your event?`,`هل تريد ${svc.name} في فعاليتك؟`)} cardTitle={<>{tr(`Add ${svc.name}`,`إضافة ${svc.name}`)}</>} copy={tr('Note: the MC is a third-party host, not DJ Khalil. Tell us if you want a host to announce and guide your night.','ملاحظة: مقدّم الحفل طرف ثالث وليس دي جي خليل. أخبرنا إن كنت تريد مقدّماً يعلن ويدير سهرتك.')}>
   <aside className="event-type-column mc-choice">
-    <span className="avail-kicker"><FieldCode k="music.mcRequested"/>{svc.name.toUpperCase()}</span>
+    <span className="avail-kicker"><FieldCode k="music.mcRequested"/>{svc.name.toUpperCase()+requiredMark("music.mcRequested")}</span>
     {svc.description&&<p className="mc-choice-copy">{svc.description}</p>}
     <div {...bookingAtomInputProps('music.mcRequested',order?.order)} role="group" aria-label={svc.name}>
       <button type="button" data-event-choice disabled={locked} aria-pressed={value===true} onClick={()=>set(true)}><Check size={17} aria-hidden="true"/><span>{tr(`Yes, add ${svc.name}`,`نعم، أضف ${svc.name}`)}</span></button>
@@ -33,7 +33,7 @@ export default function McRow({ar=false}){
     </div>
   </aside>
   {value===true&&<aside className="event-type-column mc-language" data-booking-field="music.mcLanguagePairs">
-    <span className="avail-kicker"><FieldCode k="music.mcLanguagePairs"/>{tr('MC LANGUAGE AND DIALECT','لغة ولهجة المقدّم')}</span>
+    <span className="avail-kicker"><FieldCode k="music.mcLanguagePairs"/>{tr('MC LANGUAGE AND DIALECT','لغة ولهجة المقدّم')+requiredMark("music.mcLanguagePairs")}</span>
     <div className="mc-language-menu" ref={menu}>
       <button type="button" className="mc-language-trigger" aria-haspopup="listbox" aria-expanded={open} disabled={locked||!options.length} onClick={()=>setOpen(on=>!on)}><span>{options.length?tr('Choose a language and dialect','اختر لغة ولهجة'):tr('Loading the lists…','جارٍ تحميل القوائم…')}</span><ChevronDown size={16} aria-hidden="true"/></button>
       {open&&place&&createPortal(<ul ref={listRef} className="mc-language-options" style={place} dir={ar?'rtl':'ltr'} role="listbox" aria-label={tr('Language and dialect','اللغة واللهجة')}>{options.map(option=>{const taken=pairs.some(row=>row.language===option.language&&row.dialect===option.dialect);return <li key={option.key} role="option" aria-selected={taken} className={`${option.dialect?'is-dialect':'is-language'}${taken?' is-taken':''}`}><button type="button" disabled={taken} onClick={()=>{addPair(option.key);setOpen(false);}}>{option.dialect||option.language}</button></li>;})}</ul>,document.body)}

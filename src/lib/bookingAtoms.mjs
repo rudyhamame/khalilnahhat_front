@@ -26,6 +26,7 @@ export const sectionCode=key=>fieldCode(key).split('.').slice(0,2).join('.');
 export const bookingSectionAtoms=code=>BOOKING_ATOM_SECTIONS.find(section=>section.code===code)?.keys||[];
 // The " *" shown after a question: present only while the atom is required (admin rules included).
 export const requiredMark=key=>byKey.get(key)?.required?' *':'';
+export const requiredNote=(key,ar=false)=>byKey.get(key)?.required?(ar?' (مطلوب)':' (required)'):'';
 export function bookingAtom(key){
  const field=byKey.get(key);
  if(!field)throw new Error(`Unknown booking atom: ${key}`);
@@ -38,7 +39,7 @@ export function bookingAtomApplies(order,key){
  if(key==='event.title')return order?.event?.type==='other'||isAnswered(getPath(order,key));
  return true;
 }
-export const bookingAtomRequired=(order,key)=>bookingAtomApplies(order,key)&&(Boolean(bookingAtom(key).required)||(key==='event.title'&&order?.event?.type==='other'));
+export const bookingAtomRequired=(order,key)=>bookingAtomApplies(order,key)&&(bookingAtom(key).requiredOverride===false?false:Boolean(bookingAtom(key).required)||(key==='event.title'&&order?.event?.type==='other'));
 export function bookingAtomInputProps(key,order){
  const field=bookingAtom(key),required=bookingAtomRequired(order,key);
  const props={'data-booking-field':key,'data-booking-atom':key,'aria-required':required||undefined,required};
