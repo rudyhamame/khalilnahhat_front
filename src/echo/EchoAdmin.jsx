@@ -1,5 +1,6 @@
 import AdminsList from '../components/AdminsList';
 import ServiceOperationsGuide from './ServiceOperationsGuide';
+import './meetingSlotForm.css';
 import BookingAtomTree from './BookingAtomTree';
 import SeasonalThemeAdmin from './SeasonalThemeAdmin';
 import Testimonials from './TestimonialsAdmin';
@@ -90,14 +91,24 @@ function Meetings({ token }) {
   const { items, error, load, setError } = useAdminList('/meetings/admin', token);
   const [msg, setMsg] = useState('');
   const [roomId, setRoomId] = useState('');
+  // Open time slots: pick a date and a time, press Add time (repeat for as many as you like), choose the length and the way, then ADD SLOTS.
+  const [picked, setPicked] = useState([]), [date, setDate] = useState(''), [time, setTime] = useState('14:00'), [durationMin, setDurationMin] = useState(30), [mode, setMode] = useState('online'), [link, setLink] = useState(''), [location, setLocation] = useState('');
+  const today = new Date().toLocaleDateString('en-CA');
+  const stamp = (value) => new Date(value).toLocaleString('en-CA', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  const addTime = () => {
+    if (!date || !time) { setMsg('Choose a date and a time first.'); return; }
+    const value = `${date}T${time}`;
+    if (new Date(value) <= new Date()) { setMsg('Choose a time in the future.'); return; }
+    setMsg(''); setPicked((list) => (list.includes(value) ? list : [...list, value].sort()));
+  };
+  const shiftDate = (days) => { const base = date ? new Date(`${date}T12:00`) : new Date(); base.setDate(base.getDate() + days); setDate(base.toLocaleDateString('en-CA')); };
   const add = async (e) => {
     e.preventDefault();
-    const f = Object.fromEntries(new FormData(e.target));
+    if (!picked.length) { setMsg('Add at least one date and time.'); return; }
     try {
-      const starts = f.starts.split('\n').map((s) => s.trim()).filter(Boolean).map((s) => new Date(s).toISOString());
-      await apiRequest('/meetings/slots', { method: 'POST', token, body: { starts, durationMin: Number(f.durationMin), mode: f.mode, link: f.link, location: f.location } });
-      e.target.reset(); setMsg(''); load();
-    } catch (err) { setMsg(err.message === 'Invalid time value' ? 'Use one date/time per line, e.g. 2026-11-02T14:00' : err.message); }
+      await apiRequest('/meetings/slots', { method: 'POST', token, body: { starts: picked.map((value) => new Date(value).toISOString()), durationMin, mode, link, location } });
+      setPicked([]); setMsg(''); load();
+    } catch (err) { setMsg(err.message); }
   };
   const fmt = (d) => new Date(d).toLocaleString('en-CA');
   return (
@@ -114,14 +125,25 @@ function Meetings({ token }) {
             : <button type="button" className="echo-link" onClick={() => apiRequest(`/meetings/slots/${m.id}`, { method: 'DELETE', token }).then(load).catch(error=>{if(!error.cancelled)setError(error.message);})}>Remove</button>}
         </div>
       ))}
-      <form className="echo-form" onSubmit={add}>
-        <fieldset><legend>Open time slots (Toronto time)</legend>
-          <label>Date/times, one per line (YYYY-MM-DDTHH:MM)<textarea name="starts" rows="4" required placeholder="2026-11-02T14:00" /></label>
-          <label>Length (min)<input name="durationMin" type="number" defaultValue="30" min="5" /></label>
-          <label>Mode<AdminSelect name="mode"><option value="phone">Phone call</option><option value="whatsapp-voice">WhatsApp voice call</option><option value="whatsapp-video">WhatsApp video call</option><option value="online">Online</option><option value="in-person">In person</option></AdminSelect></label>
-          <label>Meeting link<input name="link" /></label><label>Location<input name="location" /></label>
-        </fieldset>
-        <button className="echo-btn">ADD SLOTS</button>
+      <form className="meeting-slot-form" onSubmit={add}>
+        <h3>Add open times <small>Toronto time</small></h3>
+        <div className="msf-pick">
+          <label>Date<input type="date" value={date} min={today} onChange={(e) => setDate(e.target.value)} /></label>
+          <label>Time<input type="time" value={time} step="900" onChange={(e) => setTime(e.target.value)} /></label>
+          <button type="button" className="msf-add" onClick={addTime}>+ Add time</button>
+        </div>
+        <div className="msf-quick" role="group" aria-label="Quick dates">
+          <button type="button" onClick={() => setDate(today)}>Today</button>
+          <button type="button" onClick={() => shiftDate(1)}>+1 day</button>
+          <button type="button" onClick={() => shiftDate(7)}>+1 week</button>
+          {['09:00', '10:00', '12:00', '14:00', '16:00', '18:00'].map((t) => <button key={t} type="button" aria-pressed={time === t} onClick={() => setTime(t)}>{new Date(`2000-01-01T${t}`).toLocaleTimeString('en-CA', { hour: 'numeric', minute: '2-digit' })}</button>)}
+        </div>
+        <div className="msf-chips" aria-live="polite">{picked.length ? picked.map((value) => <span key={value}>{stamp(value)}<button type="button" aria-label={`Remove ${stamp(value)}`} onClick={() => setPicked((list) => list.filter((item) => item !== value))}>×</button></span>) : <em>No times added yet. Pick a date and a time, then press “Add time”.</em>}</div>
+        <div className="msf-group"><span>Length</span><div role="group" aria-label="Length">{[15, 30, 45, 60, 90].map((n) => <button key={n} type="button" aria-pressed={durationMin === n} onClick={() => setDurationMin(n)}>{n} min</button>)}</div></div>
+        <div className="msf-group"><span>How we meet</span><div role="group" aria-label="How we meet">{[['online', 'Online'], ['phone', 'Phone call'], ['whatsapp-voice', 'WhatsApp voice'], ['whatsapp-video', 'WhatsApp video'], ['in-person', 'In person']].map(([value, label]) => <button key={value} type="button" aria-pressed={mode === value} onClick={() => setMode(value)}>{label}</button>)}</div></div>
+        {mode === 'online' && <label className="msf-extra">Meeting link (optional)<input value={link} onChange={(e) => setLink(e.target.value)} placeholder="https://…" /></label>}
+        {mode === 'in-person' && <label className="msf-extra">Location<input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Where we meet" /></label>}
+        <button className="echo-btn msf-submit" disabled={!picked.length}>ADD {picked.length || ''} {picked.length === 1 ? 'SLOT' : 'SLOTS'}</button>
       </form>
     </>
   );

@@ -1,0 +1,26 @@
+/* Admin → Meetings: the "Add open times" form. Pick a date and a time, add as many as needed, then choose the length and the way we meet. */
+.meeting-slot-form{display:grid;gap:16px;margin-top:24px;padding:22px;border:1px solid #ffffff1f;border-radius:18px;background:#ffffff08}
+.meeting-slot-form h3{margin:0;font-size:18px}.meeting-slot-form h3 small{margin-inline-start:10px;color:#8d9a93;font-size:12px;font-weight:500}
+.msf-pick{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end}
+.meeting-slot-form label{display:grid;gap:6px;font-size:13px;color:#b8c4bd}
+.meeting-slot-form input[type=date],.meeting-slot-form input[type=time],.msf-extra input{min-height:46px;padding:0 12px;border:1px solid #ffffff2b;border-radius:12px;background:#0b1315;color:inherit;font:inherit;font-size:16px;color-scheme:dark}
+.meeting-slot-form input:focus-visible{outline:2px solid #a6e3ce;outline-offset:2px}
+.msf-add{min-height:46px;padding:0 20px;border:0;border-radius:12px;background:#a6e3ce;color:#07140d;font:inherit;font-weight:700;cursor:pointer}
+.msf-quick,.msf-group>div{display:flex;flex-wrap:wrap;gap:8px}
+.msf-quick button,.msf-group button{min-height:36px;padding:0 14px;border:1px solid #ffffff2b;border-radius:999px;background:transparent;color:inherit;font:inherit;font-size:13px;cursor:pointer}
+.msf-quick button:hover,.msf-group button:hover{border-color:#a6e3ce}
+.msf-quick button[aria-pressed=true],.msf-group button[aria-pressed=true]{background:#a6e3ce;border-color:#a6e3ce;color:#07140d;font-weight:650}
+.msf-chips{display:flex;flex-wrap:wrap;gap:8px;min-height:44px;align-items:center;padding:8px 10px;border:1px dashed #ffffff2b;border-radius:12px}
+.msf-chips em{color:#8d9a93;font-size:13px}
+.msf-chips>span{display:inline-flex;align-items:center;gap:8px;padding:6px 6px 6px 12px;border-radius:999px;background:#a6e3ce22;color:#dff5ea;font-size:13px}
+.msf-chips>span button{width:22px;height:22px;border:0;border-radius:50%;background:#ffffff1f;color:inherit;cursor:pointer;line-height:1}
+.msf-group{display:grid;gap:8px}.msf-group>span{font-size:13px;color:#b8c4bd}
+.msf-submit{justify-self:start;min-height:46px;padding:0 26px}.msf-submit:disabled{opacity:.45;cursor:default}
+@media(max-width:560px){.msf-pick{grid-template-columns:1fr 1fr}.msf-add{grid-column:1/-1}}
+
+/* The admin theme restyles every button; these win so the choices show which one is selected. */
+html body .admin-workspace .meeting-slot-form :is(.msf-quick,.msf-group) button{background:transparent!important;color:inherit!important;border:1px solid #ffffff3d!important;cursor:pointer;pointer-events:auto}
+html body .admin-workspace .meeting-slot-form :is(.msf-quick,.msf-group) button:hover{border-color:#a6e3ce!important}
+html body .admin-workspace .meeting-slot-form :is(.msf-quick,.msf-group) button[aria-pressed="true"]{background:#a6e3ce!important;border-color:#a6e3ce!important;color:#07140d!important;font-weight:650}
+html body .admin-workspace .meeting-slot-form .msf-add{background:#a6e3ce!important;color:#07140d!important;border:0!important}
+html body .admin-workspace .meeting-slot-form .msf-chips>span button{background:#ffffff1f!important;color:inherit!important;border:0!important}
