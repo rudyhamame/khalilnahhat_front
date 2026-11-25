@@ -22,5 +22,8 @@ export function clientBookingJourney(request,ar=false){
  const facts=Object.fromEntries(Object.keys(contract.facts).map(key=>[key,definition?.facts.includes(key)||false]));
  const path=display?contract.clientPath.map(key=>key==='available'&&stage==='unavailable'?'unavailable':key==='requested'&&stage==='modified'?'modified':key).map(key=>({status:key,...contract.clientStages[key]})):[];
  const journey={...facts,label:display?.label||definition?.label||'Status unavailable',step:display?.step??null,clientNext:display?.clientNext||definition?.clientNext||'none',path,clientStatus:stage,canDiscussAvailability:stage==='unavailable',...request.journey};
- return {...journey,label:bookingStatusLabel({...request,journey},ar),path:journey.path.map(entry=>({...entry,label:ar?(contract.clientStages[entry.status]?.labelAr||entry.labelAr||entry.label):entry.label}))};
+ const modified=stage==='modified',base=modified?(request.journey?.previousClientStatus||'requested'):stage;
+ // A client edit is not a status of its own for the client: the booking keeps its own status and shows "Booking modified" as a sub-step of it.
+ const shown=modified?{...journey,clientStatus:base,path:contract.clientPath.map(key=>({status:key,...contract.clientStages[key]})),step:contract.clientStages[base]?.step??journey.step}:journey;
+ return {...shown,modified,modificationCount:request.modificationCount||0,label:bookingStatusLabel({...request,journey:shown},ar),path:shown.path.map(entry=>({...entry,label:ar?(contract.clientStages[entry.status]?.labelAr||entry.labelAr||entry.label):entry.label}))};
 }

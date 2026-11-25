@@ -266,3 +266,13 @@
 /* Client pages scroll inside their own scroller; <main> stays fixed, so the footer never moves. */
 .client-workspace .aw-client-scroll{flex:1 1 auto;min-height:0;min-width:0;display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
 .client-workspace .aw-main>.aw-workspace-footer{flex:none;background:var(--aw-main)}
+/* Booking modified: each saved modification is a sub-step of the status it happened under, joined to the step by a branch; "Undo modification" (newest only) sits at the opposite end. */
+.dashboard-status-steps>li>span small{display:block;color:#8d9a93;font-size:11px;white-space:normal}
+.dashboard-status-steps>li>span{overflow:visible;white-space:normal}
+.dashboard-status-steps>li:has(.dashboard-status-modifications){position:relative;flex-wrap:wrap;align-items:flex-start}
+.dashboard-status-modifications{flex-basis:100%;display:grid;gap:0;margin:8px 0 0 9px;padding:0 0 0 18px;border-left:2px solid #a6e3ce;list-style:none}
+.dashboard-status-modifications>li{position:relative;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:2px 12px;padding:6px 0 6px 14px;border:0;color:#dfeee6;font-size:12px}
+.dashboard-status-modifications>li::before{content:'';position:absolute;left:-18px;top:50%;width:18px;border-top:2px solid #a6e3ce}
+.dashboard-status-modifications>li::after{content:'';position:absolute;left:-5px;top:50%;width:8px;height:8px;margin-top:-4px;border-radius:50%;background:#a6e3ce}
+.dashboard-status-modifications b{font-weight:650}
+.dashboard-status-modifications button{padding:0;border:0;background:none;color:#a6e3ce;font:inherit;text-decoration:underline;cursor:pointer}

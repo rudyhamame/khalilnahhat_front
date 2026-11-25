@@ -56,9 +56,16 @@ function DepositInstructions({ request, ar=false }) {
 }
 
 // Where a request is on its way. The labels, order and current step all come from the server's journey (booking-journey.js).
-function StatusSteps({ journey, ar=false }) {
+// When each status was reached, from the booking's own timestamps.
+const stageTime = (request, key) => {
+  const paid = (request.payments || []).filter((p) => !p.voided && p.paidAt).map((p) => p.paidAt).sort().at(-1);
+  return { requested: request.createdAt, available: request.availabilityAcceptedAt || request.availability?.informedAt, unavailable: request.availability?.informedAt, quote_ready: request.quotedAt, deposit_paid: paid, booked: request.acceptedAt, modified: request.modifiedAt }[key] || '';
+};
+function StatusSteps({ journey, request, ar=false, onUndo }) {
+  const tr = (text) => bookingText(text, ar), when = (key) => { const value = stageTime(request, key); return value ? new Intl.DateTimeFormat(bookingLocale(ar), { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value)) : ''; };
   if (journey.step === null) return <p className={`dashboard-status-end is-${journey.status}`}>{journey.label}</p>;
-  return <ol className="dashboard-status-steps" aria-label={`${ar?'الحالة':'Status'}: ${journey.label}`}>{journey.path.map((entry, index) => <li key={entry.status} className={index < journey.step ? 'is-done' : index === journey.step ? 'is-current' : ''} aria-current={index === journey.step ? 'step' : undefined}><i aria-hidden="true">{index < journey.step ? '✓' : index + 1}</i><span>{entry.label}</span></li>)}</ol>;
+  return <ol className="dashboard-status-steps" aria-label={`${ar?'الحالة':'Status'}: ${journey.label}`}>{journey.path.map((entry, index) => <li key={entry.status} className={index < journey.step ? 'is-done' : index === journey.step ? 'is-current' : ''} aria-current={index === journey.step ? 'step' : undefined}><i aria-hidden="true">{index < journey.step ? '✓' : index + 1}</i><span>{entry.label}{index <= journey.step && when(entry.status) ? <small>{when(entry.status)}</small> : null}
+    {index === journey.step && journey.modified && <ul className="dashboard-status-modifications">{(request.modifications?.length ? request.modifications.map((entry) => entry.at) : [request.modifiedAt]).map((at, n, all) => <li key={`${at}-${n}`}><b>{tr("Booking modified")}{all.length > 1 ? ` · ${n + 1}` : ''}</b>{at ? <small>{new Intl.DateTimeFormat(bookingLocale(ar), { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(at))}</small> : null}{n === all.length - 1 && request.modificationCount > 0 && <button type="button" onClick={onUndo}>{tr("Undo modification")}</button>}</li>)}</ul>}</span></li>)}</ol>;
 }
 
 // Three-dots menu in the booking header: withdraw the request, or save the booking as a PDF (the browser's print dialog opens on a clean confirmation page).
@@ -124,13 +131,13 @@ function RequestedServices({ requests, onQuoteAction, authToken, ar=false }) {
                 </div>
                 <div className="dashboard-service-head-side">
                   <span className={`dashboard-service-status is-${request.status}`}>
-                    {request.journey.label}
+                    {request.journey.label}{request.journey.modificationCount > 0 ? ` · ${tr("Modified")} ${request.journey.modificationCount}×` : ''}
                   </span>
                   <BookingMenu ar={ar} request={request} onQuoteAction={onQuoteAction} />
                 </div>
               </div>
 
-              <StatusSteps ar={ar} journey={request.journey} />
+              <StatusSteps ar={ar} journey={request.journey} request={request} onUndo={async () => { if (!window.confirm(tr("Undo your last modification?"))) return; try { await onQuoteAction(request.id, 'undo-modification'); } catch (e) { window.alert(e.message || tr("Action failed.")); } }} />
               <ClientAvailabilityNotice key={`${request.id}:${request.quoteRevision}`} request={request} onQuoteAction={onQuoteAction} token={authToken} ar={ar}/>
               {(request.journey.awaitingClient || request.journey.canNegotiate) && <QuoteActions ar={ar} request={request} onQuoteAction={onQuoteAction}/>}
               {request.availabilityAcceptedAt && request.journey.clientNext === 'wait_for_quote' && <p>{ar?'تم تأكيد التوافر. يجري إعداد الأسعار وتفاصيل العربون.':'Availability confirmed. Your prices and deposit details are being prepared.'}</p>}
