@@ -1,3 +1,4 @@
+import {isPending,uploadStaged} from '../lib/pendingFiles';
 import BookingConfirmation,{BookingSendingState} from './BookingConfirmation';
 import {useTree} from '../lib/tree';
 import {formatCanadianPhone} from '../lib/canadianPhone';
@@ -131,6 +132,8 @@ export default function QuotePage({lang,user,isSessionReady,onCreateServiceReque
     try{
       // Finish current AI writes and persist the conversation before taking the submission snapshot.
       const conversation=await ctx.flushConversation?.();
+      // Photos and documents stayed in this browser until now; upload them only at submission.
+      for(const [field,kind] of [['photos','photo'],['files','file']]){const staged=ctx.getOrder().references?.[field]||[];if(staged.some(isPending))ctx.setField('references.'+field,await uploadStaged(staged,kind,ctx.token));}
       const order=ctx.getOrder();
       const issues=validateEventOrder(order,{submission:true});
       if(issues.length){

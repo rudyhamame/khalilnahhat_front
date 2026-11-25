@@ -172,3 +172,18 @@ html body .echo .ref-stack .ref-photo-dropzone .ref-items.is-grid>li>div{padding
 html body .echo .ref-stack .ref-photo-dropzone .ref-items.is-grid textarea{height:56px;min-height:56px;font-size:12px;border:0;outline:0;box-shadow:none;background:transparent;padding:4px;resize:none}
 html body .echo .ref-stack .ref-photo-dropzone .ref-items.is-grid textarea:focus{outline:0;box-shadow:none}
 html body .echo .ref-stack .ref-photo-dropzone{margin-top:-12px}
+html body .echo .ref-stack .ref-photo-dropzone .ref-items.is-grid>li:not(.ref-photo-add-cell){flex:0 0 180px}
+html body .echo .ref-stack .ref-photo-dropzone .ref-items.is-grid>li>img{aspect-ratio:4/3}
+html body .echo .ref-stack .ref-hint-row{margin-bottom:16px}
+
+/* 04.01.03 Event documents: same rail as the photos (card per document, borderless comment). */
+html body .echo .ref-stack .ref-file-dropzone{min-width:0;max-width:100%;margin-top:-12px}
+html body .echo .ref-stack .ref-file-dropzone .ref-items{display:flex;gap:10px;min-width:0;max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;padding-bottom:10px;scrollbar-width:thin}
+html body .echo .ref-stack .ref-file-dropzone .ref-items>li{position:relative;display:flex;flex-direction:column;flex:0 0 180px;scroll-snap-align:start;padding:0;overflow:hidden;border:1px solid #a6e3ce33;border-radius:10px;background:#0b131588}
+html body .echo .ref-stack .ref-file-dropzone .ref-items>li>.ref-doc{display:grid;place-items:center;width:100%;height:135px;border-radius:0;background:#0b1315}
+html body .echo .ref-stack .ref-file-dropzone .ref-items>li>strong{order:1;margin:0;padding:6px 6px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px}
+html body .echo .ref-stack .ref-file-dropzone .ref-items>li>div{order:2;padding:6px}
+html body .echo .ref-stack .ref-file-dropzone .ref-items>li>.ref-x{position:absolute;top:8px;width:28px;height:28px;border-color:#ffffff40;background:#0b1315cc;color:#eef4ef}
+html body .echo .ref-stack .ref-file-dropzone .ref-items>li>button.ref-x{inset-inline-end:8px}
+html body .echo .ref-stack .ref-file-dropzone .ref-items>li>a.ref-x{inset-inline-end:44px}
+html body .echo .ref-stack .ref-file-dropzone textarea{width:100%;height:56px;min-height:56px;font-size:12px;border:0;outline:0;box-shadow:none;background:transparent;padding:4px;resize:none}

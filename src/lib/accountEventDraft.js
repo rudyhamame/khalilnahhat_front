@@ -1,3 +1,4 @@
+import {withoutPending} from './pendingFiles';
 import {aiFields,getPath,normalizeEventOrder} from './eventOrderCore.mjs';
 function savedValuesMatch(order,saved){
  if(!saved||typeof saved!=='object')return false;
@@ -20,7 +21,8 @@ export function accountEventDraft(request,onState=()=>{}){
   };
   return {
     async load(){const {item}=await request('/ai-booking/event-draft');version=item?.version||0;loadedDraftId=item?.draftId||null;return item;},
-    save:(order,draftId)=>enqueue(async()=>{
+    save:(fullOrder,draftId)=>enqueue(async()=>{
+      const order=withoutPending(fullOrder);
       const {item}=await request('/ai-booking/event-draft',{method:'PUT',body:{version,draftId,order}});
       if(!Number.isSafeInteger(item?.version)||item.version<=version)throw Error('Draft save was not confirmed.');
       version=item.version;

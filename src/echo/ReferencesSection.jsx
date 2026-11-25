@@ -1,6 +1,6 @@
 import {useEffect,useState} from 'react';
 import {ExternalLink,FileText,Image as ImageIcon,Link as LinkIcon,Plus,Trash2,Upload} from 'lucide-react';
-import {uploadEventFile} from '../lib/api';
+import {isPending,pendingUrl,stageFile,stagedFile,unstageFile} from '../lib/pendingFiles';
 import {EVENT_FILE_LIMITS,checkEventFile} from '../lib/eventFileLimits';
 import {duplicateAttachmentHash,hashFile} from '../lib/photoHash';
 import {useEventOrder} from './eventOrderContext';
@@ -10,6 +10,12 @@ import './referencesSection.css';
 
 // Booking-page references section of the Booking summary: inspiration photos (upload) and links, and event documents (upload).
 // photos + comments (references.photos), photo links (references.images) and documents + notes (references.files).
+// A staged photo is shown from this browser's copy; a stored one from its URL.
+function Preview({item}){
+  const [src,setSrc]=useState(isPending(item)?'':item.url);
+  useEffect(()=>{if(!isPending(item)){setSrc(item.url);return undefined;}let url,alive=true;stagedFile(item.sha256).then(blob=>{if(alive&&blob){url=URL.createObjectURL(blob);setSrc(url);}});return()=>{alive=false;if(url)URL.revokeObjectURL(url);};},[item.url,item.sha256]);
+  return <img src={src} alt="" loading="lazy"/>;
+}
 function Attachments({kind,field,title,hint,icon:Icon,ctx,ar,tr}){
   const items=ctx?.order?.references?.[field]||[],[busy,setBusy]=useState(false),[error,setError]=useState('');
   const canEdit=Boolean(ctx?.draftEditable),set=next=>ctx.setField('references.'+field,next);
@@ -21,22 +27,21 @@ function Attachments({kind,field,title,hint,icon:Icon,ctx,ar,tr}){
     try{
       const contentHash=await hashFile(file);
       if(duplicateAttachmentHash(items,contentHash)){setError(kind==='photo'?tr('This photo is already attached.','هذه الصورة مرفقة بالفعل.'):tr('This document is already attached.','هذا المستند مرفق بالفعل.'));return;}
-      const {url,name,sha256}=await uploadEventFile(file,kind,ctx.token);
-      if(sha256&&sha256!==contentHash)throw new Error(kind==='photo'?tr('The uploaded photo could not be verified. Please try again.','تعذر التحقق من الصورة المرفوعة. حاول مرة أخرى.'):tr('The uploaded document could not be verified. Please try again.','تعذر التحقق من المستند المرفوع. حاول مرة أخرى.'));
-      set([...items,{url,name,comment:'',sha256:contentHash,size:file.size}]);
+      await stageFile(contentHash,file);
+      set([...items,{url:pendingUrl(contentHash),name:file.name,comment:'',sha256:contentHash,size:file.size}]);
     }
     catch(failure){setError(failure.message);}
     finally{setBusy(false);}
   };
   return <div className="ref-block" data-booking-field={`references.${field}`}><h4><Icon size={17} aria-hidden="true"/>{title}<FieldCode k={`references.${field}`}/></h4><div className="ref-hint-row"><p>{hint}</p>{kind==='photo'?<label className={`ref-photo-add${busy||!canEdit||items.length>=EVENT_FILE_LIMITS[kind].max?' is-disabled':''}`}><Upload size={20} aria-hidden="true"/><span>{busy?tr('Uploading…','جارٍ الرفع…'):tr('Add photo','أضف صورة')}</span><input type="file" accept={EVENT_FILE_LIMITS[kind].accept} disabled={busy||!canEdit||items.length>=EVENT_FILE_LIMITS[kind].max} onChange={add}/></label>:<label className={`ref-file-add${busy||!canEdit||items.length>=EVENT_FILE_LIMITS[kind].max?' is-disabled':''}`}><Upload size={20} aria-hidden="true"/><span>{busy?tr('Uploading…','جارٍ الرفع…'):tr('Add document','أضف مستنداً')}</span><input type="file" accept={EVENT_FILE_LIMITS[kind].accept} disabled={busy||!canEdit||items.length>=EVENT_FILE_LIMITS[kind].max} onChange={add}/></label>}</div>
     {!items.length?null:kind==='photo'?<div className="ref-photo-dropzone"><ul className="ref-items is-grid">{items.map((item,index)=><li key={item.url}>
-      <img src={item.url} alt="" loading="lazy"/>
+      <Preview item={item}/>
       <div><textarea rows={2} maxLength={500} dir="auto" disabled={!canEdit} value={item.comment||''} placeholder={tr('Add a comment about this photo','أضف تعليقاً على هذه الصورة')} aria-label={`${tr('Comment for','تعليق على')} ${item.name}`} onChange={e=>set(items.map((row,i)=>i===index?{...row,comment:e.target.value}:row))}/></div>
-      <button type="button" className="ref-x" disabled={!canEdit} aria-label={`${tr('Remove','إزالة')} ${item.name}`} onClick={()=>set(items.filter((_,i)=>i!==index))}><Trash2 size={15}/></button>
+      <button type="button" className="ref-x" disabled={!canEdit} aria-label={`${tr('Remove','إزالة')} ${item.name}`} onClick={()=>{if(isPending(item))unstageFile(item.sha256);set(items.filter((_,i)=>i!==index));}}><Trash2 size={15}/></button>
     </li>)}</ul></div>:<div className="ref-file-dropzone"><ul className="ref-items">{items.map((item,index)=><li key={item.url}>
       <strong className="ref-doc-name" dir="auto">{item.name}</strong><span className="ref-doc"><FileText size={22} aria-hidden="true"/></span><div><textarea rows={2} maxLength={500} dir="auto" disabled={!canEdit} value={item.comment||''} placeholder={tr('Add a note about this document','أضف ملاحظة عن هذا المستند')} aria-label={`${tr('Comment for','تعليق على')} ${item.name}`} onChange={e=>set(items.map((row,i)=>i===index?{...row,comment:e.target.value}:row))}/></div>
       <a className="ref-x ref-open" href={item.url} target="_blank" rel="noopener noreferrer" aria-label={`${tr('Open','فتح')} ${item.name}`} title={tr('Open document','فتح المستند')}><ExternalLink size={15} aria-hidden="true"/></a>
-      <button type="button" className="ref-x" disabled={!canEdit} aria-label={`${tr('Remove','إزالة')} ${item.name}`} onClick={()=>set(items.filter((_,i)=>i!==index))}><Trash2 size={15}/></button>
+      <button type="button" className="ref-x" disabled={!canEdit} aria-label={`${tr('Remove','إزالة')} ${item.name}`} onClick={()=>{if(isPending(item))unstageFile(item.sha256);set(items.filter((_,i)=>i!==index));}}><Trash2 size={15}/></button>
     </li>)}</ul></div>}
     {error&&<p role="alert" className="ref-error">{error}</p>}
     </div>;

@@ -1,7 +1,7 @@
 import {useCallback,useEffect,useId,useLayoutEffect,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
 import {Paperclip,Image as ImageIcon,FileText} from 'lucide-react';
-import {uploadEventFile} from '../lib/api';
+import {pendingUrl,stageFile} from '../lib/pendingFiles';
 import {EVENT_FILE_LIMITS,checkEventFile} from '../lib/eventFileLimits';
 import {duplicateAttachmentHash,hashFile} from '../lib/photoHash';
 
@@ -21,8 +21,8 @@ export default function ChatAttach({ctx,ar=false,disabled=false,onAdded}){
     if(problem){setError(problem);break;}
     const contentHash=await hashFile(file);
     if(duplicateAttachmentHash(saved,contentHash)){setError(kind==='photo'?tr('This photo is already attached.','هذه الصورة مرفقة بالفعل.'):tr('This document is already attached.','هذا المستند مرفق بالفعل.'));continue;}
-    const {url,name,sha256}=await uploadEventFile(file,kind,ctx.token);
-    if(sha256&&sha256!==contentHash)throw new Error(kind==='photo'?tr('The uploaded photo could not be verified. Please try again.','تعذر التحقق من الصورة المرفوعة. حاول مرة أخرى.'):tr('The uploaded document could not be verified. Please try again.','تعذر التحقق من المستند المرفوع. حاول مرة أخرى.'));
+    await stageFile(contentHash,file);
+    const url=pendingUrl(contentHash),name=file.name;
     saved=[...saved,{url,name,comment:'',sha256:contentHash,size:file.size}];
     ctx.setField('references.'+field,saved);
     onAdded?.(kind,{url,name});
