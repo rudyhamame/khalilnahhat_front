@@ -43,3 +43,6 @@
 .bat-options ul{display:grid;gap:4px;margin-top:6px}.bat-options li{display:flex;gap:8px;align-items:baseline}
 .bat-note{color:var(--aw-muted);font-size:12.5px}.bat-empty{padding:28px;border:1px dashed var(--bat-line);border-radius:14px;text-align:center}
 @media(max-width:600px){.bat-header{padding:18px}.bat-tree details details>ul{grid-template-columns:1fr}.bat-tree>li>details>summary{padding:14px}}
+.bat-edit{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;padding:8px 10px;border-radius:10px;background:#ffffff0a;font-size:12.5px}
+.bat-edit label{display:inline-flex;gap:6px;align-items:center}.bat-edit input[type=number]{width:72px;padding:3px 6px;border:1px solid var(--bat-line);border-radius:6px;background:transparent;color:inherit}
+.bat-edit fieldset{display:flex;flex-wrap:wrap;gap:6px 14px;margin:0;padding:0;border:0;flex-basis:100%}.bat-edit legend{padding:0;margin-bottom:4px;color:var(--aw-muted);font-weight:600}

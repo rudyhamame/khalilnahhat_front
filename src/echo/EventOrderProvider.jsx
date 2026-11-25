@@ -14,7 +14,7 @@ import {accountEventDraft} from '../lib/accountEventDraft';
 import {mergeGuestDraft} from '../lib/mergeGuestDraft.mjs';
 import {aiTaskHistoryKey} from '../lib/aiTaskHistory';
 import { trackOnce, setFunnelStep, installDropOffTracking } from '../lib/analytics';
-import { createEventOrder, normalizeEventOrder, applyAccountProfile, applyDraftAccountProfile, fields, getPath, validValue, fieldName, legacyToOrder, missingOrderFields,hasEventDraftContent,setAccountLock } from '../lib/eventOrderCore.mjs';
+import { applyBookingRules, createEventOrder, normalizeEventOrder, applyAccountProfile, applyDraftAccountProfile, fields, getPath, validValue, fieldName, legacyToOrder, missingOrderFields,hasEventDraftContent,setAccountLock } from '../lib/eventOrderCore.mjs';
 import './eventOrder.css';
 import './orderAsideUI.css';
 import './eventOrderInline.css';
@@ -99,6 +99,9 @@ export function EventOrderProvider({user,token,lang,auth,children,isSessionReady
     if(!personalLeft)trackOnce('personal_info_complete');
   },[order]);
   useEffect(()=>installDropOffTracking(),[]);
+  // Admin-edited rules (required, max length, allowed values) laid over the contract.
+  const [,setRulesLoaded]=useState(false);
+  useEffect(()=>{let alive=true;apiRequest('/booking-rules').then(({rules})=>{applyBookingRules(rules);if(alive)setRulesLoaded(true);}).catch(()=>{});return()=>{alive=false;};},[]);
   // The header's Echo Smart Cart button opens only while a booking is active (anything entered, chosen or selected).
   useEffect(()=>{const on=Boolean(hasEventDraftContent(order)||order.services?.length||order.equipment?.length);try{localStorage.setItem('echo-booking-active',on?'1':'0');}catch{/* Optional. */}window.dispatchEvent(new CustomEvent('echo:booking-active',{detail:on}));},[order]);
   useEffect(()=>{window.__echoBookingDrafts=draftsToComplete;window.dispatchEvent(new CustomEvent('echo:booking-drafts',{detail:draftsToComplete}));return()=>{window.__echoBookingDrafts=0;window.dispatchEvent(new CustomEvent('echo:booking-drafts',{detail:0}));};},[draftsToComplete]);
