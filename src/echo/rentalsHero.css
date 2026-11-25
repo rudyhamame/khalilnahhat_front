@@ -58,3 +58,12 @@ html body .dj-prefs-section .rentals-hero-form .djf.djf .djf-head{margin-bottom:
 @media(max-width:700px){.dj-substep .dj-prefs-section{margin-inline-start:0}.dj-substep::before{display:none}}
 @keyframes dj-substep-in{from{opacity:0;transform:translateY(14px)}}
 @media(prefers-reduced-motion:reduce){.dj-substep{animation:none}}
+
+/* MC hosting section (03.03): the language and dialect the MC should speak. */
+.mc-language{margin-top:14px}
+.mc-language-add{display:flex;flex-wrap:wrap;gap:8px}
+.mc-language-add input{flex:1 1 150px;min-width:0;padding:9px 12px;border:1px solid currentColor;border-radius:10px;background:transparent;color:inherit;font:inherit}
+.mc-language-add button{padding:9px 16px;border-radius:10px;border:1px solid currentColor;background:transparent;color:inherit;font:inherit;cursor:pointer}
+.mc-language-list{list-style:none;display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0;padding:0}
+.mc-language-list li{display:inline-flex;align-items:center;gap:6px;padding:5px 6px 5px 12px;border:1px solid currentColor;border-radius:999px}
+.mc-language-list button{display:inline-flex;border:0;background:none;color:inherit;cursor:pointer;padding:2px}

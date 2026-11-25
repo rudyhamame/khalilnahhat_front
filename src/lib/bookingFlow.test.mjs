@@ -3,10 +3,10 @@ import assert from 'node:assert/strict';
 import {contract,createEventOrder,applyOrderPatch} from './eventOrderCore.mjs';
 import {bookingSteps,bookingStepForField,firstIncompleteStep,missingViewportFields,djServiceChoice,djServiceChanges,venueSelectionChanges} from './bookingFlow.mjs';
 test('draft steps follow VP02, VP03 and VP04 and cover every canonical field once',()=>{
- const dj=createEventOrder();dj.music.djRequested=true;const steps=bookingSteps(dj); // the music preferences exist only while DJ is requested
+ const dj=createEventOrder();dj.music.djRequested=true;dj.music.mcRequested=true;const steps=bookingSteps(dj); // the music preferences exist only while DJ is requested
  assert.equal(bookingSteps(createEventOrder()).flatMap(step=>step.fields).some(field=>field.key==='music.genres'),false);
- assert.deepEqual(steps.map(step=>step.id),['customer','event','music','equipment','additional']);
- assert.deepEqual(steps.slice(1,4).map(step=>step.chapter),['02','03','04']);
+ assert.deepEqual(steps.map(step=>step.id),['customer','event','music','additional']);
+ assert.deepEqual(steps.slice(1,3).map(step=>step.chapter),['02','03']);
  const keys=steps.flatMap(step=>step.fields.map(field=>field.key));
  assert.equal(new Set(keys).size,keys.length);
  assert.deepEqual([...keys].sort(),contract.sections.flatMap(section=>section.fields.map(field=>field.key)).sort());

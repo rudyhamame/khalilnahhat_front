@@ -9,7 +9,7 @@ import {reconcileSuggestedSongRows,savedSuggestedSongs} from './suggestedSongRow
 const rentals=[{id:'sound',name:'Sound',bookingServiceId:'sound',equipment:[{id:'speaker',name:'Speaker'}]}];
 test('rental decision stays visible, decline gates browsing and preserves saved selections for correction',()=>{
  const order=createEventOrder();order.rental.requested=false;
- const goal=bookingGoal('rentals');
+ const goal=bookingGoal('music');
  let lines=sectionLines(order,goal,false,rentals).lines;
  assert.equal(lines.some(row=>row.key==='rental.requested'),false); // the rental question is UI only, not a numbered atom
  assert.equal(lines.some(row=>row.category),false);
@@ -23,7 +23,7 @@ test('rental decision stays visible, decline gates browsing and preserves saved 
 });
 test('saved equipment missing from the current catalogue remains visible, also in submitted snapshots',()=>{
  const order=createEventOrder();order.equipment=[{id:'retired',name:'Saved speaker',quantity:3}];
- const goal=bookingGoal('rentals');
+ const goal=bookingGoal('music');
  const live=sectionLines(order,goal,false,rentals).lines.flatMap(row=>row.items||[]).find(row=>row.key.endsWith(':retired'));
  assert.equal(live.label,'Saved speaker');assert.equal(live.reviewValue,3);assert.equal(live.stock,'Unavailable');
  assert.match(submittedSectionLines(order,goal).lines.find(row=>row.key==='equipment').value,/Saved speaker × 3/);

@@ -3,7 +3,7 @@ import {treeAtoms,stepMounted,atomSource,stepsOf,withEquipmentCategoryIds,buildT
 
 test('every data atom is a node of the tree: an id, a step, a section and a source',()=>{
  const atoms=treeAtoms({dj:true,rental:true});
- assert.ok(atoms.length>=33,`${atoms.length} atoms`);
+ assert.ok(atoms.length>=34,`${atoms.length} atoms`);
  assert.equal(new Set(atoms.map(atom=>atom.id)).size,atoms.length,'ids are unique');
  for(const atom of atoms){assert.ok(atom.step>=1&&atom.step<=5,atom.id);assert.match(atom.code,/^\d\d\.\d\d\.\d\d/);assert.ok(['services','events','music','client','account'].includes(atom.branch),atom.id);}
  assert.equal(atoms.find(atom=>atom.id==='event.type').branch,'events');
@@ -12,9 +12,10 @@ test('every data atom is a node of the tree: an id, a step, a section and a sour
 
 test('atoms of a step exist only while the tree has that step',()=>{
  const noDj=treeAtoms({dj:false,rental:true}),noRental=treeAtoms({dj:true,rental:false});
- assert.ok(noDj.filter(atom=>atom.step===3).every(atom=>!atom.mounted)&&noDj.filter(atom=>atom.step!==3).every(atom=>atom.mounted));
- assert.ok(noRental.filter(atom=>atom.step===4).every(atom=>!atom.mounted));
- assert.equal(stepMounted(3,{dj:false,rental:true}),false);assert.equal(stepMounted(2,{dj:false,rental:false}),true);
+ const djAtom=atom=>atom.step===3&&[1,2].includes(Number(atom.section.split('.')[1])),rentalAtom=atom=>atom.step===3&&Number(atom.section.split('.')[1])>=4; // step 3 holds both: DJ sections 03.01–03.02, MC 03.03, rental sections 03.04+
+ assert.ok(noDj.filter(djAtom).every(atom=>!atom.mounted)&&noDj.filter(atom=>!djAtom(atom)).every(atom=>atom.mounted));
+ assert.ok(noRental.filter(rentalAtom).every(atom=>!atom.mounted)&&noRental.filter(atom=>!rentalAtom(atom)).every(atom=>atom.mounted));
+ assert.equal(stepMounted(3,{dj:false,rental:false}),false);assert.equal(stepMounted(2,{dj:false,rental:false}),true);
 });
 
 test('steps follow the service ids, equipment follows equipmentCategoryId, removed ids keep their place',()=>{

@@ -49,7 +49,7 @@ export function atomSource(key){
  if(key==='music.mcRequested')return {branch:'services',ref:MC_ID};
  if(key==='services'||key==='rental.requested'||key==='equipment')return {branch:'services',ref:''};
  if(key==='event.type'||key==='event.title')return {branch:'events',ref:''};
- if(key==='music.languagePairs')return {branch:'music',ref:'languages, dialects'};
+ if(key==='music.languagePairs'||key==='music.mcLanguagePairs')return {branch:'music',ref:'languages, dialects'};
  if(key==='music.genres')return {branch:'music',ref:'genres'};
  if(key==='music.suggestedSongs')return {branch:'music',ref:'event moments'};
  if(key==='music.favouriteArtists')return {branch:'music',ref:'artists'};
@@ -58,10 +58,12 @@ export function atomSource(key){
 }
 const stepOfAtom=key=>parseInt(fieldCode(key).slice(0,2),10);
 // A step is mounted only while its service id is in the tree; its atoms exist only then.
-export const stepMounted=(step,steps)=>(step!==3||steps.dj)&&(step!==4||steps.rental);
+export const stepMounted=(step,steps)=>step!==3||steps.dj||steps.rental;
+// Step 3 (Echo Services) holds the DJ section 03.01 and its music preferences 03.02 (while the DJ service exists), the MC section 03.03, and the rental sections 03.04+ (while rentals exist).
+export const atomMounted=(code,steps)=>{const [step,section]=String(code).split('.').map(Number);return step!==3?true:section<=2?!!steps.dj:section===3?!!(steps.dj||steps.rental):!!steps.rental;};
 export function treeAtoms(steps=treeSteps(),{includeMetadata=false}={}){
  return ATOM_KEYS.filter(key=>includeMetadata||!ATOM_SKIP.has(key)).map(key=>{
   const code=fieldCode(key),step=stepOfAtom(key);
-  return {id:key,code,step,section:code.split('.').slice(0,2).join('.'),...atomSource(key),mounted:stepMounted(step,steps)};
+  return {id:key,code,step,section:code.split('.').slice(0,2).join('.'),...atomSource(key),mounted:atomMounted(code,steps)};
  });
 }

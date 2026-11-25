@@ -12,7 +12,7 @@ import SmartCartIcon from './SmartCartIcon';
 import './bookingFooter.css';
 
 // The five steps. Required atoms come from the contract; every other atom of the step is optional.
-const STEPS=[['Personal','الشخصية'],['Event','الفعالية'],['DJ','دي جي'],['Rental','التأجير'],['Extras','إضافات']];
+const STEPS=[['Personal','الشخصية'],['Event','الفعالية'],['Echo Services','خدمات إيكو'],['Extras','إضافات']];
 // Not typed in by the client (map data) or not on this page (conditional title, room setup).
 // Required atoms per step: the contract's required fields, the DJ decision (step 3) and .
 // Every piece of rental equipment is its own data atom (the Rental step counts the chosen items against all items); everything else is a plain answered check.

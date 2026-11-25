@@ -4,12 +4,12 @@ import {useTreeService,useTreeSteps} from '../lib/tree';
 import {fieldCode} from '../lib/eventPageModel';
 import './bookingPhases.css';
 
-// The five steps of the Booking page. Music Preferences is not a step of its own: it is a sub-step (03.02) of DJ Khalil Service, shown only while that service is chosen.
+// The four steps of the Booking page (Echo Services holds the DJ, MC and rental equipment). Music Preferences is not a step of its own: it is a sub-step (03.02) of DJ Khalil Service, shown only while that service is chosen.
 // The step names and texts come from the shared step definitions (lib/bookingFlow.mjs), so the Booking page, the Booking review and the Booking draft can never differ.
-const PHASE_STEPS=[['personal','customer'],['event','event'],['dj','music'],['rental','equipment'],['additional','additional']];
+const PHASE_STEPS=[['personal','customer'],['event','event'],['dj','music'],['additional','additional']];
 const ALL_PHASES=PHASE_STEPS.map(([phase,step])=>{const definition=bookingStepDefinition(step);return [phase,definition.title,definition.ar,definition.description,definition.descriptionAr];});
 // Steps exist only while their service is in the catalogue.
-const usePhases=(ar=false)=>{const steps=useTreeSteps();return ALL_PHASES.filter(row=>(row[0]!=='dj'||steps.dj)&&(row[0]!=='rental'||steps.rental));}; // step 3 is always "Echo Services" (the step definition), whatever the DJ service is called
+const usePhases=(ar=false)=>{const steps=useTreeSteps();return ALL_PHASES.filter(row=>row[0]!=='dj'||steps.dj||steps.rental);}; // step 3 is always "Echo Services" (the step definition), whatever the DJ service is called
 // Longer headings for the page; the step bar keeps the short names above.
 const HEADINGS={personal:['Personal info: who we are planning with','المعلومات الشخصية: مع من نخطط'],event:['Event info: your occasion, date, guests and venue','معلومات الفعالية: المناسبة والموعد والضيوف والمكان'],dj:['Echo Services','خدمات إيكو'],rental:['Rental equipments','معدات التأجير'],additional:['Additional info: inspiration, documents and notes','معلومات إضافية: أفكار ومستندات وملاحظات']};
 

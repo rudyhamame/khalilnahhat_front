@@ -17,7 +17,7 @@ const GROUPS = [
     ['music-archive', 'Recordings', '/admin/archive', Archive],
     ['work-elements', 'Work Elements', '/admin/echo?tab=work-elements', Tags],
     ['dj-work-type', 'DJ Work Type', '/admin/echo?tab=dj-work-type', Tags],
-    ['dj-service-builder', 'DJ Service Builder', '/admin/dj-service-builder?window=1', ListMusic],
+    ['dj-service-builder', 'Set list builder', '/admin/dj-service-builder?window=1', ListMusic],
   ] },
   { name: 'Clients', items: [
     ['registered-clients', 'Registered Clients', '/admin/clients', Users],

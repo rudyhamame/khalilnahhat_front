@@ -12,6 +12,7 @@ const MusicPreferencesStep=lazy(()=>import('./MusicPreferencesStep'));
 const PhaseBar=lazy(()=>import('./BookingPhases').then(module=>({default:module.PhaseBar})));
 const PhaseHeading=lazy(()=>import('./BookingPhases').then(module=>({default:module.PhaseHeading})));
 const RentalsHero=lazy(()=>import('./RentalsHero'));
+const McSection=lazy(()=>import('./McChoice'));
 const ReferencesSection=lazy(()=>import('./ReferencesSection'));
 const AdditionalNotesSection=lazy(()=>import('./AdditionalNotesSection'));
 const RentalQuestion=lazy(()=>import('./RentalQuestion'));
@@ -31,7 +32,7 @@ function SectionContent({section,lang,user,token,liveStream,liveSessions,isSessi
  // The equipment explorer opens when the client answers yes to the rental question (or already chose equipment, or arrives from a link to a rental field).
  const rentalOpen=order.order?.rental?.requested===true||order.order?.equipment?.length>0||order.order?.services?.some(id=>!['dj','mc'].includes(id))||/^[?&]field=(equipment|services|rental)/.test(window.location.search.replace('?','&').replace(/^&/,'?'));
  // Event details and services are one continuous booking page (/booking and /rentals show the same page).
- const bookAndServices=()=> <><PhaseBar ar={ar}/><BookHero ar={ar}/><HomeAvailability lang={lang}/>{steps.dj&&<><PhaseHeading id="dj" ar={ar}/><div className="booking-services" dir={ar?'rtl':'ltr'}><RentalsHero ar={ar}/></div><MusicPreferencesStep ar={ar}/></>}{steps.rental&&<><PhaseHeading id="rental" ar={ar}/><RentalQuestion ar={ar}/>{rentalOpen&&<div className="booking-services rental-services-stack" dir={ar?'rtl':'ltr'}><Suspense fallback={null}><ServiceVinyl lang={lang} onPlan={onPlan}/></Suspense></div>}</>}<PhaseHeading id="additional" ar={ar}/><ReferencesSection ar={ar}/><AdditionalNotesSection ar={ar}/></>;
+ const bookAndServices=()=> <><PhaseBar ar={ar}/><BookHero ar={ar}/><HomeAvailability lang={lang}/>{(steps.dj||steps.rental)&&<PhaseHeading id="dj" ar={ar}/>}{steps.dj&&<div className="booking-services" dir={ar?'rtl':'ltr'}><RentalsHero ar={ar}/></div>}{steps.dj&&<MusicPreferencesStep ar={ar}/>}{(steps.dj||steps.rental)&&<div className="booking-services" dir={ar?'rtl':'ltr'}><McSection ar={ar}/></div>}{steps.rental&&<><RentalQuestion ar={ar}/>{rentalOpen&&<div className="booking-services rental-services-stack" dir={ar?'rtl':'ltr'}><Suspense fallback={null}><ServiceVinyl lang={lang} onPlan={onPlan}/></Suspense></div>}</>}<PhaseHeading id="additional" ar={ar}/><ReferencesSection ar={ar}/><AdditionalNotesSection ar={ar}/></>;
  const content={
   live:()=> <HomeLiveConsole overlay lang={lang} user={user} token={token} liveStream={liveStream} liveSessions={liveSessions} isSessionReady={isSessionReady}/>,
   availability:()=>bookAndServices(),

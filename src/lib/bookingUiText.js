@@ -294,7 +294,7 @@ const AR={
   "ECHO AI Billing": "فواتير إيكو AI",
   "Concept map": "خريطة المفاهيم",
   "Live Archive": "أرشيف البث",
-  "DJ Service Builder": "منشئ خدمة الدي جي",
+  "Set list builder": "منشئ قائمة الأغاني",
   "Work Elements": "عناصر العمل",
   "DJ Work Type": "نوع عمل الدي جي",
   "Your offer is with the team": "عرضك لدى الفريق",
