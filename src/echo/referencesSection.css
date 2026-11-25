@@ -163,3 +163,12 @@ html body .echo .ref-stack .ref-photo-dropzone .ref-items.is-grid>li>img{width:1
 html body .echo .ref-stack .ref-photo-dropzone .ref-items.is-grid>li>div{padding:10px}
 html body .echo .ref-stack .ref-photo-dropzone .ref-items.is-grid>li>.ref-x{position:absolute;width:28px;height:28px}
 html body .echo .ref-stack .ref-photo-dropzone .ref-items.is-grid textarea{width:100%;height:84px;min-height:84px}
+/* Smaller cards; the rail stays inside its panel (grid items need min-width:0 to scroll instead of overflow); comment has no border. */
+html body .echo .ref-stack .ref-photo-dropzone{min-width:0;max-width:100%}
+html body .echo .ref-stack .ref-photo-dropzone .ref-items.is-grid{min-width:0;max-width:100%;gap:10px}
+html body .echo .ref-stack .ref-photo-dropzone .ref-items.is-grid>li:not(.ref-photo-add-cell){flex:0 0 128px}
+html body .echo .ref-stack .ref-photo-dropzone .ref-items.is-grid>li>img{aspect-ratio:1/1}
+html body .echo .ref-stack .ref-photo-dropzone .ref-items.is-grid>li>div{padding:6px}
+html body .echo .ref-stack .ref-photo-dropzone .ref-items.is-grid textarea{height:56px;min-height:56px;font-size:12px;border:0;outline:0;box-shadow:none;background:transparent;padding:4px;resize:none}
+html body .echo .ref-stack .ref-photo-dropzone .ref-items.is-grid textarea:focus{outline:0;box-shadow:none}
+html body .echo .ref-stack .ref-photo-dropzone{margin-top:-12px}
