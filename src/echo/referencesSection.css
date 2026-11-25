@@ -155,3 +155,11 @@ html body .echo .ref-stack .ref-file-dropzone .ref-items>li{row-gap:6px}
 html body .echo .ref-stack>.ref-block{padding-bottom:20px!important}
 html body .echo .ref-stack>.ref-block:not(:first-child){padding-top:20px!important}
 html body .echo .ref-stack>.ref-block:last-child{padding-bottom:0!important}
+
+/* 04.01.01 Inspiration photos: one horizontal rail of cards (photo on top, its comment below), scroll-snapped on every screen size. */
+html body .echo .ref-stack .ref-photo-dropzone .ref-items.is-grid{display:flex;gap:12px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;padding-bottom:10px;scrollbar-width:thin}
+html body .echo .ref-stack .ref-photo-dropzone .ref-items.is-grid>li:not(.ref-photo-add-cell){display:flex;flex-direction:column;flex:0 0 clamp(190px,60vw,230px);scroll-snap-align:start;padding:0;overflow:hidden}
+html body .echo .ref-stack .ref-photo-dropzone .ref-items.is-grid>li>img{width:100%;height:auto;aspect-ratio:4/3;border-radius:0;object-fit:cover}
+html body .echo .ref-stack .ref-photo-dropzone .ref-items.is-grid>li>div{padding:10px}
+html body .echo .ref-stack .ref-photo-dropzone .ref-items.is-grid>li>.ref-x{position:absolute;width:28px;height:28px}
+html body .echo .ref-stack .ref-photo-dropzone .ref-items.is-grid textarea{width:100%;height:84px;min-height:84px}

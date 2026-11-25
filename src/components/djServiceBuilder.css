@@ -512,3 +512,53 @@ select.djb-name{min-width:0;max-width:100%;cursor:pointer}
 .djb .djb-body>.djb-output .djb-preview-table tbody{display:table-row-group;height:160px}
 
 @media(max-width:650px){.djb .djb-intro .djb-switch{grid-template-columns:1fr;width:100%}.djb .djb-intro .djb-switch button>span:nth-child(2){width:auto;order:0;flex:1}.djb .djb-intro .djb-switch button{flex-wrap:nowrap}}
+
+/* "Add music items" (djb-tools) in two columns: notes and event moments on the left, the moment's items on the right. */
+.djb-tools-backdrop>.djb-tools{width:min(1160px,100%)!important;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);column-gap:22px;align-items:start}
+.djb-tools-backdrop>.djb-tools>*{grid-column:1/-1}
+.djb-tools-backdrop>.djb-tools>.djb-notes,.djb-tools-backdrop>.djb-tools>.djb-moments,.djb-tools-backdrop>.djb-tools>.djb-empty{grid-column:1}
+.djb-tools-backdrop>.djb-tools>.djb-moment{grid-column:2;grid-row:2 / span 6;min-width:0}
+.djb-tools-backdrop .djb-tools .djb-moments{max-height:none}
+.djb-tools-backdrop>.djb-tools>.djb-moment.is-flat{grid-row:2 / span 5}
+.djb-tools-backdrop>.djb-tools:has(>.djb-moment.is-flat)>:is(.djb-step-title,.djb-tabs,.djb-panel){grid-column:1}
+/* two columns: left = notes + sources + library, right = the moment; the last left row absorbs the spare height */
+.djb-tools-backdrop>.djb-tools{grid-template-rows:auto auto auto auto auto minmax(0,1fr)}
+.djb-tools-backdrop>.djb-tools:has(>.djb-moment.is-flat){grid-template-rows:auto auto auto auto minmax(0,1fr)}
+.djb-tools-backdrop>.djb-tools>.djb-moment{align-self:stretch}
+@media(max-width:900px){.djb-tools-backdrop>.djb-tools{grid-template-columns:1fr!important;grid-template-rows:none!important}.djb-tools-backdrop>.djb-tools>*,.djb-tools-backdrop>.djb-tools>.djb-moment{grid-column:1!important;grid-row:auto!important}}
+
+/* ---- djb-moment.is-flat: the list of added items and each item ---- */
+.djb-moment.is-flat{gap:10px;padding:14px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg,color-mix(in srgb,var(--acc) 5%,var(--bg)),var(--bg) 160px)}
+.djb-moment.is-flat .djb-empty{margin:0;padding:26px 18px;border:1px dashed var(--line2);border-radius:14px;text-align:center;color:var(--muted);font-size:13px}
+.djb-moment.is-flat .djb-tracks{display:grid;gap:8px;counter-reset:none}
+.djb-moment.is-flat .djb-tracks>li{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto auto;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:var(--panel2,var(--bg));transition:border-color .15s,background-color .15s,transform .15s}
+.djb-moment.is-flat .djb-tracks>li:hover{border-color:color-mix(in srgb,var(--acc) 55%,var(--line));background:color-mix(in srgb,var(--acc) 6%,var(--panel2,var(--bg)))}
+.djb-moment.is-flat .djb-n{min-width:26px;padding:2px 6px;border-radius:7px;background:var(--line);color:var(--muted);font:700 11px/1.5 ui-monospace,Menlo,monospace;text-align:center}
+.djb-moment.is-flat .djb-manual-ico{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--acc2);color:var(--acc)}
+.djb-moment.is-flat .djb-tracks>li>button:first-child{width:34px;height:34px;border-radius:50%}
+.djb-moment.is-flat .djb-meta{display:grid;gap:2px;min-width:0}
+.djb-moment.is-flat .djb-meta strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;font-weight:650;color:var(--text)}
+.djb-moment.is-flat .djb-meta small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-size:12px}
+.djb-moment.is-flat .djb-tracks>li>em{padding:3px 10px;border-radius:999px;background:var(--acc2);color:var(--acc);font:600 10.5px/1.4 inherit;font-style:normal;letter-spacing:.06em;text-transform:uppercase}
+.djb-moment.is-flat .djb-tracks>li.is-manual>em{background:#ffffff12;color:var(--muted)}
+.djb-moment.is-flat .djb-icons{display:inline-flex;gap:4px;opacity:.7;transition:opacity .15s}
+.djb-moment.is-flat .djb-tracks>li:hover .djb-icons,.djb-moment.is-flat .djb-icons:focus-within{opacity:1}
+.djb-moment.is-flat .djb-icons button{display:grid;place-items:center;width:30px;height:30px;padding:0;border:0;border-radius:8px;background:transparent;color:var(--muted);cursor:pointer}
+.djb-moment.is-flat .djb-icons button:hover:not(:disabled){background:var(--line);color:var(--text)}
+.djb-moment.is-flat .djb-icons button:last-child:hover:not(:disabled){background:#e0786b26;color:#f2a69a}
+.djb-moment.is-flat .djb-icons button:disabled{opacity:.3;cursor:default}
+@media(max-width:600px){.djb-moment.is-flat .djb-tracks>li{grid-template-columns:auto minmax(0,1fr) auto;row-gap:6px}.djb-moment.is-flat .djb-n,.djb-moment.is-flat .djb-tracks>li>em{display:none}}
+/* The items keep a fixed height (they never stretch with the column); the list scrolls instead of growing. */
+.djb-moment.is-flat{align-self:start;align-content:start}
+.djb-moment.is-flat .djb-tracks{align-content:start;grid-auto-rows:64px;max-height:min(460px,52vh);overflow-y:auto;overscroll-behavior:contain;padding-inline-end:4px;scrollbar-width:thin}
+.djb-moment.is-flat .djb-tracks>li{height:64px;min-height:0;box-sizing:border-box;align-self:start}
+/* A wider panel for the library, search and requests: full width of a wider popup, items in as many columns as fit. */
+.djb-tools-backdrop>.djb-tools{width:min(1360px,100%)!important}
+.djb-tools-backdrop>.djb-tools .djb-panel{grid-column:1/-1;width:100%;max-width:none;max-height:min(54vh,560px)}
+.djb-tools-backdrop>.djb-tools .djb-lib{grid-template-columns:repeat(auto-fill,minmax(340px,1fr));column-gap:18px}
+/* The source tabs (Library, Song / cue, Requests) in two columns. */
+.djb-tools .djb-tabs{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px}
+@media(max-width:600px){.djb-tools .djb-tabs{grid-template-columns:1fr!important}}
+/* "Add work type" chip at the end of the type filters: opens Work Elements, where work types are managed. */
+.djb-chips .djb-chip-add{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border:1px dashed color-mix(in srgb,var(--acc) 60%,transparent);border-radius:999px;background:none;color:var(--acc);font-size:11px;font-weight:600;text-decoration:none;cursor:pointer}
+.djb-chips .djb-chip-add:hover{background:var(--acc2)}
