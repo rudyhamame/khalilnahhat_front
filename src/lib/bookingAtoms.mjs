@@ -2,7 +2,13 @@ import atomContract from './contracts/booking-atoms.json' with {type:'json'};
 import {fields,getPath,isAnswered,missingOrderFields} from './eventOrderCore.mjs';
 
 const byKey=new Map(fields.map(field=>[field.key,field]));
-export const BOOKING_ATOM_SECTIONS=Object.freeze(atomContract.sections.map(([code,keys])=>Object.freeze({code,keys:Object.freeze([...keys])})));
+export const BOOKING_TREE=atomContract;
+export const BOOKING_TREE_STEPS=Object.freeze(atomContract.steps.map(step=>Object.freeze({...step})));
+export const bookingTreeStepForField=key=>atomContract.ownership[key]?.step||atomContract.pathOwners.find(([prefix])=>key?.startsWith(prefix))?.[1]||'additional';
+export const bookingTreeSource=key=>{const {branch='client',ref=''}=atomContract.ownership[key]||{};return {branch,ref};};
+export const bookingTreeStepMounted=(code,available)=>{const step=BOOKING_TREE_STEPS.find(step=>Number(step.code)===Number(code));return !step?.requiresAny||step.requiresAny.some(id=>Boolean(available[id]));};
+export const bookingTreeAtomMounted=(code,available)=>{const section=atomContract.sectionDefinitions.find(section=>section.code===String(code).split('.').slice(0,2).join('.'));return !section?.requiresAny||section.requiresAny.some(id=>Boolean(available[id]));};
+export const BOOKING_ATOM_SECTIONS=Object.freeze(atomContract.sections.map(([code,keys])=>Object.freeze({...atomContract.sectionDefinitions.find(section=>section.code===code),code,keys:Object.freeze([...keys])})));
 const codes=Object.fromEntries(BOOKING_ATOM_SECTIONS.flatMap(section=>section.keys.map((key,index)=>[key,`${section.code}.${String(index+1).padStart(2,'0')}`])));
 export const ATOM_KEYS=Object.freeze(Object.keys(codes));
 export const fieldCode=key=>codes[key]||'';

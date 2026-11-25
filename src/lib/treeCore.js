@@ -2,7 +2,7 @@
 // service, which booking steps exist, and how the tree is laid out. Plain modules (next-step logic, section lists) and the admin read it
 // here; lib/tree.js feeds it whenever the catalogue loads or changes.
 import {contract} from './eventOrderCore.mjs';
-import {ATOM_KEYS,fieldCode} from './eventPageModel.js';
+import {ATOM_KEYS,fieldCode,bookingTreeSource,bookingTreeAtomMounted,bookingTreeStepMounted} from './bookingAtoms.mjs';
 
 // The ids the booking logic recognises: DJ and MC have their own steps; every other service is a plain rental.
 export const DJ_ID='dj',MC_ID='mc';
@@ -44,23 +44,11 @@ export function setTreeSteps(next){steps=next;}
 // and the branch of the tree that feeds it. The booking and the admin map both read the atoms from here.
 const ATOM_SKIP=new Set(['event.venue.latitude','event.venue.longitude','event.venue.source','event.venue.sourceId','event.venue.sourceAttribution']);
 // Where an atom's values come from: a branch of the tree ('services', 'events', 'music'), or the client / account when nothing is catalogued.
-export function atomSource(key){
- if(key==='music.djRequested')return {branch:'services',ref:DJ_ID};
- if(key==='music.mcRequested')return {branch:'services',ref:MC_ID};
- if(key==='services'||key==='rental.requested'||key==='equipment')return {branch:'services',ref:''};
- if(key==='event.type'||key==='event.title')return {branch:'events',ref:''};
- if(key==='music.languagePairs'||key==='music.mcLanguagePairs')return {branch:'music',ref:'languages, dialects'};
- if(key==='music.genres')return {branch:'music',ref:'genres'};
- if(key==='music.suggestedSongs')return {branch:'music',ref:'event moments'};
- if(key==='music.favouriteArtists')return {branch:'music',ref:'artists'};
- if(key.startsWith('customer.'))return {branch:'account',ref:''};
- return {branch:'client',ref:''};
-}
+export const atomSource=bookingTreeSource;
 const stepOfAtom=key=>parseInt(fieldCode(key).slice(0,2),10);
 // A step is mounted only while its service id is in the tree; its atoms exist only then.
-export const stepMounted=(step,steps)=>step!==3||steps.dj||steps.rental;
-// Step 3 (Echo Services) holds the DJ section 03.01 and its music preferences 03.02 (while the DJ service exists), the MC section 03.03, and the rental sections 03.04+ (while rentals exist).
-export const atomMounted=(code,steps)=>{const [step,section]=String(code).split('.').map(Number);return step!==3?true:section<=2?!!steps.dj:section===3?!!(steps.dj||steps.rental):!!steps.rental;};
+export const stepMounted=bookingTreeStepMounted;
+export const atomMounted=bookingTreeAtomMounted;
 export function treeAtoms(steps=treeSteps(),{includeMetadata=false}={}){
  return ATOM_KEYS.filter(key=>includeMetadata||!ATOM_SKIP.has(key)).map(key=>{
   const code=fieldCode(key),step=stepOfAtom(key);

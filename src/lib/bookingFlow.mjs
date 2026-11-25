@@ -1,25 +1,11 @@
+import {BOOKING_TREE_STEPS,bookingTreeStepForField} from './bookingAtoms.mjs';
 import {contract,getPath,missingOrderFields} from './eventOrderCore.mjs';
 const all=contract.sections.flatMap(section=>section.fields.map(field=>({...field,gate:field.gate??section.gate})));
-const definitions=[
- {id:'customer',title:'Personal info',ar:'المعلومات الشخصية',description:'Tell us who we are planning with and how to reach you, so your quote request goes to the right person.',descriptionAr:'أخبرنا مع من نخطط وكيف نصل إليك، ليصل طلب عرض السعر إلى الشخص المناسب.'},
- {id:'event',title:'Event info',ar:'معلومات الفعالية',viewport:'availability',face:'calendar',chapter:'02',description:'Your occasion, date, guests and venue shape everything that follows: the sound, the lighting and the timing of the night.',descriptionAr:'مناسبتك وموعدك وضيوفك ومكانك تحدد كل ما يلي: الصوت والإضاءة وتوقيت السهرة.'},
- {id:'music',title:'Echo Services',ar:'خدمات إيكو',viewport:'work',chapter:'03',description:'Add Echo services to your event: DJ Khalil, MC hosting and rental equipment. Then share the music you love: languages, genres, special moments and favourite songs.',descriptionAr:'أضف دي جي خليل إلى فعاليتك، ثم شاركنا الموسيقى التي تحبها: اللغات والأنواع واللحظات الخاصة وأغانيك المفضلة.'},
- {id:'additional',title:'Additional info',ar:'معلومات إضافية',description:'Inspiration, documents, a voucher and any last notes. Submitting requests a quote; it does not reserve your date.',descriptionAr:'أفكار ومستندات وقسيمة وأي ملاحظات أخيرة. الإرسال يطلب عرض سعر ولا يحجز موعدك.'}
-];
+const definitions=BOOKING_TREE_STEPS;
 // The sections are defined once, here. Goals, the Booking summary and the assistant read their titles and order from this list.
 export const bookingStepDefinition=id=>definitions.find(step=>step.id===id)||null;
 export const stepLabel=id=>{const step=bookingStepDefinition(id);return [step.title,step.ar];};
-export function bookingStepForField(path){
- // MC hosting (and its note) belong to step 3, DJ Khalil Service, with the DJ question.
- if(path==='music.mcRequested')return 'music';
- if(path==='services')return 'music';
- // Rental equipment is part of step 3, Echo Services, with the DJ and MC questions.
- if(path==='rental.requested'||path==='equipment'||path?.startsWith('equipment.')||path?.startsWith('event.setup.'))return 'music';
- if(path?.startsWith('event.'))return 'event';
- if(path?.startsWith('music.'))return 'music';
- if(path?.startsWith('customer.'))return 'customer';
- return 'additional'; // references, notes and the voucher are one step, like the Booking page
-}
+export const bookingStepForField=bookingTreeStepForField;
 export function bookingSteps(order){
  // Four sections, exactly the Booking page's steps and names: Personal info, Event info, Echo Services (DJ, MC and rental equipment), Additional info.
  return definitions.map(step=>({...step,fields:all.filter(field=>bookingStepForField(field.key)===step.id&&(!field.gate||getPath(order,field.gate)===true))}));

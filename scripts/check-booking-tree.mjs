@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import tree from '../src/lib/contracts/booking-atoms.json' with {type:'json'};
+import order from '../src/lib/eventOrderContract.json' with {type:'json'};
+assert.deepEqual(order,tree.order,'Generated order schema differs from the Booking Tree. Run npm run sync:contracts.');
+const fields=order.sections.flatMap(section=>section.fields);
+const keys=new Set(fields.map(field=>field.key));
+assert.equal(keys.size,fields.length,'Duplicate fields');
+const numbered=tree.sections.flatMap(([,keys])=>keys);
+assert.equal(new Set(numbered).size,numbered.length,'Duplicate numbered atoms');
+for(const key of [...keys,'equipment'])assert.ok(tree.steps.some(step=>step.id===tree.ownership[key]?.step),`Missing step ownership: ${key}`);
+for(const key of numbered)assert.ok(keys.has(key),`Unknown numbered atom: ${key}`);
+console.log('Booking Tree schema and ownership verified.');

@@ -46,6 +46,7 @@ const GROUPS = [
     ['concept-map', 'Concept map', '/admin/echo?tab=concept-map', Network],
   ] },
   { name: 'Echo Docs', items: [
+    ['data-atom-tree', 'Data Atoms Booking Tree', '/admin/echo?tab=data-atom-tree', Network],
     ['service-overview-operations-guide', 'Service Overview & Operations Guide', '/admin/echo?tab=service-overview-operations-guide&guide=live-stream', BookOpen],
   ] },
   { name: 'Website', items: [
