@@ -57,7 +57,7 @@ export default function MeetingPage({ lang={lang:'en'}, user, token, isSessionRe
   return (
     <section className={embedded?"client-meetings":"echo-section"} aria-busy={loading}>
       {roomId && <MeetingRoom meetingId={roomId} token={token} ar={lang.lang === 'ar'} onClose={()=>{setRoomId('');load();}} />}
-      <h1 className="echo-h1">{embedded?L('Meet with us','اجتمع معنا'):L('Book a Meeting', 'احجز اجتماعاً')}</h1>
+      <h1 className="echo-h1">{embedded?L('Meet Echo','لقاء إيكو'):L('Book a Meeting', 'احجز اجتماعاً')}</h1>
       <p>{embedded?L('Book a time, then join us here for a browser voice or video call. No app download is needed. All meeting times are Toronto time.','احجز موعداً ثم انضم إلينا هنا لمكالمة صوتية أو مرئية في المتصفح، دون تنزيل تطبيق. جميع الأوقات بتوقيت تورونتو.'):L('Pick a time for an online or in-person consultation. Times are shown in Toronto time.', 'اختر وقتاً لاستشارة عبر الإنترنت أو حضورية. الأوقات بتوقيت تورونتو.')}</p>
       {msg && <div role="alert" className="echo-error"><p>{msg}</p><button type="button" className="secondary-button" disabled={loading} onClick={()=>{setMsg('');load();}}>{L('Retry','إعادة المحاولة')}</button></div>}
       {loading&&<p role="status">{L('Loading meetings…','جارٍ تحميل الاجتماعات…')}</p>}

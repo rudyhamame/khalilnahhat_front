@@ -7,7 +7,7 @@ const GROUPS = [
   { name: 'Your event', items: [
     ['draft', 'Booking draft', '/dashboard/draft', FileText],
     ['bookings', 'Requests & quotes', '/dashboard/bookings', History],
-    ['meetings', 'Meet with us', '/dashboard/meetings', Video],
+    ['meetings', 'Meet Echo', '/dashboard/meetings', Video],
     ['profile', 'Personal info', '/dashboard/profile', UserRound],
   ] },
 ];

@@ -13,7 +13,7 @@ test('meeting route and sidebar open the existing browser meeting feature inside
   const html=renderToStaticMarkup(createElement(Dashboard,{user:{firstName:'Client'},authToken:'example-token',activeView:'meetings',lang:{lang:ar?'ar':'en'}}));
   assert.match(html,/href="\/dashboard\/meetings"[^>]*aria-current="page"/);
   assert.match(html,/class="client-meetings"/);
-  assert.ok(html.includes(ar?'اجتمع معنا':'Meet with us'));
+  assert.ok(html.includes(ar?'لقاء إيكو':'Meet Echo'));
   assert.ok(html.includes(ar?'جارٍ تحميل الاجتماعات':'Loading meetings'));
   assert.doesNotMatch(html,/No times are open|href="\/admin/);
  }

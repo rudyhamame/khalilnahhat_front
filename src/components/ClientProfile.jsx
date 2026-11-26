@@ -10,7 +10,7 @@ import {deleteClientAccount} from '../lib/deleteClientAccount';
 
 // "Personal info" tab of the client dashboard: edits only the signed-in person's own profile (PATCH /auth/profile).
 const FIELDS=['firstName','lastName','phoneNumber','preferredContact','phoneContact','company','emailNotifications'];
-import {PHONE_CONTACTS,contactChoices} from '../lib/contactChoices.mjs';
+import {PHONE_CONTACTS,CONTACT_METHODS,contactChoices} from '../lib/contactChoices.mjs';
 import {optionName} from '../lib/eventOrderCore.mjs';
 export default function ClientProfile({user,token,onSaved,onDeleted,ar=false}){
  const tr=text=>bookingText(text,ar);
@@ -50,7 +50,7 @@ export default function ClientProfile({user,token,onSaved,onDeleted,ar=false}){
       <label>{tr("First name *")}<input required maxLength={60} autoComplete="given-name" value={form.firstName} onChange={e=>set('firstName')(e.target.value)}/></label>
       <label>{tr("Last name *")}<input required maxLength={60} autoComplete="family-name" value={form.lastName} onChange={e=>set('lastName')(e.target.value)}/></label>
       <label>{tr("Phone number *")}<CanadianPhoneInput required maxLength={30} autoComplete="tel" value={form.phoneNumber} placeholder="+1 (416) 555-0123" onChange={set('phoneNumber')}/></label>
-      <label>{tr("Preferred contact *")}<select required value={form.preferredContact} onChange={e=>set('preferredContact')(e.target.value)}>{['any','email','phone'].map(option=><option key={option} value={option} disabled={!choices.enabled.includes(option)}>{optionName('customer.contactMethod',option,ar)}</option>)}</select></label>
+      <label>{tr("Preferred contact *")}<select required value={form.preferredContact} onChange={e=>set('preferredContact')(e.target.value)}>{CONTACT_METHODS.map(option=><option key={option} value={option} disabled={!choices.enabled.includes(option)}>{optionName('customer.contactMethod',option,ar)}</option>)}</select></label>
       {choices.hasPhone&&<fieldset className="cw-profile-wide cw-phone-contact"><legend>{tr("How may we reach you on your phone? *")}</legend>{PHONE_CONTACTS.map(option=><label key={option}><input type="radio" name="phoneContact" required value={option} checked={form.phoneContact===option} onChange={()=>set('phoneContact')(option)}/><span>{optionName('customer.phoneContact',option,ar)}</span></label>)}</fieldset>}
       <label className="cw-profile-wide">{tr("Company name")}<small>{tr("(optional)")}</small><input maxLength={120} autoComplete="organization" value={form.company} onChange={e=>set('company')(e.target.value)}/></label>
       <label className="cw-profile-wide cw-profile-toggle"><span><strong>{tr("Receive notifications via email")}</strong><small>{tr("Quote reminders and updates about your events. Account and booking confirmations are always sent.")}</small></span><input type="checkbox" role="switch" checked={form.emailNotifications} onChange={e=>set('emailNotifications')(e.target.checked)}/></label>

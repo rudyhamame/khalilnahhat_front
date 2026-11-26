@@ -132,7 +132,7 @@ function RequestedServices({requests,onQuoteAction,authToken,ar=false}){
       </div>
      </header>
      <div className="booking-detail-sections">{request.order?<BookingDraftReview order={{...request.order,customer:{...request.order.customer,...customerNameParts({...request.order.customer,fullName:request.order.customer?.fullName||request.customerName}),email:request.order.customer?.email||request.customerEmail}}} snapshot ar={ar}/>:<section className="booking-detail-section is-wide"><h4>{tr('Booking details')}</h4><BookingCardFallback request={request} ar={ar}/></section>}</div>
-     {request.changeRequest&&<section className="booking-detail-section is-wide"><h4>{tr('Requested changes')}</h4><p>{request.changeRequest}</p></section>}
+     <section className="booking-detail-section is-wide client-booking-meeting-invite"><h4>{ar?'هل ترغب في الاجتماع معنا؟':'Want to meet with us?'}</h4><p>{ar?<>استخدم قسم <a href="/dashboard/meetings">لقاء إيكو</a> لحجز جلسة لمناقشة حجزك بمزيد من التفاصيل.</>:<>Use the <a href="/dashboard/meetings">Meet Echo</a> tab to book a session to discuss your booking further.</>}</p></section>
      {!request.journey.showsPrices&&request.items?.length>0&&<section className="booking-detail-section is-wide"><h4>{tr('Rental services & equipment')}</h4><ul>{request.items.map(item=><li key={item.serviceId}>{item.name} × {item.quantity}</li>)}</ul></section>}
      {!request.journey.showsPrices&&(request.journey.awaitingClient||request.journey.canNegotiate)&&<BookingNegotiation ar={ar} request={request} token={authToken} onQuoteAction={onQuoteAction}/>}
      {(request.journey.canRecordDeposit||request.journey.isBooked)&&<BookingMeetingForm ar={ar} request={request} token={authToken}/>}
