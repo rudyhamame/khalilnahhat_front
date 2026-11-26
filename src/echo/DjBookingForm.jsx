@@ -13,7 +13,7 @@ import TagInput from './TagInput';
 import {dialectsOf,languagesOf,makeMain,withDialect,withLanguage} from '../lib/languagePairs.mjs';
 import './djBookingForm.css';
 
-const MUSIC_PREFERENCE_ATOMS=Object.fromEntries(bookingSectionAtoms('03.02').map((key,index)=>[index+1,key]));
+const MUSIC_PREFERENCE_ATOMS=Object.fromEntries(bookingSectionAtoms('03.01').slice(1).map((key,index)=>[index+1,key]));
 
 // Replaces the DJ Khalil's Work content with the inputs of the DJ service section of the Booking summary.
 export default function DjBookingForm({ar=false,ctx}){
