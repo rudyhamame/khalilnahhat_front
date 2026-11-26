@@ -2,7 +2,7 @@ import DjBookingForm from './DjBookingForm';
 import {useEventOrder} from './eventOrderContext';
 import {Music2} from 'lucide-react';
 
-// Sub-step 03.02 of "DJ Khalil Service": the music preferences. It exists only while the DJ service is chosen, and hangs under the DJ step on a vertical connector.
+// Sub-step 03.01 of "DJ Khalil Service": the music preferences. It exists only while the DJ service is chosen, and hangs under the DJ step on a vertical connector.
 export default function MusicPreferencesStep({ar=false}){
  const order=useEventOrder(),dj=order?.order?.music?.djRequested===true,tr=(en,arabic)=>ar?arabic:en;
  // Only the client pressing "Yes" brings the sub-step into view. A saved booking that already has the DJ service (it arrives after the page loads) must not scroll the page.

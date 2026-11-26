@@ -5,7 +5,7 @@ import {requiredMark} from '../lib/bookingAtoms.mjs';
 import {fieldCode} from '../lib/eventPageModel';
 import './bookingPhases.css';
 
-// The four steps of the Booking page (Echo Services holds the DJ, MC and rental equipment). Music Preferences is not a step of its own: it is a sub-step (03.02) of DJ Khalil Service, shown only while that service is chosen.
+// The four steps of the Booking page (Echo Services holds the DJ, MC and rental equipment). Music Preferences is not a step of its own: it is a sub-step (03.01) of DJ Khalil Service, shown only while that service is chosen.
 // The step names and texts come from the shared step definitions (lib/bookingFlow.mjs), so the Booking page, the Booking review and the Booking draft can never differ.
 const PHASE_STEPS=[['personal','customer'],['event','event'],['dj','music'],['additional','additional']];
 const ALL_PHASES=PHASE_STEPS.map(([phase,step])=>{const definition=bookingStepDefinition(step);return [phase,definition.title,definition.ar,definition.description,definition.descriptionAr];});
