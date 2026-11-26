@@ -64,7 +64,7 @@ const AR={
   "EXPLORE SERVICES": "استكشف الخدمات",
   "Your event": "فعاليتك",
   "Overview": "نظرة عامة",
-  "Requests & quotes": "الطلبات وعروض الأسعار",
+  "Bookings": "الحجوزات",
   "Personal info": "المعلومات الشخصية",
   "Client Workspace": "مساحة العميل",
   "Booking requests": "طلبات الحجز",

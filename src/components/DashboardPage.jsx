@@ -19,7 +19,6 @@ import { PaymentsBlock, PlanningForm } from '../echo/ClientExtras';
 import ClientProfile from './ClientProfile';
 import ClientWorkspace from './ClientWorkspace';
 import BookingConversationHistory from './BookingConversationHistory';
-import EventDraftCard from './EventDraftCard';
 import BookingDraftReview from './BookingDraftReview';
 
 
@@ -148,9 +147,9 @@ function BookingCardFallback({request,ar}){
 }
 
 
-export default function DashboardPage({ user, serviceRequests = [], onQuoteAction, authToken, activeView = 'draft', onLogout, onProfileSaved, lang }) {
+export default function DashboardPage({ user, serviceRequests = [], onQuoteAction, authToken, activeView = 'bookings', onLogout, onProfileSaved, lang }) {
   const ar=lang?.lang==='ar',tr=text=>bookingText(text,ar);
-  if(activeView==='overview')activeView='draft';
+  if(activeView==='overview'||activeView==='draft')activeView='bookings';
   if(activeView==='services')activeView='bookings';
   serviceRequests=serviceRequests.map(request=>({...request,journey:clientBookingJourney(request,ar)}));
   const confirmed = serviceRequests.filter(request => request.journey.isBooked);
@@ -159,7 +158,6 @@ export default function DashboardPage({ user, serviceRequests = [], onQuoteActio
     {activeView === 'payments' && <section className="cw-panel"><h1>{tr("Payments")}</h1>{confirmed.length?confirmed.map(request=><article key={request.id}><h2>{request.requestNumber||tr("Your event")}</h2><PaymentsBlock ar={ar} request={request} token={authToken}/></article>):<p>{tr("No payments to arrange yet.")}</p>}</section>}
     {activeView === 'meetings' && <MeetingPage embedded lang={{lang:ar?'ar':'en'}} user={user} token={authToken} isSessionReady/>}
     {activeView === 'profile' && <ClientProfile ar={ar} user={user} token={authToken} onSaved={onProfileSaved} onDeleted={()=>window.location.replace('/login')} />}
-    {activeView === 'draft' && <EventDraftCard token={authToken} user={user} ar={ar}/>}
     {activeView === 'conversations' && <BookingConversationHistory token={authToken}/>}
     {activeView === 'bookings' && <RequestedServices requests={serviceRequests} onQuoteAction={onQuoteAction} authToken={authToken} ar={ar} />}
   </ClientWorkspace>;

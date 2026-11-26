@@ -47,3 +47,10 @@ test('past meetings are archived without showing a live join button',()=>{
  const html=renderMeetings({meetings:[{id:'old',mode:'online',start:'2000-01-01T12:00:00Z',durationMin:30}]});
  assert.match(html,/Past meetings/);assert.doesNotMatch(html,/>Join meeting</);
 });
+
+test('Personal info offers and retains Meet Echo as the preferred contact method',()=>{
+ const html=renderToStaticMarkup(createElement(Dashboard,{user:{firstName:'Ana',lastName:'Client',email:'ana@example.test',phoneNumber:'4165550100',phoneContact:'call',preferredContact:'meet-echo'},activeView:'profile',lang:{lang:'en'}}));
+ const option=html.match(/<option[^>]*value="meet-echo"[^>]*>/)?.[0];
+ assert.ok(option);assert.match(option,/selected/);assert.doesNotMatch(option,/disabled/);assert.ok(html.includes('>Meet Echo</option>'));
+ assert.match(html,/href="\/dashboard\/meetings"[^>]*title="Meet Echo"/);
+});
