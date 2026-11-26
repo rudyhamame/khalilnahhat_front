@@ -1,8 +1,14 @@
 import journeyContract from '../lib/bookingJourneyContract.json' with {type:'json'};
-import {bookingText} from '../lib/bookingUiText';
+import {bookingText,bookingLocale} from '../lib/bookingUiText';
+import './clientBookingRequests.css';
 import {Check,Undo2} from 'lucide-react';
 
-export default function BookingStatusPipeline({request={},draft=false,ar=false,tr=text=>bookingText(text,ar),onBack,onNext,audience="admin",renderStepExtra,renderStepSide}){
+const stageTime = (request, key) => {
+  const paid = (request.payments || []).filter((p) => !p.voided && p.paidAt).map((p) => p.paidAt).sort().at(-1);
+  return { requested: request.createdAt, available: request.availabilityAcceptedAt || request.availability?.informedAt, unavailable: request.availability?.informedAt, quote_ready: request.quotedAt, deposit_paid: paid, booked: request.acceptedAt, modified: request.modifiedAt }[key] || '';
+};
+export default function BookingStatusPipeline({request={},draft=false,ar=false,tr=text=>bookingText(text,ar),onBack,onNext,audience="admin",renderStepExtra,onUndo}){
+  const when=key=>{const value=stageTime(request,key);return value?new Intl.DateTimeFormat(bookingLocale(ar),{dateStyle:'medium',timeStyle:'short'}).format(new Date(value)):'';};
   const j=request.journey||{};
   const stages=draft?[{status:'draft',label:tr('Booking draft'),labelAr:'مسودة الحجز'},...journeyContract.clientPath.map(status=>({status,...journeyContract.clientStages[status]}))]:j.path||[];
   const path=stages.map(step=>{const own=journeyContract.clientStages[step.status]||step; return {key:step.status,label:audience==="client"?(ar?own.labelAr||own.label:own.label):(ar?own.adminLabelAr||own.labelAr||own.label:own.adminLabel||own.label)};}); // wording from the shared contract, not from a possibly older running server
@@ -30,7 +36,7 @@ export default function BookingStatusPipeline({request={},draft=false,ar=false,t
     <ol>{path.map((step,i)=>{const last=i===path.length-1,done=i<now||(i===now&&last),here=i===now&&!done;
       return <li key={step.key} className={done?'is-done':here?'is-here':i<now?'':'is-next'} aria-current={here?'step':undefined}>
         <span className="node" aria-hidden="true">{done?<svg viewBox="0 0 16 16" width="14" height="14"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg>:here?<i/>:null}</span>
-        <span className="label">{step.label}{here&&hint&&<small>{hint}</small>}{renderStepExtra?.(step.key,i,now)}</span>{renderStepSide?.(step.key,i,now)}{here&&((onNext&&onNext.label)||(onBack&&i>0))&&<span className="bsp-actions">
+        <span className="label">{step.label}{here&&hint&&<small>{hint}</small>}{renderStepExtra?.(step.key,i,now)}{step.key==='requested'&&(request.modifications?.length>0||(audience==='client'&&request.journey?.modified))&&<ul className="dashboard-status-modifications">{(request.modifications?.length?request.modifications:[{at:request.modifiedAt}]).map((entry,n)=><li key={`${entry.at}-${n}`} className={entry.undone?'is-undone':''}><b>{tr('Booking modified')}</b>{entry.at&&<small>{new Intl.DateTimeFormat(bookingLocale(ar),{dateStyle:'medium',timeStyle:'short'}).format(new Date(entry.at))}</small>}{onUndo&&entry.canUndo&&<button type="button" onClick={()=>onUndo(n)}>{tr('Undo modification')}</button>}</li>)}</ul>}</span>{i<=now&&when(step.key)&&<small className="bsp-date">{when(step.key)}</small>}{here&&((onNext&&onNext.label)||(onBack&&i>0))&&<span className="bsp-actions">
           {onNext?.label&&<button type="button" className="bsp-back" onClick={onNext.run}><Check size={11} aria-hidden="true"/>{onNext.label}</button>}
           {onBack&&i>0&&<button type="button" className="bsp-back" onClick={onBack} title={`${tr('Back to')} ${path[i-1].label}`} aria-label={`${tr('Back to')} ${path[i-1].label}`}><Undo2 size={11} aria-hidden="true"/>{tr('Previous step')}</button>}</span>}</li>;})}</ol></section>;
 }

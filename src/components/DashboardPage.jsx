@@ -63,16 +63,9 @@ function DepositInstructions({ request, ar=false }) {
 
 // Where a request is on its way. The labels, order and current step all come from the server's journey (booking-journey.js).
 // When each status was reached, from the booking's own timestamps.
-const stageTime = (request, key) => {
-  const paid = (request.payments || []).filter((p) => !p.voided && p.paidAt).map((p) => p.paidAt).sort().at(-1);
-  return { requested: request.createdAt, available: request.availabilityAcceptedAt || request.availability?.informedAt, unavailable: request.availability?.informedAt, quote_ready: request.quotedAt, deposit_paid: paid, booked: request.acceptedAt, modified: request.modifiedAt }[key] || '';
-};
 function StatusSteps({ journey, request, ar=false, onUndo }) {
-  const tr = (text) => bookingText(text, ar), when = (key) => { const value = stageTime(request, key); return value ? new Intl.DateTimeFormat(bookingLocale(ar), { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value)) : ''; };
   if (journey.step === null) return <p className={`dashboard-status-end is-${journey.status}`}>{journey.label}</p>;
-  return <BookingStatusPipeline request={request} ar={ar} audience="client" renderStepSide={(key,index,current)=>index<=current&&when(key)?<small className="bsp-date">{when(key)}</small>:null} renderStepExtra={(key,index,current)=><>
-    {key==='requested'&&(journey.modified||request.modifications?.length>0)&&<ul className="dashboard-status-modifications">{(request.modifications?.length?request.modifications:[{at:request.modifiedAt}]).map((entry,n)=><li key={`${entry.at}-${n}`} className={entry.undone?'is-undone':''}><b>{tr('Booking modified')}</b>{entry.at&&<small>{new Intl.DateTimeFormat(bookingLocale(ar),{dateStyle:'medium',timeStyle:'short'}).format(new Date(entry.at))}</small>}{entry.canUndo&&<button type="button" onClick={()=>onUndo(n)}>{tr('Undo modification')}</button>}</li>)}</ul>}
-  </>}/>;
+  return <BookingStatusPipeline request={request} ar={ar} audience="client" onUndo={onUndo}/>;
 }
 
 // Three-dots menu in the booking header: withdraw the request, or save the booking as a PDF (the browser's print dialog opens on a clean confirmation page).

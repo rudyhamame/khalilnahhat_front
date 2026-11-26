@@ -476,3 +476,4 @@ html body .admin-workspace .bpa-more>div button+button{margin-top:2px;border-top
 .client-booking-meeting-invite p a{color:#f0cd7c}
 .client-booking-meeting-invite>.primary-button{border-color:#e6b95a;border-radius:8px;background:#e6b95a;color:#121216}
 .client-booking-meeting-invite>.primary-button:hover{background:#f0cd7c;color:#121216}
+.booking-status-band>ol>li>.bsp-date{flex:0 0 140px;width:140px}
