@@ -12,7 +12,7 @@ export default function BookingDraftReview({order,snapshot=false,ar=false}){
  const tr=(en,arabic)=>ar?arabic:en,{catalog,equipment,loading}=useTree(),rentals=numberedRentalCatalog(catalog,equipment);
  // Dashboard wording comes from the Booking Tree: the step titles and the two service atom names.
  const goalTitle=goal=>ar?goal.ar:goal.title;
- const sections=BOOKING_GOALS.map(goal=>{const result=snapshot?submittedSectionLines(order,goal,ar):sectionLines(order,goal,ar,rentals,loading);return {...result,lines:result.lines.map(line=>bookingTreeViewerName(line.key,ar)?{...line,label:bookingTreeViewerName(line.key,ar)}:line)};});
+ const sections=BOOKING_GOALS.map(goal=>{const result=snapshot?submittedSectionLines(order,goal,ar,rentals,loading):sectionLines(order,goal,ar,rentals,loading);return {...result,lines:result.lines.map(line=>bookingTreeViewerName(line.key,ar)?{...line,label:bookingTreeViewerName(line.key,ar)}:line)};});
  return (
   <div className="bdr" dir={ar?"rtl":"ltr"}>{BOOKING_GOALS.map((goal,index)=>{
    const {progress,lines}=sections[index];

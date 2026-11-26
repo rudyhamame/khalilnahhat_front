@@ -8,3 +8,12 @@
 .client-workspace[data-area=bookings] .booking-status-band .dashboard-status-modifications::before,
 .client-workspace[data-area=bookings] .booking-status-band .dashboard-status-modifications>li::before,
 .client-workspace[data-area=bookings] .booking-status-band .dashboard-status-modifications>li::after{content:none;display:none}
+.client-workspace[data-area=bookings] .booking-status-band .dashboard-status-modifications li{grid-template-columns:minmax(0,1fr) auto;align-items:baseline;gap:4px 12px}
+.client-workspace[data-area=bookings] .booking-status-band .dashboard-status-modifications li>small{white-space:nowrap;text-align:end;font-size:12px;color:var(--aw-muted);margin:0}
+.client-workspace[data-area=bookings] .booking-status-band .dashboard-status-modifications li>button{grid-column:1/-1;justify-self:start}
+/* Modifications branch off the main pipe: the list starts on the pipe's own line, and each entry has a link to a point of its own. */
+.client-workspace[data-area=bookings] .booking-status-band .dashboard-status-modifications{position:relative;margin:10px 0 0;margin-inline-start:-24px;padding:0;border:0}
+.client-workspace[data-area=bookings] .booking-status-band .dashboard-status-modifications>li{position:relative;padding:6px 0 6px 42px}
+.client-workspace[data-area=bookings] .booking-status-band .dashboard-status-modifications>li::before{content:'';display:block;position:absolute;inset-inline-start:22px;top:12px;width:10px;height:10px;border-radius:50%;background:#2f4f9e}
+.client-workspace[data-area=bookings] .booking-status-band .dashboard-status-modifications>li::after{content:'';display:block;position:absolute;inset-inline-start:0;top:16px;width:24px;height:2px;background:#2f4f9e}
+.client-workspace[data-area=bookings] .booking-status-band .dashboard-status-modifications>li.is-undone::before,.client-workspace[data-area=bookings] .booking-status-band .dashboard-status-modifications>li.is-undone::after{background:var(--aw-muted)}

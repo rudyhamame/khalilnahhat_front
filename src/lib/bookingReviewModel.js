@@ -29,7 +29,7 @@ export function sectionLines(order,goal,ar,rentals=[],catalogLoading=false,{ever
  // Every field of the section is listed with its value; fields not answered yet read "Not set yet".
  const lines=all.filter(field=>everyAtom||field.key!=='event.setup.requirements'||order.rental?.requested===true||isAnswered(getPath(order,field.key))).map(field=>({key:field.key,reviewValue:draftValue(order,field.key),label:(fieldName(field.key,ar)||(ar?field.ar||field.label:field.label)).replace(/\s*[(（](?:optional|only if|اختياري)[^)）]*[)）]/i,''),value:bookingFieldValue(order,field.key,ar,draftValue(order,field.key)),...(field.key.startsWith('music.')||field.key.startsWith('references.')?{rawValue:draftValue(order,field.key)}:{}),empty:!isAnswered(draftValue(order,field.key)),required:progress.missing.some(item=>item.key===field.key)}));
  if(tree&&order.rental?.requested===false&&order.equipment?.length){const decision=lines.find(line=>line.key==='rental.requested');if(decision)decision.value+=tr(' — selected equipment is still saved; remove it or enable rentals.',' — المعدات المختارة ما زالت محفوظة؛ احذفها أو فعّل التأجير.');}
- if(tree&&(order.rental?.requested===true||order.equipment?.length)){
+ if(tree&&(everyAtom||order.rental?.requested===true||order.equipment?.length)){
   const needs=progress.missing.some(item=>item.key==='services'),name=item=>ar?item.nameAr||item.name:item.name;
   // Codes match the Booking page cards: categories 03.04, 03.05… (MC is a real service, not a category) and their individual equipment 03.0X.01…
   // MC hosting is a real service of Step 3 (music.mcRequested has its own line there), so it is not part of the rental tree.
@@ -49,7 +49,8 @@ export function sectionLines(order,goal,ar,rentals=[],catalogLoading=false,{ever
 
 // A submitted brief is immutable: only captured values, independent of today's
 // catalog, stock, newly required fields or unselected services.
-export function submittedSectionLines(order,goal,ar=false){
- const {progress,lines}=sectionLines(order,goal,ar,[],false,{everyAtom:true});
+export function submittedSectionLines(order,goal,ar=false,rentals=[],loading=false){
+ // Every equipment category and item of the catalogue is listed with its atom code; the submitted ones carry their quantity.
+ const {progress,lines}=sectionLines(order,goal,ar,rentals,loading,{everyAtom:true});
  return {progress:{...progress,missing:[]},lines:lines.map(line=>({...line,required:false,group:0,...(line.empty||line.value==null||line.value===''?{value:ar?'غير مُدخل':'Not provided',empty:true}:{})}))};
 }
