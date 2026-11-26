@@ -714,6 +714,10 @@ html.aw-no-page-scroll,html.aw-no-page-scroll body{overflow:hidden!important;ove
  .admin-workspace.aw-collapsed .aw-sidebar:hover .aw-nav-group a{justify-content:flex-start;padding:8px 10px}
  .admin-workspace.aw-collapsed .aw-sidebar:hover .aw-tools{padding-inline:12px}
  .admin-workspace.aw-collapsed .aw-sidebar:hover .aw-theme{flex-direction:row}
+ .admin-workspace.aw-collapsed .aw-sidebar:hover .aw-sidebar-footer{padding:12px}
+ .admin-workspace.aw-collapsed .aw-sidebar:hover .aw-account{flex-direction:row;align-items:center}
+ .admin-workspace.aw-collapsed .aw-sidebar:hover .aw-account-name{flex:1;min-width:0}
+ .admin-workspace.aw-collapsed .aw-sidebar:hover .aw-signout{flex-shrink:0}
 }
 .admin-workspace .aw-sidebar-heading .aw-collapse:hover{background:transparent!important;border-color:transparent!important;color:inherit!important}
 /* No padding around admin page content */
