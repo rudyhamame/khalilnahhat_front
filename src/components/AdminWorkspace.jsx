@@ -7,7 +7,7 @@ import {administratorDataChanged} from '../echo/administratorChanges';
 import AiAdministrator from '../echo/AiAdministrator';
 import './adminAssistantAside.css';
 import './adminAssistantDock.css';
-import { DollarSign, Archive, CalendarDays, ClipboardList, ExternalLink, Images, LogOut, Menu, MessageSquare, Moon, PanelLeftClose, PanelLeftOpen, Radio, Receipt, Sun, Tags, X, Bot, TreePine, Ticket, ListMusic, Play, Users, Bell, BookOpen, Mail, Network } from 'lucide-react';
+import { GitBranch, DollarSign, Archive, CalendarDays, ClipboardList, ExternalLink, Images, LogOut, Menu, MessageSquare, Moon, PanelLeftClose, PanelLeftOpen, Radio, Receipt, Sun, Tags, X, Bot, TreePine, Ticket, ListMusic, Play, Users, Bell, BookOpen, Mail, Network } from 'lucide-react';
 
 const GROUPS = [
   { name: 'Live', items: [
@@ -47,6 +47,7 @@ const GROUPS = [
   ] },
   { name: 'Echo Docs', items: [
     ['data-atom-tree', 'Data Atoms Booking Tree', '/admin/echo?tab=data-atom-tree', Network],
+    ['booking-journey-tree', 'Booking Journey Tree', '/admin/echo?tab=booking-journey-tree', GitBranch],
     ['service-overview-operations-guide', 'Service Overview & Operations Guide', '/admin/echo?tab=service-overview-operations-guide&guide=live-stream', BookOpen],
   ] },
   { name: 'Website', items: [

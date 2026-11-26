@@ -25,3 +25,8 @@
 html body :is(.admin-workspace,.client-workspace) .booking-status-band>ol>li.is-here{flex-wrap:wrap!important}
 html body :is(.admin-workspace,.client-workspace) .booking-status-band>ol>li.is-here>.label{flex:1 1 0!important;min-width:0}
 html body :is(.admin-workspace,.client-workspace) .booking-status-band>ol>li.is-here>.bsp-actions{order:3;flex:1 1 100%!important;margin:6px 0 0 34px!important;justify-content:flex-start}
+/* Parallel decisions and the cancel branch use the modification branch drawing. Not yet reached: quiet. Cancel: red. */
+:is(.client-workspace[data-area=bookings],.admin-workspace[data-area=services]) .booking-status-band .dashboard-status-modifications>li.is-pending{color:var(--aw-muted,#9a9aa3)}
+:is(.client-workspace[data-area=bookings],.admin-workspace[data-area=services]) .booking-status-band .dashboard-status-modifications>li.is-pending::before{color:var(--aw-muted,#9a9aa3);opacity:.6}
+:is(.client-workspace[data-area=bookings],.admin-workspace[data-area=services]) .booking-status-band .dashboard-status-modifications>li.is-cancel{color:#e08a85}
+:is(.client-workspace[data-area=bookings],.admin-workspace[data-area=services]) .booking-status-band .dashboard-status-modifications>li.is-cancel::before{color:#e08a85}

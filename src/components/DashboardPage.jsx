@@ -65,7 +65,7 @@ function DepositInstructions({ request, ar=false }) {
 // Where a request is on its way. The labels, order and current step all come from the server's journey (booking-journey.js).
 // When each status was reached, from the booking's own timestamps.
 function StatusSteps({ journey, request, ar=false, onUndo }) {
-  if (journey.step === null) return <p className={`dashboard-status-end is-${journey.status}`}>{journey.label}</p>;
+  if (journey.step === null && !journey.branches?.cancelled) return <p className={`dashboard-status-end is-${journey.status}`}>{journey.label}</p>;
   return <BookingStatusPipeline request={request} ar={ar} audience="client" onUndo={onUndo}/>;
 }
 
@@ -83,9 +83,9 @@ function BookingMenu({ request, onQuoteAction, ar=false }) {
     document.addEventListener('pointerdown', away); document.addEventListener('keydown', esc);
     return () => { document.removeEventListener('pointerdown', away); document.removeEventListener('keydown', esc); };
   }, [open]);
-  const canWithdraw = request.journey.awaitingClient || request.journey.canNegotiate;
+  const canWithdraw = request.journey.clientCancellable; // the client can cancel at any step before the booking is closed
   const withdraw = async () => {
-    if (!window.confirm(request.journey.awaitingClient ? tr("Decline this quote?") : tr("Withdraw this request?"))) return;
+    if (!window.confirm(request.journey.awaitingClient ? tr("Decline this quote?") : tr("Cancel this booking?"))) return;
     setBusy(true); setError('');
     try { await onQuoteAction(request.id, 'decline'); setOpen(false); } catch (e) { setError(e.message || tr("Action failed.")); } finally { setBusy(false); }
   };
@@ -93,7 +93,7 @@ function BookingMenu({ request, onQuoteAction, ar=false }) {
   return <div className="dashboard-booking-menu" ref={box}>
     <button type="button" className="dashboard-booking-menu-toggle" aria-label={tr("Booking actions")} aria-haspopup="menu" aria-expanded={open} onClick={() => { setOpen(!open); setError(''); }}><EllipsisVertical size={18} strokeWidth={2} aria-hidden="true" /></button>
     {open && <div className="dashboard-booking-menu-list" role="menu">
-      {canWithdraw && <button type="button" role="menuitem" disabled={busy} onClick={withdraw}><Undo2 size={16} aria-hidden="true" />{tr("Withdraw")}</button>}
+      {canWithdraw && <button type="button" role="menuitem" disabled={busy} onClick={withdraw}><Undo2 size={16} aria-hidden="true" />{tr("Cancel booking")}</button>}
       <button type="button" role="menuitem" onClick={download}><FileDown size={16} aria-hidden="true" />{tr("Download booking information")}</button>
       {error ? <p role="alert">{error}</p> : null}
     </div>}
