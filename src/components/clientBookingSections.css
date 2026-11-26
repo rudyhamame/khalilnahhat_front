@@ -36,3 +36,9 @@ html body :is(.client-workspace,.admin-workspace) .bdr-atoms .music-value-list>[
  html body :is(.client-workspace,.admin-workspace) .bdr-atoms .ea-data-row>i.ea-atom-code{grid-column:1/-1}
  html body :is(.client-workspace,.admin-workspace) .bdr-atoms .ea-data-row>.ea-data-value{grid-column:1}
 }
+
+/* Equipment categories: no lines under the category name, none around or inside its equipment table. */
+html body :is(.client-workspace,.admin-workspace) .bdr-atoms .ea-data-row[data-category]{border-bottom:0!important;min-height:0}
+html body :is(.client-workspace,.admin-workspace) .bdr-atoms .ea-data-row[data-category]:hover{background:none}
+html body :is(.client-workspace,.admin-workspace) .bdr-atoms .ea-equipment-table{border:0!important;border-radius:0!important}
+html body :is(.client-workspace,.admin-workspace) .bdr-atoms .ea-equipment-table :is(th,td,tr,thead,tbody){border:0!important;box-shadow:none!important}

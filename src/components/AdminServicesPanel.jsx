@@ -8,6 +8,7 @@ import BookingQuoteEditor from './BookingQuoteEditor';
 import {adminStatusLabel} from '../lib/clientBookingJourney';
 import {bookingText,bookingLocale,bookingMoney} from '../lib/bookingUiText';
 import BookingDraftReview from './BookingDraftReview';
+import BookingFiles from './BookingFiles';
 import {bookingTreeViewerName} from '../lib/bookingAtoms.mjs';
 import {OfferReview} from './BookingNegotiation';
 import {quoteTotals} from '../lib/quoteTotals.mjs';
@@ -331,6 +332,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                 <div id="booking-tab-panel">
                 <div className="booking-detail-sections">
                   {request.order&&<BookingDraftReview order={{...request.order,customer:{...request.order.customer,...(n=>({firstName:request.order.customer?.firstName||n.firstName,lastName:request.order.customer?.lastName||n.lastName}))(customerNameParts({...request.order.customer,fullName:request.order.customer?.fullName??request.customerName}))}}} snapshot ar={ar} edit={{onSave:(path,value,acknowledgeReset)=>onQuoteAction(request.id,'admin-order-edit',{path,value,quoteRevision:request.quoteRevision,acknowledgeReset})}}/>}
+                  <BookingFiles admin requestId={request.id} token={token} ar={ar}/>
                   {bookingSections(request,ar).map(section=>request.order&&section.title==="References & notes"?{...section,rows:section.rows.filter(([label])=>label==="Requested changes")}:section).filter(section=>!request.order||section.title==="Event planning"||section.title==="References & notes"&&section.rows.length).map((section,index)=><section key={section.title} className={`booking-detail-section${section.wide?' is-wide':''}`} aria-label={tr(section.title)}>
                     <h4><span aria-hidden="true">{String(index+1).padStart(2,'0')}</span>{tr(section.title)}</h4>
                     <dl>{section.rows.map(([label,value])=><div key={label}><dt>{tr(label)}</dt><dd>{detailText(value)}</dd></div>)}</dl>
