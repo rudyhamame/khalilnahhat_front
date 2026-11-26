@@ -31,7 +31,7 @@ export function sectionLines(order,goal,ar,rentals=[],catalogLoading=false,{ever
  if(tree&&order.rental?.requested===false&&order.equipment?.length){const decision=lines.find(line=>line.key==='rental.requested');if(decision)decision.value+=tr(' — selected equipment is still saved; remove it or enable rentals.',' — المعدات المختارة ما زالت محفوظة؛ احذفها أو فعّل التأجير.');}
  if(tree&&(order.rental?.requested===true||order.equipment?.length)){
   const needs=progress.missing.some(item=>item.key==='services'),name=item=>ar?item.nameAr||item.name:item.name;
-  // Codes match the Booking page cards: categories 03.05, 03.06… (MC is a real service, not a category) and their individual equipment 03.0X.01…
+  // Codes match the Booking page cards: categories 03.04, 03.05… (MC is a real service, not a category) and their individual equipment 03.0X.01…
   // MC hosting is a real service of Step 3 (music.mcRequested has its own line there), so it is not part of the rental tree.
   const categories=bookingSections(order,rentals).rentals.filter(service=>service.id!=='mc'&&service.selectionField!=='music.mcRequested');let categoryIndex=0;
   const listed=new Set();
