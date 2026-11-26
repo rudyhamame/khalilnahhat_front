@@ -29,7 +29,14 @@ function QuoteActions({ request, onQuoteAction, ar=false, pill=false }) {
   const tr=text=>bookingText(text,ar);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  if (!request.journey.awaitingClient) return null;
+  if (!request.journey.awaitingClient) {
+    // The pill stays split after the client has decided: the right half says what they did (no button, there is nothing left to accept).
+    if (!pill || request.journey.isBooked) return null;
+    const done = request.journey.branches?.decisions?.filter((item) => item.reached) || [];
+    if (done.some((item) => item.canUndo && item.status === 'quote_accepted') || done.some((item) => item.status === 'quote_accepted')) return <span className="booking-heading-accept is-done">✓ {tr("QUOTE ACCEPTED")}</span>;
+    if (done.length) return <span className="booking-heading-accept is-wait">{tr("OFFER SENT")}</span>;
+    return null;
+  }
   const accept = async () => {
     setBusy(true);
     setError('');

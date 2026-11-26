@@ -485,8 +485,6 @@ html body .admin-workspace .bpa-more>div button+button{margin-top:2px;border-top
 .booking-status-band>ol>li>.bsp-side{flex:0 0 140px;display:flex;flex-direction:column;align-items:flex-end;gap:8px;min-width:0}
 .booking-status-band>ol>li>.bsp-side:empty{display:none}
 .booking-status-band>ol>li>.bsp-side>.bsp-date{flex:none;width:auto;padding-top:3px;margin:0}
-html body :is(.admin-workspace,.client-workspace) .booking-status-band>ol>li.is-here>.bsp-side>.bsp-actions{display:flex!important;flex-direction:column;align-items:flex-end;gap:6px;margin:0!important;flex:none!important;white-space:nowrap}
-html body :is(.admin-workspace,.client-workspace) .booking-status-band>ol>li.is-here>.bsp-side>.bsp-actions button.bsp-back{margin:0!important}
 .booking-status-band>ol>li>.bsp-side>.bsp-date{font-size:12px;font-weight:400;color:var(--aw-muted);white-space:nowrap;text-align:end}
 
 /* QUOTE TAB, NO SCROLL: the same two columns and the same widths (the Price adjustments box does not grow), only tighter spacing so the whole
@@ -684,6 +682,18 @@ html body .booking-negotiation-popup:modal{position:fixed!important;inset:0!impo
 .booking-negotiation-popup .primary-button:active:not(:disabled){transform:translateY(1px)}
 .booking-negotiation-popup .primary-button:disabled{opacity:.55;cursor:default}
 
-/* The client's own "Go back" / "Restore booking" on a decision or cancellation step: a small quiet pill under the step. */
-.booking-status-band .bsp-branches>li>button{padding:3px 12px;border:1px solid color-mix(in srgb,currentColor 45%,transparent);border-radius:999px;background:transparent;color:inherit;font-family:inherit;font-size:11px;font-weight:600;letter-spacing:.03em;cursor:pointer}
-.booking-status-band .bsp-branches>li>button:hover{background:color-mix(in srgb,currentColor 14%,transparent)}
+
+/* The step's option buttons sit at the BOTTOM of the step (under its text and substeps), side by side. */
+html body :is(.admin-workspace,.client-workspace) .booking-status-band>ol>li>.label>.bsp-actions{display:flex!important;flex-wrap:wrap;align-items:center;gap:6px 18px;margin:12px 0 0!important;flex:none!important;white-space:nowrap}
+html body :is(.admin-workspace,.client-workspace) .booking-status-band>ol>li>.label>.bsp-actions button.bsp-back{margin:0!important}
+
+/* The client's step buttons are drawn exactly like the admin's. */
+html body .client-workspace .booking-status-band>ol>li button.bsp-back{background:#d6ad5933!important;color:#f0cd7c!important;border:1px solid #d6ad5966!important;border-radius:6px!important;padding:2px 8px!important;font-size:9.5px!important;font-weight:700!important;letter-spacing:.05em!important;text-transform:uppercase!important;text-decoration:none!important;box-shadow:none!important}
+html body .client-workspace .booking-status-band>ol>li button.bsp-back:hover{background:#d6ad5955!important}
+html body .client-workspace .booking-status-band>ol>li button.bsp-back{background:none!important;border:0!important;padding:2px 0!important}
+html body .client-workspace .booking-status-band>ol>li button.bsp-back:hover{background:none!important;text-decoration:underline!important}
+/* Right half of the header pill after the client has decided: a status, not a button. */
+html body .admin-booking-detail-heading .booking-publish-action .booking-heading-pill>.booking-heading-accept.is-done{background:#5fd3a0!important;cursor:default;display:inline-flex;align-items:center}
+html body .admin-booking-detail-heading .booking-publish-action .booking-heading-pill>.booking-heading-accept.is-wait{background:#7fb4ff!important;cursor:default;display:inline-flex;align-items:center}
+.booking-heading-pill:has(.is-done){border-color:#5fd3a0}
+.booking-heading-pill:has(.is-wait){border-color:#7fb4ff}
