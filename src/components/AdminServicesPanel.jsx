@@ -120,7 +120,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
   const selectedRequest=requests.find(request=>request.id===selectedId)||requests[0];
   const [bookingTab,setBookingTab]=useState('details');
   const hasQuote=Boolean(selectedRequest&&(['available','quote_ready','deposit_paid','booked'].includes(selectedRequest.bookingStatus||selectedRequest.journey?.clientStatus)||selectedRequest.quotedAt));
-  const activeTab=bookingTab==='quote'&&hasQuote?'quote':'details';
+  const activeTab=bookingTab==='files'&&selectedRequest?'files':bookingTab==='quote'&&hasQuote?'quote':'details';
   const [drafts, setDrafts] = useState({});
   const [publishingId, setPublishingId] = useState('');
   const [availabilityBusy,setAvailabilityBusy]=useState(''),[unavailableRequest,setUnavailableRequest]=useState(null);
@@ -284,7 +284,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
       <div className="admin-booking-layout">
         <BookingRequestList requests={requests} selectedId={selectedRequest?.id} onSelect={id=>{setSelectedId(id);setBookingTab('details');}} ar={ar} countLabel={requestCountLabel}/>
       <section id="admin-booking-detail" className="admin-booking-detail-column" aria-labelledby="admin-booking-detail-title">
-        <header className="admin-booking-detail-heading"><div className="booking-detail-title"><h2 id="admin-booking-detail-title">{tr(activeTab==='quote'?'Quote':'Booking details')}</h2>{selectedRequest&&<span>{selectedRequest.requestNumber||selectedRequest.id}</span>}</div>
+        <header className="admin-booking-detail-heading"><div className="booking-detail-title"><h2 id="admin-booking-detail-title">{tr(activeTab==='quote'?'Quote':activeTab==='files'?'Shared files':'Booking details')}</h2>{selectedRequest&&<span>{selectedRequest.requestNumber||selectedRequest.id}</span>}</div>
           {selectedRequest&&(()=>{
             // Header actions follow the booking's stage and the open tab: Booking info -> availability decisions, Quote -> publishing.
             const r=selectedRequest,stage=r.journey?.clientStatus,repr=r.journey.repriceable,busy=Boolean(publishingId||availabilityBusy);
@@ -332,7 +332,6 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                 <div id="booking-tab-panel">
                 <div className="booking-detail-sections">
                   {request.order&&<BookingDraftReview order={{...request.order,customer:{...request.order.customer,...(n=>({firstName:request.order.customer?.firstName||n.firstName,lastName:request.order.customer?.lastName||n.lastName}))(customerNameParts({...request.order.customer,fullName:request.order.customer?.fullName??request.customerName}))}}} snapshot ar={ar} edit={{onSave:(path,value,acknowledgeReset)=>onQuoteAction(request.id,'admin-order-edit',{path,value,quoteRevision:request.quoteRevision,acknowledgeReset})}}/>}
-                  <BookingFiles admin requestId={request.id} token={token} ar={ar}/>
                   {bookingSections(request,ar).map(section=>request.order&&section.title==="References & notes"?{...section,rows:section.rows.filter(([label])=>label==="Requested changes")}:section).filter(section=>!request.order||section.title==="Event planning"||section.title==="References & notes"&&section.rows.length).map((section,index)=><section key={section.title} className={`booking-detail-section${section.wide?' is-wide':''}`} aria-label={tr(section.title)}>
                     <h4><span aria-hidden="true">{String(index+1).padStart(2,'0')}</span>{tr(section.title)}</h4>
                     <dl>{section.rows.map(([label,value])=><div key={label}><dt>{tr(label)}</dt><dd>{detailText(value)}</dd></div>)}</dl>
@@ -346,6 +345,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                   </p>
                 ) : null}
               </article>
+              <section className="booking-files-panel" role="tabpanel" id="admin-booking-files-panel" aria-labelledby="admin-booking-files-tab" tabIndex={0} hidden={activeTab!=='files'}>{activeTab==='files'&&<BookingFiles admin requestId={request.id} token={token} ar={ar}/>}</section>
               {showQuote&&<aside className="booking-conversation-aside booking-quote-aside" aria-label={tr("Quote")} role="tabpanel" id="admin-booking-quote-panel" aria-labelledby="admin-booking-quote-tab" tabIndex={0} hidden={activeTab!=='quote'}><header className="booking-column-heading booking-quote-heading"><h3>{tr("Quote")}</h3>{(()=>{const canPublish=request.journey.repriceable&&isAvailable(request)&&['available','quote_ready','deposit_paid'].includes(request.journey?.clientStatus),busy=Boolean(publishingId||availabilityBusy);
                   return canPublish?<button type="button" className="primary-button booking-quote-publish" disabled={busy} onClick={()=>publishQuote(request)}><Send size={14}/>{publishingId===request.id?tr("Sending..."):request.journey.awaitingClient?tr("Update sent quote"):tr("Send quote")}</button>:null;})()}</header>
                 <div className="booking-quote-panel">

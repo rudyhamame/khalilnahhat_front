@@ -9,6 +9,6 @@ export default function BookingPageHeader({ar=false,value='details',onChange,idP
   if(next===null)return;event.preventDefault();buttons[next].focus();buttons[next].click();
  };
  return <header className="booking-page-heading"><div className="booking-page-tabs" role="tablist" aria-label={tr('Booking details')} onKeyDown={move}>
-  {[['details',tr('Booking details'),hasBooking],['quote',tr('Quote'),hasQuote]].map(([id,label,enabled])=><button key={id} type="button" role="tab" id={`${idPrefix}-${id}-tab`} aria-selected={value===id} aria-controls={enabled?`${idPrefix}-${id}-panel`:undefined} tabIndex={value===id?0:-1} disabled={!enabled} onClick={()=>onChange?.(id)}>{label}</button>)}
+  {[['details',tr('Booking details'),hasBooking],['quote',tr('Quote'),hasQuote],['files',tr('Shared files'),hasBooking]].map(([id,label,enabled])=><button key={id} type="button" role="tab" id={`${idPrefix}-${id}-tab`} aria-selected={value===id} aria-controls={enabled?`${idPrefix}-${id}-panel`:undefined} tabIndex={value===id?0:-1} disabled={!enabled} onClick={()=>onChange?.(id)}>{label}</button>)}
  </div></header>;
 }

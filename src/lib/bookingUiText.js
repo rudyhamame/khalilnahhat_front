@@ -161,6 +161,7 @@ const AR={
   "Expand sidebar": "توسيع الشريط الجانبي",
   "Collapse sidebar": "طي الشريط الجانبي",
   "Links": "روابط",
+  "Shared files": "الملفات المشاركة",
   "Cancel booking": "إلغاء الحجز",
   "Cancel this booking?": "إلغاء هذا الحجز؟",
   "View website ↗": "عرض الموقع ↗",

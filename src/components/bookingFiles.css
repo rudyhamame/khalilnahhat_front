@@ -10,3 +10,5 @@
 .booking-files-remove{border:0;background:none;color:var(--aw-muted,#9a9aa3);padding:6px}
 .booking-files-empty,.booking-files>p{margin:0;color:var(--aw-muted,#9a9aa3);font-size:13px}
 .booking-files [role=alert]{color:#e08a85}
+.booking-files-panel{padding:20px}
+.booking-files-panel .booking-files{border-top:0;margin-top:0;padding-top:0}

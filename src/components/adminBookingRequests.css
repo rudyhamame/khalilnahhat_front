@@ -488,3 +488,32 @@ html body .admin-workspace .bpa-more>div button+button{margin-top:2px;border-top
 html body :is(.admin-workspace,.client-workspace) .booking-status-band>ol>li.is-here>.bsp-side>.bsp-actions{display:flex!important;flex-direction:column;align-items:flex-end;gap:6px;margin:0!important;flex:none!important;white-space:nowrap}
 html body :is(.admin-workspace,.client-workspace) .booking-status-band>ol>li.is-here>.bsp-side>.bsp-actions button.bsp-back{margin:0!important}
 .booking-status-band>ol>li>.bsp-side>.bsp-date{font-size:12px;font-weight:400;color:var(--aw-muted);white-space:nowrap;text-align:end}
+
+/* QUOTE TAB, NO SCROLL: the same two columns and the same widths (the Price adjustments box does not grow), only tighter spacing so the whole
+   quote fits one viewport. If a very long item list or a tiny window still cannot fit, the panel scrolls instead of clipping. */
+.admin-booking-detail-body[data-view=quote] .booking-quote-aside{padding:6px 18px 10px!important}
+.admin-booking-detail-body[data-view=quote] .booking-quote-aside>.booking-column-heading{padding:4px 0 6px!important}
+.admin-booking-detail-body[data-view=quote] .booking-quote-layout{gap:14px!important}
+.admin-booking-detail-body[data-view=quote] .booking-quote-layout :is(.bqe-editor,.bqe-sidebar){padding-block:10px!important}
+.admin-booking-detail-body[data-view=quote] .bqe-heading{margin-bottom:6px!important}
+.admin-booking-detail-body[data-view=quote] .bqe-heading p{display:none}
+.admin-booking-detail-body[data-view=quote] .bqe-fill{min-height:30px!important;padding:4px 10px!important}
+.admin-booking-detail-body[data-view=quote] .bqe-table-wrap{max-height:clamp(90px,calc(100vh - 640px),320px);overflow:auto}
+.admin-booking-detail-body[data-view=quote] .bqe-table :is(th,td){padding:6px 10px!important}
+.admin-booking-detail-body[data-view=quote] .bqe-rate input{min-height:30px!important;padding:4px 8px!important}
+.admin-booking-detail-body[data-view=quote] .bqe-currency{margin:4px 0 6px!important}
+.admin-booking-detail-body[data-view=quote] .bqe-adjustments{padding:8px 0!important}
+.admin-booking-detail-body[data-view=quote] .bqe-adjustments h5{margin:0 0 6px!important}
+.admin-booking-detail-body[data-view=quote] .bqe-adjustments .bqe-adjustment-fields{gap:8px!important}
+.admin-booking-detail-body[data-view=quote] .bqe-fields :is(input,select){min-height:32px!important;padding:5px 9px!important}
+.admin-booking-detail-body[data-view=quote] .bqe-fields label{gap:4px!important}
+.admin-booking-detail-body[data-view=quote] .bqe-fields textarea{min-height:38px!important;padding:5px 9px!important}
+.admin-booking-detail-body[data-view=quote] .bqe-note{margin-top:8px!important}
+.admin-booking-detail-body[data-view=quote] .bqe-sidebar{gap:10px!important}
+.admin-booking-detail-body[data-view=quote] .bqe-summary{padding:10px 14px!important}
+.admin-booking-detail-body[data-view=quote] .bqe-total{margin:2px 0 8px!important;font-size:24px!important}
+.admin-booking-detail-body[data-view=quote] :is(.bqe-breakdown,.bqe-balance){gap:3px!important}
+.admin-booking-detail-body[data-view=quote] .bqe-terms{padding:8px 12px!important}
+.admin-booking-detail-body[data-view=quote] .bqe-payment-options{margin-top:6px!important}
+.admin-booking-detail-body[data-view=quote] .bqe-payment-options>label{padding:3px 10px!important}
+.admin-booking-detail-body[data-view=quote] :is(.bqe-default-terms,.bqe-save-terms){margin-top:6px!important}
