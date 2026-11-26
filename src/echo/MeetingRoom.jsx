@@ -3,30 +3,31 @@ import {createPortal} from 'react-dom';
 import {Mic,MicOff,MessageCircle,Phone,PhoneOff,Send,Video,VideoOff,X} from 'lucide-react';
 import {apiRequest} from '../lib/api';
 import './meetingRoom.css';
+import MeetingDeviceSettings from './MeetingDeviceSettings';
+import {useMeetingDevices} from './useMeetingDevices';
 
 // Online meeting between the client and Khalil: chat, voice call and video call (WebRTC, signalled through the server).
-export default function MeetingRoom({meetingId,token,ar=false,onClose}){
+export default function MeetingRoom({meetingId,token,ar=false,onClose,onEnded}){
   const tr=(en,arabic)=>ar?arabic:en;
   const base=`/meetings/${meetingId}/room`;
   const [info,setInfo]=useState(null),[error,setError]=useState(''),[peerOnline,setPeerOnline]=useState(false);
   const [messages,setMessages]=useState([]),[text,setText]=useState('');
-  const [call,setCall]=useState({state:'idle',kind:'voice'}),[incoming,setIncoming]=useState(null),[notice,setNotice]=useState('');
+  const [call,setCall]=useState({state:'idle',kind:'voice'}),[incoming,setIncoming]=useState(null),[notice,setNotice]=useState(''),[clientJoined,setClientJoined]=useState(false),[ending,setEnding]=useState(false);
   const [muted,setMuted]=useState(false),[cameraOff,setCameraOff]=useState(false);
   const pc=useRef(null),local=useRef(null),pendingCandidates=useRef([]),cursors=useRef({signal:0,message:0});
   const remoteVideo=useRef(null),localVideo=useRef(null),log=useRef(null),infoRef=useRef(null),incomingRef=useRef(null),callRef=useRef(call);
   callRef.current=call;incomingRef.current=incoming;infoRef.current=info;
+  const deviceControls=useMeetingDevices({streamRef:local,peerRef:pc,ar});
+  const resetDevices=deviceControls.reset;
 
   const send=useCallback((type,data)=>apiRequest(`${base}/signal`,{method:'POST',token,body:{type,data}}).catch(()=>{}),[base,token]);
   const cleanup=useCallback(()=>{
     pc.current?.close();pc.current=null;pendingCandidates.current=[];
-    local.current?.getTracks().forEach(track=>track.stop());local.current=null;
+    resetDevices();
     if(remoteVideo.current)remoteVideo.current.srcObject=null;if(localVideo.current)localVideo.current.srcObject=null;
     setMuted(false);setCameraOff(false);setCall({state:'idle',kind:'voice'});
-  },[]);
-  const media=async kind=>{
-    const stream=await navigator.mediaDevices.getUserMedia({audio:true,video:kind==='video'});
-    local.current=stream;if(localVideo.current)localVideo.current.srcObject=stream;return stream;
-  };
+  },[resetDevices]);
+  const media=deviceControls.getMedia;
   const connection=kind=>{
     const peer=new RTCPeerConnection({iceServers:infoRef.current?.iceServers||[{urls:'stun:stun.l.google.com:19302'}]});
     pc.current=peer;
@@ -42,13 +43,13 @@ export default function MeetingRoom({meetingId,token,ar=false,onClose}){
   const flushCandidates=async()=>{for(const candidate of pendingCandidates.current.splice(0))await pc.current?.addIceCandidate(candidate).catch(()=>{});};
 
   const startCall=async kind=>{
-    if(!infoRef.current||callRef.current.state!=='idle')return;
+    if(!infoRef.current||deviceControls.busy||callRef.current.state!=='idle')return;
     setNotice('');setError('');
     try{
       await media(kind);setCall({state:'calling',kind});
       const peer=connection(kind),offer=await peer.createOffer();await peer.setLocalDescription(offer);
       await send('offer',{sdp:offer.sdp,kind});
-    }catch(e){cleanup();setError(e.name==='NotAllowedError'?tr('Allow the microphone (and camera) to call.','اسمح بالميكروفون (والكاميرا) للاتصال.'):tr('The call could not start.','تعذر بدء المكالمة.'));}
+    }catch(e){if(e.name==='AbortError')return;cleanup();setError(e.name==='NotAllowedError'?tr('Allow the microphone (and camera) to call.','اسمح بالميكروفون (والكاميرا) للاتصال.'):tr('The call could not start.','تعذر بدء المكالمة.'));}
   };
   const accept=async()=>{
     const offer=incomingRef.current;if(!offer)return;
@@ -57,12 +58,19 @@ export default function MeetingRoom({meetingId,token,ar=false,onClose}){
       await media(offer.kind);setCall({state:'connecting',kind:offer.kind});
       const peer=connection(offer.kind);await peer.setRemoteDescription({type:'offer',sdp:offer.sdp});await flushCandidates();
       const answer=await peer.createAnswer();await peer.setLocalDescription(answer);await send('answer',{sdp:answer.sdp});
-    }catch(e){cleanup();send('decline');setError(e.name==='NotAllowedError'?tr('Allow the microphone (and camera) to answer.','اسمح بالميكروفون (والكاميرا) للرد.'):tr('The call could not connect.','تعذر الاتصال.'));}
+    }catch(e){if(e.name==='AbortError')return;cleanup();send('decline');setError(e.name==='NotAllowedError'?tr('Allow the microphone (and camera) to answer.','اسمح بالميكروفون (والكاميرا) للرد.'):tr('The call could not connect.','تعذر الاتصال.'));}
   };
   const decline=()=>{setIncoming(null);send('decline');};
   const hangUp=()=>{send('hangup');cleanup();};
-  const toggleMute=()=>{const track=local.current?.getAudioTracks()[0];if(track){track.enabled=!track.enabled;setMuted(!track.enabled);}};
-  const toggleCamera=()=>{const track=local.current?.getVideoTracks()[0];if(track){track.enabled=!track.enabled;setCameraOff(!track.enabled);}};
+  const endMeeting=async()=>{
+    if(infoRef.current?.role!=='host'||ending)return;
+    setEnding(true);setError('');
+    try{await apiRequest(`/meetings/${meetingId}/end`,{method:'POST',token});cleanup();(onEnded||onClose)();}
+    catch(failure){setError(failure.message||tr('The meeting could not be ended. Try again.','تعذر إنهاء الاجتماع. حاول مجدداً.'));}
+    finally{setEnding(false);}
+  };
+  const toggleMute=()=>{const track=local.current?.getAudioTracks()[0];if(track){const enabled=!track.enabled;deviceControls.setEnabled('audio',enabled);setMuted(!enabled);}};
+  const toggleCamera=()=>{const track=local.current?.getVideoTracks()[0];if(track){const enabled=!track.enabled;deviceControls.setEnabled('video',enabled);setCameraOff(!enabled);}};
 
   const handleSignal=async signal=>{
     const peer=pc.current;
@@ -73,7 +81,7 @@ export default function MeetingRoom({meetingId,token,ar=false,onClose}){
     else if(signal.type==='decline'){cleanup();setNotice(tr('The call was declined.','تم رفض المكالمة.'));}
   };
 
-  useEffect(()=>{let alive=true;apiRequest(base,{token}).then(result=>{if(alive)setInfo(result);}).catch(e=>{if(alive)setError(e.message);});return()=>{alive=false;};},[base,token]);
+  useEffect(()=>{let alive=true;apiRequest(base,{token}).then(result=>{if(alive){setInfo(result);setClientJoined(Boolean(result.meeting.clientJoinedAt));}}).catch(e=>{if(alive)setError(e.message);});return()=>{alive=false;};},[base,token]);
   useEffect(()=>{
     if(!info)return undefined;
     let stop=false,timer;
@@ -81,10 +89,10 @@ export default function MeetingRoom({meetingId,token,ar=false,onClose}){
       try{
         const result=await apiRequest(`${base}/poll?signal=${cursors.current.signal}&message=${cursors.current.message}`,{token});
         if(stop)return;
-        setPeerOnline(result.peerOnline);
+        setPeerOnline(result.peerOnline);setClientJoined(Boolean(result.clientJoinedAt));
         if(result.messages.length){cursors.current.message=result.messages.at(-1).seq;setMessages(current=>[...current,...result.messages.filter(item=>!current.some(row=>row.seq===item.seq))]);}
         for(const signal of result.signals){cursors.current.signal=signal.seq;await handleSignal(signal);}
-      }catch(e){if(!stop&&/opens|not found/i.test(e.message))setError(e.message);}
+      }catch(e){if(!stop){if([404,410].includes(e.status)){cleanup();setIncoming(null);setPeerOnline(false);setInfo(null);setError(tr('This meeting has ended or is no longer available.','انتهى هذا الاجتماع أو لم يعد متاحاً.'));}else if(/opens|closed/i.test(e.message))setError(e.message);}}
       finally{if(!stop)timer=setTimeout(poll,1000);}
     };
     poll();
@@ -95,7 +103,7 @@ export default function MeetingRoom({meetingId,token,ar=false,onClose}){
   useEffect(()=>()=>{pc.current?.close();local.current?.getTracks().forEach(track=>track.stop());},[]);
   useEffect(()=>{log.current?.scrollTo({top:log.current.scrollHeight});},[messages.length]);
   // The local video element mounts after camera capture starts. Attach its stream after that render.
-  useEffect(()=>{if(localVideo.current)localVideo.current.srcObject=local.current;},[call.kind,call.state]);
+  useEffect(()=>{if(localVideo.current)localVideo.current.srcObject=local.current;},[call.kind,call.state,deviceControls.previewing,deviceControls.previewKind,deviceControls.revision]);
 
   const submit=async event=>{
     event.preventDefault();const value=text.trim();if(!value)return;
@@ -104,6 +112,7 @@ export default function MeetingRoom({meetingId,token,ar=false,onClose}){
     catch(e){setError(e.message);}
   };
   const calling=call.state!=='idle',showVideo=calling&&call.kind==='video';
+  const canEnd=info?.role==='host'&&clientJoined;
   const who=info?(info.role==='host'?info.meeting.clientName||tr('Client','العميل'):'Khalil'):'';
   return createPortal(<div className="meeting-room" role="dialog" aria-modal="true" aria-label={tr('Meeting room','غرفة الاجتماع')} dir={ar?'rtl':'ltr'}>
     <div className="meeting-room-panel">
@@ -115,22 +124,27 @@ export default function MeetingRoom({meetingId,token,ar=false,onClose}){
         <section className="meeting-room-call" aria-label={tr('Call','المكالمة')}>
           <div className={`meeting-room-stage${calling?' is-live':''}`}>
             <video ref={remoteVideo} autoPlay playsInline className={showVideo?'':'is-audio'}/>
-            {showVideo&&<video ref={localVideo} autoPlay playsInline muted className="meeting-room-self"/>}
-            {!calling&&!incoming&&<div className="meeting-room-idle"><Phone size={30} strokeWidth={1.4}/><p>{peerOnline?tr('Start a voice or video call, or just chat.','ابدأ مكالمة صوتية أو مرئية، أو تحدث كتابةً.'):tr('Waiting for the other person. You can chat now and call once they are here.','بانتظار الطرف الآخر. يمكنك الكتابة الآن والاتصال عند حضوره.')}</p></div>}
+            {(showVideo||deviceControls.previewing&&deviceControls.previewKind==='video')&&<video ref={localVideo} autoPlay playsInline muted className={showVideo?'meeting-room-self':'meeting-room-preview'}/>}
+            {deviceControls.previewing&&deviceControls.previewKind==='video'&&<span className="meeting-room-preview-label">{tr('Your preview · not shared','معاينتك · غير مشتركة')}</span>}
+            {!calling&&!incoming&&deviceControls.previewing&&deviceControls.previewKind==='voice'&&<div className="meeting-room-idle"><Mic size={30} strokeWidth={1.4}/><p>{tr('Microphone ready · not shared. Choose your microphone below.','الميكروفون جاهز · غير مشترك. اختر الميكروفون أدناه.')}</p></div>}
+            {!calling&&!incoming&&!deviceControls.previewing&&<div className="meeting-room-idle"><Phone size={30} strokeWidth={1.4}/><p>{peerOnline?tr('Start a voice or video call, or just chat.','ابدأ مكالمة صوتية أو مرئية، أو تحدث كتابةً.'):tr('Waiting for the other person. You can chat now and call once they are here.','بانتظار الطرف الآخر. يمكنك الكتابة الآن والاتصال عند حضوره.')}</p></div>}
             {calling&&call.kind==='voice'&&<div className="meeting-room-idle"><Phone size={30} strokeWidth={1.4}/><p>{call.state==='active'?tr('Voice call connected','المكالمة الصوتية متصلة'):tr('Calling…','جارٍ الاتصال…')}</p></div>}
-            {incoming&&<div className="meeting-room-incoming" role="alert"><p>{incoming.kind==='video'?tr('Incoming video call','مكالمة مرئية واردة'):tr('Incoming voice call','مكالمة صوتية واردة')}</p><div><button type="button" className="is-accept" onClick={accept}><Phone size={16}/>{tr('Accept','قبول')}</button><button type="button" className="is-decline" onClick={decline}><PhoneOff size={16}/>{tr('Decline','رفض')}</button></div></div>}
+            {incoming&&<div className="meeting-room-incoming" role="alert"><p>{incoming.kind==='video'?tr('Incoming video call','مكالمة مرئية واردة'):tr('Incoming voice call','مكالمة صوتية واردة')}</p><div><button type="button" className="is-accept" disabled={deviceControls.busy} onClick={accept}><Phone size={16}/>{tr('Accept','قبول')}</button><button type="button" className="is-decline" onClick={decline}><PhoneOff size={16}/>{tr('Decline','رفض')}</button></div></div>}
           </div>
           {notice&&<p className="meeting-room-notice" role="status">{notice}</p>}
+          <MeetingDeviceSettings devices={deviceControls.devices} selected={deviceControls.selected} busy={deviceControls.busy} previewing={deviceControls.previewing} previewKind={deviceControls.previewKind} error={deviceControls.error} ready={Boolean(info)} calling={calling} ar={ar} onChange={deviceControls.change} onPreview={deviceControls.togglePreview}/>
           <div className="meeting-room-controls">
             {!calling?<>
-              <button type="button" onClick={()=>startCall('voice')} disabled={!info||Boolean(incoming)}><Phone size={16}/>{tr('Voice call','مكالمة صوتية')}</button>
-              <button type="button" onClick={()=>startCall('video')} disabled={!info||Boolean(incoming)}><Video size={16}/>{tr('Video call','مكالمة مرئية')}</button>
+              <button type="button" onClick={()=>startCall('voice')} disabled={!info||deviceControls.busy||Boolean(incoming)}><Phone size={16}/>{tr('Voice call','مكالمة صوتية')}</button>
+              <button type="button" onClick={()=>startCall('video')} disabled={!info||deviceControls.busy||Boolean(incoming)}><Video size={16}/>{tr('Video call','مكالمة مرئية')}</button>
             </>:<>
               <button type="button" onClick={toggleMute} aria-pressed={muted} title={muted?tr('Unmute','إلغاء الكتم'):tr('Mute','كتم')}>{muted?<MicOff size={16}/>:<Mic size={16}/>}</button>
               {call.kind==='video'&&<button type="button" onClick={toggleCamera} aria-pressed={cameraOff} title={cameraOff?tr('Camera on','تشغيل الكاميرا'):tr('Camera off','إيقاف الكاميرا')}>{cameraOff?<VideoOff size={16}/>:<Video size={16}/>}</button>}
-              <button type="button" className="is-decline" onClick={hangUp}><PhoneOff size={16}/>{tr('End call','إنهاء المكالمة')}</button>
+              <button type="button" className="is-decline" disabled={ending} onClick={canEnd?endMeeting:hangUp}><PhoneOff size={16}/>{ending?tr('Ending…','جارٍ الإنهاء…'):canEnd?tr('End meeting','إنهاء الاجتماع'):tr('End call','إنهاء المكالمة')}</button>
             </>}
           </div>
+          {!calling&&canEnd&&<button type="button" className="is-decline meeting-room-end" disabled={ending} onClick={endMeeting}><PhoneOff size={16}/>{ending?tr('Ending…','جارٍ الإنهاء…'):tr('End meeting','إنهاء الاجتماع')}</button>}
+          {canEnd&&<small className="meeting-room-end-hint">{tr('Ending the meeting removes this appointment from the calendar.','إنهاء الاجتماع يزيل هذا الموعد من التقويم.')}</small>}
         </section>
         <section className="meeting-room-chat" aria-label={tr('Chat','الدردشة')}>
           <h3><MessageCircle size={15}/>{tr('Chat','الدردشة')}</h3>

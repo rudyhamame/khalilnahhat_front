@@ -26,3 +26,26 @@
 .meeting-room-chat form{display:flex;gap:8px;padding:12px 16px;border-top:1px solid #ffffff14}
 .meeting-room-chat input{flex:1;min-width:0;min-height:38px;padding:0 12px;border:1px solid #ffffff2e;border-radius:10px;background:#ffffff0a;color:inherit;font:inherit;font-size:13px}
 @media(max-width:800px){.meeting-room-body{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1.2fr) minmax(0,1fr)}.meeting-room-chat{border-inline-start:0;border-top:1px solid #ffffff14}}
+/* Device choices stay available before joining and while the peer connection is live. */
+.meeting-room-devices{flex:none;padding:12px;border:1px solid #ffffff20;background:#15191c;color:#e8efeb;border-radius:0}
+.meeting-room-device-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.meeting-room-device-fields label{display:grid;gap:7px;margin:0;font-size:11px;min-width:0}
+.meeting-room-device-fields label>span{display:flex;align-items:center;gap:6px;color:#a9b7af}
+.meeting-room-device-fields select{box-sizing:border-box;min-width:0;width:100%;min-height:36px;padding:7px 9px;border:1px solid #ffffff25;border-radius:0;background:#0f1214;color:#e8efeb;color-scheme:dark;font:inherit;font-size:12px}
+.meeting-room-device-fields select:disabled{opacity:.5}
+.meeting-room-device-help{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px}
+.meeting-room-device-help small{font-size:10px;color:#a9b7af;line-height:1.6;max-width:47ch}
+.meeting-room .meeting-room-device-help button{flex:none;min-height:30px;padding:5px 9px;font-size:10px;border-radius:0}
+.meeting-room .meeting-room-device-help button[aria-pressed=true]{background:#3457a730;border-color:#527ad2}
+.meeting-room-device-error{margin:9px 0 0;font-size:11px;line-height:1.6;color:#ffb3aa}
+.meeting-room-stage>.meeting-room-preview{width:100%;height:100%;object-fit:contain;transform:scaleX(-1)}
+.meeting-room-preview-label{position:absolute;bottom:12px;left:12px;padding:5px 9px;background:#000a;color:#fff;font-size:11px}
+.meeting-room :is(button,select):focus-visible{outline:2px solid #8ba9eb;outline-offset:2px}
+.meeting-room-device-fields svg,.meeting-room-device-help button>svg{flex:none;width:14px;height:14px}
+@media(max-width:800px){.meeting-room-body{display:flex;flex-direction:column;overflow-y:auto}.meeting-room-call{flex:none;min-height:440px}.meeting-room-stage{min-height:190px}.meeting-room-chat{flex:none;min-height:260px;max-height:360px}.meeting-room-device-help{flex-wrap:wrap}}
+@media(max-width:420px){.meeting-room-device-fields{gap:8px}.meeting-room-device-help small{max-width:none}.meeting-room-device-help button{width:100%}.meeting-room-call{min-height:475px}}
+.meeting-room-device-tests{display:flex;flex-wrap:wrap;gap:6px;flex:none}
+.meeting-room-preview-label{left:auto;inset-inline-start:12px}
+@media(max-width:420px){.meeting-room-device-tests{width:100%}.meeting-room .meeting-room-device-tests button{flex:1;width:auto}}
+.meeting-room .meeting-room-end{align-self:center}
+.meeting-room-end-hint{display:block;text-align:center;font-size:10px;line-height:1.5;color:#9fb2a8}

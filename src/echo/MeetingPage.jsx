@@ -19,15 +19,15 @@ export default function MeetingPage({ lang={lang:'en'}, user, token, isSessionRe
   const [moving, setMoving] = useState('');
   const [roomId, setRoomId] = useState('');
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const load = useCallback(async (quiet=false) => {
+    if(quiet!==true)setLoading(true);
     try {
       const [available,booked]=await Promise.all([apiRequest('/meetings/slots'),token&&user?apiRequest('/meetings/mine',{token}):Promise.resolve({items:[]})]);
       setSlots(available.items);setMine(booked.items);
     } catch(error) {setMsg(error.message||'Meetings could not be loaded. Please try again.');}
-    finally {setLoading(false);}
+    finally {if(quiet!==true)setLoading(false);}
   }, [token, user]);
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {load();const timer=setInterval(()=>{if(!document.hidden)load(true);},30000);return()=>clearInterval(timer);},[load]);
 
   const fmt = (d) => new Intl.DateTimeFormat(lang.lang === 'ar' ? 'ar-CA' : 'en-CA', { dateStyle: 'full', timeStyle: 'short', timeZone: 'America/Toronto' }).format(new Date(d));
   const mode = (m) => ({phone:L('Phone call','مكالمة هاتفية'),'whatsapp-voice':L('WhatsApp voice call','مكالمة واتساب صوتية'),'whatsapp-video':L('WhatsApp video call','مكالمة واتساب مرئية')}[m] || (m === 'online' ? L('Online', 'عبر الإنترنت') : L('In person', 'حضورياً')));
@@ -47,7 +47,7 @@ export default function MeetingPage({ lang={lang:'en'}, user, token, isSessionRe
   };
 
   if(embedded)return <>
-    {roomId&&<MeetingRoom meetingId={roomId} token={token} ar={lang.lang==='ar'} onClose={()=>setRoomId('')}/>}
+    {roomId&&<MeetingRoom meetingId={roomId} token={token} ar={lang.lang==='ar'} onClose={()=>{setRoomId('');load();}}/>}
     <ClientMeetingWorkspace ar={lang.lang==='ar'} loading={loading} busy={busy} slots={slots} meetings={mine} topic={topic} error={msg} onTopicChange={setTopic} onRefresh={()=>{setMsg('');load();}} onJoin={setRoomId}
       onBook={id=>act(()=>apiRequest(`/meetings/${id}/book`,{method:'POST',token,body:{topic}}))}
       onCancel={id=>act(()=>apiRequest(`/meetings/${id}/cancel`,{method:'POST',token}))}
@@ -56,7 +56,7 @@ export default function MeetingPage({ lang={lang:'en'}, user, token, isSessionRe
 
   return (
     <section className={embedded?"client-meetings":"echo-section"} aria-busy={loading}>
-      {roomId && <MeetingRoom meetingId={roomId} token={token} ar={lang.lang === 'ar'} onClose={() => setRoomId('')} />}
+      {roomId && <MeetingRoom meetingId={roomId} token={token} ar={lang.lang === 'ar'} onClose={()=>{setRoomId('');load();}} />}
       <h1 className="echo-h1">{embedded?L('Meet with us','اجتمع معنا'):L('Book a Meeting', 'احجز اجتماعاً')}</h1>
       <p>{embedded?L('Book a time, then join us here for a browser voice or video call. No app download is needed. All meeting times are Toronto time.','احجز موعداً ثم انضم إلينا هنا لمكالمة صوتية أو مرئية في المتصفح، دون تنزيل تطبيق. جميع الأوقات بتوقيت تورونتو.'):L('Pick a time for an online or in-person consultation. Times are shown in Toronto time.', 'اختر وقتاً لاستشارة عبر الإنترنت أو حضورية. الأوقات بتوقيت تورونتو.')}</p>
       {msg && <div role="alert" className="echo-error"><p>{msg}</p><button type="button" className="secondary-button" disabled={loading} onClick={()=>{setMsg('');load();}}>{L('Retry','إعادة المحاولة')}</button></div>}
