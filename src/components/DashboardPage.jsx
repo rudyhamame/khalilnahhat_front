@@ -65,9 +65,9 @@ function DepositInstructions({ request, ar=false }) {
 
 // Where a request is on its way. The labels, order and current step all come from the server's journey (booking-journey.js).
 // When each status was reached, from the booking's own timestamps.
-function StatusSteps({ journey, request, ar=false, onUndo }) {
+function StatusSteps({ journey, request, ar=false, onUndo, onClientStep }) {
   if (journey.step === null && !journey.branches?.cancelled) return <p className={`dashboard-status-end is-${journey.status}`}>{journey.label}</p>;
-  return <BookingStatusPipeline request={request} ar={ar} audience="client" onUndo={onUndo}/>;
+  return <BookingStatusPipeline request={request} ar={ar} audience="client" onUndo={onUndo} onClientStep={onClientStep}/>;
 }
 
 // Three-dots menu in the booking header: withdraw the request, or save the booking as a PDF (the browser's print dialog opens on a clean confirmation page).
@@ -118,7 +118,7 @@ function RequestedServices({requests,onQuoteAction,authToken,ar=false}){
      <div className="client-booking-identity"><div className="booking-summary-who"><h3>{request.customerName||tr('Your event')}</h3>{request.customerEmail&&<a href={`mailto:${request.customerEmail}`}>{request.customerEmail}</a>}</div><div className="booking-summary-foot"><div><span>{tr('Booking code')}</span><code>{request.requestNumber||request.id}</code></div></div></div>
      <header className="booking-column-heading"><h3>{tr('Booking details')}</h3></header>
      <header className="booking-brief-heading booking-summary" aria-label={tr('Booking summary')}>
-      <StatusSteps request={request} journey={request.journey} ar={ar} onUndo={async index=>{if(!window.confirm(tr('Undo this modification?')))return;try{await onQuoteAction(request.id,'undo-modification',{index});}catch(error){window.alert(error.message||tr('Action failed.'));}}}/>
+      <StatusSteps request={request} journey={request.journey} ar={ar} onClientStep={async to=>{if(!window.confirm(to==='restore'?tr('Restore this booking?'):tr('Go back to the quote decision?')))return;try{await onQuoteAction(request.id,'client-step-back',{to,quoteRevision:request.quoteRevision||0});}catch(error){window.alert(error.message||tr('Action failed.'));}}} onUndo={async index=>{if(!window.confirm(tr('Undo this modification?')))return;try{await onQuoteAction(request.id,'undo-modification',{index});}catch(error){window.alert(error.message||tr('Action failed.'));}}}/>
       <div className="booking-summary-main"><section className="client-booking-meeting-invite"><h4>{ar?'هل ترغب في الاجتماع معنا؟':'Want to meet with us?'}</h4><p>{ar?<>استخدم قسم <a href="/dashboard/meetings">لقاء إيكو</a> لحجز جلسة لمناقشة حجزك بمزيد من التفاصيل.</>:<>Use the <a href="/dashboard/meetings">Meet Echo</a> tab to book a session to discuss your booking further.</>}</p><a className="primary-button" href="/dashboard/meetings">{tr('Meet Echo')}</a></section>
        <ClientAvailabilityNotice request={request} onQuoteAction={onQuoteAction} token={authToken} ar={ar}/>
        {!request.journey.showsPrices&&<p>{request.journey.clientNext==='wait_for_revised_quote'?(ar?'استلمنا طلب التعديل. سيصلك عرض سعر محدّث.':'We received your change request. An updated quote will follow.'):request.journey.clientNext==='none'?(request.declinedBy?tr('This request was declined. Thank you for considering Echo Event Entertainment.'):tr('This request was cancelled.')):tr('Khalil is reviewing your event plan. Pricing will appear here when the quote is ready.')}</p>}
