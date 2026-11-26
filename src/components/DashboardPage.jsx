@@ -1,4 +1,12 @@
+import MeetingPage from '../echo/MeetingPage';
+import BookingPageHeader from './BookingPageHeader';
 import BookingCardSummary from './BookingCardSummary';
+import {customerNameParts} from '../lib/eventOrderCore.mjs';
+import BookingRequestList from './BookingRequestList';
+import BookingStatusPipeline from './BookingStatusPipeline';
+import BookingQuoteEditor from './BookingQuoteEditor';
+import './adminBookingRequests.css';
+import './clientBookingRequests.css';
 import {ClientAvailabilityNotice} from './BookingAvailability';
 import {bookingText,bookingLocale,bookingMoney} from '../lib/bookingUiText';
 import BookingNegotiation from './BookingNegotiation';
@@ -64,8 +72,10 @@ const stageTime = (request, key) => {
 function StatusSteps({ journey, request, ar=false, onUndo }) {
   const tr = (text) => bookingText(text, ar), when = (key) => { const value = stageTime(request, key); return value ? new Intl.DateTimeFormat(bookingLocale(ar), { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value)) : ''; };
   if (journey.step === null) return <p className={`dashboard-status-end is-${journey.status}`}>{journey.label}</p>;
-  return <ol className="dashboard-status-steps" aria-label={`${ar?'الحالة':'Status'}: ${journey.label}`}>{journey.path.map((entry, index) => <li key={entry.status} className={index < journey.step ? 'is-done' : index === journey.step ? 'is-current' : ''} aria-current={index === journey.step ? 'step' : undefined}><i aria-hidden="true">{index < journey.step ? '✓' : index + 1}</i><span>{entry.label}{index <= journey.step && when(entry.status) ? <small>{when(entry.status)}</small> : null}
-    {entry.status === 'requested' && (journey.modified || request.modifications?.length > 0) && (() => { const all = request.modifications?.length ? request.modifications : [{ at: request.modifiedAt }], lastUndoable = all.map((entry) => entry.canUndo).lastIndexOf(true); return <ul className="dashboard-status-modifications">{all.map((entry, n) => <li key={`${entry.at}-${n}`} className={entry.undone ? 'is-undone' : ''}><b>{tr("Booking modified")}{all.length > 1 ? ` · ${n + 1}` : ''}</b>{entry.at ? <small>{new Intl.DateTimeFormat(bookingLocale(ar), { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(entry.at))}</small> : null}{entry.canUndo && <button type="button" onClick={() => onUndo(n)}>{tr("Undo modification")}</button>}</li>)}</ul>; })()}</span></li>)}</ol>;
+  return <BookingStatusPipeline request={request} ar={ar} audience="client" renderStepExtra={(key,index,current)=><>
+    {index<=current&&when(key)&&<small>{when(key)}</small>}
+    {key==='requested'&&(journey.modified||request.modifications?.length>0)&&<ul className="dashboard-status-modifications">{(request.modifications?.length?request.modifications:[{at:request.modifiedAt}]).map((entry,n)=><li key={`${entry.at}-${n}`} className={entry.undone?'is-undone':''}><b>{tr('Booking modified')}</b>{entry.at&&<small>{new Intl.DateTimeFormat(bookingLocale(ar),{dateStyle:'medium',timeStyle:'short'}).format(new Date(entry.at))}</small>}{entry.canUndo&&<button type="button" onClick={()=>onUndo(n)}>{tr('Undo modification')}</button>}</li>)}</ul>}
+  </>}/>;
 }
 
 // Three-dots menu in the booking header: withdraw the request, or save the booking as a PDF (the browser's print dialog opens on a clean confirmation page).
@@ -90,7 +100,7 @@ function BookingMenu({ request, onQuoteAction, ar=false }) {
   };
   const download = () => { if (!openBookingConfirmation(request,{ar})) setError(tr("Your browser blocked the new window. Allow pop-ups for this site and try again.")); else setOpen(false); };
   return <div className="dashboard-booking-menu" ref={box}>
-    <button type="button" className="dashboard-booking-menu-toggle" aria-label={tr("Booking actions")} aria-haspopup="menu" aria-expanded={open} onClick={() => { setOpen(!open); setError(''); }}><EllipsisVertical size={30} strokeWidth={2.5} aria-hidden="true" /></button>
+    <button type="button" className="dashboard-booking-menu-toggle" aria-label={tr("Booking actions")} aria-haspopup="menu" aria-expanded={open} onClick={() => { setOpen(!open); setError(''); }}><EllipsisVertical size={18} strokeWidth={2} aria-hidden="true" /></button>
     {open && <div className="dashboard-booking-menu-list" role="menu">
       {canWithdraw && <button type="button" role="menuitem" disabled={busy} onClick={withdraw}><Undo2 size={16} aria-hidden="true" />{tr("Withdraw")}</button>}
       <button type="button" role="menuitem" onClick={download}><FileDown size={16} aria-hidden="true" />{tr("Download booking information")}</button>
@@ -99,116 +109,42 @@ function BookingMenu({ request, onQuoteAction, ar=false }) {
   </div>;
 }
 
-function RequestedServices({ requests, onQuoteAction, authToken, ar=false }) {
-  const tr=text=>bookingText(text,ar),money=value=>bookingMoney(value,ar),dateTime=value=>new Intl.DateTimeFormat(bookingLocale(ar),{dateStyle:'long',timeStyle:'short'}).format(value);
-  // Left aside: one card per booking. Right main: the details of the selected booking.
-  const [selectedId, setSelectedId] = useState(()=>typeof window==='undefined'?'':new URLSearchParams(window.location.search).get('booking')||'');
-  const selected = requests.find((request) => request.id === selectedId) || requests[0];
-  return (
-    <section className={`dashboard-services-view${requests.length ? ' is-split' : ''}`} aria-label={tr("Requests and quotes")}>
-      {requests.length ? (
-        <>
-          <aside className="dashboard-bookings-aside" aria-label={tr("Your bookings")}>
-            <span className="dashboard-bookings-count">{ar?`${requests.length} طلب`:`${requests.length} REQUEST${requests.length === 1 ? '' : 'S'}`}</span>
-            <nav>
-              {requests.map((request) => (
-                <button key={request.id} type="button" aria-current={request.id === selected.id ? 'true' : undefined} onClick={() => setSelectedId(request.id)}>
-                  <strong>{request.requestNumber || tr("Request received")}</strong>
-                  <span className={`dashboard-service-status is-${request.status}`}>{request.journey.label}</span>
-                  <BookingCardSummary request={request} ar={ar}/>
-                  <small className="booking-card-received">{tr("Requested on")} {new Date(request.createdAt).toLocaleDateString(bookingLocale(ar))}</small>
-                </button>
-              ))}
-            </nav>
-          </aside>
-          <main className="dashboard-bookings-main">
-          {[selected].map((request) => (
-            <article key={request.id} className="dashboard-service-request">
-              <div className="dashboard-service-request-head">
-                <div>
-                  <h3>{request.requestNumber || (request.journey.awaitingClient ? tr("Your quote is ready") : tr("Request received"))}</h3>
-                  <p>{`${tr("Requested on")} ${new Date(request.createdAt).toLocaleDateString(bookingLocale(ar), { dateStyle: 'long' })}`}</p>
-                </div>
-                <div className="dashboard-service-head-side">
-                  <span className={`dashboard-service-status is-${request.status}`}>
-                    {request.journey.label}{request.journey.modificationCount > 0 ? ` · ${tr("Modified")} ${request.journey.modificationCount}×` : ''}
-                  </span>
-                  <BookingMenu ar={ar} request={request} onQuoteAction={onQuoteAction} />
-                </div>
-              </div>
-
-              <StatusSteps ar={ar} journey={request.journey} request={request} onUndo={async (index) => { if (!window.confirm(tr("Undo this modification?"))) return; try { await onQuoteAction(request.id, 'undo-modification', { index }); } catch (e) { window.alert(e.message || tr("Action failed.")); } }} />
-              <ClientAvailabilityNotice key={`${request.id}:${request.quoteRevision}`} request={request} onQuoteAction={onQuoteAction} token={authToken} ar={ar}/>
-              {(request.journey.awaitingClient || request.journey.canNegotiate) && <QuoteActions ar={ar} request={request} onQuoteAction={onQuoteAction}/>}
-              {request.availabilityAcceptedAt && request.journey.clientNext === 'wait_for_quote' && <p>{ar?'تم تأكيد التوافر. يجري إعداد الأسعار وتفاصيل العربون.':'Availability confirmed. Your prices and deposit details are being prepared.'}</p>}
-              {(request.journey.canRecordDeposit || request.journey.isBooked) && <BookingMeetingForm ar={ar} request={request} token={authToken} />}
-              <BookingNegotiation ar={ar} request={request} token={authToken} onQuoteAction={onQuoteAction}/>
-              {request.order&&<section className="dashboard-service-brief"><h4>{ar?'ملف فعاليتك الكامل':'Your complete event brief'}</h4><BookingDraftReview order={request.order} snapshot ar={ar}/></section>}
-              <h4 className="dashboard-service-section-title">{tr("Rental services & equipment")}</h4>
-              <div className="dashboard-service-table">
-                <div className="dashboard-service-row dashboard-service-row-head">
-                  <span>{tr("Service")}</span>
-                  <span>{tr("Qty")}</span>
-                  {request.journey.showsPrices ? <span>{tr("Unit price")}</span> : null}
-                  {request.journey.showsPrices ? <span>{tr("Total")}</span> : null}
-                </div>
-                {request.items.map((item) => (
-                  <div key={item.serviceId} className="dashboard-service-row">
-                    <strong>{item.name}</strong>
-                    <span>{item.quantity}</span>
-                    {request.journey.showsPrices ? <span>{money(item.unitPrice)}</span> : null}
-                    {request.journey.showsPrices ? <span>{money(item.lineTotal)}</span> : null}
-                  </div>
-                ))}
-              </div>
-
-              <div className="dashboard-service-request-footer">
-                {request.journey.showsPrices ? (
-                  <>
-                    <p>{request.adminNote || tr("Your itemized quote has been prepared.")}</p>
-                    <div>
-                      <span>{tr("Subtotal")}</span><strong>{money(request.subtotal)}</strong>
-                      {request.discount>0&&<><span>{request.discountType==='percent'?`${tr("Discount")} (${request.discountValue}%)`:tr("Discount")}</span><strong>−{money(request.discount)}</strong></>}
-                      <span>{`${tr("Tax")} (${request.taxPercent}%)`}</span><strong>{money(request.tax)}</strong>
-                      <span>{tr("Quote total")}</span><strong>{money(request.total)}</strong>
-                      <span>{tr("Deposit")}</span><strong>{money(request.deposit)}</strong>
-                      <span>{tr("Remaining balance")}</span><strong>{money(request.balance)}</strong>
-                    </div>
-                    {request.journey.awaitingClient && request.expiresAt ? (
-                      <p>{ar?`صالح حتى ${dateTime(new Date(request.expiresAt))}. عرض السعر لا يحجز الموعد؛ يتأكد الموعد بعد قبول العرض ودفع العربون.`:`Valid until ${dateTime(new Date(request.expiresAt))}. A quotation does not guarantee a booking; your date is confirmed after acceptance and deposit payment.`}</p>
-                    ) : null}
-                    {request.journey.clientNext === 'contact_to_reactivate' ? <p>{tr("This quote has expired. Contact us to reactivate it.")}</p> : null}
-                    {request.journey.canRecordDeposit ? <DepositInstructions ar={ar} request={request} /> : null}
-                    {request.journey.isBooked ? (
-                      <>
-                        <p>{tr("Booking confirmed.")}</p>
-                        <PaymentsBlock ar={ar} request={request} token={authToken} />
-                        <PlanningForm ar={ar} request={request} onQuoteAction={onQuoteAction} />
-                      </>
-                    ) : null}
-                  </>
-                ) : request.journey.clientNext === 'wait_for_revised_quote' ? (
-                  <p>{ar?`استلمنا طلب التعديل: «${request.changeRequest}». سيصلك عرض سعر محدّث.`:`We received your change request: "${request.changeRequest}". An updated quote will follow.`}</p>
-                ) : request.journey.clientNext === 'none' ? (
-                  <p>{request.declinedBy ? tr("This request was declined. Thank you for considering Echo Event Entertainment.") : tr("This request was cancelled.")}</p>
-                ) : (
-                  <p>{tr("Khalil is reviewing your event plan. Pricing will appear here when the quote is ready.")}</p>
-                )}
-              </div>
-            </article>
-          ))}
-          </main>
-        </>
-      ) : (
-        <div className="dashboard-services-empty">
-          <PackageCheck size={30} />
-          <h3>{tr("No service requests yet")}</h3>
-          <p>{tr("Build an event package, then submit it for a personalized quote.")}</p>
-          <a className="primary-button" href="/#services">{tr("EXPLORE SERVICES")}</a>
-        </div>
-      )}
-    </section>
-  );
+function RequestedServices({requests,onQuoteAction,authToken,ar=false}){
+ const tr=text=>bookingText(text,ar);
+ const [selectedId,setSelectedId]=useState(()=>typeof window==='undefined'?'':new URLSearchParams(window.location.search).get('booking')||'');
+ const request=requests.find(request=>request.id===selectedId)||requests[0];
+ const [bookingTab,setBookingTab]=useState('details');
+ const activeTab=bookingTab==='quote'&&request?.journey.showsPrices?'quote':'details';
+ const draft=request?{items:request.items||[],prices:Object.fromEntries((request.items||[]).map(item=>[item.serviceId,item.unitPrice??0])),discountType:request.discountType||'amount',discountValue:request.discountValue||0,taxPercent:request.taxPercent??0,depositAmount:request.deposit||0,depositType:'amount',validDays:request.validDays||7,adminNote:request.adminNote||'',paymentInstructions:request.paymentInstructions||'',paymentOptions:request.paymentOptions||[],etransferEmail:request.etransferEmail||''}:null;
+ const totals=request?{subtotal:request.subtotal||0,discount:request.discount||0,tax:request.tax||0,total:request.total||0,deposit:request.deposit||0,balance:request.balance??Math.max(0,(request.total||0)-(request.deposit||0))}:null;
+ return <section className="client-booking-requests" aria-label={tr('Requests and quotes')}><BookingPageHeader ar={ar} idPrefix="client-booking" value={activeTab} onChange={setBookingTab} hasBooking={Boolean(request)} hasQuote={Boolean(request?.journey.showsPrices)}/><div className="admin-booking-layout">
+  <BookingRequestList requests={requests} selectedId={request?.id} onSelect={id=>{setSelectedId(id);setBookingTab('details');}} ar={ar} detailId="client-booking-detail"/>
+  <section id="client-booking-detail" className="admin-booking-detail-column" aria-labelledby="client-booking-detail-title">
+   <header className="admin-booking-detail-heading"><div className="booking-detail-title"><h2 id="client-booking-detail-title">{tr(activeTab==='quote'?'Quote':'Booking details')}</h2>{request&&<span>{request.requestNumber||request.id}</span>}</div>{request&&<div className="booking-publish-action"><BookingMenu ar={ar} request={request} onQuoteAction={onQuoteAction}/></div>}</header>
+   {request?<div key={request.id} className="admin-booking-detail-body" data-view={activeTab} data-quote={request.journey.showsPrices?'on':'off'}>
+    <article className="admin-service-request-card" role="tabpanel" id="client-booking-details-panel" aria-labelledby="client-booking-details-tab" tabIndex={0} hidden={activeTab!=='details'}>
+     <header className="booking-column-heading"><h3>{tr('Booking details')}</h3></header>
+     <header className="booking-brief-heading booking-summary" aria-label={tr('Booking summary')}>
+      <StatusSteps request={request} journey={request.journey} ar={ar} onUndo={async index=>{if(!window.confirm(tr('Undo this modification?')))return;try{await onQuoteAction(request.id,'undo-modification',{index});}catch(error){window.alert(error.message||tr('Action failed.'));}}}/>
+      <div className="booking-summary-main"><div className="booking-summary-who"><h3>{request.customerName||tr('Your event')}</h3><span className={`admin-service-request-status is-${request.status}`}>{request.journey.label}</span>{request.customerEmail&&<a href={`mailto:${request.customerEmail}`}>{request.customerEmail}</a>}</div><div className="booking-summary-foot"><div><span>{tr('Booking code')}</span><code>{request.requestNumber||request.id}</code></div></div>
+       <ClientAvailabilityNotice request={request} onQuoteAction={onQuoteAction} token={authToken} ar={ar}/>
+       {!request.journey.showsPrices&&<p>{request.journey.clientNext==='wait_for_revised_quote'?(ar?'استلمنا طلب التعديل. سيصلك عرض سعر محدّث.':'We received your change request. An updated quote will follow.'):request.journey.clientNext==='none'?(request.declinedBy?tr('This request was declined. Thank you for considering Echo Event Entertainment.'):tr('This request was cancelled.')):tr('Khalil is reviewing your event plan. Pricing will appear here when the quote is ready.')}</p>}
+      </div>
+     </header>
+     <div className="booking-detail-sections">{request.order?<BookingDraftReview order={{...request.order,customer:{...request.order.customer,...customerNameParts({...request.order.customer,fullName:request.order.customer?.fullName||request.customerName}),email:request.order.customer?.email||request.customerEmail}}} snapshot ar={ar}/>:<section className="booking-detail-section is-wide"><h4>{tr('Booking details')}</h4><BookingCardFallback request={request} ar={ar}/></section>}</div>
+     {request.changeRequest&&<section className="booking-detail-section is-wide"><h4>{tr('Requested changes')}</h4><p>{request.changeRequest}</p></section>}
+     {!request.journey.showsPrices&&request.items?.length>0&&<section className="booking-detail-section is-wide"><h4>{tr('Rental services & equipment')}</h4><ul>{request.items.map(item=><li key={item.serviceId}>{item.name} × {item.quantity}</li>)}</ul></section>}
+     {!request.journey.showsPrices&&(request.journey.awaitingClient||request.journey.canNegotiate)&&<BookingNegotiation ar={ar} request={request} token={authToken} onQuoteAction={onQuoteAction}/>}
+     {(request.journey.canRecordDeposit||request.journey.isBooked)&&<BookingMeetingForm ar={ar} request={request} token={authToken}/>}
+     {request.journey.isBooked&&<><PaymentsBlock ar={ar} request={request} token={authToken}/><PlanningForm ar={ar} request={request} onQuoteAction={onQuoteAction}/></>}
+    </article>
+    {request.journey.showsPrices&&<aside className="booking-conversation-aside booking-quote-aside" aria-label={tr('Quote')} role="tabpanel" id="client-booking-quote-panel" aria-labelledby="client-booking-quote-tab" tabIndex={0} hidden={activeTab!=='quote'}><header className="booking-column-heading booking-quote-heading"><h3>{tr('Quote')}</h3><QuoteActions ar={ar} request={request} onQuoteAction={onQuoteAction}/></header><div className="booking-quote-panel"><BookingQuoteEditor request={request} draft={draft} totals={totals} ar={ar} editable={false}/>{(request.journey.awaitingClient||request.journey.canNegotiate)&&<BookingNegotiation ar={ar} request={request} token={authToken} onQuoteAction={onQuoteAction}/>}{request.journey.canRecordDeposit&&<DepositInstructions request={request} ar={ar}/>}<p className="client-quote-validity">{request.journey.awaitingClient&&request.expiresAt?(ar?'صالح حتى ':'Valid until ')+new Intl.DateTimeFormat(bookingLocale(ar),{dateStyle:'long',timeStyle:'short'}).format(new Date(request.expiresAt)):''}</p>{request.journey.clientNext==='contact_to_reactivate'&&<p>{tr('This quote has expired. Contact us to reactivate it.')}</p>}</div></aside>}
+   </div>:<div className="admin-services-empty"><PackageCheck size={30}/><h3>{tr('No service requests yet')}</h3><p>{tr('Build an event package, then submit it for a personalized quote.')}</p><a className="primary-button" href="/booking">{tr('EXPLORE SERVICES')}</a></div>}
+  </section>
+ </div></section>;
+}
+function BookingCardFallback({request,ar}){
+ return <BookingCardSummary request={request} ar={ar}/>;
 }
 
 
@@ -221,6 +157,7 @@ export default function DashboardPage({ user, serviceRequests = [], onQuoteActio
   return <ClientWorkspace ar={ar} activeKey={['planning','payments'].includes(activeView)?'bookings':activeView} user={user} onLogout={onLogout}>
     {activeView === 'planning' && <section className="cw-panel"><h1>{tr("Event planning")}</h1>{confirmed.length?confirmed.map(request=><article key={request.id}><h2>{request.requestNumber||tr("Your event")}</h2><PlanningForm ar={ar} request={request} onQuoteAction={onQuoteAction}/></article>):<p>{tr("Planning opens after confirmation.")}</p>}</section>}
     {activeView === 'payments' && <section className="cw-panel"><h1>{tr("Payments")}</h1>{confirmed.length?confirmed.map(request=><article key={request.id}><h2>{request.requestNumber||tr("Your event")}</h2><PaymentsBlock ar={ar} request={request} token={authToken}/></article>):<p>{tr("No payments to arrange yet.")}</p>}</section>}
+    {activeView === 'meetings' && <MeetingPage embedded lang={{lang:ar?'ar':'en'}} user={user} token={authToken} isSessionReady/>}
     {activeView === 'profile' && <ClientProfile ar={ar} user={user} token={authToken} onSaved={onProfileSaved} onDeleted={()=>window.location.replace('/login')} />}
     {activeView === 'draft' && <EventDraftCard token={authToken} user={user} ar={ar}/>}
     {activeView === 'conversations' && <BookingConversationHistory token={authToken}/>}

@@ -19,21 +19,21 @@
 @media(prefers-reduced-motion:reduce){.admin-booking-list .admin-booking-list-item{transition:none}}
 /* Fill the workspace below its breadcrumb; each column owns its scrolling. */
 @media(min-width:761px){
- .admin-workspace[data-area=services] .aw-content{display:flex;flex-direction:column;overflow:hidden}
- .admin-workspace[data-area=services] .admin-booking-layout{flex:1;min-height:0;align-items:stretch}
- .admin-workspace[data-area=services] .admin-booking-list{position:static;height:auto;min-height:0;max-height:none;align-self:stretch}
- .admin-workspace[data-area=services] .admin-booking-list>header{flex:none}
- .admin-workspace[data-area=services] .admin-booking-list>nav{flex:1;min-height:0}
- .admin-workspace[data-area=services] .admin-booking-detail-column{height:auto;align-self:stretch}
+ .admin-workspace:is([data-area=services],[data-area=bookings]) .aw-content{display:flex;flex-direction:column;overflow:hidden}
+ .admin-workspace:is([data-area=services],[data-area=bookings]) .admin-booking-layout{flex:1;min-height:0;align-items:stretch}
+ .admin-workspace:is([data-area=services],[data-area=bookings]) .admin-booking-list{position:static;height:auto;min-height:0;max-height:none;align-self:stretch}
+ .admin-workspace:is([data-area=services],[data-area=bookings]) .admin-booking-list>header{flex:none}
+ .admin-workspace:is([data-area=services],[data-area=bookings]) .admin-booking-list>nav{flex:1;min-height:0}
+ .admin-workspace:is([data-area=services],[data-area=bookings]) .admin-booking-detail-column{height:auto;align-self:stretch}
 }
 @media(min-width:761px){
- html:has(.admin-workspace[data-area=services]),body:has(.admin-workspace[data-area=services]){height:100%;overflow:hidden}
- .admin-workspace[data-area=services]{overflow:hidden}
- .admin-workspace[data-area=services] .aw-main{min-height:0;overflow:hidden}
- .admin-workspace[data-area=services] .aw-content{flex:1 1 0;min-height:0;padding-bottom:10px}
- .admin-workspace[data-area=services] .admin-booking-layout{grid-template-rows:minmax(0,1fr);overflow:visible}
- .admin-workspace[data-area=services] .admin-confirmed-bookings{flex:none;max-height:80px;overflow:auto}
- .admin-workspace[data-area=services] .admin-service-request-card{margin:0}
+ html:has(.admin-workspace:is([data-area=services],[data-area=bookings])),body:has(.admin-workspace:is([data-area=services],[data-area=bookings])){height:100%;overflow:hidden}
+ .admin-workspace:is([data-area=services],[data-area=bookings]){overflow:hidden}
+ .admin-workspace:is([data-area=services],[data-area=bookings]) .aw-main{min-height:0;overflow:hidden}
+ .admin-workspace:is([data-area=services],[data-area=bookings]) .aw-content{flex:1 1 0;min-height:0;padding-bottom:10px}
+ .admin-workspace:is([data-area=services],[data-area=bookings]) .admin-booking-layout{grid-template-rows:minmax(0,1fr);overflow:visible}
+ .admin-workspace:is([data-area=services],[data-area=bookings]) .admin-confirmed-bookings{flex:none;max-height:80px;overflow:auto}
+ .admin-workspace:is([data-area=services],[data-area=bookings]) .admin-service-request-card{margin:0}
 }
 
 .admin-booking-detail-heading{flex:none;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:16px;margin:0;border-bottom:1px solid var(--aw-line,var(--border));background:var(--aw-main,var(--surface))}
@@ -45,15 +45,15 @@
 .admin-booking-detail-heading h2{white-space:normal;line-height:1.5;overflow-wrap:anywhere}
 .admin-booking-list>nav{overscroll-behavior:contain;scrollbar-gutter:stable;padding-bottom:16px}
 @media(min-width:761px){
- .admin-workspace[data-area=services] .aw-content{padding-top:2px;padding-bottom:16px}
- .admin-workspace[data-area=services] .admin-booking-layout{flex:1 1 0}
+ .admin-workspace:is([data-area=services],[data-area=bookings]) .aw-content{padding-top:2px;padding-bottom:16px}
+ .admin-workspace:is([data-area=services],[data-area=bookings]) .admin-booking-layout{flex:1 1 0}
 }
 
 .admin-booking-detail-column>.admin-service-request-card{flex:1 1 0;align-self:stretch;min-height:0;min-width:0;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable;border:0;border-radius:0;padding-bottom:20px}
 .admin-booking-detail-column>.admin-services-empty{padding:20px}
 @media(min-width:761px){
- .admin-workspace[data-area=services] .aw-content>.admin-grid{display:flex;flex-direction:column;flex:1 1 0;min-height:0;height:100%;width:100%;gap:12px;margin:0;align-content:stretch;overflow:hidden}
- .admin-workspace[data-area=services] .admin-grid>.admin-booking-layout{flex:1 1 0;min-height:0;width:100%;align-self:stretch;align-items:stretch}
+ .admin-workspace:is([data-area=services],[data-area=bookings]) .aw-content>.admin-grid{display:flex;flex-direction:column;flex:1 1 0;min-height:0;height:100%;width:100%;gap:12px;margin:0;align-content:stretch;overflow:hidden}
+ .admin-workspace:is([data-area=services],[data-area=bookings]) .admin-grid>.admin-booking-layout{flex:1 1 0;min-height:0;width:100%;align-self:stretch;align-items:stretch}
 }
 /* A single reading surface, with the conversation alongside the booking. */
 .admin-booking-detail-body{display:grid;grid-template-columns:minmax(0,1fr) minmax(250px,30%);flex:1 1 0;min-height:0;overflow:hidden}
@@ -139,20 +139,20 @@
 @media(max-width:700px){.admin-booking-detail-heading{padding:10px 14px}.admin-booking-detail-heading .booking-publish-action{flex:1 1 100%;margin-inline-start:0}.admin-booking-detail-heading .booking-publish-action :is(.primary-button,.secondary-button){flex:1 1 auto}}
 
 /* Booking requests: the three columns sit flush (no gap) and have square corners, divided by single lines. */
-.admin-workspace[data-area=services] .aw-content{padding:0!important}
-.admin-workspace[data-area=services] .aw-content>.admin-grid{gap:0!important}
-.admin-workspace[data-area=services] .admin-booking-layout{gap:0}
-.admin-workspace[data-area=services] :is(.admin-booking-list,.admin-booking-detail-column,.booking-conversation-aside){border-radius:0;border-block:0;border-inline-start:0}
-.admin-workspace[data-area=services] .admin-booking-list{border-inline-end:1px solid var(--aw-line,var(--border))}
-.admin-workspace[data-area=services] .admin-booking-detail-column{border-inline-end:0}
+.admin-workspace:is([data-area=services],[data-area=bookings]) .aw-content{padding:0!important}
+.admin-workspace:is([data-area=services],[data-area=bookings]) .aw-content>.admin-grid{gap:0!important}
+.admin-workspace:is([data-area=services],[data-area=bookings]) .admin-booking-layout{gap:0}
+.admin-workspace:is([data-area=services],[data-area=bookings]) :is(.admin-booking-list,.admin-booking-detail-column,.booking-conversation-aside){border-radius:0;border-block:0;border-inline-start:0}
+.admin-workspace:is([data-area=services],[data-area=bookings]) .admin-booking-list{border-inline-end:1px solid var(--aw-line,var(--border))}
+.admin-workspace:is([data-area=services],[data-area=bookings]) .admin-booking-detail-column{border-inline-end:0}
 
 /* Booking requests: only the structural lines stay (column dividers, header bars, the line above the quote, input boxes). Decorative borders are gone. */
-.admin-workspace[data-area=services] :is(.booking-brief-heading,.booking-detail-section){border-bottom:0}
-.admin-workspace[data-area=services] .booking-conversation-aside .booking-draft-conversation li{border-bottom:0}
+.admin-workspace:is([data-area=services],[data-area=bookings]) :is(.booking-brief-heading,.booking-detail-section){border-bottom:0}
+.admin-workspace:is([data-area=services],[data-area=bookings]) .booking-conversation-aside .booking-draft-conversation li{border-bottom:0}
 
 /* The three column headers (Booking requests, Booking details, conversation) share one height. */
 @media(min-width:761px){
- .admin-workspace[data-area=services] :is(.admin-booking-list>header,.admin-booking-detail-heading,.booking-conversation-aside .booking-draft-conversation>header){box-sizing:border-box;height:56px;min-height:56px;padding-block:0;align-content:center;align-items:center;flex-wrap:nowrap}
+ .admin-workspace:is([data-area=services],[data-area=bookings]) :is(.admin-booking-list>header,.admin-booking-detail-heading,.booking-conversation-aside .booking-draft-conversation>header){box-sizing:border-box;height:56px;min-height:56px;padding-block:0;align-content:center;align-items:center;flex-wrap:nowrap}
 }
 
 /* Booking summary: who, status and the key facts at a glance. */
@@ -200,16 +200,16 @@
 @media(max-width:900px){.admin-booking-detail-heading{grid-template-columns:minmax(0,1fr) auto}.booking-detail-tabs{grid-row:2;grid-column:1 / -1;justify-self:stretch}.booking-detail-tabs button{flex:1}}
 
 /* The Booking details header uses the same dark surface as the Recordings header. */
-.admin-workspace[data-area=services] .admin-booking-detail-heading{background:#121216}
+.admin-workspace:is([data-area=services],[data-area=bookings]) .admin-booking-detail-heading{background:#121216}
 /* Room under the booking summary before the first section. */
 .admin-booking-detail-body .booking-summary{padding-bottom:28px;margin-bottom:8px}
 /* A full line, edge to edge, closes the booking summary. */
-.admin-workspace[data-area=services] .admin-booking-detail-body .booking-summary{margin-inline:calc(var(--quote-pad,24px) * -1);padding-inline:var(--quote-pad,24px);border-bottom:1px solid var(--aw-line)}
+.admin-workspace:is([data-area=services],[data-area=bookings]) .admin-booking-detail-body .booking-summary{margin-inline:calc(var(--quote-pad,24px) * -1);padding-inline:var(--quote-pad,24px);border-bottom:1px solid var(--aw-line)}
 
 /* "Services & pricing" sits in its own wrapper with the raised background, like the quote terms card. */
-.admin-workspace[data-area=services] .bqe-editor{padding:16px 18px;border-radius:12px;background:var(--aw-raised,#ffffff08)}
+.admin-workspace:is([data-area=services],[data-area=bookings]) .bqe-editor{padding:16px 18px;border-radius:12px;background:var(--aw-raised,#ffffff08)}
 /* The booking summary shares the header's surface, flush to the top and both edges. */
-.admin-workspace[data-area=services] .admin-booking-detail-body .booking-summary{background:#121216;margin-top:calc(var(--quote-pad,24px) * -1);padding-top:var(--quote-pad,24px)}
+.admin-workspace:is([data-area=services],[data-area=bookings]) .admin-booking-detail-body .booking-summary{background:#121216;margin-top:calc(var(--quote-pad,24px) * -1);padding-top:var(--quote-pad,24px)}
 /* Delete is a red outline button in the Booking details header. */
 .admin-booking-detail-heading .booking-publish-action .secondary-button.is-danger{color:#e08a85;border-color:color-mix(in srgb,#e08a85 55%,transparent)}
 .admin-booking-detail-heading .booking-publish-action .secondary-button.is-danger:hover{background:color-mix(in srgb,#e08a85 14%,transparent)}
@@ -220,7 +220,7 @@
 .bqe-mini-tabs{display:inline-flex;gap:3px;padding:3px;border-radius:999px;background:var(--aw-raised,#ffffff0d)}
 .bqe-mini-tabs button{padding:4px 12px;border:0;border-radius:999px;background:transparent;color:var(--aw-muted);font:600 11.5px/1.3 inherit;cursor:pointer}
 .bqe-mini-tabs button.is-active{background:var(--aw-text,#fff);color:var(--aw-main,#101514)}
-.admin-workspace[data-area=services] :is(input,textarea)::placeholder{color:#9aa6a2;opacity:1}
+.admin-workspace:is([data-area=services],[data-area=bookings]) :is(input,textarea)::placeholder{color:#9aa6a2;opacity:1}
 
 /* Booking requests list: three bands per row (who, the facts, what was requested). */
 .admin-booking-list .admin-booking-list-item{gap:8px}
@@ -254,7 +254,7 @@
 /* Flat booking page, same logic as the Android apps: square full-width blocks, a status band with a ticked stepper. */
 .admin-booking-list-item,.admin-booking-detail-body .booking-detail-section,.admin-booking-detail-body .booking-availability-step{border-radius:0}
 /* Let long statuses and actions wrap instead of forcing a fixed-height bar. */
-.admin-workspace[data-area=services] .admin-booking-detail-heading{height:auto;min-height:56px;flex-wrap:wrap;gap:12px;padding:12px 20px}
+.admin-workspace:is([data-area=services],[data-area=bookings]) .admin-booking-detail-heading{height:auto;min-height:56px;flex-wrap:wrap;gap:12px;padding:12px 20px}
 .admin-booking-detail-heading .booking-detail-title{display:flex;flex:1 1 360px;min-width:0;flex-wrap:wrap;align-items:center;gap:8px 12px}
 .admin-booking-detail-heading .booking-detail-title h2{white-space:normal}
 .admin-booking-detail-heading .booking-detail-stage{display:inline-flex;max-width:100%;box-sizing:border-box;padding:5px 10px;border:1px solid var(--aw-line);border-radius:8px;font:600 11px/1.6 system-ui;white-space:normal;overflow-wrap:anywhere;color:var(--aw-muted)}
@@ -282,7 +282,7 @@
 /* Title on one side, actions at the opposite end (the tabs that used to sit between them are gone). */
 .admin-booking-detail-heading{grid-template-columns:minmax(0,1fr) auto!important}
 .admin-booking-detail-heading .booking-publish-action{grid-column:2;justify-self:end;margin-inline-start:auto}
-.admin-workspace[data-area=services] .admin-booking-detail-body .booking-quote-aside{background:#121216}
+.admin-workspace:is([data-area=services],[data-area=bookings]) .admin-booking-detail-body .booking-quote-aside{background:#121216}
 /* The status stepper stands vertically at the left of the Booking header, the summary to its right. */
 .admin-booking-detail-body .booking-brief-heading.booking-summary{display:grid;grid-template-columns:minmax(210px,26%) minmax(0,1fr);align-items:start;gap:0 24px}
 .booking-summary .booking-summary-main{display:grid;gap:14px;min-width:0}
@@ -291,34 +291,34 @@
 .booking-status-band{margin:0;padding:16px 18px;background:color-mix(in srgb,var(--aw-text) 8%,transparent);grid-row:1 / span 4}
 .booking-status-band h4{margin:0 0 14px;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--aw-muted)}
 .booking-status-band ol{list-style:none;margin:0;padding:0;display:block}
-.booking-status-band li{position:relative;display:flex;align-items:flex-start;gap:12px;padding:0 0 20px;border:0;background:none;font-size:14px;color:var(--aw-muted)}
-.booking-status-band li:last-child{padding-bottom:0}
-.booking-status-band li::after{content:"";position:absolute;inset-inline-start:10px;top:22px;bottom:0;width:2px;background:color-mix(in srgb,var(--aw-text) 22%,transparent)}
-.booking-status-band li:last-child::after{display:none}
-.booking-status-band li.is-done::after{background:#2f4f9e}
+.booking-status-band>ol>li{position:relative;display:flex;align-items:flex-start;gap:12px;padding:0 0 20px;border:0;background:none;font-size:14px;color:var(--aw-muted)}
+.booking-status-band>ol>li:last-child{padding-bottom:0}
+.booking-status-band>ol>li::after{content:"";position:absolute;inset-inline-start:10px;top:22px;bottom:0;width:2px;background:color-mix(in srgb,var(--aw-text) 22%,transparent)}
+.booking-status-band>ol>li:last-child::after{display:none}
+.booking-status-band>ol>li.is-done::after{background:#2f4f9e}
 .booking-status-band .node{position:relative;z-index:1;flex:0 0 22px;width:22px;height:22px;border:0;border-radius:50%;display:grid;place-items:center;color:#fff;background:color-mix(in srgb,var(--aw-text) 22%,transparent)}
-.booking-status-band li.is-done .node,.booking-status-band li.is-here .node{background:#2f4f9e}
+.booking-status-band>ol>li.is-done .node,.booking-status-band>ol>li.is-here .node{background:#2f4f9e}
 .booking-status-band .node i{width:8px;height:8px;border-radius:50%;background:#fff}
-.booking-status-band li.is-done,.booking-status-band li.is-here{color:var(--aw-text)}
+.booking-status-band>ol>li.is-done,.booking-status-band>ol>li.is-here{color:var(--aw-text)}
 .booking-status-band .label{padding-top:2px;min-width:0;overflow-wrap:anywhere}
-.booking-status-band li.is-here .label{font-weight:700}
+.booking-status-band>ol>li.is-here .label{font-weight:700}
 .booking-status-band .label small{display:block;margin-top:4px;font-size:12.5px;font-weight:400;color:var(--aw-muted);line-height:1.45}
 .booking-status-band{border:1px dashed color-mix(in srgb,var(--aw-text) 40%,transparent)}
 #booking-tab-panel{background:none!important}
 /* Every Booking info section looks like the Booking status block: same tint, dashed border, square corners. */
-.admin-booking-detail-body .bdr-section,.admin-booking-detail-body .booking-status-band{background:color-mix(in srgb,var(--aw-text) 8%,transparent)!important;border:1px dashed color-mix(in srgb,var(--aw-text) 40%,transparent)!important;border-radius:0!important}
-.admin-workspace[data-area=services] #booking-tab-panel{background:#121216!important}
+.admin-booking-detail-body .bdr-section,.admin-booking-detail-body .booking-status-band,.client-workspace .booking-draft :is(.bdr-section,.cw-panel,.booking-status-band){background:color-mix(in srgb,var(--aw-text) 8%,transparent)!important;border:1px dashed color-mix(in srgb,var(--aw-text) 40%,transparent)!important;border-radius:0!important}
+.admin-workspace:is([data-area=services],[data-area=bookings]) #booking-tab-panel{background:#121216!important}
 /* Booking details has no background of its own: the gray came from the column (--aw-main). */
-.admin-workspace[data-area=services] :is(.admin-booking-detail-column,.admin-booking-detail-body,#booking-tab-panel,.booking-detail-sections){background:none!important}
+.admin-workspace:is([data-area=services],[data-area=bookings]) :is(.admin-booking-detail-column,.admin-booking-detail-body,#booking-tab-panel,.booking-detail-sections){background:none!important}
 /* Booking details: no background on any wrapper between the column and the sections (only the sections keep the tinted look). */
-.admin-workspace[data-area=services] .admin-booking-detail-column>:not(.admin-booking-detail-heading),
-.admin-workspace[data-area=services] .admin-booking-detail-body>*:not(.booking-quote-aside),
-.admin-workspace[data-area=services] .admin-booking-detail-body .admin-service-request-card,
-.admin-workspace[data-area=services] #booking-tab-panel,
-.admin-workspace[data-area=services] #booking-tab-panel :is(div,section,article,ul,ol,dl):not(.bdr-section):not(.booking-status-band):not([class*="node"]){background:none!important}
-html body .admin-workspace[data-area=services] article.admin-service-request-card.admin-service-request-card{background:transparent!important;background-image:none!important;box-shadow:none!important}
-html body .admin-workspace[data-area=services] article.admin-service-request-card.admin-service-request-card{background:#121216!important}
-.admin-workspace[data-area=services] .admin-booking-detail-body .booking-brief-heading.booking-summary{border-bottom:0!important;border-top:0!important}
+.admin-workspace:is([data-area=services],[data-area=bookings]) .admin-booking-detail-column>:not(.admin-booking-detail-heading),
+.admin-workspace:is([data-area=services],[data-area=bookings]) .admin-booking-detail-body>*:not(.booking-quote-aside),
+.admin-workspace:is([data-area=services],[data-area=bookings]) .admin-booking-detail-body .admin-service-request-card,
+.admin-workspace:is([data-area=services],[data-area=bookings]) #booking-tab-panel,
+.admin-workspace:is([data-area=services],[data-area=bookings]) #booking-tab-panel :is(div,section,article,ul,ol,dl):not(.bdr-section):not(.booking-status-band):not([class*="node"]){background:none!important}
+html body .admin-workspace:is([data-area=services],[data-area=bookings]) article.admin-service-request-card.admin-service-request-card{background:transparent!important;background-image:none!important;box-shadow:none!important}
+html body .admin-workspace:is([data-area=services],[data-area=bookings]) article.admin-service-request-card.admin-service-request-card{background:#121216!important}
+.admin-workspace:is([data-area=services],[data-area=bookings]) .admin-booking-detail-body .booking-brief-heading.booking-summary{border-bottom:0!important;border-top:0!important}
 /* AI summary in the booking header. */
 .booking-ai-summary{display:grid;gap:8px;padding:12px 14px;border:1px dashed color-mix(in srgb,var(--aw-text) 40%,transparent);background:color-mix(in srgb,var(--aw-text) 6%,transparent)}
 .booking-ai-summary>header{display:flex;align-items:center;justify-content:space-between;gap:10px}
@@ -332,24 +332,24 @@ html body .admin-workspace[data-area=services] article.admin-service-request-car
 /* AI summary: no background, no border. */
 .booking-ai-summary{background:none!important;border:0!important;padding:0!important}
 /* Every card in the Quote column looks like the Booking info cards (same tint, dashed border, square corners). */
-.admin-workspace[data-area=services] .booking-quote-aside :is(.bqe-editor,.bqe-summary,.bqe-adjustments,.bqe-sidebar>*,.admin-service-request-terms){background:color-mix(in srgb,var(--aw-text) 8%,transparent)!important;border:1px dashed color-mix(in srgb,var(--aw-text) 40%,transparent)!important;border-radius:0!important}
+.admin-workspace:is([data-area=services],[data-area=bookings]) .booking-quote-aside :is(.bqe-editor,.bqe-summary,.bqe-adjustments,.bqe-sidebar>*,.admin-service-request-terms){background:color-mix(in srgb,var(--aw-text) 8%,transparent)!important;border:1px dashed color-mix(in srgb,var(--aw-text) 40%,transparent)!important;border-radius:0!important}
 /* Header of the Booking details column, same as the Quote column's header. */
 .admin-booking-detail-body .booking-column-heading{padding:16px 0 12px;border:0;background:none}
 .admin-booking-detail-body .booking-column-heading h3{margin:0;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--aw-muted)}
 /* The Quote column uses the very same header (markup, padding, alignment) as the Booking details column. */
-.admin-workspace[data-area=services] .admin-booking-detail-body .booking-quote-aside{padding:24px!important}
+.admin-workspace:is([data-area=services],[data-area=bookings]) .admin-booking-detail-body .booking-quote-aside{padding:24px!important}
 .booking-quote-aside>.booking-column-heading{padding:16px 0 12px}
 /* Price adjustments: rounded corners and a solid border (the other Quote cards keep the dashed, square look). */
-.admin-workspace[data-area=services] .booking-quote-aside .bqe-adjustments{border:1px solid color-mix(in srgb,var(--aw-text) 40%,transparent)!important;border-radius:12px!important}
+.admin-workspace:is([data-area=services],[data-area=bookings]) .booking-quote-aside .bqe-adjustments{border:1px solid color-mix(in srgb,var(--aw-text) 40%,transparent)!important;border-radius:12px!important}
 /* Price adjustments: same background as the Services & pricing table (transparent over the card's tint) and padded. */
-.admin-workspace[data-area=services] .booking-quote-aside .bqe-adjustments{background:transparent!important;padding:18px 20px!important}
-.admin-workspace[data-area=services] .booking-quote-aside .bqe-adjustments .bqe-adjustment-fields{gap:16px}
-.admin-workspace[data-area=services] .booking-quote-aside .bqe-adjustments :is(.bqe-discount,label){padding:0}
+.admin-workspace:is([data-area=services],[data-area=bookings]) .booking-quote-aside .bqe-adjustments{background:transparent!important;padding:18px 20px!important}
+.admin-workspace:is([data-area=services],[data-area=bookings]) .booking-quote-aside .bqe-adjustments .bqe-adjustment-fields{gap:16px}
+.admin-workspace:is([data-area=services],[data-area=bookings]) .booking-quote-aside .bqe-adjustments :is(.bqe-discount,label){padding:0}
 /* Price adjustments: discount, tax and deposit each on their own line. */
-.admin-workspace[data-area=services] .booking-quote-aside .bqe-adjustments .bqe-adjustment-fields{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:16px}
-.admin-workspace[data-area=services] .booking-quote-aside .bqe-adjustments .bqe-adjustment-fields>*{grid-column:1 / -1}
-.admin-workspace[data-area=services] .booking-quote-aside .bqe-adjustments{border:1px solid var(--aw-line)!important;border-radius:12px!important}
-.admin-workspace[data-area=services] .booking-quote-aside .bqe-adjustments{background:var(--aw-main)!important}
+.admin-workspace:is([data-area=services],[data-area=bookings]) .booking-quote-aside .bqe-adjustments .bqe-adjustment-fields{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:16px}
+.admin-workspace:is([data-area=services],[data-area=bookings]) .booking-quote-aside .bqe-adjustments .bqe-adjustment-fields>*{grid-column:1 / -1}
+.admin-workspace:is([data-area=services],[data-area=bookings]) .booking-quote-aside .bqe-adjustments{border:1px solid var(--aw-line)!important;border-radius:12px!important}
+.admin-workspace:is([data-area=services],[data-area=bookings]) .booking-quote-aside .bqe-adjustments{background:var(--aw-main)!important}
 .bqe-deposit-amount{color:var(--aw-muted);font-size:12px}
 /* Smaller Amount / Percent tabs. */
 .bqe-mini-tabs{gap:2px;padding:2px}
@@ -361,7 +361,7 @@ html body .admin-workspace[data-area=services] article.admin-service-request-car
 .booking-status-band .bsp-back{display:block;margin-top:8px;padding:0;border:0;background:none;color:var(--aw-muted);font:600 12px/1.4 inherit;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 .booking-status-band .bsp-back:hover{color:var(--aw-text)}
 /* Smaller, to the right of the current step. */
-.booking-status-band li .label{flex:1}
+.booking-status-band>ol>li .label{flex:1}
 .booking-status-band .bsp-back{display:inline-block;margin:0 0 0 auto;padding:2px 8px;border:1px solid color-mix(in srgb,var(--aw-text) 30%,transparent);border-radius:999px;font:600 10.5px/1.5 inherit;text-decoration:none;white-space:nowrap;align-self:flex-start}
 /* Wider Booking status column. */
 .admin-booking-detail-body .booking-brief-heading.booking-summary{grid-template-columns:minmax(300px,42%) minmax(0,1fr)!important}
@@ -372,14 +372,14 @@ html body .admin-workspace[data-area=services] article.admin-service-request-car
 .booking-status-band .bsp-back:hover{background:color-mix(in srgb,var(--aw-text) 26%,transparent)}
 .booking-status-band .bsp-back{background:#d6ad5929;color:#e8c675}
 .booking-status-band .bsp-back:hover{background:#d6ad5947}
-html body .admin-workspace .booking-status-band li button.bsp-back{background:#d6ad5933!important;color:#f0cd7c!important;border:1px solid #d6ad5966!important;border-radius:6px!important;padding:2px 8px!important;font-size:9.5px!important;font-weight:700!important;letter-spacing:.05em!important;text-transform:uppercase!important;text-decoration:none!important;box-shadow:none!important}
-html body .admin-workspace .booking-status-band li button.bsp-back:hover{background:#d6ad5955!important}
-html body .admin-workspace .booking-status-band li button.bsp-back{background:none!important;border:0!important;padding:2px 0!important}
-html body .admin-workspace .booking-status-band li button.bsp-back:hover{background:none!important;text-decoration:underline!important}
+html body .admin-workspace .booking-status-band>ol>li button.bsp-back{background:#d6ad5933!important;color:#f0cd7c!important;border:1px solid #d6ad5966!important;border-radius:6px!important;padding:2px 8px!important;font-size:9.5px!important;font-weight:700!important;letter-spacing:.05em!important;text-transform:uppercase!important;text-decoration:none!important;box-shadow:none!important}
+html body .admin-workspace .booking-status-band>ol>li button.bsp-back:hover{background:#d6ad5955!important}
+html body .admin-workspace .booking-status-band>ol>li button.bsp-back{background:none!important;border:0!important;padding:2px 0!important}
+html body .admin-workspace .booking-status-band>ol>li button.bsp-back:hover{background:none!important;text-decoration:underline!important}
 /* Revert text sits at the opposite (far) end of the current step's row. */
-html body .admin-workspace .booking-status-band li.is-here{display:flex!important;align-items:flex-start;justify-content:space-between;gap:12px}
-html body .admin-workspace .booking-status-band li.is-here .label{flex:1 1 auto!important;min-width:0}
-html body .admin-workspace .booking-status-band li.is-here button.bsp-back{flex:none!important;margin-inline-start:auto!important;align-self:flex-start;white-space:nowrap}
+html body .admin-workspace .booking-status-band>ol>li.is-here{display:flex!important;align-items:flex-start;justify-content:space-between;gap:12px}
+html body .admin-workspace .booking-status-band>ol>li.is-here .label{flex:1 1 auto!important;min-width:0}
+html body .admin-workspace .booking-status-band>ol>li.is-here button.bsp-back{flex:none!important;margin-inline-start:auto!important;align-self:flex-start;white-space:nowrap}
 /* Publish to Customer sits opposite the Quote title, in the column header. */
 .booking-quote-aside>.booking-quote-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .booking-quote-heading .booking-quote-publish{position:static;width:auto;margin:0;padding:6px 14px;font-size:12px;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;background:none}
@@ -402,7 +402,7 @@ html body .admin-workspace .booking-status-band li.is-here button.bsp-back{flex:
 .admin-booking-detail-body .bqe-payment-options>label.bqe-etransfer-email{flex:1 1 100%;display:grid;gap:6px;padding:0;border:0;border-radius:0;font-size:12px;cursor:default;background:none;font-weight:400}
 .admin-booking-detail-body .bqe-payment-options>label.bqe-etransfer-email:hover{background:none}
 .admin-booking-detail-body .bqe-payment-options>label.bqe-etransfer-email>input[type=email]{position:static;opacity:1;width:100%;height:auto;min-height:36px;padding:9px 10px}
-.admin-workspace[data-area=services] .booking-summary .booking-summary-foot{border-top:0!important;border:0!important;padding-top:0!important}
+.admin-workspace:is([data-area=services],[data-area=bookings]) .booking-summary .booking-summary-foot{border-top:0!important;border:0!important;padding-top:0!important}
 /* The e-transfer email field has no focus outline (my chip outline was also hitting its label). */
 .admin-booking-detail-body .bqe-payment-options>label.bqe-etransfer-email:focus-within{outline:none!important}
 .bqe-save-terms{display:grid;gap:6px;margin-top:14px}
@@ -411,10 +411,10 @@ html body .admin-workspace .booking-status-band li.is-here button.bsp-back{flex:
 /* No Quote column yet: the booking details use the full width. */
 .admin-booking-detail-body[data-quote=off]{grid-template-columns:minmax(0,1fr)!important}
 /* Dashed divider between Booking details and the Quote column. */
-.admin-workspace[data-area=services] .admin-booking-detail-body[data-quote=on] .booking-quote-aside{border-inline-start:1px dashed color-mix(in srgb,var(--aw-text) 40%,transparent)}
+.admin-workspace:is([data-area=services],[data-area=bookings]) .admin-booking-detail-body[data-quote=on] .booking-quote-aside{border-inline-start:1px dashed color-mix(in srgb,var(--aw-text) 40%,transparent)}
 /* Step actions (next step and previous step) share one style, side by side at the far end of the current step. */
-html body .admin-workspace .booking-status-band li .bsp-actions{display:inline-flex;align-items:flex-start;gap:12px;margin-inline-start:auto;flex:none;white-space:nowrap}
-html body .admin-workspace .booking-status-band li .bsp-actions button.bsp-back{margin:0!important}
+html body .admin-workspace .booking-status-band>ol>li .bsp-actions{display:inline-flex;align-items:flex-start;gap:12px;margin-inline-start:auto;flex:none;white-space:nowrap}
+html body .admin-workspace .booking-status-band>ol>li .bsp-actions button.bsp-back{margin:0!important}
 /* Send quote button: green background. */
 html body .admin-workspace .booking-quote-heading .booking-quote-publish.primary-button{background:#2f9e6a!important;color:#fff!important;border:0!important}
 html body .admin-workspace .booking-quote-heading .booking-quote-publish.primary-button:hover:not(:disabled){background:#38b27a!important}
@@ -439,3 +439,16 @@ html body .admin-workspace .bpa-more>div button:hover,html body .admin-workspace
 html body .admin-workspace .bpa-more>div button.is-danger{color:#f0908a}
 html body .admin-workspace .bpa-more>div button.is-danger:hover{background:#e0524a26}
 html body .admin-workspace .bpa-more>div button+button{margin-top:2px;border-top:1px solid color-mix(in srgb,var(--aw-text) 10%,transparent);border-radius:0 0 8px 8px}
+
+/* One shared page heading above the request list and booking details columns. */
+.booking-page-heading{flex:none;grid-column:1/-1;margin:0;padding:16px 20px;border-bottom:1px solid var(--aw-line,var(--border));color:var(--aw-text,var(--text-primary))}
+.booking-page-tabs{display:flex;align-items:center;gap:8px}
+.booking-page-tabs>[role=tab]{padding:9px 16px;margin:0;border:1px solid transparent;border-radius:0;background:transparent;color:var(--aw-muted);font:inherit;font-size:14px;font-weight:600;line-height:1.4;cursor:pointer}
+.booking-page-tabs>[aria-selected=true]{background:var(--aw-raised);border-color:var(--aw-line);color:var(--aw-text)}
+.booking-page-tabs>[role=tab]:hover:not(:disabled){background:var(--aw-hover);color:var(--aw-text)}
+.booking-page-tabs>[role=tab]:focus-visible{outline:2px solid var(--aw-text);outline-offset:2px}
+.booking-page-tabs>[role=tab]:disabled{opacity:.4;cursor:default}
+.admin-booking-detail-body[data-view]{grid-template-columns:minmax(0,1fr)!important}
+.admin-booking-detail-body[data-view]>[hidden]{display:none!important}
+.admin-booking-detail-body[data-view]>.booking-quote-aside{border-inline-start:0!important;max-height:none}
+.admin-booking-detail-body[data-view]>[role=tabpanel]:focus-visible{outline:2px solid var(--aw-text);outline-offset:-2px}

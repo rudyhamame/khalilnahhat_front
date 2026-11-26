@@ -42,7 +42,7 @@ export default function MeetingRoom({meetingId,token,ar=false,onClose}){
   const flushCandidates=async()=>{for(const candidate of pendingCandidates.current.splice(0))await pc.current?.addIceCandidate(candidate).catch(()=>{});};
 
   const startCall=async kind=>{
-    if(callRef.current.state!=='idle')return;
+    if(!infoRef.current||callRef.current.state!=='idle')return;
     setNotice('');setError('');
     try{
       await media(kind);setCall({state:'calling',kind});
@@ -94,6 +94,8 @@ export default function MeetingRoom({meetingId,token,ar=false,onClose}){
   },[info,base,token]);
   useEffect(()=>()=>{pc.current?.close();local.current?.getTracks().forEach(track=>track.stop());},[]);
   useEffect(()=>{log.current?.scrollTo({top:log.current.scrollHeight});},[messages.length]);
+  // The local video element mounts after camera capture starts. Attach its stream after that render.
+  useEffect(()=>{if(localVideo.current)localVideo.current.srcObject=local.current;},[call.kind,call.state]);
 
   const submit=async event=>{
     event.preventDefault();const value=text.trim();if(!value)return;
@@ -121,8 +123,8 @@ export default function MeetingRoom({meetingId,token,ar=false,onClose}){
           {notice&&<p className="meeting-room-notice" role="status">{notice}</p>}
           <div className="meeting-room-controls">
             {!calling?<>
-              <button type="button" onClick={()=>startCall('voice')} disabled={Boolean(incoming)}><Phone size={16}/>{tr('Voice call','مكالمة صوتية')}</button>
-              <button type="button" onClick={()=>startCall('video')} disabled={Boolean(incoming)}><Video size={16}/>{tr('Video call','مكالمة مرئية')}</button>
+              <button type="button" onClick={()=>startCall('voice')} disabled={!info||Boolean(incoming)}><Phone size={16}/>{tr('Voice call','مكالمة صوتية')}</button>
+              <button type="button" onClick={()=>startCall('video')} disabled={!info||Boolean(incoming)}><Video size={16}/>{tr('Video call','مكالمة مرئية')}</button>
             </>:<>
               <button type="button" onClick={toggleMute} aria-pressed={muted} title={muted?tr('Unmute','إلغاء الكتم'):tr('Mute','كتم')}>{muted?<MicOff size={16}/>:<Mic size={16}/>}</button>
               {call.kind==='video'&&<button type="button" onClick={toggleCamera} aria-pressed={cameraOff} title={cameraOff?tr('Camera on','تشغيل الكاميرا'):tr('Camera off','إيقاف الكاميرا')}>{cameraOff?<VideoOff size={16}/>:<Video size={16}/>}</button>}
@@ -133,7 +135,7 @@ export default function MeetingRoom({meetingId,token,ar=false,onClose}){
         <section className="meeting-room-chat" aria-label={tr('Chat','الدردشة')}>
           <h3><MessageCircle size={15}/>{tr('Chat','الدردشة')}</h3>
           <ol ref={log} aria-live="polite">{messages.length?messages.map(item=><li key={item.seq} className={item.from===info?.role?'is-mine':''}><small>{item.from===info?.role?tr('You','أنت'):item.name}</small><p>{item.text}</p></li>):<li className="is-empty">{tr('No messages yet.','لا توجد رسائل بعد.')}</li>}</ol>
-          <form onSubmit={submit}><input value={text} maxLength={1000} placeholder={tr('Write a message…','اكتب رسالة…')} onChange={event=>setText(event.target.value)} aria-label={tr('Message','الرسالة')}/><button type="submit" disabled={!text.trim()} aria-label={tr('Send','إرسال')}><Send size={16}/></button></form>
+          <form onSubmit={submit}><input value={text} maxLength={1000} placeholder={tr('Write a message…','اكتب رسالة…')} onChange={event=>setText(event.target.value)} aria-label={tr('Message','الرسالة')}/><button type="submit" disabled={!info||!text.trim()} aria-label={tr('Send','إرسال')}><Send size={16}/></button></form>
         </section>
       </div>
     </div>

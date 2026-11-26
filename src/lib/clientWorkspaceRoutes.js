@@ -8,6 +8,7 @@ export function clientWorkspaceView(path, search='') {
   }
   return ({
     '/dashboard/draft':'draft',
+    '/dashboard/meetings':'meetings',
     '/dashboard/conversations':'conversations',
     '/dashboard/services':'bookings',
     '/dashboard/planning':'planning',

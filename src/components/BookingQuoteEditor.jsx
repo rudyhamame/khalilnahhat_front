@@ -9,8 +9,8 @@ export default function BookingQuoteEditor({request,draft,totals,catalog=[],equi
  const lines=sortQuoteLines(draft.items,catalog,equipment);
  return <div className="booking-quote-layout" dir={ar?'rtl':'ltr'}>
   <section className="bqe-editor" aria-labelledby={`${id}-pricing`}>
-   <header className="bqe-heading"><div><h4 id={`${id}-pricing`}>{tr('Services & pricing')}</h4><p>{ar?'راجع الكميات وحدّد سعر كل بند.':'Review quantities and set a rate for each item.'}</p></div>
-    {!!lines.length&&<button type="button" className="bqe-fill" disabled={!editable} onClick={onFillRates}><Sparkles size={15} aria-hidden="true"/>{ar?'تحميل الأسعار':'Load rates'}</button>}
+   <header className="bqe-heading"><div><h4 id={`${id}-pricing`}>{tr('Services & pricing')}</h4><p>{editable?(ar?'راجع الكميات وحدّد سعر كل بند.':'Review quantities and set a rate for each item.'):(ar?'تفاصيل عرض السعر المرسل إليك.':'The details of your published quote.')}</p></div>
+    {editable&&!!lines.length&&<button type="button" className="bqe-fill" disabled={!editable} onClick={onFillRates}><Sparkles size={15} aria-hidden="true"/>{ar?'تحميل الأسعار':'Load rates'}</button>}
    </header>
    {rateFeedback&&<p className="bqe-rate-feedback" role="status">{rateFeedback}</p>}
    <fieldset className="bqe-fields" disabled={!editable}>
@@ -54,7 +54,7 @@ export default function BookingQuoteEditor({request,draft,totals,catalog=[],equi
       </div>
      </div>
     </section>
-    <label className="bqe-note"><span>{ar?'رسالة للعميل':'Message to customer'}<small>{tr('(optional)')}</small></span><textarea rows={3} value={draft.adminNote||''} onChange={event=>onNoteChange(event.target.value)} placeholder={ar?'أضف تفاصيل أو ملاحظات حول هذا العرض':'Add context or notes about this quote'}/></label>
+    <label className="bqe-note"><span>{editable?(ar?'رسالة للعميل':'Message to customer'):(ar?'رسالة من إيكو':'Message from Echo')}<small>{tr('(optional)')}</small></span><textarea rows={3} value={draft.adminNote||''} onChange={event=>onNoteChange(event.target.value)} placeholder={ar?'أضف تفاصيل أو ملاحظات حول هذا العرض':'Add context or notes about this quote'}/></label>
    </fieldset>
   </section>
   <aside className="bqe-sidebar" aria-label={ar?'ملخص العرض وشروطه':'Quote summary and terms'}>

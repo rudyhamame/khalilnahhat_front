@@ -1,6 +1,5 @@
 // Booking photos/documents stay in THIS browser (IndexedDB, with a memory fallback) until the booking is submitted; only then are they uploaded.
 // A staged file appears in the order as {url:'pending:<sha256>',name,comment,sha256,size}; the server draft never receives it.
-import {uploadEventFile} from './api';
 const mem=new Map();let opened;
 const open=()=>opened||(opened=new Promise((resolve,reject)=>{const request=indexedDB.open('echo-pending-files',1);request.onupgradeneeded=()=>request.result.createObjectStore('f');request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);}));
 const run=async(mode,work)=>{const db=await open();return new Promise((resolve,reject)=>{const request=work(db.transaction('f',mode).objectStore('f'));request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);});};
@@ -21,6 +20,7 @@ export async function uploadStaged(items,kind,token){
   if(!isPending(item)){next.push(item);continue;}
   const blob=await stagedFile(item.sha256);
   if(!blob)throw new Error(`“${item.name}” is no longer stored in this browser. Remove it and add it again.`);
+  const {uploadEventFile}=await import('./api.js');
   const {url,name,sha256}=await uploadEventFile(new File([blob],item.name,{type:blob.type}),kind,token);
   if(sha256&&sha256!==item.sha256)throw new Error(`“${item.name}” could not be verified. Please try again.`);
   next.push({url,name,comment:item.comment||'',sha256:item.sha256,size:item.size});

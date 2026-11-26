@@ -1,4 +1,4 @@
-import {withoutPending} from './pendingFiles';
+import {withoutPending} from './pendingFiles.js';
 import {aiFields,getPath,normalizeEventOrder} from './eventOrderCore.mjs';
 function savedValuesMatch(order,saved){
  if(!saved||typeof saved!=='object')return false;

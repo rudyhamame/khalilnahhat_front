@@ -1,3 +1,6 @@
+import BookingPageHeader from './BookingPageHeader';
+import StatusPipeline from './BookingStatusPipeline';
+import BookingRequestList from './BookingRequestList';
 import journeyContract from '../lib/bookingJourneyContract.json' with {type:'json'};
 import BookingCardSummary from './BookingCardSummary';
 import {UnavailableReasonDialog} from './BookingAvailability';
@@ -18,7 +21,7 @@ import './adminBookingRequests.css';
 import '../echo/eaAtomCode.css';
 import AdminSelect from './AdminSelect';
 import BookingDraftConversation from './BookingDraftConversation';
-import { Send, MapPin, Undo2, Check, MoreHorizontal, Ban, Trash2 } from 'lucide-react';
+import { Send, MapPin, MoreHorizontal, Ban, Trash2 } from 'lucide-react';
 import { apiRequest } from '../lib/api';
 import { useEffect, useMemo, useState } from 'react';
 import {createMailApi} from '../echo/mail/mailApi';
@@ -87,29 +90,6 @@ function buildDraft(request, currentDraft, defaults) {
 
 /** Booking status as a stepper, same as the Android apps: ticked circles for completed stages, a dot on the current one, a line linking the nodes,
  *  the stage's hint as a sub-paragraph under the current step. "Deposit paid" sits before "Booked". */
-function StatusPipeline({request,ar,tr,onBack,onNext}){
-  const j=request.journey||{},path=(j.path||[]).map(step=>{const own=journeyContract.clientStages[step.status]||step; return {key:step.status,label:ar?own.adminLabelAr||own.labelAr||own.label:own.adminLabel||own.label};}); // wording from the shared contract, not from a possibly older running server
-  const stage=request.bookingStatus||j.clientStatus; // the real, stored booking status
-  const now=path.findIndex(step=>step.key===stage);
-  if(!path.length)return null;
-  // Admin-side hints under the current step (the client app shows its own wording).
-  const hint={
-    requested:tr('Booking received. Confirm the requested date and time are available, or explain why they are not.'),
-    unavailable:[tr('Booking date unavailable. The client is invited to book an optional meeting to discuss date and time options.'),request.availability?.reason].filter(Boolean).join(' '),
-    available:tr('Booking date availability confirmed. You can now prepare and send the quote.'),
-    quote_ready:j.canRecordDeposit?tr('Quote accepted by the client. Record the deposit once you receive it.'):tr('Booking quote sent. Waiting for the client to accept it or ask for changes.'),
-    deposit_paid:tr('Deposit received. The booking is confirmed once the required deposit is covered and the date and equipment checks pass.'),
-    booked:tr('Booked. The client can now plan the event.'),
-  }[stage]||''
-  return <section className="booking-status-band" aria-label={tr('Booking status')}><h4>{tr('Booking status')}</h4>
-    <ol>{path.map((step,i)=>{const last=i===path.length-1,done=i<now||(i===now&&last),here=i===now&&!done;
-      return <li key={step.key} className={done?'is-done':here?'is-here':i<now?'':'is-next'} aria-current={here?'step':undefined}>
-        <span className="node" aria-hidden="true">{done?<svg viewBox="0 0 16 16" width="14" height="14"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg>:here?<i/>:null}</span>
-        <span className="label">{step.label}{here&&hint&&<small>{hint}</small>}</span>{here&&((onNext&&onNext.label)||(onBack&&i>0))&&<span className="bsp-actions">
-          {onNext?.label&&<button type="button" className="bsp-back" onClick={onNext.run}><Check size={11} aria-hidden="true"/>{onNext.label}</button>}
-          {onBack&&i>0&&<button type="button" className="bsp-back" onClick={onBack} title={`${tr('Back to')} ${path[i-1].label}`} aria-label={`${tr('Back to')} ${path[i-1].label}`}><Undo2 size={11} aria-hidden="true"/>{tr('Previous step')}</button>}</span>}</li>;})}</ol></section>;
-}
-
 /** AI summary of the booking for the reviewing admin. Written automatically when a booking is opened (and again when it changes); kept per booking version so reopening costs nothing. */
 const summaryCache=new Map();
 function AiBookingSummary({request,token,tr}){
@@ -137,6 +117,9 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
   const composeTo=address=>{if(!composer.draft){composer.compose();composer.edit('to',address);}else composer.compose();};
   const [selectedId,setSelectedId]=useState(null);
   const selectedRequest=requests.find(request=>request.id===selectedId)||requests[0];
+  const [bookingTab,setBookingTab]=useState('details');
+  const hasQuote=Boolean(selectedRequest&&(['available','quote_ready','deposit_paid','booked'].includes(selectedRequest.bookingStatus||selectedRequest.journey?.clientStatus)||selectedRequest.quotedAt));
+  const activeTab=bookingTab==='quote'&&hasQuote?'quote':'details';
   const [drafts, setDrafts] = useState({});
   const [publishingId, setPublishingId] = useState('');
   const [availabilityBusy,setAvailabilityBusy]=useState(''),[unavailableRequest,setUnavailableRequest]=useState(null);
@@ -286,6 +269,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
 
   return (
     <>
+      <BookingPageHeader ar={ar} idPrefix="admin-booking" value={activeTab} onChange={setBookingTab} hasBooking={Boolean(selectedRequest)} hasQuote={hasQuote}/>
       {confirmedBookings.length ? (
         <div className="admin-confirmed-bookings">
           <h3>{tr("Confirmed bookings")}</h3>
@@ -297,15 +281,9 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
         </div>
       ) : null}
       <div className="admin-booking-layout">
-        <aside className="admin-booking-list" aria-label={tr("Booking requests")}>
-          <header><h2>{tr("Booking requests")}</h2><span className="admin-services-count">{requestCountLabel}</span></header>
-          <nav aria-label={tr("Choose a booking request")}>
-            {requests.map(request=><button key={request.id} type="button" className="admin-booking-list-item admin-booking-list-code" aria-current={selectedRequest?.id===request.id?'true':undefined} aria-controls="admin-booking-detail" onClick={()=>setSelectedId(request.id)}>{request.requestNumber||request.id}</button>)}
-            {!requests.length&&<p className="admin-booking-list-empty">{tr("No booking requests yet.")}</p>}
-          </nav>
-        </aside>
+        <BookingRequestList requests={requests} selectedId={selectedRequest?.id} onSelect={id=>{setSelectedId(id);setBookingTab('details');}} ar={ar} countLabel={requestCountLabel}/>
       <section id="admin-booking-detail" className="admin-booking-detail-column" aria-labelledby="admin-booking-detail-title">
-        <header className="admin-booking-detail-heading"><div className="booking-detail-title"><h2 id="admin-booking-detail-title">{tr("Booking details")}</h2>{selectedRequest&&<span>{selectedRequest.requestNumber||selectedRequest.id}</span>}</div>
+        <header className="admin-booking-detail-heading"><div className="booking-detail-title"><h2 id="admin-booking-detail-title">{tr(activeTab==='quote'?'Quote':'Booking details')}</h2>{selectedRequest&&<span>{selectedRequest.requestNumber||selectedRequest.id}</span>}</div>
           {selectedRequest&&(()=>{
             // Header actions follow the booking's stage and the open tab: Booking info -> availability decisions, Quote -> publishing.
             const r=selectedRequest,stage=r.journey?.clientStatus,repr=r.journey.repriceable,busy=Boolean(publishingId||availabilityBusy);
@@ -325,17 +303,17 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
           [selectedRequest].map((request) => {
             const draft = drafts[request.id] || buildDraft(request, undefined, termsDefaults);
             // The Quote column appears only once the date is confirmed (Booking date available or later), or when a quote already exists.
-            const showQuote=['available','quote_ready','deposit_paid','booked'].includes(request.bookingStatus||request.journey?.clientStatus)||Boolean(request.quotedAt);
+            const showQuote=hasQuote;
             const totals=quoteTotals({...draft,items:draft.items.map(item=>({...item,unitPrice:Number(draft.prices?.[item.serviceId]||0)}))});
 
             return (
-              <div key={request.id} className="admin-booking-detail-body" data-quote={showQuote?'on':'off'}>
-              <article className={`admin-service-request-card`} aria-busy={publishingId===request.id}>
+              <div key={request.id} className="admin-booking-detail-body" data-view={activeTab} data-quote={showQuote?'on':'off'}>
+              <article className="admin-service-request-card" role="tabpanel" id="admin-booking-details-panel" aria-labelledby="admin-booking-details-tab" tabIndex={0} hidden={activeTab!=='details'} aria-busy={publishingId===request.id}>
                 <header className="booking-column-heading"><h3>{tr("Booking details")}</h3></header>
                 <header className="booking-brief-heading booking-summary" aria-label={tr("Booking summary")}>
                   <StatusPipeline request={request} ar={ar} tr={tr} onNext={(()=>{const idle=request.journey.repriceable&&!publishingId&&!availabilityBusy,stage=request.bookingStatus||request.journey?.clientStatus;
                     if(['requested','modified','unavailable'].includes(stage)&&idle)return {label:tr('Confirm availability'),run:()=>{void informAvailability(request,'accept').catch(()=>{});}};
-                    if(stage==='quote_ready'&&request.journey.canRecordDeposit)return {label:tr('Record deposit'),run:()=>{const form=document.getElementById('booking-payment-form');form?.scrollIntoView({behavior:'smooth',block:'center'});form?.querySelector('input')?.focus();}};
+                    if(stage==='quote_ready'&&request.journey.canRecordDeposit)return {label:tr('Record deposit'),run:()=>{setBookingTab('quote');requestAnimationFrame(()=>{const form=document.getElementById('booking-payment-form');form?.scrollIntoView({behavior:'smooth',block:'center'});form?.querySelector('input')?.focus();});}};
                     return null;})()} onBack={(()=>{const back=stepBackTarget(request);return back&&request.journey.repriceable&&!(request.depositPaidCents>0)&&!publishingId&&!availabilityBusy?()=>{const target=journeyContract.clientStages[back[0]];if(window.confirm(`${tr('Move this booking back to')} “${ar?target.labelAr||target.label:target.label}”?`))void stepBack(request,back[0]);}:null;})()}/>
                   <div className="booking-summary-main">
                   <div className="booking-summary-who">
@@ -366,9 +344,10 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                   </p>
                 ) : null}
               </article>
-              {showQuote&&<aside className="booking-conversation-aside booking-quote-aside" aria-label={tr("Quote")}><header className="booking-column-heading booking-quote-heading"><h3>{tr("Quote")}</h3>{(()=>{const canPublish=request.journey.repriceable&&isAvailable(request)&&['available','quote_ready','deposit_paid'].includes(request.journey?.clientStatus),busy=Boolean(publishingId||availabilityBusy);
+              {showQuote&&<aside className="booking-conversation-aside booking-quote-aside" aria-label={tr("Quote")} role="tabpanel" id="admin-booking-quote-panel" aria-labelledby="admin-booking-quote-tab" tabIndex={0} hidden={activeTab!=='quote'}><header className="booking-column-heading booking-quote-heading"><h3>{tr("Quote")}</h3>{(()=>{const canPublish=request.journey.repriceable&&isAvailable(request)&&['available','quote_ready','deposit_paid'].includes(request.journey?.clientStatus),busy=Boolean(publishingId||availabilityBusy);
                   return canPublish?<button type="button" className="primary-button booking-quote-publish" disabled={busy} onClick={()=>publishQuote(request)}><Send size={14}/>{publishingId===request.id?tr("Sending..."):request.journey.awaitingClient?tr("Update sent quote"):tr("Send quote")}</button>:null;})()}</header>
                 <div className="booking-quote-panel">
+                {statuses[request.id]&&<p className="admin-service-request-feedback" role="status">{statuses[request.id]}</p>}
                 <OfferReview ar={ar} request={request} onAdopt={request.journey.repriceable ? offer=>setDrafts(current=>({...current,[request.id]:{...buildDraft(request,current[request.id],termsDefaults),proposalRevision:offer.revision,items:offer.items,prices:Object.fromEntries(offer.items.map(item=>[item.serviceId,item.unitPrice]))}})) : undefined}/>
                 {draft.proposalRevision&&<p role="status">Editing client offer {draft.proposalRevision}. Publishing sends a new quote for the client to accept or decline.</p>}
                 <BookingQuoteEditor termsDefaults={termsDefaults} onApplyTerms={()=>{for(const key of ['validDays','paymentInstructions','paymentOptions','etransferEmail'])setField(request.id,key,termsDefaults[key]??(key==='paymentOptions'?[]:''));}} onSaveTerms={()=>saveTerms(request)} request={request} draft={draft} totals={totals} catalog={treeCatalog} equipment={treeEquipment} ar={ar} editable={request.journey.repriceable&&!publishingId} rateFeedback={rateFeedback[request.id]}

@@ -1,4 +1,5 @@
 const AR={
+  "Meet with us": "اجتمع معنا",
   "Booking draft": "مسودة الحجز",
   "Your saved event plan, with every detail you have added so far.": "خطة فعاليتك المحفوظة، بكل التفاصيل التي أضفتها.",
   "Refreshing draft": "جارٍ تحديث المسودة",
