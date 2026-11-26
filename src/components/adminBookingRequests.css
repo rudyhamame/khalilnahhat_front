@@ -517,3 +517,169 @@ html body :is(.admin-workspace,.client-workspace) .booking-status-band>ol>li.is-
 .admin-booking-detail-body[data-view=quote] .bqe-payment-options{margin-top:6px!important}
 .admin-booking-detail-body[data-view=quote] .bqe-payment-options>label{padding:3px 10px!important}
 .admin-booking-detail-body[data-view=quote] :is(.bqe-default-terms,.bqe-save-terms){margin-top:6px!important}
+.bqe-extend{margin-top:8px}
+.bqe-extend .secondary-button{padding:5px 12px;font-size:12px}
+/* "Quote terms": the title sits inside its card (a legend normally straddles the border), like the other card titles. */
+.booking-quote-layout .bqe-terms>legend{float:left;width:100%;box-sizing:border-box;padding:0;margin:0 0 10px;color:var(--aw-text);font-size:12px;font-weight:650;line-height:1.4}
+.booking-quote-layout .bqe-terms>legend+*{clear:both}
+
+/* Payment options: equal selectable tiles (a box that fills with a tick when chosen), two per row; the e-transfer email takes the full width below. */
+.admin-booking-detail-body .booking-quote-layout .bqe-payment-options{display:grid!important;grid-template-columns:1fr 1fr;gap:8px!important;margin:8px 0 0!important;padding:0!important;border:0!important;min-width:0}
+.admin-booking-detail-body .booking-quote-layout .bqe-payment-options>legend{grid-column:1/-1;width:auto;margin:0 0 2px!important;padding:0!important;color:var(--aw-muted);font-size:12px}
+.admin-booking-detail-body .booking-quote-layout .bqe-payment-options>label:not(.bqe-etransfer-email){position:relative;display:flex!important;align-items:center;gap:8px!important;box-sizing:border-box;min-height:36px;padding:6px 10px!important;border:1px solid var(--aw-line)!important;border-radius:8px!important;background:transparent;color:var(--aw-muted);font-size:12.5px;line-height:1.3;cursor:pointer}
+.admin-booking-detail-body .booking-quote-layout .bqe-payment-options>label:not(.bqe-etransfer-email)::before{content:'';flex:none;display:grid;place-items:center;width:15px;height:15px;box-sizing:border-box;border:1.5px solid color-mix(in srgb,var(--aw-text) 40%,transparent);border-radius:4px;color:var(--aw-main,#101014);font-size:11px;font-weight:800;line-height:1}
+.admin-booking-detail-body .booking-quote-layout .bqe-payment-options>label:not(.bqe-etransfer-email):hover{background:color-mix(in srgb,var(--aw-text) 6%,transparent)}
+.admin-booking-detail-body .booking-quote-layout .bqe-payment-options>label.is-on:not(.bqe-etransfer-email){border-color:var(--aw-text)!important;background:color-mix(in srgb,var(--aw-text) 10%,transparent)!important;color:var(--aw-text);font-weight:600}
+.admin-booking-detail-body .booking-quote-layout .bqe-payment-options>label.is-on:not(.bqe-etransfer-email)::before{content:'✓';border-color:var(--aw-text);background:var(--aw-text)}
+.admin-booking-detail-body .booking-quote-layout .bqe-payment-options>label>input[type=checkbox]{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer}
+.admin-booking-detail-body .booking-quote-layout .bqe-payment-options>label:focus-within:not(.bqe-etransfer-email){outline:2px solid var(--aw-text);outline-offset:2px}
+.admin-booking-detail-body .booking-quote-layout .bqe-payment-options>.bqe-etransfer-email{grid-column:1/-1;display:grid!important;gap:6px!important;padding:0!important;border:0!important;background:none!important}
+.admin-booking-detail-body .booking-quote-layout .bqe-payment-options>.bqe-etransfer-email>span{color:var(--aw-muted);font-size:12px;line-height:1.4}
+.admin-booking-detail-body .booking-quote-layout .bqe-payment-options>.bqe-etransfer-email>input[type=email]{position:static!important;opacity:1!important;width:100%;height:auto;margin:0}
+/* Read-only quote (the client's): plain values, no fields. */
+.booking-quote-layout .bqe-facts{display:grid;gap:8px;margin:0}
+.booking-quote-layout .bqe-facts>div{display:flex;justify-content:space-between;gap:16px;padding-bottom:8px;border-bottom:1px solid color-mix(in srgb,var(--aw-line) 70%,transparent)}
+.booking-quote-layout .bqe-facts>div:last-child{border-bottom:0;padding-bottom:0}
+.booking-quote-layout .bqe-facts dt{color:var(--aw-muted);font-size:12.5px}
+.booking-quote-layout .bqe-facts dd{margin:0;font-size:13.5px;font-weight:500;text-align:end;overflow-wrap:anywhere}
+.booking-quote-layout .bqe-note.bqe-readonly{margin-top:14px}
+.booking-quote-layout .bqe-note.bqe-readonly>span{display:block;color:var(--aw-muted);font-size:12px;margin-bottom:4px}
+.booking-quote-layout .bqe-note.bqe-readonly>p{margin:0;font-size:13.5px;line-height:1.6;white-space:pre-wrap}
+.booking-quote-layout .bqe-adjustments.bqe-readonly{background:none!important;border:0!important;border-block:1px solid var(--aw-line)!important;border-radius:0!important}
+.booking-quote-layout .bqe-facts dd[dir=ltr]{white-space:nowrap;overflow-wrap:normal}
+
+/* The client's read-only quote is ONE card: pricing, then the total, then the terms, stacked in a single column. The negotiation and payment
+   notes sit to its right. */
+.booking-quote-layout.is-readonly{grid-template-columns:minmax(0,1fr)!important;gap:0!important;padding:20px 22px;border:1px solid var(--aw-line);border-radius:14px;background:var(--aw-raised,#ffffff06)}
+.booking-quote-layout.is-readonly :is(.bqe-editor,.bqe-sidebar,.bqe-summary,.bqe-terms){border:0!important;border-radius:0!important;background:none!important;padding:0!important;box-shadow:none!important}
+.booking-quote-layout.is-readonly .bqe-sidebar{display:block!important}
+.booking-quote-layout.is-readonly .bqe-editor{padding-bottom:0!important}
+.booking-quote-layout.is-readonly :is(.bqe-summary,.bqe-terms){margin-top:16px;padding-top:16px!important;border-top:1px solid var(--aw-line)!important}
+.booking-quote-layout.is-readonly .bqe-terms>legend{margin-bottom:10px}
+.client-workspace .booking-quote-panel{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,340px);gap:16px 20px;align-items:start}
+.client-workspace .booking-quote-panel>.booking-quote-layout{grid-column:1;grid-row:1 / span 99}
+.client-workspace .booking-quote-panel>:not(.booking-quote-layout){grid-column:2;margin-top:0}
+@media(max-width:900px){.client-workspace .booking-quote-panel{grid-template-columns:minmax(0,1fr)}.client-workspace .booking-quote-panel>:not(.booking-quote-layout){grid-column:1}.client-workspace .booking-quote-panel>.booking-quote-layout{grid-row:auto}}
+
+/* Client quote cards: real card padding and a surface that stands apart from the page. The quote card is a lifted dark surface;
+   the negotiation card to its right is tinted gold like the "Want to meet with us?" card. */
+.client-workspace .booking-quote-layout.is-readonly{padding:28px 32px!important;background:#1b1c23!important;border:1px solid #2c2e38!important;border-radius:16px!important;box-shadow:0 10px 30px #0006}
+.client-workspace .booking-quote-layout.is-readonly :is(.bqe-summary,.bqe-terms){margin-top:22px;padding-top:22px!important;border-top-color:#2c2e38!important}
+.client-workspace .booking-quote-panel>.booking-negotiation,.client-workspace .booking-quote-panel>.booking-offer-review,.client-workspace .booking-quote-panel>.deposit-instructions{box-sizing:border-box;padding:24px 26px!important;border:1px solid color-mix(in srgb,#e6b95a 45%,transparent)!important;border-radius:16px!important;background:linear-gradient(135deg,color-mix(in srgb,#e6b95a 16%,transparent),color-mix(in srgb,#e6b95a 4%,transparent))!important;box-shadow:0 10px 30px #0004}
+.client-workspace .booking-quote-panel>.booking-negotiation h4{margin:0 0 8px;color:#f0cd7c}
+.client-workspace .booking-quote-panel>.booking-negotiation p{margin:0 0 14px}
+
+/* The quote is never a scroll area of its own; if the window is very short the page itself scrolls. Spacing is tight so the one card normally fits. */
+.admin-booking-detail-body[data-view=quote] .booking-quote-aside{overflow:visible!important;max-height:none!important;height:auto!important}
+.admin-booking-detail-body[data-view=quote] .booking-quote-panel{overflow:visible!important}
+.client-workspace .booking-quote-layout.is-readonly{padding:20px 26px!important}
+.client-workspace .booking-quote-layout.is-readonly :is(.bqe-summary,.bqe-terms){margin-top:14px;padding-top:14px!important}
+.client-workspace .booking-quote-layout.is-readonly .bqe-total{margin:2px 0 6px!important;font-size:24px!important}
+.client-workspace .booking-quote-layout.is-readonly .bqe-facts{gap:5px}
+.client-workspace .booking-quote-layout.is-readonly .bqe-facts>div{padding-bottom:5px}
+.client-workspace .booking-quote-layout.is-readonly :is(.bqe-breakdown,.bqe-balance){gap:3px!important}
+.client-workspace .booking-quote-layout.is-readonly .bqe-heading{margin-bottom:6px!important}
+.client-workspace .booking-quote-layout.is-readonly .bqe-note.bqe-readonly{margin-top:8px}
+
+/* QUOTE CARDS, BORDERLESS: no outlines on any card. Each card is a soft raised surface (a fill and a shadow), the total card a shade warmer. */
+.admin-booking-detail-body[data-view=quote] :is(.bqe-editor,.bqe-summary,.bqe-terms){border:0!important;border-radius:18px!important;background:#17181f!important;box-shadow:0 10px 28px #0006!important}
+.admin-booking-detail-body[data-view=quote] .bqe-editor{padding:22px 24px!important}
+.admin-booking-detail-body[data-view=quote] .bqe-summary{padding:20px 22px!important;background:linear-gradient(160deg,#23242d,#17181f)!important}
+.admin-booking-detail-body[data-view=quote] .bqe-terms{padding:20px 22px!important}
+.admin-booking-detail-body[data-view=quote] .bqe-total{letter-spacing:-.02em}
+.admin-booking-detail-body[data-view=quote] .bqe-adjustments{border:0!important;border-radius:14px!important;background:#10111700!important;background-color:#101117!important;padding:16px 18px!important}
+.admin-booking-detail-body[data-view=quote] .bqe-table-wrap{border:0!important;border-radius:12px;background:#101117}
+.admin-booking-detail-body[data-view=quote] .bqe-table thead th{border-bottom:1px solid #262833!important}
+.admin-booking-detail-body[data-view=quote] .bqe-table tbody :is(th,td){border-bottom-color:#20222b!important}
+.client-workspace .booking-quote-layout.is-readonly{border:0!important;background:#17181f!important;box-shadow:0 10px 28px #0006!important}
+.client-workspace .booking-quote-layout.is-readonly :is(.bqe-editor,.bqe-summary,.bqe-terms){background:none!important;box-shadow:none!important;border-radius:0!important}
+.client-workspace .booking-quote-layout.is-readonly .bqe-table-wrap{background:#10111700;background-color:#101117}
+.client-workspace .booking-quote-panel>:is(.booking-negotiation,.booking-offer-review){border:0!important;background:linear-gradient(145deg,#2a2417,#1a1812)!important;box-shadow:0 10px 28px #0006!important}
+.client-workspace .booking-quote-panel>.booking-negotiation h4{color:#f0cd7c}
+/* ...and the same, outranking the older "every Quote card is dashed" rule of the admin workspace. */
+.admin-workspace:is([data-area=services],[data-area=bookings]) .admin-booking-detail-body[data-view=quote] .booking-quote-aside,.admin-workspace:is([data-area=services],[data-area=bookings]) .admin-booking-detail-body[data-view=quote][data-quote=on] .booking-quote-aside{border:0!important}
+.admin-workspace:is([data-area=services],[data-area=bookings]) .admin-booking-detail-body[data-view=quote] .booking-quote-aside :is(.bqe-editor,.bqe-summary,.bqe-terms,.bqe-sidebar>*){border:0!important;border-radius:18px!important;background:#17181f!important;box-shadow:0 10px 28px #0006!important}
+.admin-workspace:is([data-area=services],[data-area=bookings]) .admin-booking-detail-body[data-view=quote] .booking-quote-aside .bqe-summary{background:linear-gradient(160deg,#23242d,#17181f)!important}
+.admin-workspace:is([data-area=services],[data-area=bookings]) .admin-booking-detail-body[data-view=quote] .booking-quote-aside .bqe-adjustments{border:0!important;border-radius:14px!important;background:#101117!important}
+.admin-workspace:is([data-area=services],[data-area=bookings]) .admin-booking-detail-body[data-view=quote] .booking-quote-aside .bqe-sidebar{background:none!important;box-shadow:none!important;border-radius:0!important}
+
+/* "Want to change the package or price?" in ONE viewport: when its form is open the column widens, the form is compact, and only a long item list
+   scrolls inside itself (never the card or the page). */
+.client-workspace .booking-negotiation h4{margin-bottom:6px}
+.client-workspace .booking-negotiation form{gap:10px!important;margin-top:12px!important}
+.client-workspace .booking-negotiation form>p{margin:0;font-size:12px;color:var(--aw-muted)}
+.client-workspace .booking-negotiation-items{gap:0!important;max-height:calc(100vh - 430px);min-height:96px;overflow:auto;padding-inline-end:4px}
+.client-workspace .booking-negotiation-item{grid-template-columns:minmax(0,1fr) 62px 92px 72px auto!important;gap:8px!important;padding:8px 0!important;font-size:12.5px}
+.client-workspace .booking-negotiation-item>strong{font-size:13px;overflow-wrap:anywhere}
+.client-workspace .booking-negotiation-item label{gap:3px!important;font-size:10.5px!important;color:var(--aw-muted)}
+.client-workspace .booking-negotiation input,.client-workspace .booking-negotiation select,.client-workspace .booking-negotiation textarea{padding:6px 8px!important;font-size:13px}
+.client-workspace .booking-negotiation textarea{min-height:44px}
+.client-workspace .booking-negotiation-add{gap:8px!important;align-items:end}
+.client-workspace .booking-negotiation .secondary-button{padding:5px 10px;font-size:12px}
+.client-workspace .booking-negotiation .primary-button{padding:9px 14px}
+@media(max-width:900px){
+/* The client's quote card, two columns inside the one card: Services & pricing on the left, the Quote total on the right with the quote terms as
+   small text under it (not a card). */
+.client-workspace .booking-quote-layout.is-readonly{grid-template-columns:minmax(0,1.6fr) minmax(230px,1fr)!important;column-gap:32px!important;align-items:start}
+.client-workspace .booking-quote-layout.is-readonly :is(.bqe-summary,.bqe-terms){margin-top:0!important;padding-top:0!important;border-top:0!important}
+.client-workspace .booking-quote-layout.is-readonly .bqe-sidebar{padding:0 0 0 28px!important;border-inline-start:1px solid #2c2e38!important;border-radius:0!important}
+.client-workspace .booking-quote-layout.is-readonly .bqe-terms{margin-top:18px!important}
+.client-workspace .booking-quote-layout.is-readonly .bqe-terms>legend{margin:0 0 6px!important;color:var(--aw-muted);font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.client-workspace .booking-quote-layout.is-readonly .bqe-terms .bqe-facts{gap:3px}
+.client-workspace .booking-quote-layout.is-readonly .bqe-terms .bqe-facts>div{padding-bottom:0;border-bottom:0;justify-content:flex-start;gap:8px}
+.client-workspace .booking-quote-layout.is-readonly .bqe-terms :is(dt,dd,.bqe-expiry,time){font-size:11.5px!important;line-height:1.5;color:var(--aw-muted)!important;text-align:start;font-weight:400!important}
+.client-workspace .booking-quote-layout.is-readonly .bqe-terms .bqe-expiry{margin:6px 0 0;font-size:11.5px;color:var(--aw-muted)}
+@media(max-width:900px){.client-workspace .booking-quote-layout.is-readonly{grid-template-columns:minmax(0,1fr)!important}.client-workspace .booking-quote-layout.is-readonly .bqe-sidebar{padding:18px 0 0!important;border-inline-start:0!important;border-top:1px solid #2c2e38!important}}
+
+/* The header status is a split pill: the status on the left half, the Accept button on the right half (only while the quote awaits the client). */
+.booking-heading-pill{display:inline-flex;align-items:stretch;overflow:hidden;border-radius:999px;border:1px solid #e6b95a}
+.booking-heading-pill>.booking-heading-status{border:0!important;border-radius:0!important;background:color-mix(in srgb,currentColor 14%,transparent)}
+.booking-heading-accept{padding:0 16px;border:0;border-inline-start:1px solid #e6b95a;background:#e6b95a;color:#121216;font-family:inherit;font-size:12px;font-weight:700;line-height:1;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;white-space:nowrap}
+html body .admin-booking-detail-heading .booking-publish-action .booking-heading-pill>.booking-heading-accept{align-self:stretch;box-sizing:border-box;height:auto;min-height:0;margin:0;padding:0 18px;border:0!important;border-inline-start:1px solid #00000033!important;border-radius:0!important;background:#e6b95a!important;color:#121216!important;font-family:inherit!important;font-size:12px!important;font-weight:700!important;line-height:1!important;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+html body .admin-booking-detail-heading .booking-publish-action .booking-heading-pill>.booking-heading-accept:hover:not(:disabled){background:#f0cd7c!important}
+.booking-heading-accept:hover:not(:disabled){background:#f0cd7c}
+
+/* Services & pricing: one even rhythm between its parts (heading, items, currency note, adjustments, message) instead of each part's own margin. */
+.admin-booking-detail-body[data-view=quote] .booking-quote-layout .bqe-editor{display:flex!important;flex-direction:column;gap:14px}
+.admin-booking-detail-body[data-view=quote] .booking-quote-layout .bqe-editor>.bqe-fields{display:flex!important;flex-direction:column;gap:14px;min-width:0}
+.admin-booking-detail-body[data-view=quote] .booking-quote-layout .bqe-editor :is(.bqe-heading,.bqe-currency,.bqe-note,.bqe-rate-feedback,.bqe-adjustments,.bqe-table-wrap){margin:0!important}
+.admin-booking-detail-body[data-view=quote] .booking-quote-layout .bqe-editor .bqe-adjustments{padding:16px 18px!important}
+.admin-booking-detail-body[data-view=quote] .booking-quote-layout .bqe-editor .bqe-note{display:grid;gap:8px}
+.admin-booking-detail-body[data-view=quote] .booking-quote-layout .bqe-editor .bqe-currency{margin-top:-6px!important}
+.booking-heading-accept:disabled{opacity:.6;cursor:default}
+
+/* The right column of the Quote (total and terms): the same inner padding on every card, and the "Quote terms" title aligned with its fields. */
+.admin-workspace .admin-booking-detail-body[data-view=quote] .booking-quote-aside .bqe-sidebar{display:flex!important;flex-direction:column;gap:24px!important}
+.admin-workspace .admin-booking-detail-body[data-view=quote] .booking-quote-aside .bqe-sidebar>:is(.bqe-summary,.bqe-terms){box-sizing:border-box;padding:20px 22px!important;margin:0!important}
+.admin-workspace .admin-booking-detail-body[data-view=quote] .booking-quote-aside .bqe-terms>legend{padding:0!important;margin:0 0 12px!important;margin-inline:0!important;float:left;width:100%;box-sizing:border-box}
+.admin-workspace .admin-booking-detail-body[data-view=quote] .booking-quote-aside .bqe-terms>legend+*{clear:both}
+.admin-workspace .admin-booking-detail-body[data-view=quote] .booking-quote-aside .bqe-terms :is(.bqe-term-fields,.bqe-payment-note,.bqe-payment-options){margin-inline:0}
+.admin-booking-detail-body .booking-quote-layout .bqe-payment-options>label:not(.bqe-etransfer-email){padding:6px 8px!important;gap:6px!important;font-size:12px!important;white-space:nowrap}
+.admin-booking-detail-body .booking-quote-layout .bqe-payment-options{grid-template-columns:repeat(2,minmax(0,1fr))}
+.admin-workspace .admin-booking-detail-body[data-view=quote] .booking-quote-aside .bqe-terms>:is(.bqe-save-terms,.bqe-default-terms,.bqe-extend,.bqe-expiry){margin-top:12px!important}
+
+/* The negotiation popup: centered over the page, never taller than the window. */
+.booking-negotiation-popup{width:min(660px,calc(100vw - 32px));max-height:calc(100vh - 48px);margin:auto;padding:22px 26px;border:0;border-radius:18px;background:#1b1c23;color:var(--aw-text,#eee);box-shadow:0 24px 70px #000a;overflow:auto}
+.booking-negotiation-popup::backdrop{background:#000b}
+/* Centered in the window, both ways, whatever global dialog rules say. */
+html body .booking-negotiation-popup:modal{position:fixed!important;inset:0!important;margin:auto!important;height:fit-content;max-height:calc(100vh - 48px)!important;transform:none!important}
+.booking-negotiation-popup>header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:4px}
+.booking-negotiation-popup>header h4{margin:0;font-size:17px;color:#f0cd7c}
+.booking-negotiation-popup form{margin-top:10px;display:grid;gap:12px}
+.booking-negotiation-popup .booking-negotiation-items{max-height:calc(100vh - 420px);overflow:auto}
+
+/* Popup buttons: a round close, quiet pill actions (Add, Remove / Restore) and one solid gold Send. */
+.booking-negotiation-popup .bnp-close{width:34px;height:34px;padding:0;border:0;border-radius:50%;background:#ffffff10;color:var(--aw-muted,#a8a8b3);font-size:14px;line-height:1;cursor:pointer;transition:background .15s,color .15s}
+.booking-negotiation-popup .bnp-close:hover{background:#ffffff22;color:#fff}
+.booking-negotiation-popup .secondary-button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:34px;padding:0 16px;border:1px solid #ffffff2e;border-radius:999px;background:transparent;color:var(--aw-text,#eee);font-family:inherit;font-size:12.5px;font-weight:600;line-height:1;letter-spacing:.02em;cursor:pointer;white-space:nowrap;transition:background .15s,border-color .15s,color .15s}
+.booking-negotiation-popup .secondary-button:hover:not(:disabled){background:#ffffff12;border-color:#ffffff55}
+.booking-negotiation-popup .booking-negotiation-item .secondary-button{min-height:30px;padding:0 12px;border-color:#e08a8555;color:#e8a29d}
+.booking-negotiation-popup .booking-negotiation-item .secondary-button:hover:not(:disabled){background:#e08a8518;border-color:#e08a85}
+.booking-negotiation-popup .booking-negotiation-item.is-removed .secondary-button{border-color:#5fd3a055;color:#7fe0b8}
+.booking-negotiation-popup .booking-negotiation-add .secondary-button{border-color:#e6b95a66;color:#f0cd7c}
+.booking-negotiation-popup .booking-negotiation-add .secondary-button:hover:not(:disabled){background:#e6b95a1c;border-color:#e6b95a}
+.booking-negotiation-popup .secondary-button:disabled{opacity:.4;cursor:default}
+.booking-negotiation-popup .primary-button{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 22px;border:0;border-radius:999px;background:#e6b95a;color:#16140f;font-family:inherit;font-size:13px;font-weight:700;line-height:1;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;box-shadow:0 8px 22px #e6b95a33;transition:background .15s,transform .1s}
+.booking-negotiation-popup .primary-button:hover:not(:disabled){background:#f0cd7c}
+.booking-negotiation-popup .primary-button:active:not(:disabled){transform:translateY(1px)}
+.booking-negotiation-popup .primary-button:disabled{opacity:.55;cursor:default}

@@ -254,9 +254,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
       });
       setStatuses((current) => ({
         ...current,
-        [request.id]: result.notificationSent
-          ? 'Quote published to the customer dashboard and emailed to the customer.'
-          : 'Quote published, but the customer email could not be sent. Check the Brevo configuration.',
+        [request.id]: result.notificationSent ? '' : 'Quote published, but the customer email could not be sent. Check the Brevo configuration.',
       }));
     } catch (error) {
       setStatuses((current) => ({
@@ -332,7 +330,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                 <div id="booking-tab-panel">
                 <div className="booking-detail-sections">
                   {request.order&&<BookingDraftReview order={{...request.order,customer:{...request.order.customer,...(n=>({firstName:request.order.customer?.firstName||n.firstName,lastName:request.order.customer?.lastName||n.lastName}))(customerNameParts({...request.order.customer,fullName:request.order.customer?.fullName??request.customerName}))}}} snapshot ar={ar} edit={{onSave:(path,value,acknowledgeReset)=>onQuoteAction(request.id,'admin-order-edit',{path,value,quoteRevision:request.quoteRevision,acknowledgeReset})}}/>}
-                  {bookingSections(request,ar).map(section=>request.order&&section.title==="References & notes"?{...section,rows:section.rows.filter(([label])=>label==="Requested changes")}:section).filter(section=>!request.order||section.title==="Event planning"||section.title==="References & notes"&&section.rows.length).map((section,index)=><section key={section.title} className={`booking-detail-section${section.wide?' is-wide':''}`} aria-label={tr(section.title)}>
+                  {bookingSections(request,ar).map(section=>request.order&&section.title==="References & notes"?{...section,rows:section.rows.filter(([label])=>label==="Requested changes")}:section).filter(section=>!request.order||section.title==="Event planning").map((section,index)=><section key={section.title} className={`booking-detail-section${section.wide?' is-wide':''}`} aria-label={tr(section.title)}>
                     <h4><span aria-hidden="true">{String(index+1).padStart(2,'0')}</span>{tr(section.title)}</h4>
                     <dl>{section.rows.map(([label,value])=><div key={label}><dt>{tr(label)}</dt><dd>{detailText(value)}</dd></div>)}</dl>
                     {!section.rows.length&&<p className="booking-detail-empty">{tr("No details provided.")}</p>}
@@ -352,7 +350,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                 {statuses[request.id]&&<p className="admin-service-request-feedback" role="status">{statuses[request.id]}</p>}
                 <OfferReview ar={ar} request={request} onAdopt={request.journey.repriceable ? offer=>setDrafts(current=>({...current,[request.id]:{...buildDraft(request,current[request.id],termsDefaults),proposalRevision:offer.revision,items:offer.items,prices:Object.fromEntries(offer.items.map(item=>[item.serviceId,item.unitPrice]))}})) : undefined}/>
                 {draft.proposalRevision&&<p role="status">Editing client offer {draft.proposalRevision}. Publishing sends a new quote for the client to accept or decline.</p>}
-                <BookingQuoteEditor termsDefaults={termsDefaults} onApplyTerms={()=>{for(const key of ['validDays','paymentInstructions','paymentOptions','etransferEmail'])setField(request.id,key,termsDefaults[key]??(key==='paymentOptions'?[]:''));}} onSaveTerms={()=>saveTerms(request)} request={request} draft={draft} totals={totals} catalog={treeCatalog} equipment={treeEquipment} ar={ar} editable={request.journey.repriceable&&!publishingId} rateFeedback={rateFeedback[request.id]}
+                <BookingQuoteEditor termsExtra={request.journey.extendable && request.quotedAt ? <div className="bqe-extend"><button type="button" className="secondary-button" onClick={() => runAction(request, 'extend', { days: Number(draft.validDays) || 7 })}>{request.journey.adminNext === 'reactivate_or_close' ? tr("Reactivate") : tr("Extend")} {Number(draft.validDays) || 7} {ar?'أيام':'days'}</button></div> : null} termsDefaults={termsDefaults} onApplyTerms={()=>{for(const key of ['validDays','paymentInstructions','paymentOptions','etransferEmail'])setField(request.id,key,termsDefaults[key]??(key==='paymentOptions'?[]:''));}} onSaveTerms={()=>saveTerms(request)} request={request} draft={draft} totals={totals} catalog={treeCatalog} equipment={treeEquipment} ar={ar} editable={request.journey.repriceable&&!publishingId} rateFeedback={rateFeedback[request.id]}
                   onPriceChange={(id,value)=>updatePrice(request.id,id,value)} onFieldChange={(key,value)=>setField(request.id,key,value)} onNoteChange={value=>updateNote(request.id,value)} onFillRates={()=>fillFromEngine(request,draft)}/>
                 {(request.journey.canRecordDeposit||request.journey.isBooked||(request.payments||[]).length>0)&&<h4 className="booking-section-title">{tr("Payments")}</h4>}
                 {request.journey.canRecordDeposit||request.journey.isBooked ? (
@@ -382,13 +380,6 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                       </li>
                     ))}
                   </ul>
-                ) : null}
-                {request.journey.extendable && request.quotedAt ? (
-                  <div className="admin-service-request-terms">
-                    <button type="button" className="secondary-button" onClick={() => runAction(request, 'extend', { days: Number(draft.validDays) || 7 })}>
-                      {request.journey.adminNext === 'reactivate_or_close' ? tr("Reactivate") : tr("Extend")} {Number(draft.validDays) || 7} {ar?'أيام':'days'}
-                    </button>
-                  </div>
                 ) : null}
                 </div>
               </aside>}

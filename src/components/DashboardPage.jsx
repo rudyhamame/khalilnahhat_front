@@ -25,7 +25,7 @@ import BookingFiles from './BookingFiles';
 
 
 
-function QuoteActions({ request, onQuoteAction, ar=false }) {
+function QuoteActions({ request, onQuoteAction, ar=false, pill=false }) {
   const tr=text=>bookingText(text,ar);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -41,6 +41,7 @@ function QuoteActions({ request, onQuoteAction, ar=false }) {
       setBusy(false);
     }
   };
+  if (pill) return <button type="button" className="booking-heading-accept" disabled={busy} onClick={accept} title={error||undefined}>{tr("ACCEPT QUOTE")}</button>;
   return (
     <div className="dashboard-quote-actions">
       <button type="button" className="primary-button" disabled={busy} onClick={accept}>{tr("ACCEPT QUOTE")}</button>
@@ -111,7 +112,7 @@ function RequestedServices({requests,onQuoteAction,authToken,ar=false}){
  return <section className="client-booking-requests" aria-label={tr('Requests and quotes')}><BookingPageHeader ar={ar} idPrefix="client-booking" value={activeTab} onChange={setBookingTab} hasBooking={Boolean(request)} hasQuote={Boolean(request?.journey.showsPrices)}/><div className="admin-booking-layout">
   <BookingRequestList requests={requests} selectedId={request?.id} onSelect={id=>{setSelectedId(id);setBookingTab('details');}} ar={ar} detailId="client-booking-detail"/>
   <section id="client-booking-detail" className="admin-booking-detail-column" aria-labelledby="client-booking-detail-title">
-   <header className="admin-booking-detail-heading"><div className="booking-detail-title"><h2 id="client-booking-detail-title">{tr(activeTab==='quote'?'Quote':activeTab==='files'?'Shared files':'Booking details')}</h2>{request&&<span>{request.requestNumber||request.id}</span>}</div>{request&&<div className="booking-publish-action"><span className={`booking-heading-status is-${request.status}`}>{request.journey.label}</span><BookingMenu ar={ar} request={request} onQuoteAction={onQuoteAction}/></div>}</header>
+   <header className="admin-booking-detail-heading"><div className="booking-detail-title"><h2 id="client-booking-detail-title">{tr(activeTab==='quote'?'Quote':activeTab==='files'?'Shared files':'Booking details')}</h2>{request&&<span>{request.requestNumber||request.id}</span>}</div>{request&&<div className="booking-publish-action"><span className="booking-heading-pill"><span className={`booking-heading-status is-${request.status}`}>{request.journey.label}</span><QuoteActions pill ar={ar} request={request} onQuoteAction={onQuoteAction}/></span><BookingMenu ar={ar} request={request} onQuoteAction={onQuoteAction}/></div>}</header>
    {request?<div key={request.id} className="admin-booking-detail-body" data-view={activeTab} data-quote={request.journey.showsPrices?'on':'off'}>
     <article className="admin-service-request-card" role="tabpanel" id="client-booking-details-panel" aria-labelledby="client-booking-details-tab" tabIndex={0} hidden={activeTab!=='details'}>
      <div className="client-booking-identity"><div className="booking-summary-who"><h3>{request.customerName||tr('Your event')}</h3>{request.customerEmail&&<a href={`mailto:${request.customerEmail}`}>{request.customerEmail}</a>}</div><div className="booking-summary-foot"><div><span>{tr('Booking code')}</span><code>{request.requestNumber||request.id}</code></div></div></div>
@@ -129,7 +130,7 @@ function RequestedServices({requests,onQuoteAction,authToken,ar=false}){
      {request.journey.isBooked&&<><PaymentsBlock ar={ar} request={request} token={authToken}/><PlanningForm ar={ar} request={request} onQuoteAction={onQuoteAction}/></>}
     </article>
     <section className="booking-files-panel" role="tabpanel" id="client-booking-files-panel" aria-labelledby="client-booking-files-tab" tabIndex={0} hidden={activeTab!=='files'}>{activeTab==='files'&&<BookingFiles requestId={request.id} token={authToken} ar={ar}/>}</section>
-    {request.journey.showsPrices&&<aside className="booking-conversation-aside booking-quote-aside" aria-label={tr('Quote')} role="tabpanel" id="client-booking-quote-panel" aria-labelledby="client-booking-quote-tab" tabIndex={0} hidden={activeTab!=='quote'}><header className="booking-column-heading booking-quote-heading"><h3>{tr('Quote')}</h3><QuoteActions ar={ar} request={request} onQuoteAction={onQuoteAction}/></header><div className="booking-quote-panel"><BookingQuoteEditor request={request} draft={draft} totals={totals} ar={ar} editable={false}/>{(request.journey.awaitingClient||request.journey.canNegotiate)&&<BookingNegotiation ar={ar} request={request} token={authToken} onQuoteAction={onQuoteAction}/>}{request.journey.canRecordDeposit&&<DepositInstructions request={request} ar={ar}/>}<p className="client-quote-validity">{request.journey.awaitingClient&&request.expiresAt?(ar?'صالح حتى ':'Valid until ')+new Intl.DateTimeFormat(bookingLocale(ar),{dateStyle:'long',timeStyle:'short'}).format(new Date(request.expiresAt)):''}</p>{request.journey.clientNext==='contact_to_reactivate'&&<p>{tr('This quote has expired. Contact us to reactivate it.')}</p>}</div></aside>}
+    {request.journey.showsPrices&&<aside className="booking-conversation-aside booking-quote-aside" aria-label={tr('Quote')} role="tabpanel" id="client-booking-quote-panel" aria-labelledby="client-booking-quote-tab" tabIndex={0} hidden={activeTab!=='quote'}><div className="booking-quote-panel"><BookingQuoteEditor request={request} draft={draft} totals={totals} ar={ar} editable={false}/>{(request.journey.awaitingClient||request.journey.canNegotiate)&&<BookingNegotiation ar={ar} request={request} token={authToken} onQuoteAction={onQuoteAction}/>}{request.journey.canRecordDeposit&&<DepositInstructions request={request} ar={ar}/>}{request.journey.clientNext==='contact_to_reactivate'&&<p>{tr('This quote has expired. Contact us to reactivate it.')}</p>}</div></aside>}
    </div>:<div className="admin-services-empty"><PackageCheck size={30}/><h3>{tr('No service requests yet')}</h3><p>{tr('Build an event package, then submit it for a personalized quote.')}</p><a className="primary-button" href="/booking">{tr('EXPLORE SERVICES')}</a></div>}
   </section>
  </div></section>;
