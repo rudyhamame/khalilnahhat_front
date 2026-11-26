@@ -477,3 +477,14 @@ html body .admin-workspace .bpa-more>div button+button{margin-top:2px;border-top
 .client-booking-meeting-invite>.primary-button{border-color:#e6b95a;border-radius:8px;background:#e6b95a;color:#121216}
 .client-booking-meeting-invite>.primary-button:hover{background:#f0cd7c;color:#121216}
 .booking-status-band>ol>li>.bsp-date{flex:0 0 140px;width:140px}
+/* The last reached step keeps a free end: the line carries on below it and fades out, because the journey is not finished. */
+.booking-status-band>ol>li.is-open-end{padding-bottom:34px}
+.booking-status-band>ol>li.is-open-end::after{display:block!important;bottom:0;background:linear-gradient(color-mix(in srgb,var(--aw-text) 28%,transparent),transparent)!important}
+
+/* The step's date and, for the current step, its option buttons share one right column: the buttons sit UNDER the date. */
+.booking-status-band>ol>li>.bsp-side{flex:0 0 140px;display:flex;flex-direction:column;align-items:flex-end;gap:8px;min-width:0}
+.booking-status-band>ol>li>.bsp-side:empty{display:none}
+.booking-status-band>ol>li>.bsp-side>.bsp-date{flex:none;width:auto;padding-top:3px;margin:0}
+html body :is(.admin-workspace,.client-workspace) .booking-status-band>ol>li.is-here>.bsp-side>.bsp-actions{display:flex!important;flex-direction:column;align-items:flex-end;gap:6px;margin:0!important;flex:none!important;white-space:nowrap}
+html body :is(.admin-workspace,.client-workspace) .booking-status-band>ol>li.is-here>.bsp-side>.bsp-actions button.bsp-back{margin:0!important}
+.booking-status-band>ol>li>.bsp-side>.bsp-date{font-size:12px;font-weight:400;color:var(--aw-muted);white-space:nowrap;text-align:end}

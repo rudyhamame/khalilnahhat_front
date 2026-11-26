@@ -22,9 +22,7 @@
 :is(.client-workspace[data-area=bookings],.admin-workspace[data-area=services]) .booking-status-band .dashboard-status-modifications>li::after{content:none;display:none}
 :is(.client-workspace[data-area=bookings],.admin-workspace[data-area=services]) .booking-status-band .dashboard-status-modifications>li.is-undone::before{color:var(--aw-muted)}
 /* A current step with actions: the title and date stay on one row, the buttons drop below, so they no longer fight for the width. */
-html body :is(.admin-workspace,.client-workspace) .booking-status-band>ol>li.is-here{flex-wrap:wrap!important}
 html body :is(.admin-workspace,.client-workspace) .booking-status-band>ol>li.is-here>.label{flex:1 1 0!important;min-width:0}
-html body :is(.admin-workspace,.client-workspace) .booking-status-band>ol>li.is-here>.bsp-actions{order:3;flex:1 1 100%!important;margin:6px 0 0 34px!important;justify-content:flex-start}
 /* Parallel decisions and the cancel branch use the modification branch drawing. Not yet reached: quiet. Cancel: red. */
 :is(.client-workspace[data-area=bookings],.admin-workspace[data-area=services]) .booking-status-band .dashboard-status-modifications>li.is-pending{color:var(--aw-muted,#9a9aa3)}
 :is(.client-workspace[data-area=bookings],.admin-workspace[data-area=services]) .booking-status-band .dashboard-status-modifications>li.is-pending::before{color:var(--aw-muted,#9a9aa3);opacity:.6}
