@@ -1,6 +1,7 @@
 import {nextRequiredKey,nextOptionalKey,atomLabel} from '../lib/footerAtoms';
 import {musicPatchFields} from '../lib/musicMessageFields';
 import {useTree} from '../lib/tree';
+import {withRentalAtoms} from './docs/bookingAtomTree';
 import {createAiTaskWriter,sameDraftValue} from '../lib/bookingDraftEdits';
 import {findVenues} from '../lib/venueSearch';
 import {venueResultReply} from '../lib/venueResultReply';
@@ -324,7 +325,9 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   const resources=useRef({}),request=useRef(null),history=useRef([]),log=useRef(null),alive=useRef(true);
   const sharedContext=useRef(null);
   sharedContext.current={interfaceLanguage:ar?'ar':'en',selectedBookingGoal:bookingGoal(selectedGoal)?{id:selectedGoal,title:bookingGoal(selectedGoal).title}:null,recentDraftEdits:orderDraft?.recentEdits||[],tasks:aiTasks,sessionId:taskSession.current.id,modification:modifyingTask?.key===taskKey?modifyingTask:null,liveBookingData,equipment:activeEquipment,numberedCatalog,selectedServiceId:orderDraft?.rentalServiceId,venueSearch:venueSearch?{query:venueSearch.query,busy:venueSearch.busy,items:venueSearch.items,error:venueSearch.error,awaitingClientChoice:true}:null,nextBookingQuestion:nextBookingStep(applyOrderPatch(orderRef.current,(aiTasks||[]).filter(task=>task.confirmed===null).flatMap(resolveAiTaskChanges)),ar),currentSubject:conversationSubject(),pendingSubject:pendingSubject.current?.target||null,quantityRequired:pendingEquipmentQuantity.current};
-  const assistantContext=()=>voiceConversationContext(history.current,{...(orderRef.current?aiOrderContext(orderRef.current):{}),activeCatalog:sharedContext.current.equipment.map(({id,name,minQuantity,availableQuantity,availabilityStatus})=>({id,name,minQuantity,availableQuantity,availabilityStatus}))},sharedContext.current);
+  // Every rental equipment item is a data atom of the Booking data atoms tree (equipment:<service>:<item>); the conversation gets all of them with the quantity chosen so far.
+  const equipmentAtoms=()=>{const chosen=new Map((orderRef.current?.equipment||[]).map(row=>[row.id,row.quantity]));return withRentalAtoms({catalog:activeCatalog,equipment:activeEquipment}).flatMap(step=>step.sections.flatMap(section=>section.atoms)).filter(atom=>atom.key.startsWith('equipment:')).map(atom=>({key:atom.key,code:atom.code,name:atom.name,cartId:atom.key.split(':').at(-1),quantity:chosen.get(atom.key.split(':').at(-1))||0,available:atom.input?.max}));};
+  const assistantContext=()=>voiceConversationContext(history.current,{...(orderRef.current?aiOrderContext(orderRef.current):{}),equipmentAtoms:equipmentAtoms(),equipmentAtomsNote:'Each equipment atom is changed through the equipment cart: save path "equipment" with rows of {id: cartId, quantity}. Quantity 0 means not chosen.',activeCatalog:sharedContext.current.equipment.map(({id,name,minQuantity,availableQuantity,availabilityStatus})=>({id,name,minQuantity,availableQuantity,availabilityStatus}))},sharedContext.current);
   const availabilityYear=Number(orderDraft?.order.event.date?.slice(0,4))||new Date().getFullYear();
   useEffect(()=>{
     if(call!=='active')return;let current=true;
