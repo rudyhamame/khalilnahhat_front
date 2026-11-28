@@ -1,4 +1,5 @@
 import BookingPageHeader from './BookingPageHeader';
+import MeetingRoom from '../echo/MeetingRoom';
 import StatusPipeline from './BookingStatusPipeline';
 import BookingRequestList from './BookingRequestList';
 import journeyContract from '../lib/bookingJourneyContract.json' with {type:'json'};
@@ -117,6 +118,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
   const composer=useMailboxDraft({owner:'admin-booking-requests',api:mailApi,onSent:()=>{}});
   const composeTo=address=>{if(!composer.draft){composer.compose();composer.edit('to',address);}else composer.compose();};
   const [selectedId,setSelectedId]=useState(null);
+  const [contactBookingId,setContactBookingId]=useState('');
   const selectedRequest=requests.find(request=>request.id===selectedId)||requests[0];
   const [bookingTab,setBookingTab]=useState('details');
   const hasQuote=Boolean(selectedRequest&&(['available','quote_ready','deposit_paid','booked'].includes(selectedRequest.bookingStatus||selectedRequest.journey?.clientStatus)||selectedRequest.quotedAt));
@@ -268,6 +270,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
 
   return (
     <>
+      {contactBookingId&&<MeetingRoom key={contactBookingId} bookingId={contactBookingId} token={token} ar={ar} onClose={()=>setContactBookingId('')}/>}
       <BookingPageHeader ar={ar} idPrefix="admin-booking" value={activeTab} onChange={setBookingTab} hasBooking={Boolean(selectedRequest)} hasQuote={hasQuote}/>
       {confirmedBookings.length ? (
         <div className="admin-confirmed-bookings">
@@ -282,7 +285,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
       <div className="admin-booking-layout">
         <BookingRequestList requests={requests} selectedId={selectedRequest?.id} onSelect={id=>{setSelectedId(id);setBookingTab('details');}} ar={ar} countLabel={requestCountLabel}/>
       <section id="admin-booking-detail" className="admin-booking-detail-column" aria-labelledby="admin-booking-detail-title">
-        <header className="admin-booking-detail-heading"><div className="booking-detail-title"><h2 id="admin-booking-detail-title">{tr(activeTab==='quote'?'Quote':activeTab==='files'?'Shared files':'Booking details')}</h2>{selectedRequest&&<span>{selectedRequest.requestNumber||selectedRequest.id}</span>}</div>
+        <header className="admin-booking-detail-heading"><div className="booking-detail-title"><h2 id="admin-booking-detail-title">{tr(activeTab==='quote'?'Quote':activeTab==='files'?'Shared files':'Booking details')}</h2>{selectedRequest&&<span>{selectedRequest.requestNumber||selectedRequest.id}</span>}{selectedRequest&&<button type="button" className="secondary-button" onClick={()=>setContactBookingId(selectedRequest.id)}>{ar?'الدردشة والمكالمات':'Chat & calls'}</button>}</div>
           {selectedRequest&&(()=>{
             // Header actions follow the booking's stage and the open tab: Booking info -> availability decisions, Quote -> publishing.
             const r=selectedRequest,stage=r.journey?.clientStatus,repr=r.journey.repriceable,busy=Boolean(publishingId||availabilityBusy);

@@ -725,6 +725,7 @@ function App() {
         onQuoteAction={quoteAction}
         authToken={authToken}
         activeView={clientWorkspaceView(routePath,routeSearch)}
+        bookingId={new URLSearchParams(routeSearch).get('booking')||''}
         onLogout={handleLogout}
         onProfileSaved={setAuthUser}
       />

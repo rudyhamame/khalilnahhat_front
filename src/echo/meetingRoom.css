@@ -3,10 +3,10 @@
 .meeting-room-panel>header{display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid #ffffff14}
 .meeting-room-panel>header>div{display:grid;gap:2px;flex:1;min-width:0}.meeting-room-panel>header small{color:#9fb2a8;font-size:12px}
 .meeting-room-presence{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:#9fb2a8}.meeting-room-presence i{width:8px;height:8px;border-radius:50%;background:#7f8a85}.meeting-room-presence.is-on{color:#7fdcb3}.meeting-room-presence.is-on i{background:#4fd18b;box-shadow:0 0 0 3px #4fd18b33}
-.meeting-room button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:38px;padding:6px 14px;border:1px solid #ffffff2e;border-radius:10px;background:#ffffff0a;color:inherit;font:inherit;font-size:13px;cursor:pointer}
-.meeting-room button:hover:not(:disabled){background:#ffffff18}.meeting-room button:disabled{opacity:.45;cursor:default}
-.meeting-room button[aria-pressed=true]{background:#e0746a33;border-color:#e0746a}
-.meeting-room .is-accept{background:#2f9d6b;border-color:#2f9d6b;color:#fff}.meeting-room .is-decline{background:#c4493f;border-color:#c4493f;color:#fff}
+:is(.meeting-room,.meeting-room-embedded) button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:38px;padding:6px 14px;border:1px solid #ffffff2e;border-radius:10px;background:#ffffff0a;color:inherit;font:inherit;font-size:13px;cursor:pointer}
+:is(.meeting-room,.meeting-room-embedded) button:hover:not(:disabled){background:#ffffff18}:is(.meeting-room,.meeting-room-embedded) button:disabled{opacity:.45;cursor:default}
+:is(.meeting-room,.meeting-room-embedded) button[aria-pressed=true]{background:#e0746a33;border-color:#e0746a}
+:is(.meeting-room,.meeting-room-embedded) .is-accept{background:#2f9d6b;border-color:#2f9d6b;color:#fff}:is(.meeting-room,.meeting-room-embedded) .is-decline{background:#c4493f;border-color:#c4493f;color:#fff}
 .meeting-room-error{margin:0;padding:8px 16px;background:#e0746a22;color:#ffb3aa;font-size:13px}
 .meeting-room-body{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(280px,1fr);flex:1;min-height:0}
 .meeting-room-call{display:flex;flex-direction:column;gap:10px;min-width:0;min-height:0;padding:14px}
@@ -35,17 +35,51 @@
 .meeting-room-device-fields select:disabled{opacity:.5}
 .meeting-room-device-help{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px}
 .meeting-room-device-help small{font-size:10px;color:#a9b7af;line-height:1.6;max-width:47ch}
-.meeting-room .meeting-room-device-help button{flex:none;min-height:30px;padding:5px 9px;font-size:10px;border-radius:0}
-.meeting-room .meeting-room-device-help button[aria-pressed=true]{background:#3457a730;border-color:#527ad2}
+:is(.meeting-room,.meeting-room-embedded) .meeting-room-device-help button{flex:none;min-height:30px;padding:5px 9px;font-size:10px;border-radius:0}
+:is(.meeting-room,.meeting-room-embedded) .meeting-room-device-help button[aria-pressed=true]{background:#3457a730;border-color:#527ad2}
 .meeting-room-device-error{margin:9px 0 0;font-size:11px;line-height:1.6;color:#ffb3aa}
 .meeting-room-stage>.meeting-room-preview{width:100%;height:100%;object-fit:contain;transform:scaleX(-1)}
 .meeting-room-preview-label{position:absolute;bottom:12px;left:12px;padding:5px 9px;background:#000a;color:#fff;font-size:11px}
-.meeting-room :is(button,select):focus-visible{outline:2px solid #8ba9eb;outline-offset:2px}
+:is(.meeting-room,.meeting-room-embedded) :is(button,select):focus-visible{outline:2px solid #8ba9eb;outline-offset:2px}
 .meeting-room-device-fields svg,.meeting-room-device-help button>svg{flex:none;width:14px;height:14px}
 @media(max-width:800px){.meeting-room-body{display:flex;flex-direction:column;overflow-y:auto}.meeting-room-call{flex:none;min-height:440px}.meeting-room-stage{min-height:190px}.meeting-room-chat{flex:none;min-height:260px;max-height:360px}.meeting-room-device-help{flex-wrap:wrap}}
 @media(max-width:420px){.meeting-room-device-fields{gap:8px}.meeting-room-device-help small{max-width:none}.meeting-room-device-help button{width:100%}.meeting-room-call{min-height:475px}}
-.meeting-room-device-tests{display:flex;flex-wrap:wrap;gap:6px;flex:none}
+.meeting-room-device-tests{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;flex:none}
 .meeting-room-preview-label{left:auto;inset-inline-start:12px}
-@media(max-width:420px){.meeting-room-device-tests{width:100%}.meeting-room .meeting-room-device-tests button{flex:1;width:auto}}
-.meeting-room .meeting-room-end{align-self:center}
+@media(max-width:420px){.meeting-room-device-tests{width:100%}:is(.meeting-room,.meeting-room-embedded) .meeting-room-device-tests button{flex:1;width:auto}}
+:is(.meeting-room,.meeting-room-embedded) .meeting-room-end{align-self:center}
 .meeting-room-end-hint{display:block;text-align:center;font-size:10px;line-height:1.5;color:#9fb2a8}
+
+/* The booking contact room stays inline beside every booking tab. */
+.meeting-room-embedded{position:relative;inset:auto;z-index:auto;display:block;box-sizing:border-box;width:100%;padding:0;border:0;border-radius:0;background:none;box-shadow:none;min-width:0}
+.meeting-room-embedded{color:var(--aw-text,#e8efeb);font-family:inherit}
+.meeting-room-embedded>header{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:12px;border-bottom:1px solid var(--aw-line,#ffffff1f)}
+.meeting-room-embedded>header small{display:block;margin-top:4px;color:var(--aw-muted,#9fb2a8);font-size:12px}
+.meeting-room-embedded>header>div{flex-basis:100%;font-size:14px}
+.meeting-room-embedded .meeting-room-body{display:flex;flex-direction:column;overflow:visible}
+.meeting-room-embedded .meeting-room-call{flex:none;min-height:0;padding:12px;gap:12px}
+.meeting-room-embedded .meeting-room-stage{flex:none;height:190px;min-height:190px}
+.meeting-room-embedded .meeting-room-chat{flex:none;height:300px;min-height:260px;max-height:360px;border-inline-start:0;border-top:1px solid var(--aw-line,#ffffff1f)}
+.meeting-room-embedded .meeting-room-device-fields{grid-template-columns:minmax(0,1fr)}
+.meeting-room-embedded .meeting-room-device-help{flex-wrap:wrap}
+.meeting-room-embedded .meeting-room-device-tests{width:100%}
+.meeting-room-embedded .meeting-room-controls{justify-content:center;gap:8px}
+.meeting-room-embedded .meeting-room-controls button{flex:0 1 auto;width:auto;padding:6px 12px;font-size:12px}
+.meeting-room-embedded .meeting-room-chat form{padding:12px;align-items:center}
+.meeting-room-embedded .meeting-room-chat form input{width:0;min-height:38px;padding:8px 10px;border-radius:8px;background:var(--aw-raised,#ffffff0a);color:inherit}
+
+.meeting-room-device-popover{position:absolute;inset:0;z-index:3;pointer-events:none}
+:is(.meeting-room,.meeting-room-embedded) .meeting-room-device-toggle{position:absolute;inset-block-start:8px;inset-inline-end:8px;width:34px;min-height:34px;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;color:#a9b7af;pointer-events:auto}
+:is(.meeting-room,.meeting-room-embedded) .meeting-room-device-toggle:hover:not(:disabled){background:transparent;color:#fff;box-shadow:none}
+html body :is(.meeting-room,.meeting-room-embedded) button.meeting-room-device-toggle{appearance:none!important;border:0!important;background:none!important;box-shadow:none!important;border-radius:0!important;outline:none!important}
+html body :is(.meeting-room,.meeting-room-embedded) button.meeting-room-device-toggle:focus-visible svg{color:#e6b95a;filter:drop-shadow(0 0 3px #e6b95a);transform:scale(1.1)}
+.meeting-room-device-overlay{position:absolute;inset:0;overflow-y:auto;overscroll-behavior:contain;pointer-events:auto;background:#15191cf5;color:#e8efeb;scrollbar-width:thin}
+:is(.meeting-room,.meeting-room-embedded) .meeting-room-device-close{position:sticky;top:4px;z-index:1;display:flex;margin:4px 4px 0 auto;width:30px;min-height:30px;padding:0;border:0!important;background:none!important;box-shadow:none!important;border-radius:0}
+.meeting-room-device-overlay .meeting-room-devices{box-sizing:border-box;width:100%;min-width:0;padding:4px 10px 10px;border:0;background:none}
+.meeting-room-device-overlay .meeting-room-device-fields{grid-template-columns:minmax(0,1fr);gap:8px;min-width:0}
+.meeting-room-device-overlay .meeting-room-device-fields label{grid-template-columns:minmax(0,80px) minmax(0,1fr);align-items:center;gap:8px;min-width:0;margin:0}
+.meeting-room-device-overlay .meeting-room-device-fields select{box-sizing:border-box;width:100%;max-width:100%;min-width:0;min-height:30px;padding:4px 7px;font-size:11px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
+.meeting-room-device-overlay .meeting-room-device-help{gap:6px;margin-top:6px;min-width:0}
+.meeting-room-device-overlay .meeting-room-device-help small{font-size:10px;line-height:1.4;overflow-wrap:anywhere}
+.meeting-room-device-overlay .meeting-room-device-tests{gap:6px;min-width:0}
+:is(.meeting-room,.meeting-room-embedded) .meeting-room-device-overlay .meeting-room-device-tests button{min-width:0;min-height:28px;padding:4px 6px;font-size:10px}

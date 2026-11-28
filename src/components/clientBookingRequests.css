@@ -1,4 +1,23 @@
 /* Both dashboards use adminBookingRequests.css and the same components. Only client-specific actions live here. */
+.client-workspace .admin-booking-detail-body[data-view]{display:grid;grid-template-columns:minmax(0,1fr) 340px!important;min-width:0}
+.client-workspace .admin-booking-detail-body[data-view]>[role=tabpanel]{box-sizing:border-box;width:100%;min-width:0}
+.client-workspace .client-booking-contact-aside{box-sizing:border-box;min-width:0;min-height:0;overflow-y:auto;padding:0;border-inline-start:1px solid var(--aw-line);scrollbar-width:thin}
+.client-workspace .booking-brief-heading.booking-summary{grid-template-columns:minmax(0,1fr)!important;justify-items:stretch}
+.client-workspace .booking-summary>.booking-status-band{box-sizing:border-box;width:100%;grid-row:auto}
+.client-workspace .booking-summary-main:empty{display:none}
+.client-workspace .client-booking-contact-launch{display:flex;flex:none;justify-content:flex-end;padding:10px 16px;border-bottom:1px solid var(--aw-line)}
+.client-booking-contact-launch .primary-button{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:8px 16px;font-size:13px;text-decoration:none}
+.client-booking-contact-heading{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding:16px 12px;border-bottom:1px solid var(--aw-line)}
+.client-booking-contact-heading>a{flex-basis:100%;color:var(--aw-muted);font-size:13px}
+.client-booking-contact-heading h1{margin:0;font-size:20px}
+.client-booking-contact-heading code{color:var(--aw-muted);font-size:12px;overflow-wrap:anywhere}
+@media(orientation:portrait){.client-workspace .admin-booking-detail-body[data-view]{grid-template-columns:minmax(0,1fr)!important}}
+@media(max-width:1100px){
+ .client-workspace .admin-booking-detail-body[data-view]{display:flex;flex-direction:column;align-items:stretch;overflow:auto}
+ .client-workspace .admin-booking-detail-body[data-view]>.admin-service-request-card{flex:0 0 auto;width:100%;height:auto;max-height:none;overflow:visible}
+ .client-workspace .admin-booking-detail-body[data-view]>.booking-quote-aside{height:auto!important;max-height:none!important;overflow:visible!important}
+ .client-workspace .client-booking-contact-aside{position:relative;flex:0 0 auto;width:100%;overflow:visible;border-inline-start:0;border-top:1px solid var(--aw-line);padding:0}
+}
 .client-workspace .client-booking-requests{margin:0;padding:0;width:100%;min-width:0;min-height:0;flex:1;display:flex;flex-direction:column}.client-booking-requests>.admin-booking-layout{flex:1;min-height:0}.client-workspace[data-area=bookings] .booking-quote-heading .dashboard-quote-actions{margin:0;padding:0;border:0}.client-workspace[data-area=bookings] .booking-quote-heading .dashboard-quote-actions .primary-button{padding:8px 14px;font-size:12px}.client-workspace[data-area=bookings] .booking-quote-panel>.dashboard-quote-actions{padding:16px 0}.client-quote-validity{font-size:12px;line-height:1.6;color:var(--aw-muted)}
 @media(min-width:761px){.client-workspace[data-area=bookings] .aw-content>.client-booking-requests{flex:1 1 0;min-height:0}.client-booking-requests>.admin-booking-layout{grid-template-rows:minmax(0,1fr)}}
 :is(.client-workspace[data-area=bookings],.admin-workspace[data-area=services]) .booking-status-band .dashboard-status-modifications{list-style:none;margin:8px 0 0;padding:0;border:0}:is(.client-workspace[data-area=bookings],.admin-workspace[data-area=services]) .booking-status-band .dashboard-status-modifications li{padding:6px 0;display:grid;gap:4px}:is(.client-workspace[data-area=bookings],.admin-workspace[data-area=services]) .booking-status-band .dashboard-status-modifications li::before{display:none}:is(.client-workspace[data-area=bookings],.admin-workspace[data-area=services]) .booking-status-band .dashboard-status-modifications li.is-undone{text-decoration:line-through;opacity:.6}.client-workspace[data-area=bookings] .dashboard-booking-menu-toggle{width:28px;height:28px;min-width:28px;display:grid;place-items:center;padding:0;border:0;border-radius:50%;background:transparent;color:var(--aw-text)}

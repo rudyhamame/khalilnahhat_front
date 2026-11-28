@@ -42,3 +42,19 @@ html body :is(.client-workspace,.admin-workspace) .bdr-atoms .ea-data-row[data-c
 html body :is(.client-workspace,.admin-workspace) .bdr-atoms .ea-data-row[data-category]:hover{background:none}
 html body :is(.client-workspace,.admin-workspace) .bdr-atoms .ea-equipment-table{border:0!important;border-radius:0!important}
 html body :is(.client-workspace,.admin-workspace) .bdr-atoms .ea-equipment-table :is(th,td,tr,thead,tbody){border:0!important;box-shadow:none!important}
+
+/* Submitted client bookings show one numbered detail step at a time. */
+html body .client-workspace .bdr-stepped{gap:0;min-width:0}
+.client-workspace .bdr-steps{display:flex;gap:8px;overflow-x:auto;padding:12px 0 16px;scrollbar-width:thin}
+.client-workspace .bdr-steps [role=tab]{display:flex;flex:1 0 auto;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:10px 16px;border:1px solid var(--aw-line,#2a2a30);border-radius:8px;background:transparent;color:var(--aw-muted,#9a9aa3);font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.client-workspace .bdr-steps [role=tab]:hover{background:var(--aw-raised,#ffffff08);color:var(--aw-text,#eee)}
+.client-workspace .bdr-steps [role=tab][aria-selected=true]{border-color:#e6b95a;background:color-mix(in srgb,#e6b95a 10%,transparent);color:var(--aw-text,#eee)}
+.client-workspace .bdr-step-number{display:grid;place-items:center;flex:none;width:26px;height:26px;border:1px solid var(--aw-line,#2a2a30);border-radius:50%;font:600 11px/1 ui-monospace,Menlo,Consolas,monospace}
+.client-workspace [aria-selected=true] .bdr-step-number{border-color:#e6b95a;background:#e6b95a;color:#171717}
+html body .client-workspace .bdr-stepped .bdr-section[hidden]{display:none!important}
+.client-workspace .bdr-step-navigation{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:24px;padding-top:16px;border-top:1px solid var(--aw-line,#2a2a30)}
+.client-workspace .bdr-step-navigation>span{color:var(--aw-muted,#9a9aa3);font-size:12px}
+.client-workspace .bdr-step-navigation button{min-width:80px;min-height:38px;padding:8px 16px;border:1px solid var(--aw-line,#2a2a30);border-radius:6px;background:var(--aw-raised,#ffffff08);color:var(--aw-text,#eee);font:inherit;font-size:13px;cursor:pointer}
+.client-workspace .bdr-step-navigation button:disabled{opacity:.4;cursor:default}
+.client-workspace :is(.bdr-steps [role=tab],.bdr-step-navigation button,.bdr-stepped [role=tabpanel]):focus-visible{outline:2px solid #e6b95a;outline-offset:3px}
+@media(max-width:700px){.client-workspace .bdr-steps{flex-wrap:wrap}.client-workspace .bdr-steps [role=tab]{flex:1 1 calc(50% - 8px);justify-content:flex-start;padding:10px;font-size:12px}}

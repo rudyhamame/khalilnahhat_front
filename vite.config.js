@@ -17,6 +17,16 @@ export default defineConfig({
     strictPort: true,
     proxy: {
       '/khalil-media': mediaDevProxy(),
+      // Booking calls use the locally developed room routes while the remaining APIs use their configured host.
+      '^/api/bookings/[^/]+/room(?:/|\\?|$)': {
+        target: process.env.VITE_BOOKING_ROOM_PROXY_TARGET || 'http://127.0.0.1:4310',
+        changeOrigin: true,
+        configure(proxy) {
+          proxy.on('proxyReq', (proxyRequest, request) => {
+            if (request.headers.origin === `http://${request.headers.host}` || request.headers.origin === `https://${request.headers.host}`) proxyRequest.removeHeader('origin');
+          });
+        },
+      },
       // The mailbox always sends from OVH's fixed IP, even when other APIs run locally.
       // Keep inbox, send and send-status on the same authenticated mailbox service.
       '/api/admin/mail': {

@@ -26,7 +26,7 @@ export default function BookingStatusPipeline({request={},draft=false,ar=false,t
   }[stage]||''
   const hint=audience==='admin'?adminHint:({
     draft:ar?'لم يتم إرسال هذه المسودة بعد. أكمل بياناتك وأرسل طلب الحجز للانتقال إلى الخطوة التالية.':'This draft has not been submitted. Complete your details and send your booking request to move to the next stage.',
-    requested:ar?'استلمنا طلب حجزك. يجري التحقق من التوافر.':'Your booking request was received. Availability is being checked.',
+    requested:[ar?'استلمنا طلب حجزك. يجري التحقق من التوافر.':'Your booking request was received. Availability is being checked.',tr('Khalil is reviewing your event plan. Pricing will appear here when the quote is ready.')].join(' '),
     available:ar?'تم تأكيد توافر التاريخ. يجري إعداد عرض السعر.':'Your date is available. Your quote is being prepared.',
     unavailable:request.availability?.reason||'',
     quote_ready:j.canRecordDeposit?(ar?'تم قبول العرض. اتبع تعليمات دفع العربون لتأكيد الحجز.':'Your quote is accepted. Follow the deposit instructions to confirm your booking.'):(ar?'عرض السعر جاهز للمراجعة والقبول.':'Your quote is ready to review and accept.'),

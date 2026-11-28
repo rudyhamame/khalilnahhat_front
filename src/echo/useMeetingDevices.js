@@ -5,10 +5,16 @@ const cancelled=()=>Object.assign(new Error('Media request cancelled.'),{name:'A
 export function useMeetingDevices({streamRef,peerRef,ar=false}){
  const [devices,setDevices]=useState({audio:[],video:[]}),[selected,setSelected]=useState({audio:'',video:''}),[busy,setBusy]=useState(false),[previewing,setPreviewing]=useState(false),[previewKind,setPreviewKind]=useState('video'),[error,setError]=useState(''),[revision,setRevision]=useState(0);
  const mounted=useRef(true),epoch=useRef(0),working=useRef(false),preferences=useRef({audio:'',video:''}),candidates=useRef({});
- const refresh=useCallback(async()=>{try{if(!navigator.mediaDevices?.enumerateDevices)return;const result=await meetingDeviceList(navigator.mediaDevices);if(mounted.current)setDevices(result);}catch{/* Device labels can be unavailable until permission is granted. */}},[]);
+ const accessError=useCallback(()=>{
+  if(window.isSecureContext===false)return ar?'يتطلب الميكروفون والكاميرا اتصال HTTPS. على هذا الكمبيوتر افتح http://localhost:5176، أو استخدم عنوان HTTPS موثوقاً على الأجهزة الأخرى.':'Microphone and camera access requires HTTPS. On this computer, open http://localhost:5176. On other devices, use a trusted HTTPS address.';
+  if(!navigator.mediaDevices?.getUserMedia||!navigator.mediaDevices?.enumerateDevices)return ar?'هذا المتصفح لا يتيح الوصول إلى الميكروفون والكاميرا. استخدم متصفحاً يدعمهما وتحقق من أذونات الموقع.':'This browser does not provide microphone and camera access. Use a supported browser and check site permissions.';
+  return '';
+ },[ar]);
+ const refresh=useCallback(async()=>{try{const unavailable=accessError();if(unavailable){if(mounted.current)setError(unavailable);return;}const result=await meetingDeviceList(navigator.mediaDevices);if(mounted.current)setDevices(result);}catch{if(mounted.current)setError(ar?'تعذر اكتشاف الأجهزة. تحقق من أذونات الميكروفون والكاميرا في المتصفح.':'Could not detect devices. Check microphone and camera permissions in your browser.');}},[accessError,ar]);
  const reset=useCallback(()=>{epoch.current++;working.current=false;for(const track of Object.values(candidates.current))track.stop();candidates.current={};streamRef.current?.getTracks().forEach(track=>track.stop());streamRef.current=null;if(mounted.current){setBusy(false);setPreviewing(false);setError('');setRevision(value=>value+1);}},[streamRef]);
  useEffect(()=>{mounted.current=true;refresh();const mediaDevices=navigator.mediaDevices;mediaDevices?.addEventListener?.('devicechange',refresh);return()=>{mounted.current=false;mediaDevices?.removeEventListener?.('devicechange',refresh);reset();};},[refresh,reset]);
  const getMedia=async kind=>{
+  const unavailable=accessError();if(unavailable)throw Object.assign(new Error(unavailable),{name:'NotSupportedError'});
   if(working.current)throw cancelled();
   const current=streamRef.current;
   if(current?.getAudioTracks().some(track=>track.readyState==='live')&&(kind!=='video'||current.getVideoTracks().some(track=>track.readyState==='live'))){if(kind!=='video')for(const track of current.getVideoTracks()){current.removeTrack(track);track.stop();}setPreviewing(false);return current;}
@@ -35,7 +41,7 @@ export function useMeetingDevices({streamRef,peerRef,ar=false}){
   if(working.current)return;
   if(previewing&&previewKind===kind){reset();return;}
   try{await getMedia(kind);if(mounted.current){setPreviewKind(kind);setPreviewing(true);}}
-  catch(failure){if(failure.name!=='AbortError'&&mounted.current)setError(ar?'تعذر فتح المعاينة. اسمح بالميكروفون والكاميرا وتحقق من أجهزتك.':'Could not open the preview. Allow microphone and camera access and check your devices.');}
+  catch(failure){if(failure.name!=='AbortError'&&mounted.current)setError(failure.name==='NotSupportedError'?failure.message:ar?'تعذر فتح المعاينة. اسمح بالميكروفون والكاميرا وتحقق من أجهزتك.':'Could not open the preview. Allow microphone and camera access and check your devices.');}
  };
  const setEnabled=useCallback((kind,enabled)=>{for(const track of streamRef.current?.getTracks()||[])if(track.kind===kind)track.enabled=enabled;if(candidates.current[kind])candidates.current[kind].enabled=enabled;},[streamRef]);
  return {devices,selected,busy,previewing,previewKind,error,revision,refresh,reset,getMedia,change,togglePreview,setEnabled};
