@@ -2,7 +2,7 @@ import {useState} from 'react';
 import {ArrowUpRight,Check,CheckCircle2,Copy,LoaderCircle} from 'lucide-react';
 import './bookingConfirmation.css';
 
-export default function BookingConfirmation({code,ar=false,heading=true,cleaning=false,onPlanAnother,onRetryCleanup,cleanupError=''}){
+export default function BookingConfirmation({code,ar=false,heading=true,cleaning=false,onPlanAnother,onRetryCleanup,cleanupError='',hideWorkspaceLink=false}){
  const [copied,setCopied]=useState(false),[copyError,setCopyError]=useState('');
  const tr=(en,arabic)=>ar?arabic:en;
  const copy=async()=>{
@@ -22,7 +22,7 @@ export default function BookingConfirmation({code,ar=false,heading=true,cleaning
   <p className="booking-receipt-reminder">{tr('Please memorize or save this booking ID. Use it whenever you contact us about your booking.','يرجى حفظ رقم الحجز أو تذكّره، واستخدامه عند التواصل معنا بشأن حجزك.')}</p>
   {copyError&&<p className="booking-receipt-status" role="status">{copyError}</p>}
   <p className="booking-receipt-next">{tr('Your date will be reserved after the team confirms your booking.','سيُحجز موعدك بعد تأكيد فريقنا للحجز.')}</p>
-  <div className="booking-receipt-actions"><a href="/dashboard/bookings">{tr('Open Client Workspace','فتح مساحة العميل')}<ArrowUpRight size={15}/></a>{onPlanAnother&&!cleaning&&<button type="button" onClick={onPlanAnother}>{tr('Plan another event','خطّط لفعالية أخرى')}</button>}</div>
+  <div className="booking-receipt-actions">{!hideWorkspaceLink&&<a href="/dashboard/bookings">{tr('Open Client Workspace','فتح مساحة العميل')}<ArrowUpRight size={15}/></a>}{onPlanAnother&&!cleaning&&<button type="button" onClick={onPlanAnother}>{tr('Plan another event','خطّط لفعالية أخرى')}</button>}</div>
   {cleaning&&<p className="booking-receipt-status" role="status"><LoaderCircle size={14} className="booking-receipt-spinner"/>{tr('Preparing your next draft…','جارٍ تجهيز مسودتك التالية…')}</p>}
   {cleanupError&&<div className="booking-receipt-cleanup"><p role="status">{cleanupError}</p>{onRetryCleanup&&<button type="button" onClick={onRetryCleanup}>{tr('Retry draft cleanup','إعادة محاولة تنظيف المسودة')}</button>}</div>}
  </section>;

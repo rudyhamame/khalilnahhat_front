@@ -21,3 +21,9 @@ html body .echo .booking-receipt .booking-receipt-status{display:flex;gap:7px;al
 @keyframes booking-receipt-spin{to{transform:rotate(360deg)}}
 @media(max-width:600px){html body .echo .booking-receipt,html body .echo .booking-sending{padding:20px}.booking-receipt-actions>a{width:100%}.booking-receipt-code{padding:20px 10px}}
 @media(prefers-reduced-motion:reduce){.booking-receipt-spinner{animation:none}}
+/* Booking ID popup in the client dashboard after sending: stays until closed. */
+.booking-receipt-notice{position:fixed;inset:0;z-index:2000;display:grid;place-items:center;padding:20px;background:#05090bcc;backdrop-filter:blur(6px);overflow-y:auto}
+.booking-receipt-notice-card{position:relative;width:min(560px,100%);max-height:calc(100dvh - 40px);overflow-y:auto;padding:28px 24px 22px;border:1px solid #d9b97045;border-radius:22px;background:#111b1e;box-shadow:0 30px 90px #000a}
+.booking-receipt-notice-close{position:absolute;top:12px;inset-inline-end:12px;display:grid;place-items:center;width:36px;height:36px;border:1px solid #ffffff26;border-radius:50%;background:transparent;color:#e5eee8;cursor:pointer}
+.booking-receipt-notice-done{display:flex;align-items:center;justify-content:center;width:100%;min-height:46px;margin-top:16px;border:0;border-radius:999px;background:#e2c779;color:#14181a;font:700 14px/1 Manrope,'Noto Sans Arabic',sans-serif;cursor:pointer}
+.booking-receipt-notice-close:focus-visible,.booking-receipt-notice-done:focus-visible{outline:2px solid #e2c779;outline-offset:3px}

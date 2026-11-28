@@ -20,6 +20,8 @@ import ClientWorkspace from './ClientWorkspace';
 import BookingConversationHistory from './BookingConversationHistory';
 import BookingDraftReview from './BookingDraftReview';
 import BookingFiles from './BookingFiles';
+import BookingReceiptNotice from '../echo/BookingReceiptNotice';
+import '../echo/bookingConfirmation.css';
 
 
 
@@ -159,6 +161,7 @@ export default function DashboardPage({ user, serviceRequests = [], onQuoteActio
     {activeView === 'meetings' && <MeetingPage embedded lang={{lang:ar?'ar':'en'}} user={user} token={authToken} isSessionReady/>}
     {activeView === 'profile' && <ClientProfile ar={ar} user={user} token={authToken} onSaved={onProfileSaved} onDeleted={()=>window.location.replace('/login')} />}
     {activeView === 'conversations' && <BookingConversationHistory token={authToken}/>}
+    {activeView === 'bookings' && <BookingReceiptNotice ar={ar}/>}
     {activeView === 'bookings' && <RequestedServices requests={serviceRequests} onQuoteAction={onQuoteAction} authToken={authToken} ar={ar} />}
   </ClientWorkspace>;
 }

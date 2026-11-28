@@ -166,7 +166,7 @@ export default function QuotePage({lang,user,isSessionReady,onCreateServiceReque
       const retired=await ctx.finish(receipt);
       setState({busy:false,error:retired?'':tr('Request sent. The old draft could not be cleared; please delete it before starting another.','تم إرسال الطلب. تعذر حذف المسودة السابقة؛ احذفها قبل البدء من جديد.'),done:receipt});
       // Sent from Echo AI: the client follows the request's status on the Booking tab of their dashboard (after the old draft is retired, so that call is never cut off).
-      if(autoSubmit&&retired)window.location.assign('/dashboard/bookings');
+      if(autoSubmit&&retired){try{localStorage.setItem('echo-booking-receipt',JSON.stringify({code:receipt,at:Date.now()}));}catch{/* the dashboard still lists the booking */}window.location.assign('/dashboard/bookings');}
     }catch(error){setState({busy:false,error:error.message||tr('Could not submit your request.','تعذر إرسال الطلب.'),done:null});}
     finally{submitting.current=false;}
   };
@@ -180,6 +180,8 @@ export default function QuotePage({lang,user,isSessionReady,onCreateServiceReque
   });
   if(!user)return <OrderSignIn ar={ar}/>;
   if(!isSessionReady)return <p role="status">{tr('Checking your sign-in…','جارٍ التحقق من تسجيل الدخول…')}</p>;
+  // Sent from Echo AI the confirmation (with the booking ID) is shown in the client dashboard after the redirect, where it stays until closed; keep the sending screen until then.
+  if(state.done&&autoSubmit&&!state.error)return <BookingSendingState ar={ar}/>;
   if(state.done)return <BookingConfirmation code={state.done} ar={ar} heading={!embedded} cleanupError={state.error}/>;
   if(autoSubmit&&!atomsConfirmed)return <section className="booking-submit-error" role="status"><p>{tr('Confirm every entry in Booking review before submitting.','أكّد جميع المعلومات في مراجعة الحجز قبل الإرسال.')}</p><a className="booking-submit-open" href="/echo-ai">{tr('Open Booking review','فتح مراجعة الحجز')}</a></section>;
   if(autoSubmit&&!showForm)return state.error?<section className="booking-submit-error" role="status" aria-live="polite"><h2>{tr('We could not send it yet','تعذر الإرسال حتى الآن')}</h2><p role="alert">{state.error}</p><div className="booking-auto-send-actions"><button className="echo-btn" type="button" onClick={()=>{setState({busy:false,error:'',done:null});submit();}}>{tr('Try again','حاول مرة أخرى')}</button><button className="echo-btn booking-auto-send-secondary" type="button" onClick={()=>onOpenSmartCart?onOpenSmartCart():setShowForm(true)}>{onOpenSmartCart?tr('Open Echo AI Smart Cart','افتح عربة إيكو الذكية'):tr('Open the details to fix it','افتح التفاصيل لتصحيحها')}</button></div></section>:<BookingSendingState ar={ar}/>;
