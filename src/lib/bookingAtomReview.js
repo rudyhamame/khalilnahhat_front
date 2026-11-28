@@ -26,11 +26,11 @@ export function manualBookingFieldHref(path,signedIn=true){
  if(['event.type','event.title','event.date','event.startTime','event.endTime'].includes(path))return '/booking'+field+'#booking-date';
  if(path==='event.setup.requirements')return '/booking'+field+'#setup-notes';
  if(path==='additional.voucherCode')return '/booking'+field+'#voucher';
- if(path.startsWith('references.'))return '/rentals'+field+'#references';
- if(path==='additional.notes')return '/rentals'+field+'#additional-notes';
- if(path.startsWith('music.')&&path!=='music.mcRequested')return '/rentals'+field+'#rentals-hero-title';
+ if(path.startsWith('references.'))return '/booking'+field+'#references';
+ if(path==='additional.notes')return '/booking'+field+'#additional-notes';
+ if(path.startsWith('music.')&&path!=='music.mcRequested')return '/booking'+field+'#rentals-hero-title';
  if(path.startsWith('event.setup.')&&path!=='event.setup.requirements')return '/room'+field;
- return '/rentals'+field+'#rental-equipment';
+ return '/booking'+field+'#rental-equipment';
 }
 export function bookingAtomCorrectionReply(path,label,ar=false){
  const code=fieldCode(path);if(code)label=`${code} ${label}`;// the same index the Booking page and the review show

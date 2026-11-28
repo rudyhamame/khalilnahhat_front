@@ -1,5 +1,5 @@
 import {hasBookingServices} from '../lib/bookingFlow.mjs';
-import {lazy,Suspense} from 'react';
+import {lazy,Suspense,useEffect} from 'react';
 import {useTreeSteps} from '../lib/tree';
 import {EventOrderProvider} from './EventOrderProvider';
 import {useEventOrder} from './eventOrderContext';
@@ -34,6 +34,20 @@ function SectionContent({section,lang,user,token,liveStream,liveSessions,isSessi
  const order=useEventOrder(),theme=useSeasonalTheme(),steps=useTreeSteps();
  const onPlan=initial=>{if(initial===null){order.closeEditor();return;}order.begin(order.order.source,initial);order.openEditor();};
  const ar=lang.lang==='ar';
+ // "Edit manually" links open the Booking page with ?field=<atom>: scroll to that exact data atom (sections load lazily, so keep looking for a few seconds) and blink it.
+ useEffect(()=>{
+  if(section!=='availability'&&section!=='setup')return undefined;
+  const field=new URLSearchParams(window.location.search).get('field'),hash=window.location.hash.slice(1);
+  if(!field&&!hash)return undefined;
+  let tries=0;
+  const timer=setInterval(()=>{
+   const item=field?.startsWith('equipment:')?CSS.escape(field.split(':').at(-1)):'';// an equipment atom is equipment:<category>:<item>; its card carries the item id
+   const target=(field&&(document.querySelector(`[data-booking-field="${CSS.escape(field)}"]`)||document.querySelector(`[data-field="${CSS.escape(field)}"]`)))||(item&&document.querySelector(`[data-equipment-id="${item}"],[data-equipment-item="${item}"]`))||(hash&&document.getElementById(hash));
+   if(target){clearInterval(timer);target.scrollIntoView({block:'center',behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});target.classList.add('is-blinking');setTimeout(()=>target.classList.remove('is-blinking'),2600);}
+   else if(++tries>40)clearInterval(timer);
+  },250);
+  return()=>clearInterval(timer);
+ },[section]);
  // The equipment explorer opens when the client answers yes to the rental question (or already chose equipment, or arrives from a link to a rental field).
  const rentalOpen=order.order?.rental?.requested===true||order.order?.equipment?.length>0||order.order?.services?.some(id=>!['dj','mc'].includes(id))||/^[?&]field=(equipment|services|rental)/.test(window.location.search.replace('?','&').replace(/^&/,'?'));
  // Event details and services are one continuous booking page (/booking and /rentals show the same page).

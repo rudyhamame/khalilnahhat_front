@@ -92,7 +92,7 @@ export default function RentalWorkbench({services,sections,service,items,selecte
         <span className="rw-count">{items.length} {tr(items.length===1?'item':'items','عنصر')}</span>
       </header>
       <div id="rental-equipment-panel" className="rw-eq-grid" role="region" aria-label={heading}>
-        {items.map(row=>{const picked=cart[row.id]?.quantity||0;return <button type="button" key={row.id} className={`rw-card${row.id===item?.id&&showDetails?' is-open':''}${picked>0?' is-picked':''}`} aria-pressed={row.id===item?.id&&showDetails} onClick={()=>openEquipment(row)}>
+        {items.map(row=>{const picked=cart[row.id]?.quantity||0;return <button type="button" key={row.id} data-equipment-item={row.id} className={`rw-card${row.id===item?.id&&showDetails?' is-open':''}${picked>0?' is-picked':''}`} aria-pressed={row.id===item?.id&&showDetails} onClick={()=>openEquipment(row)}>
           <span className="rw-card-img"><EquipmentThumbnail key={`${row.id}:${row.imageUrl||''}`} item={row}/></span>
           <span className="rw-card-tag" aria-label={`${tr('Equipment','المعدة')} ${equipmentTag(row)}`}>{equipmentTag(row)}</span>
           <span className="rw-card-copy"><strong>{name(row)}</strong>{row.brandModel&&<small>{row.brandModel}</small>}</span>
