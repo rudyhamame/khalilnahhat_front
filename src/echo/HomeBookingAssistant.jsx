@@ -128,7 +128,7 @@ export default function HomeBookingAssistant({lang,user,token,auth,overlay=false
  },[]);
  // When Echo updates the draft, scroll Booking review to the changed values and make them glow.
  // Back from creating the account (/echo-ai?send=1): the signed-in client lands on the review & send dialog once the draft is ready.
- useEffect(()=>{if(!ctx.user||!ctx.token||!ctx.draftEditable||!new URLSearchParams(window.location.search).has('send'))return;window.history.replaceState(null,'',window.location.pathname+window.location.hash);setView('details');},[ctx.user,ctx.token,ctx.draftEditable]);
+ useEffect(()=>{if(!ctx.user||!ctx.token||!ctx.draftEditable||!new URLSearchParams(window.location.search).has('send'))return;window.history.replaceState(null,'',window.location.pathname+window.location.hash);/* the account was created from the personal info entered before verification: bring it into the booking first, so nothing is lost or asked again */(async()=>{if(!ctx.getOrder?.().accountDetailsImported){try{await ctx.importAccountDetails?.();}catch{/* the review lists whatever is still missing */}}setView('details');})();},[ctx.user,ctx.token,ctx.draftEditable]);
  const steps=useRef(null);
  useChangeHighlight({rootRef:steps,changed,flashClass:'ea-flash',delay:150,reveal:(rows,list)=>{
   const box=list.getBoundingClientRect(),first=rows[0].getBoundingClientRect();
