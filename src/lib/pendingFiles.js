@@ -24,7 +24,7 @@ export async function uploadStaged(items,kind,token){
   const {url,name,sha256}=await uploadEventFile(new File([blob],item.name,{type:blob.type}),kind,token);
   if(sha256&&sha256!==item.sha256)throw new Error(`“${item.name}” could not be verified. Please try again.`);
   next.push({url,name,comment:item.comment||'',sha256:item.sha256,size:item.size});
-  await unstageFile(item.sha256);
+  // The staged copy stays until the booking is really sent (the caller removes it then): a failed or refused step after the upload must not leave the order pointing at a file that is gone.
  }
  return next;
 }

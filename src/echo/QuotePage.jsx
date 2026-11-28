@@ -1,4 +1,4 @@
-import {isPending,uploadStaged} from '../lib/pendingFiles';
+import {isPending,uploadStaged,unstageFile} from '../lib/pendingFiles';
 import BookingConfirmation,{BookingSendingState} from './BookingConfirmation';
 import {useTree} from '../lib/tree';
 import {formatCanadianPhone} from '../lib/canadianPhone';
@@ -134,12 +134,15 @@ export default function QuotePage({lang,user,isSessionReady,onCreateServiceReque
       // Finish current AI writes and persist the conversation before taking the submission snapshot.
       const conversation=await ctx.flushConversation?.();
       // Photos and documents stayed in this browser until now; upload them only at submission.
-      for(const [field,kind] of [['photos','photo'],['files','file']]){const staged=ctx.getOrder().references?.[field]||[];if(staged.some(isPending))ctx.setField('references.'+field,await uploadStaged(staged,kind,ctx.token));}
+      const uploadedFields={},stagedCopies=[];
+      for(const [field,kind] of [['photos','photo'],['files','file']]){const staged=ctx.getOrder().references?.[field]||[];if(staged.some(isPending)){const uploaded=await uploadStaged(staged,kind,ctx.token);uploadedFields[field]=uploaded;stagedCopies.push(...staged.filter(isPending));ctx.setField('references.'+field,uploaded);}}
       // A signed-in client's name, email, phone and contact choices come from the account (the server uses it too); fill them in before checking, so a booking not yet imported is not rejected for them.
       let current=ctx.getOrder();
       // The signed-in session user may not carry the profile (name, phone, contact choices): import the account details, as the "Get from account" button does, before checking.
       if(!current.accountDetailsImported){try{await ctx.importAccountDetails?.();}catch{/* the check below lists whatever is still missing */}current=ctx.getOrder();}
-      const order=applyAccountProfile(current,user);
+      let order=applyAccountProfile(current,user);
+      // Use the uploaded addresses for this submission even if the draft refused the edit just above.
+      if(Object.keys(uploadedFields).length)order={...order,references:{...order.references,...uploadedFields}};
       const issues=validateEventOrder(order,{submission:true});
       if(issues.length){
         if(guided)selectTab(bookingIssueStep(order,issues));
@@ -157,6 +160,7 @@ export default function QuotePage({lang,user,isSessionReady,onCreateServiceReque
       const receipt=bookingSubmissionReceipt(result);
       if(!receipt)throw new Error(tr('The server did not return a booking reference. Check Client Workspace before retrying. Your form is still here.','لم يُرجع الخادم رقم الطلب. تحقق من مساحة العميل قبل المحاولة مجدداً. بقي النموذج هنا.'));
       storeBookingSubmissionIdentity(submissionStorageKey,null);
+      for(const item of stagedCopies)await unstageFile(item.sha256);// sent: the browser copies of the uploaded files are no longer needed
       setState({busy:true,error:'',done:receipt});
       // Retire only after a durable receipt; the request keeps its own conversation snapshot.
       const retired=await ctx.finish(receipt);
