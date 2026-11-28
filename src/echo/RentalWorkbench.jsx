@@ -31,7 +31,8 @@ function scrollServiceWheel(event,direction,ar){
 
 function EquipmentWheel({ar,label,selectedItemId,children}){
   const viewport=useRef(null);
-  useEffect(()=>{if(!selectedItemId)return;const frame=requestAnimationFrame(()=>{const target=Array.from(viewport.current?.querySelectorAll('[data-equipment-id]')||[]).find(node=>node.dataset.equipmentId===selectedItemId);target?.scrollIntoView({block:'nearest',inline:'center',behavior:window.matchMedia?.('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});});return()=>cancelAnimationFrame(frame);},[selectedItemId]);
+  // Scroll the wheel only, never the page: scrollIntoView would also scroll the page down to this card on load.
+  useEffect(()=>{if(!selectedItemId)return;const frame=requestAnimationFrame(()=>{const target=Array.from(viewport.current?.querySelectorAll('[data-equipment-id]')||[]).find(node=>node.dataset.equipmentId===selectedItemId);const box=viewport.current;if(target&&box)box.scrollTo({left:box.scrollLeft+target.getBoundingClientRect().left-box.getBoundingClientRect().left-(box.clientWidth-target.offsetWidth)/2,behavior:window.matchMedia?.('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});});return()=>cancelAnimationFrame(frame);},[selectedItemId]);
   return <div ref={viewport} className="rw-equipment-wheel" role="region" aria-label={label} tabIndex={0} dir={ar?'rtl':'ltr'}>{children}</div>;
 }
 

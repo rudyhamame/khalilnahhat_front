@@ -62,7 +62,7 @@ export default function ReferencesSection({ar=false}){
   useEffect(()=>{if(['#references','#special-requests'].includes(window.location.hash))document.getElementById('references')?.scrollIntoView({block:'start'});},[]);
   const common={ctx,ar,tr};
   return <div id="references" className="booking-services" dir={ar?'rtl':'ltr'}>
-    <BookingStep number={8} title={tr('Anything to show us?','هل لديك ما تريد أن تُرينا إياه؟')} cardTitle={<>{tr('Inspiration & documents','الإلهام والمستندات')}</>} copy={tr('Share inspiration photos or links, and documents with your own notes. Everything here appears under References in your Booking summary.','شاركنا صوراً ملهمة أو روابطها، ومستندات بملاحظاتك. كل ما هنا يظهر ضمن المراجع في ملخص حجزك.')}>
+    <BookingStep number={8} title={tr('Anything to show us?','هل لديك ما تريد أن تُرينا إياه؟')} cardTitle={<>{tr('Inspiration & documents','الإلهام والمستندات')}</>} copy={tr('Share inspiration photos, links (a playlist, a video, a Pinterest board), or documents such as a run-of-show, a floor plan or a guest list, each with your own note about why it matters. Everything here appears under References in your Booking summary.','شاركنا صوراً ملهمة أو روابط (قائمة تشغيل، فيديو، لوحة بينترست)، أو مستندات مثل برنامج الحفل أو مخطط القاعة أو قائمة الضيوف، مع ملاحظتك عن أهميتها. كل ما هنا يظهر ضمن المراجع في ملخص حجزك.')}>
       <div className="ref-stack">
       <Attachments {...common} kind="photo" field="photos" icon={ImageIcon} title={tr('Inspiration photos','صور ملهمة')} hint={tr('JPG, PNG or WebP, up to 10 MB each.','JPG أو PNG أو WebP، حتى 10 ميجابايت للملف.')}/>
       <PhotoLinks ctx={ctx} tr={tr}/>

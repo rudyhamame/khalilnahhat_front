@@ -5,7 +5,7 @@
 .hero-intro-controls button:hover:not(:disabled){background:#c3e5d51c}
 .hero-intro-controls button:disabled{opacity:.35;cursor:default}
 .hero-intro-skip-seconds{position:absolute;inset:0;display:grid;place-items:center;padding-top:2px;font:700 12px/1 'Noto Sans',sans-serif}
-@media(max-width:600px){.hero-intro-controls{margin-inline:auto!important}}
+@media (max-width:600px), (max-width:1100px) and (orientation:portrait){.hero-intro-controls{margin-inline:auto!important}}
 .hero-intro-player{position:absolute;inset-inline-start:0;top:clamp(160px,25svh,220px);width:clamp(210px,21vw,310px);pointer-events:auto;color:#e5eee8;text-align:start}
 .hero-intro-language{display:flex;align-items:center;gap:8px;margin:0 0 14px;color:#b0ccc1;font-size:12px;font-weight:600;letter-spacing:.13em}
 .hero-intro-play{display:flex;align-items:center;gap:12px;border:1px solid #d4e8df4d;border-radius:40px;padding:8px 18px 8px 8px;color:#f5fbf8;background:#152126b8;font:inherit;font-size:14px;cursor:pointer;backdrop-filter:blur(12px);transition:background .2s,border-color .2s}
@@ -26,8 +26,8 @@
 .hero-narration-arcs .is-spoken{fill:#9affdc;paint-order:stroke;stroke:#9affdc33;stroke-width:.45px}
 .hero-narration-arcs .was-spoken{fill:#aedac6}
 @media(prefers-reduced-motion:reduce){.hero-narration-arcs{animation:none}}
-@media(max-width:1100px){.hero-intro-player{width:clamp(180px,23vw,250px);top:160px}.hero-intro-play{font-size:12px;gap:8px;padding-inline-end:12px}.hero-intro-note{font-size:12px}.hero-introduction .curved-intro-text.hero-narration-text svg{font-size:27px}}
-@media(max-width:600px){
+@media (max-width:1100px){.hero-intro-player{width:clamp(180px,23vw,250px);top:160px}.hero-intro-play{font-size:12px;gap:8px;padding-inline-end:12px}.hero-intro-note{font-size:12px}.hero-introduction .curved-intro-text.hero-narration-text svg{font-size:27px}}
+@media (max-width:600px), (max-width:1100px) and (orientation:portrait){
  .hero-intro-player{top:100px;inset-inline-start:50%;transform:translateX(-50%);width:min(80vw,300px);text-align:center}
  [dir=rtl] .hero-intro-player{transform:translateX(50%)}
  .hero-intro-language,.hero-intro-play{justify-content:center;margin-inline:auto}
@@ -60,7 +60,7 @@
 @keyframes hero-language-leave{to{opacity:0;transform:translateY(-12px) scale(.97)}}
 @keyframes hero-language-backdrop{from{opacity:0}to{opacity:1}}
 @keyframes hero-scroll-invite{0%,100%{transform:translateY(-3px)}50%{transform:translateY(4px)}}
-@media(max-width:600px){.hero-language-dialog{padding:32px 22px}.hero-language-dialog h2{font-size:24px}.hero-language-dialog h2 span{font-size:20px}.hero-language-options button{padding:14px 12px}.hero-intro-scroll{justify-content:center}}
+@media (max-width:600px), (max-width:1100px) and (orientation:portrait){.hero-language-dialog{padding:32px 22px}.hero-language-dialog h2{font-size:24px}.hero-language-dialog h2 span{font-size:20px}.hero-language-options button{padding:14px 12px}.hero-intro-scroll{justify-content:center}}
 @media(prefers-reduced-motion:reduce){.hero-language-dialog,.hero-language-dialog::backdrop,.hero-language-dialog[data-leaving],.hero-language-dialog[data-leaving]::backdrop,.hero-intro-scroll svg{animation:none}.hero-language-options button{transition:none}}
 
 .hero-narration-arcs .is-current{fill:#f4fff8;filter:drop-shadow(0 3px 7px #080d0fdd)}
@@ -100,8 +100,8 @@ html body dialog.hero-language-dialog{position:fixed;inset:0;margin:auto;height:
 .hero-intro-note{font-size:12px;line-height:1.8;max-width:none;margin-top:14px;color:#90ae9a}
 .hero-intro-change-language{margin-top:17px;border-top:1px solid #d7ecdc18;padding-top:12px;width:100%;font-size:12px;color:#a7c3af}
 @keyframes hero-intro-active{from{height:5px;opacity:.5}to{height:18px;opacity:1}}
-@media(max-width:1100px){.hero-intro-player{width:clamp(210px,24vw,270px)}.hero-intro-transport{gap:10px;margin-top:17px}.hero-intro-transport .hero-intro-play{width:46px;height:46px;flex-basis:46px}.hero-intro-track strong{font-size:12px}.hero-intro-subtitle{font-size:12px}}
-@media(max-width:600px){.hero-intro-player{width:min(80vw,300px)}.hero-intro-heading{justify-content:center}.hero-intro-transport{margin-top:12px;text-align:start}.hero-intro-transport .hero-intro-play{margin:0}.hero-intro-timeline{margin-top:14px}.hero-intro-change-language{margin-top:10px;padding-top:8px}.hero-audio-introduction .hero-introduction-chunks{inset:325px calc(var(--echo-viewport-gutter)*-1) 0}}
+@media (max-width:1100px){.hero-intro-player{width:clamp(210px,24vw,270px)}.hero-intro-transport{gap:10px;margin-top:17px}.hero-intro-transport .hero-intro-play{width:46px;height:46px;flex-basis:46px}.hero-intro-track strong{font-size:12px}.hero-intro-subtitle{font-size:12px}}
+@media (max-width:600px), (max-width:1100px) and (orientation:portrait){.hero-intro-player{width:min(80vw,300px)}.hero-intro-heading{justify-content:center}.hero-intro-transport{margin-top:12px;text-align:start}.hero-intro-transport .hero-intro-play{margin:0}.hero-intro-timeline{margin-top:14px}.hero-intro-change-language{margin-top:10px;padding-top:8px}.hero-audio-introduction .hero-introduction-chunks{inset:325px calc(var(--echo-viewport-gutter)*-1) 0}}
 @media(prefers-reduced-motion:reduce){.hero-intro-transport[data-playing] .hero-intro-playing-bars i{animation:none;height:12px}.hero-intro-transport .hero-intro-play{transition:none}}
 
 /* Sculpted charcoal and brushed gold, echoing the vinyl in VP1. */
@@ -114,7 +114,7 @@ html body dialog.hero-language-dialog{position:fixed;inset:0;margin:auto;height:
 .echo .hero-intro-launch:focus-visible{outline:2px solid #FFFFFF;outline-offset:7px}
 .echo .hero-intro-launch:disabled{cursor:wait;opacity:.7}
 .hero-intro-launch-caption{display:block;margin:13px 0 17px;color:#e2c58c;font:500 14px/1.6 'Manrope','Noto Sans Arabic',sans-serif}
-@media(max-width:760px){.echo .hero-intro-launch{width:clamp(112px,16svh,150px);margin:14px auto 0}.hero-intro-launch-caption{font-size:13px;margin:10px 0 12px}.hero-intro-controls{margin-inline:auto!important}}
+@media (max-width:600px), (max-width:1100px) and (orientation:portrait){.echo .hero-intro-launch{width:clamp(112px,16svh,150px);margin:14px auto 0}.hero-intro-launch-caption{font-size:13px;margin:10px 0 12px}.hero-intro-controls{margin-inline:auto!important}}
 @media(prefers-reduced-motion:reduce){.echo .hero-intro-launch{transition:none}}
 
 /* Language is chosen before mounting the portrait and vinyl scene. */
@@ -129,14 +129,14 @@ html body dialog.hero-language-dialog{position:fixed;inset:0;margin:auto;height:
 :is(.echo,.hero-language-modal) .hero-language-entry>button:hover{transform:translateY(-5px);border-color:#FFFFFF;background-color:#242424}
 :is(.echo,.hero-language-modal) .hero-language-entry>button:active{transform:translateY(-1px)}
 :is(.echo,.hero-language-modal) .hero-language-entry>button:focus-visible{outline:2px solid #FFFFFF;outline-offset:6px}
-@media(max-width:600px){.hero-language-entry{gap:14px;padding:12px}:is(.echo,.hero-language-modal) .hero-language-entry>button{width:min(43vw,210px);min-height:180px;padding:26px 12px;border-radius:25px}.hero-language-entry-title{font-size:48px}.hero-language-entry-subtitle{font-size:14px}}
+@media (max-width:600px), (max-width:1100px) and (orientation:portrait){.hero-language-entry{gap:14px;padding:12px}:is(.echo,.hero-language-modal) .hero-language-entry>button{width:min(43vw,210px);min-height:180px;padding:26px 12px;border-radius:25px}.hero-language-entry-title{font-size:48px}.hero-language-entry-subtitle{font-size:14px}}
 @media(prefers-reduced-motion:reduce){:is(.echo,.hero-language-modal) .hero-language-entry>button{transition:none}}
 
 /* Keep transport centered beneath the greeting's column. */
 .hero-introduction .hero-intro-player{width:min(29%,420px);text-align:center}
 .echo .hero-introduction .hero-intro-launch{margin-inline:auto}
 .hero-introduction .hero-intro-controls{margin:22px auto 0!important}
-@media(max-width:600px){.hero-introduction .hero-intro-player{width:min(80vw,300px)}}
+@media (max-width:600px), (max-width:1100px) and (orientation:portrait){.hero-introduction .hero-intro-player{width:min(80vw,300px)}}
 
 /* Small transport keys share the play button's beveled metal finish. */
 .hero-introduction .hero-intro-controls{gap:12px}
@@ -147,7 +147,7 @@ html body dialog.hero-language-dialog{position:fixed;inset:0;margin:auto;height:
 .hero-intro-control-symbol>svg{width:25px;height:25px;filter:drop-shadow(0 1px 0 #533915) drop-shadow(0 2px 2px #0008)}
 .hero-intro-control-symbol .hero-intro-skip-seconds{font-size:12px;padding-top:1px;color:#FFFFFF}
 .echo .hero-intro-controls .hero-intro-transport-button:disabled{opacity:.45}
-@media(max-width:600px){.echo .hero-introduction .hero-intro-controls .hero-intro-transport-button{flex-basis:48px;width:48px;height:48px;min-height:48px;padding:4px}.hero-introduction .hero-intro-controls{gap:10px}}
+@media (max-width:600px), (max-width:1100px) and (orientation:portrait){.echo .hero-introduction .hero-intro-controls .hero-intro-transport-button{flex-basis:48px;width:48px;height:48px;min-height:48px;padding:4px}.hero-introduction .hero-intro-controls{gap:10px}}
 .echo .hero-intro-controls .hero-intro-transport-button:hover:not(:disabled){background:linear-gradient(145deg,#657073 0%,#1c2427 8%,#080e11 49%,#293337 92%,#657073);color:#FFFFFF}
 .echo .hero-intro-controls .hero-intro-transport-button:focus-visible{outline:2px solid #FFFFFF;outline-offset:5px}
 
@@ -178,7 +178,7 @@ html body dialog.hero-language-dialog{position:fixed;inset:0;margin:auto;height:
 .echo .hero-introduction .hero-intro-player .hero-intro-controls-inline .hero-intro-launch:is(:hover,:active,:disabled){flex:0 0 48px;width:48px;height:48px;min-height:48px;margin:0;padding:5px;border:0;border-radius:10px;background:transparent;box-shadow:none}
 .hero-intro-controls-inline .hero-intro-launch-face>svg{width:30px;height:30px}
 .echo .hero-intro-controls-inline .hero-intro-launch:hover:not(:disabled){opacity:.7;transform:none}
-@media(max-width:1100px){.hero-introduction .hero-intro-controls-inline{gap:2px}.echo .hero-introduction .hero-intro-player .hero-intro-controls-inline .hero-intro-launch{flex-basis:40px;width:40px;height:40px;min-height:40px}}
+@media (max-width:1100px){.hero-introduction .hero-intro-controls-inline{gap:2px}.echo .hero-introduction .hero-intro-player .hero-intro-controls-inline .hero-intro-launch{flex-basis:40px;width:40px;height:40px;min-height:40px}}
 
 .hero-introduction .hero-intro-heading-group .hero-intro-player{width:100%;margin:24px auto 0;translate:none;text-align:center}
 
@@ -186,7 +186,7 @@ html body dialog.hero-language-dialog{position:fixed;inset:0;margin:auto;height:
 
 html[dir=rtl] .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .echo-hero-title{font-size:clamp(12px,1.4vw,22px)!important}
 
-@media(max-width:720px), (max-height:450px) and (orientation:landscape) and (any-pointer:coarse), (orientation:portrait) and (any-pointer:coarse){
+@media (max-width:600px), (max-width:1100px) and (orientation:portrait), (max-height:450px) and (orientation:landscape) and (any-pointer:coarse), (orientation:portrait) and (any-pointer:coarse){
  .echo .hero-introduction .hero-intro-heading-group{width:min(100%,280px);margin:10px auto 0;text-align:center}
  .hero-introduction .hero-intro-heading-group .hero-returning-greeting{margin:0 0 4px;font-size:12px;line-height:1.45;text-align:center}
  .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .echo-hero-title{font-size:clamp(14px,4svh,20px)!important;line-height:1.3;text-align:center}
@@ -229,7 +229,7 @@ html body dialog.hero-language-modal{position:fixed;inset:0;box-sizing:border-bo
 .hero-introduction .hero-intro-meta time{font:600 12px/1 ui-monospace,Menlo,monospace;letter-spacing:.04em;color:#a9b8b0}
 .hero-introduction .hero-intro-start-hint{position:absolute;z-index:2;inset:50% 24px auto;margin:0;translate:0 -50%;pointer-events:none;text-align:center;text-wrap:balance;font:italic 600 clamp(18px,1.55vw,23px)/1.25 'Cormorant Garamond','Playfair Display',Georgia,serif;letter-spacing:.015em;color:#f0e8d8}
 html[dir=rtl] .hero-introduction .hero-intro-start-hint{font:400 clamp(16px,1.35vw,20px)/1.55 'Aref Ruqaa','Noto Sans Arabic',serif;letter-spacing:0}
-@media(max-width:760px) and (orientation:portrait){.hero-introduction .hero-intro-frame[data-open=false] .hero-intro-start-hint{display:none}}
+@media (max-width:1100px) and (orientation:portrait){.hero-introduction .hero-intro-frame[data-open=false] .hero-intro-start-hint{display:none}}
 .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-player .hero-intro-subtitle{box-sizing:border-box;width:100%;height:4.8em;min-height:0;margin:0;padding:0;overflow:hidden;font:500 16px/1.6 'Noto Sans','Noto Sans Arabic',sans-serif;text-align:start;text-wrap:pretty;color:#d4dfd8}
 .hero-introduction .hero-intro-subtitle.is-idle{color:#8c9d94;font-style:italic}
 .hero-introduction .hero-intro-seek{appearance:none;display:block;width:100%;height:18px;margin:0;padding:0;background:transparent;cursor:pointer}
@@ -241,7 +241,7 @@ html[dir=rtl] .hero-introduction .hero-intro-start-hint{font:400 clamp(16px,1.35
 .hero-introduction .hero-intro-seek:disabled{cursor:default;opacity:.5}
 .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-player .hero-intro-controls{display:flex;align-items:center;justify-content:flex-start;gap:12px;width:100%;margin:4px 0 0!important}
 /* ECHO GREETING player sits lower, further from the headline. */
-@media(min-width:601px){html body .echo .hero-introduction .hero-intro-heading-group .hero-intro-player{margin-top:clamp(48px,12svh,120px)}}
+@media (min-width:601px) and ((orientation:landscape) or (min-width:1101px)){html body .echo .hero-introduction .hero-intro-heading-group .hero-intro-player{margin-top:clamp(48px,12svh,120px)}}
 /* Arabic: the greeting position runs right to left, so the filled part grows from the right edge, where the thumb starts. */
 .hero-introduction .hero-intro-seek:dir(rtl)::-webkit-slider-runnable-track{background:linear-gradient(270deg,#d9b46e var(--seek),#ffffff2e var(--seek))}
 
@@ -251,39 +251,39 @@ html[dir=rtl] .hero-introduction .hero-intro-start-hint{font:400 clamp(16px,1.35
 .hero-language-overlay-close:focus-visible{outline:2px solid #fff;outline-offset:3px}
 .hero-language-overlay .hero-language-entry>button[aria-pressed=true]{border-color:#FFFFFF;background-color:#242424}
 
-@media(max-width:600px),(max-height:450px) and (orientation:landscape) and (any-pointer:coarse){
+@media (max-width:600px), (max-width:1100px) and (orientation:portrait), (max-height:450px) and (orientation:landscape) and (any-pointer:coarse){
  .hero-introduction .hero-intro-controls-inline{flex-wrap:wrap;justify-content:center}
 }
 
 /* Home: the greeting player sits at the far end of the hero (right; left in Arabic), level with the headline's top edge; the equipment showcase starts below it. */
-@media(min-width:601px){
+@media (min-width:601px) and ((orientation:landscape) or (min-width:1101px)){
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .hero-intro-player{position:absolute;inset:64px 16px auto auto;inset-inline:auto 16px;margin:0;width:clamp(260px,22vw,320px)}
  html body .echo[data-page=home] .hero-introduction>.hero-equipment-showcase{top:420px;bottom:32px;inset-inline:auto calc(var(--echo-viewport-gutter,32px) + 16px);width:min(320px,calc(26vw - 28px));max-width:none}
 }
-@media(min-width:601px) and (max-width:1100px){
+@media (min-width:601px) and (max-width:1100px) and (orientation:landscape){
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .hero-intro-player{top:16px}
  html body .echo[data-page=home] .hero-introduction>.hero-equipment-showcase{top:372px}
 }
 
 /* Tablet portrait: the greeting player sits at the bottom centre of the screen. */
-@media(min-width:601px) and (max-width:1100px) and (orientation:portrait){
+@media not all{
  html body .echo .hero-introduction .hero-intro-player{top:auto!important;bottom:clamp(24px,4svh,56px)!important;left:0!important;right:0!important;inset-inline-start:0!important;inset-inline-end:0!important;margin-inline:auto!important;transform:none!important;width:min(60vw,420px)!important;text-align:center;z-index:5}
 }
 
 /* Mobile and tablet portrait: the Menu is the way into Echo, so the extra CTA is hidden. */
-@media(max-width:1100px) and (orientation:portrait){
+@media (max-width:1100px) and (orientation:portrait){
  html body .echo .hero-ring-cta{display:none!important}
 }
 
 /* Tablet portrait: a bigger title on the greeting page, in a wider column, and the two logos keep their full size (the header's brand box no longer squeezes them). */
-@media(min-width:601px) and (max-width:1100px) and (orientation:portrait){
+@media not all{
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group,html[dir=rtl] body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group{width:min(72%,620px)!important;margin:16px auto 0!important;text-align:center}
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .echo-hero-title,html[dir=rtl] body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .echo-hero-title{margin-inline:auto;font-size:clamp(2.4rem,5.6vw,3.6rem)!important;line-height:1.15;text-align:center}
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group :is(.hero-returning-greeting,.echo-hero-subline){margin-inline:auto;text-align:center}
 }
 
 /* Greeting header (721px and up, portrait): the two logos keep their full size side by side, never squeezed, overlapping or spilling out. */
-@media(min-width:721px) and (max-width:1100px) and (orientation:portrait){
+@media not all{
  html body .echo[data-page=home][data-theme] .echo-header>.echo-logo{width:auto!important;max-width:none!important;flex:none;justify-content:flex-start}
  html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair{display:flex!important;align-items:center;justify-content:flex-start;width:auto!important;flex:none;gap:18px}
  html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img{width:auto!important;max-width:none!important;flex:none}

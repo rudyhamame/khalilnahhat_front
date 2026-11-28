@@ -63,7 +63,7 @@ function ModelScene({cue,active,playing,ar,reducedMotion}){
  </div>;
 }
 // Phones skip the 3D showcase entirely (nothing is drawn and no model is downloaded while the greeting plays).
-const PHONE='(max-width:600px), (max-height:600px) and (orientation:landscape) and (any-pointer:coarse)';
+const PHONE='(max-width:600px), (max-width:1100px) and (orientation:portrait), (max-height:600px) and (orientation:landscape) and (any-pointer:coarse)';
 export default function HeroEquipmentShowcase(){
  const [phone,setPhone]=useState(()=>typeof matchMedia==='function'&&matchMedia(PHONE).matches);
  useEffect(()=>{const query=matchMedia(PHONE),change=()=>setPhone(query.matches);query.addEventListener('change',change);return()=>query.removeEventListener('change',change);},[]);

@@ -65,8 +65,8 @@ html[dir=rtl] .rw-drawer{animation-name:rw-slide-rtl}
 .rw-drawer .rental-item-info dd{margin:5px 0 0;color:#e6dfcd;font-size:15px;line-height:1.7}
 .rw-drawer .rental-booking{flex:none;padding:16px 22px 22px;border-top:1px solid var(--rw-line);background:#0b0d09}
 .rw-drawer .rental-quantity-note{margin:10px 0 0;color:var(--rw-gold);font-size:13px}
-@media(max-width:700px){.rw-vp{padding-block:40px}.rw-service{min-height:150px;padding:18px}.rw-eq-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.rw-card-copy{padding:12px 36px 12px 12px}.rw-drawer{width:100%}}
-@media(prefers-reduced-motion:reduce){.rw-service,.rw-card,.rw-scrim,.rw-drawer{transition:none;animation:none}}
+@media (max-width:700px), (max-width:1100px) and (orientation:portrait){.rw-vp{padding-block:40px}.rw-service{min-height:150px;padding:18px}.rw-eq-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.rw-card-copy{padding:12px 36px 12px 12px}.rw-drawer{width:100%}}
+@media (prefers-reduced-motion:reduce){.rw-service,.rw-card,.rw-scrim,.rw-drawer{transition:none;animation:none}}
 
 /* Page-wide heading rules would thin these out: keep the weight. */
 html body .echo .rw :is(h2,h3),html body .rw-drawer h3{font-weight:700;text-transform:none}
@@ -75,7 +75,7 @@ html body .echo .rw :is(h2,h3),html body .rw-drawer h3{font-weight:700;text-tran
 html body .echo .rw.rw-dj,html body .echo .rental-with-feature.rw-dj{min-height:calc(100dvh / var(--echo-css-zoom,1))!important;height:auto!important;max-height:none!important;box-sizing:border-box;padding:clamp(24px,5svh,56px) var(--echo-viewport-gutter,5vw)!important;overflow:visible;background:transparent!important;background-image:none!important;border:0!important}
 
 .rw-vp{animation:rw-fade .3s both}
-@media(prefers-reduced-motion:reduce){.rw-vp{animation:none}}
+@media (prefers-reduced-motion:reduce){.rw-vp{animation:none}}
 
 /* Content starts at the top of its viewport, not vertically centred. */
 .rw-vp{justify-content:flex-start}
@@ -144,7 +144,7 @@ html body .rw-card .rw-card-img .rental-equipment-thumbnail{overflow:visible}
 html:has(.rentals-hero){scroll-snap-type:y mandatory}
 html:has(.rentals-hero) .rw-vp{scroll-snap-align:start;scroll-snap-stop:always}
 html:has(.rentals-hero) #rentals-so-far{scroll-snap-align:start;scroll-snap-stop:always}
-@media(prefers-reduced-motion:reduce){html:has(.rentals-hero){scroll-snap-type:none}}
+@media (prefers-reduced-motion:reduce){html:has(.rentals-hero){scroll-snap-type:none}}
 /* The first magnet is the very top of the page (header + hero in view), so the hero never snaps its header out of sight. */
 html:has(.rentals-hero) .echo-header{scroll-snap-align:start;scroll-snap-stop:always}
 html:has(.rentals-hero) .rentals-hero{scroll-snap-align:none}
@@ -200,7 +200,7 @@ html:has(.rentals-hero){scroll-snap-type:none}
 .rw-services :is(.rw-service-grid,#rental-packages)>:nth-child(8){animation-delay:.35s}
 .rw-services :is(.rw-service-grid,#rental-packages)>:nth-child(n+9){animation-delay:.4s}
 .rw-modes>button{transition:background .25s,color .25s}
-@media(prefers-reduced-motion:reduce){.rw-services :is(.rw-service-grid,#rental-packages)>*{animation:none!important}}
+@media (prefers-reduced-motion:reduce){.rw-services :is(.rw-service-grid,#rental-packages)>*{animation:none!important}}
 
 /* Stock / selected / remove sit under the "Quantity" title instead of beside it. */
 html body .rw-drawer .setup-quantity-picker>span{display:flex;flex-direction:column;align-items:flex-start;gap:8px}

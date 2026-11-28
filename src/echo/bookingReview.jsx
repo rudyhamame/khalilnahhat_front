@@ -15,7 +15,7 @@ function AtomReviewControls({line,tr,review}){
  if(!review?.onReview&&!review?.onEdit)return null;
  const state=review.stateFor?.(line);
  return <span className="ea-atom-controls" role="group" aria-label={`${tr('Review','مراجعة')} ${line.label}`}>
-  {line.empty||state==='confirmed'||!review.onReview?<button type="button" className="is-edit" disabled={review.disabled} aria-label={`${tr('Edit','تعديل')} ${line.label}`} title={tr('Edit this entry','تعديل هذه المعلومة')} onClick={()=>review.onEdit?review.onEdit(line):line.empty?window.location.assign(manualBookingFieldHref(line.reviewPath||line.key)):review.onReview(line,false)}><Pencil size={14} aria-hidden="true"/></button>:<>
+  {line.empty||state==='confirmed'||state==='editing'||!review.onReview?<button type="button" className="is-edit" disabled={review.disabled} aria-label={`${tr('Edit','تعديل')} ${line.label}`} title={tr('Edit this entry','تعديل هذه المعلومة')} onClick={()=>review.onEdit?review.onEdit(line):line.empty?window.location.assign(manualBookingFieldHref(line.reviewPath||line.key)):review.onReview(line,false)}><Pencil size={14} aria-hidden="true"/></button>:<>
    <button type="button" disabled={review.disabled} aria-label={`${tr('Confirm','تأكيد')} ${line.label}`} title={tr('Confirm this entry','تأكيد هذه المعلومة')} onClick={()=>review.onReview(line,true)}><Check size={14} aria-hidden="true"/></button>
    <button type="button" disabled={review.disabled} aria-pressed={state==='correction'} aria-label={`${tr('Correct','تصحيح')} ${line.label}`} title={tr('Ask Echo for a replacement or edit manually','اطلب بديلاً من إيكو أو عدّل يدوياً')} onClick={()=>review.onReview(line,false)}><X size={14} aria-hidden="true"/></button>
   </>}

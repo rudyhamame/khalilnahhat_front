@@ -30,13 +30,13 @@
 }
 .echo #services .rental-service-list button[aria-pressed=true]>svg{color:#d9cba6}
 .echo #services .rental-workbench[dir=rtl] .rental-service-list button[aria-pressed=true]{box-shadow:inset -3px 0 0 #c8b787}
-@media(max-width:760px){
+@media (max-width:760px), (max-width:1100px) and (orientation:portrait){
   .echo #services .rental-services{padding:18px 12px 12px}
   .echo #services .rental-services>.rental-label{padding:0 4px 14px}
   .echo #services .rental-service-list{gap:7px;max-height:190px;padding-top:12px}
   .echo #services .rental-service-list button{min-height:48px;padding:10px;font-size:12px}
 }
-@media(prefers-reduced-motion:reduce){.echo #services .rental-service-list button{transition:none}}
+@media (prefers-reduced-motion:reduce){.echo #services .rental-service-list button{transition:none}}
 
 .rental-service-choice{display:block;width:100%;padding:11px 12px;margin:10px 0;border:1px solid #c8b88966;border-radius:8px;background:#c8b889;color:#141c20;font:inherit;font-size:12px;cursor:pointer}
 .rental-service-choice[aria-pressed=true]{background:transparent;color:#e7d6a4}
@@ -65,7 +65,7 @@
 .echo #services .rental-service-list button.rental-service-decision>span{grid-column:2;grid-row:1;white-space:nowrap;text-wrap:nowrap}
 .echo #services .rental-service-list button.rental-service-decision>svg{grid-column:1;grid-row:1}
 .echo #services .rental-service-list button.rental-service-decision>small{grid-column:3;grid-row:1}
-@media(max-width:760px){
+@media (max-width:760px), (max-width:1100px) and (orientation:portrait){
  .echo #services .rental-workspace{grid-template-columns:minmax(0,1fr)}
  .echo #services .rental-services{min-width:0}
  .echo #services .rental-service-list{display:flex;overflow-x:auto}

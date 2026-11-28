@@ -15,7 +15,7 @@
 .favourite-song-copy>a:hover{text-decoration:underline}
 .favourite-song-row-actions{display:flex;gap:4px}
 .favourite-song-row-actions .djf-back{display:grid;place-items:center;width:32px;height:32px;min-height:32px;padding:0;border-radius:8px}
-@media(max-width:600px){.favourite-song-fields{grid-template-columns:minmax(0,1fr)}.favourite-song-list>li{padding:12px;gap:8px}}
+@media (max-width:600px), (max-width:1100px) and (orientation:portrait){.favourite-song-fields{grid-template-columns:minmax(0,1fr)}.favourite-song-list>li{padding:12px;gap:8px}}
 /* Edit and delete icons on every favourite song: clearly visible buttons. */
 html body .djf .favourite-song-row-actions{display:flex;gap:6px;flex:none;margin-inline-start:auto}
 html body .djf .favourite-song-row-actions button{display:grid;place-items:center;width:34px;height:34px;min-height:34px;padding:0;border:1px solid #ffffff2b;border-radius:9px;background:#ffffff0a;color:#d9e2dc;cursor:pointer}
@@ -38,7 +38,7 @@ html body .djf .favourite-song-row-actions svg{width:16px;height:16px}
 /* A song found on YouTube takes the width of both text columns (song and artist), so long titles are not squeezed. */
 .djf-songs>li>.djf-song-found{grid-column:3/5;min-width:0}
 .djf-song-found strong{overflow-wrap:anywhere}
-@media(max-width:900px){.djf-songs>li>.djf-song-found{grid-column:2/4;grid-row:2}}
+@media (max-width:900px){.djf-songs>li>.djf-song-found{grid-column:2/4;grid-row:2}}
 
 /* Restyle: Songs for event moments (add buttons, YouTube search, results, song rows). No dashed borders. */
 html body .djf .djf-song-adders{gap:10px}
@@ -62,7 +62,7 @@ html body .djf .djf-song-found small{color:#9fb5a8;opacity:1}
 html body .djf .djf-song-found a{color:#e3d3a3;text-underline-offset:3px}
 html body .djf .djf-songs .djf-row-actions{gap:6px}
 html body .djf .djf-songs .djf-row-actions button{width:32px;height:32px;border:1px solid #ffffff2b;border-radius:9px;background:#ffffff0a}
-@media(max-width:560px){html body .djf .youtube-results li{flex-wrap:wrap}html body .djf .youtube-results .djf-add{width:100%;justify-content:center}}
+@media (max-width:560px), (max-width:1100px) and (orientation:portrait){html body .djf .youtube-results li{flex-wrap:wrap}html body .djf .youtube-results .djf-add{width:100%;justify-content:center}}
 
 /* Song row inputs: smaller text, placeholders never cut with an ellipsis. */
 html body .djf .djf-songs :is(.djf-input,.djf-combo>input){min-height:40px;padding:0 10px;font-size:12px}
@@ -87,7 +87,7 @@ html body .djf .youtube-result-copy small{color:#e3d3a3;font-size:11.5px;letter-
 html body .djf .youtube-results .djf-add{min-height:34px;padding:0 14px;border:0;border-radius:999px;background:#e3d3a3;color:#0d1012;font-weight:700}
 html body .djf .youtube-results .djf-add:hover:not(:disabled){background:#f0e3b8}
 html body .djf .youtube-results .djf-add:disabled{background:#a6e3ce22;color:#c0efdc;opacity:1}
-@media(max-width:560px){html body .djf .youtube-results li{grid-template-columns:72px minmax(0,1fr)}html body .djf .youtube-results img{width:72px;height:41px}html body .djf .youtube-results .djf-add{grid-column:1/-1;width:100%;justify-content:center}}
+@media (max-width:560px), (max-width:1100px) and (orientation:portrait){html body .djf .youtube-results li{grid-template-columns:72px minmax(0,1fr)}html body .djf .youtube-results img{width:72px;height:41px}html body .djf .youtube-results .djf-add{grid-column:1/-1;width:100%;justify-content:center}}
 
 /* More songs for the same moment. */
 html body .djf .djf-same-moment{align-self:center;color:#9fb5a8;font-size:12px;font-style:italic}
@@ -114,7 +114,7 @@ html body .djf .yt-preview-btn:hover>span{background:#0b131599}
 html body .djf .yt-preview-btn:focus-visible{outline:2px solid #e3d3a3;outline-offset:2px}
 html body .djf .youtube-results .yt-preview{grid-column:1/-1;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#000}
 html body .djf .youtube-results .yt-preview iframe{display:block;width:100%;height:100%;border:0}
-@media(max-width:560px){html body .djf .yt-preview-btn{width:72px;height:41px}}
+@media (max-width:560px), (max-width:1100px) and (orientation:portrait){html body .djf .yt-preview-btn{width:72px;height:41px}}
 
 /* Manual song: an "Add song" button confirms it into the same card the YouTube songs use. */
 html body .djf .djf-song-submit{justify-self:center;min-height:38px;padding:0 16px;border:0;border-radius:999px;background:#e3d3a3;color:#0d1012;font-weight:700}
@@ -137,11 +137,11 @@ html body .djf .djf-choose{display:grid;grid-template-columns:1fr 1fr;gap:10px;p
 html body .djf .djf-choose>span{grid-column:1/-1;text-align:center;color:#e9eee8;font:600 13px/1.3 'Manrope','Noto Sans Arabic',sans-serif}
 html body .djf .djf-choose .djf-add{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 12px;border:1px solid #e3d3a366;border-radius:12px;background:#e3d3a30f;color:#e3d3a3;font:600 13px/1.2 'Manrope','Noto Sans Arabic',sans-serif;text-align:center}
 html body .djf .djf-choose .djf-add:hover{background:#e3d3a31f;border-color:#e3d3a3}
-@media(max-width:420px){html body .djf .djf-choose{grid-template-columns:1fr}}
+@media (max-width:420px), (max-width:1100px) and (orientation:portrait){html body .djf .djf-choose{grid-template-columns:1fr}}
 html body .djf .djf-moment .djf-more-songs{justify-content:center}
 
 /* Phones: "Songs for event moments" is smaller and has room to breathe. */
-@media(max-width:760px){
+@media (max-width:760px), (max-width:1100px) and (orientation:portrait){
  html body .djf .djf-songs.djf-songs>li.djf-moment{gap:18px;padding:16px}
  html body .djf .djf-moment-head{gap:12px}
  html body .djf .djf-moment-pick{gap:12px}
@@ -155,3 +155,45 @@ html body .djf .djf-moment .djf-more-songs{justify-content:center}
  html body .djf .djf-moment .djf-num{width:20px;height:20px;font-size:11px}
  html body .djf .djf-moment .djf-row-actions button{width:30px;height:30px}
 }
+
+/* "More songs" buttons stay on one line: they share the width and shrink (text and padding scale down) instead of wrapping. */
+html body .echo .djf .djf-more-songs,html body .echo .djf .djf-moment .djf-more-songs,html body .echo .djf .djf-songs.djf-songs>li>.djf-more-songs{display:flex;flex-wrap:nowrap;gap:clamp(4px,1vw + 1px,10px)}
+html body .echo .djf .djf-more-songs .djf-add,html body .echo .djf .djf-moment .djf-more-songs .djf-add{flex:1 1 0;min-width:0;padding:0 clamp(4px,1.2vw + 1px,12px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:clamp(10px,.8vw + 6.5px,13px)}
+
+/* Fluid input text: every .djf-input (and the song/artist combo inputs) follows the screen width, whatever fixed size a rule above gives it. */
+html body .echo .djf :is(.djf-input,.djf-combo>input,.djf-link-input){font-size:clamp(12px,.5vw + 9.5px,15px)!important}
+html body .echo .djf :is(.djf-input,.djf-combo>input,.djf-link-input)::placeholder{font-size:clamp(11px,.5vw + 8.5px,14px)!important}
+
+/* Tighter favourite-songs editor: less space between its parts. */
+html body .echo .favourite-songs-editor{gap:clamp(10px,.8vw + 6px,14px)}
+html body .echo .favourite-songs-editor .favourite-song-fields{gap:clamp(8px,.6vw + 5px,10px)}
+html body .echo .favourite-songs-editor .favourite-song-fields>label{gap:4px}
+html body .echo .favourite-songs-editor .favourite-song-list{gap:6px}
+html body .echo .favourite-songs-editor .favourite-song-list>li{padding:clamp(8px,.5vw + 6px,12px);gap:8px}
+
+/* Tighter buttons in the favourite-songs editor (adders, actions, row actions, entry modes). */
+html body .echo .favourite-songs-editor :is(.djf-song-adders .djf-add,.favourite-song-actions button,.song-entry-modes button){min-height:clamp(30px,.8vw + 24px,36px);padding:0 clamp(8px,.6vw + 5px,12px);gap:clamp(4px,.4vw + 2px,6px)}
+html body .echo .favourite-songs-editor .favourite-song-row-actions{gap:3px}
+html body .echo .favourite-songs-editor .favourite-song-row-actions button{padding:clamp(2px,.3vw + 1px,4px)}
+html body .echo .favourite-songs-editor .djf-song-adders,html body .echo .favourite-songs-editor .favourite-song-actions{gap:clamp(4px,.6vw + 2px,8px)}
+
+/* The YouTube search row: the search button and its field are the same, smaller height, with less button padding. */
+html body .echo .djf .youtube-search-form{gap:clamp(4px,.6vw + 2px,8px)}
+html body .echo .djf .youtube-search-form .djf-add{min-height:clamp(34px,.8vw + 28px,40px);padding:0 clamp(10px,.8vw + 5px,14px);gap:clamp(4px,.4vw + 2px,6px);font-size:clamp(11px,.4vw + 9px,13px)}
+html body .echo .djf .youtube-search-form .djf-input{min-height:clamp(34px,.8vw + 28px,40px)}
+
+/* The song-entry mode buttons (Search / manual) are centered. */
+html body .echo .djf .song-entry-modes,html body .echo .favourite-songs-editor .song-entry-modes{display:flex;flex-wrap:wrap;justify-content:center;align-items:center}
+
+/* The search field and its button have exactly the same height (one shared value, no stretching or flex-start differences). */
+html body .echo .djf .youtube-search-form{--ys-h:clamp(34px,.8vw + 28px,40px);align-items:stretch}
+html body .echo .djf .youtube-search-form :is(.djf-input,.djf-add,input,button){box-sizing:border-box;height:var(--ys-h)!important;min-height:var(--ys-h)!important;max-height:var(--ys-h);align-self:center;margin:0}
+
+/* The saved-song buttons (edit, remove) are bare icons: no background, border or padding. */
+html body .echo .favourite-song-list .favourite-song-row-actions{gap:clamp(8px,1vw + 4px,14px)}
+html body .echo .favourite-song-list .favourite-song-row-actions button{display:inline-grid;place-items:center;width:auto;height:auto;min-width:0;min-height:0;padding:0;border:0;border-radius:0;background:none;box-shadow:none}
+html body .echo .favourite-song-list .favourite-song-row-actions button:hover:not(:disabled){background:none;opacity:.75}
+html body .echo .favourite-song-list .favourite-song-row-actions svg{width:clamp(15px,.4vw + 13px,19px);height:clamp(15px,.4vw + 13px,19px)}
+
+/* No margin under the song-entry mode buttons. */
+html body .echo .djf .song-entry-modes,html body .echo .favourite-songs-editor .song-entry-modes{margin-bottom:0}

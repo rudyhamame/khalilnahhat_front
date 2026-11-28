@@ -24,7 +24,7 @@
 .ref-link-form button{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 14px;border:1px solid #a6e3ce66;border-radius:12px;background:#a6e3ce1a;color:#c0efdc;font:600 13px/1 'Manrope',sans-serif;cursor:pointer}
 .ref-link-form button:disabled{opacity:.45;cursor:default}
 .ref-link-list a{color:#c0efdc;word-break:break-all}
-@media(max-width:560px){.ref-items li{grid-template-columns:48px minmax(0,1fr) 32px}.ref-items img,.ref-doc{width:48px;height:48px}}
+@media (max-width:560px), (max-width:1100px) and (orientation:portrait){.ref-items li{grid-template-columns:48px minmax(0,1fr) 32px}.ref-items img,.ref-doc{width:48px;height:48px}}
 .booking-services .ref-block>.ref-upload{margin:0}
 .booking-services .ref-block>p{margin:0!important}
 
@@ -77,7 +77,7 @@ html body .echo[data-page=home][data-theme] .setup-notes-card>label>.ysf-order{d
 .ref-link-list a{display:inline-flex;align-items:center;gap:6px;font-size:14px;line-height:1.4}
 .ref-link-list a svg{flex:none}
 .ref-link-form button{white-space:nowrap}
-@media(max-width:420px){.ref-link-form{flex-wrap:wrap}.ref-link-form input{flex-basis:100%}.ref-link-form button{width:100%;justify-content:center}}
+@media (max-width:420px), (max-width:1100px) and (orientation:portrait){.ref-link-form{flex-wrap:wrap}.ref-link-form input{flex-basis:100%}.ref-link-form button{width:100%;justify-content:center}}
 
 /* Photos: one row each, thumbnail at the start, comment textarea to its side, remove chip at the end (same as documents). */
 .ref-photo-dropzone .ref-items.is-grid{grid-template-columns:1fr;gap:12px}
@@ -87,7 +87,7 @@ html body .echo[data-page=home][data-theme] .setup-notes-card>label>.ysf-order{d
 .ref-photo-dropzone .ref-items.is-grid>li>.ref-x{position:static;width:32px;height:32px}
 .ref-photo-dropzone .ref-items.is-grid textarea{min-height:72px}
 .ref-photo-add{aspect-ratio:auto;min-height:56px;flex-direction:row;white-space:nowrap}
-@media(max-width:560px){.ref-photo-dropzone .ref-items.is-grid>li:not(.ref-photo-add-cell){grid-template-columns:56px minmax(0,1fr) 32px}.ref-photo-dropzone .ref-items.is-grid>li>img{width:56px;height:56px}.ref-photo-dropzone .ref-items.is-grid textarea{min-height:56px}}
+@media (max-width:560px), (max-width:1100px) and (orientation:portrait){.ref-photo-dropzone .ref-items.is-grid>li:not(.ref-photo-add-cell){grid-template-columns:56px minmax(0,1fr) 32px}.ref-photo-dropzone .ref-items.is-grid>li>img{width:56px;height:56px}.ref-photo-dropzone .ref-items.is-grid textarea{min-height:56px}}
 
 /* The add button sits at the opposite end of the line from the file-type hint. */
 .ref-hint-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
@@ -100,11 +100,11 @@ html body .echo[data-page=home][data-theme] .setup-notes-card>label>.ysf-order{d
 
 /* Photo comment box is exactly as tall as its thumbnail. */
 html body .echo .ref-photo-dropzone .ref-items.is-grid textarea{box-sizing:border-box;height:72px;min-height:72px;field-sizing:fixed;overflow:auto}
-@media(max-width:560px){html body .echo .ref-photo-dropzone .ref-items.is-grid textarea{height:56px;min-height:56px}}
+@media (max-width:560px), (max-width:1100px) and (orientation:portrait){html body .echo .ref-photo-dropzone .ref-items.is-grid textarea{height:56px;min-height:56px}}
 
 /* Edge-to-edge dividers between the three attachment blocks (card padding mirrors .booking-step-card). */
 .ref-stack{--ref-pad:clamp(24px,2.6vw,36px);gap:0}
-@media(max-width:520px){.ref-stack{--ref-pad:20px}}
+@media (max-width:520px), (max-width:1100px) and (orientation:portrait){.ref-stack{--ref-pad:20px}}
 .ref-stack>.ref-block{position:relative;border-top:0;padding-block:var(--ref-pad)}
 .ref-stack>.ref-block:first-child{padding-top:0}
 html body .echo .ref-stack>.ref-block:last-child{padding-bottom:0!important}

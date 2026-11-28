@@ -23,7 +23,7 @@
 .echo .hero-carousel-group .hero-review-card blockquote{font-size:clamp(12px,.9vw,16px)}
 .hero-carousel-group .hero-review-dots{max-width:100%;flex-wrap:wrap}
 .hero-carousel-group .hero-review-dots button{width:16px}
-@media(max-width:1100px){.hero-carousel-group{gap:24px;padding-inline:24px;max-width:100%}.hero-carousel-group .hero-review-carousel{height:280px}.hero-carousel-group .hero-gallery-stack{height:210px}}
+@media (max-width:1100px){.hero-carousel-group{gap:24px;padding-inline:24px;max-width:100%}.hero-carousel-group .hero-review-carousel{height:280px}.hero-carousel-group .hero-gallery-stack{height:210px}}
 /* Never shrink customer text as part of a scaled hero composition. */
 .hero-copy-content{width:100%;min-width:0;box-sizing:border-box;padding-top:clamp(28px,4svh,52px)}
 .echo[data-page=home][data-theme] .echo-artist-sequence>.echo-hero{height:100%;max-height:none}
@@ -43,7 +43,7 @@
 .hero-carousel-group .hero-gallery-stack{height:310px}
 .hero-carousel-group .hero-gallery-photo{height:100%}
 .hero-carousel-group .hero-gallery-dots{margin-top:12px}
-@media(max-width:720px){.echo .hero-carousel-group .hero-review-card blockquote{font-size:14px}.echo .hero-carousel-group .hero-reviews>header>span{font-size:clamp(12px,.65vw,12px)}.hero-copy-content{padding-top:18px}.echo .hero-copy-content .hero-carousel-group{padding-inline:20px}.hero-carousel-group .hero-review-carousel{height:290px}.hero-carousel-group .hero-gallery-stack{height:290px}}
+@media (max-width:600px), (max-width:1100px) and (orientation:portrait){.echo .hero-carousel-group .hero-review-card blockquote{font-size:14px}.echo .hero-carousel-group .hero-reviews>header>span{font-size:clamp(12px,.65vw,12px)}.hero-copy-content{padding-top:18px}.echo .hero-copy-content .hero-carousel-group{padding-inline:20px}.hero-carousel-group .hero-review-carousel{height:290px}.hero-carousel-group .hero-gallery-stack{height:290px}}
 /* The transformed side cards extend beyond their stage. Reserve that space
    inside the copy column, rather than letting it consume the page gutters. */
 .echo .echo-hero-copy .hero-carousel-group{max-width:100%;overflow:clip;box-sizing:border-box}

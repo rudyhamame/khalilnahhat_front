@@ -71,13 +71,13 @@
 .echo #services .rental-equipment-detail .rental-booking .setup-add-booking.is-added:hover{border-color:#d99c8c55;background:#d99c8c0d;color:#e4b6aa;transform:none}
 .echo #services .rental-equipment .rental-empty{margin:10px 18px 20px;color:var(--equipment-secondary)}
 .echo #services [dir=rtl] .rental-equipment-list>button[aria-pressed=true]{box-shadow:inset -3px 0 0 #c8b787}
-@media(max-width:760px){
+@media (max-width:760px), (max-width:1100px) and (orientation:portrait){
   .echo #services .rental-equipment-heading{padding:18px 16px 16px}
   .echo #services .rental-equipment-intro h3{font-size:20px}
   .echo #services .rental-equipment-list>button,.echo #services .rental-equipment-list>button:first-child{min-height:0}
   .echo #services .rental-equipment-card-copy{padding:12px 12px 22px}
 }
-@media(prefers-reduced-motion:reduce){.echo #services .rental-equipment-list>button{transition:none}}
+@media (prefers-reduced-motion:reduce){.echo #services .rental-equipment-list>button{transition:none}}
 
 /* Keep removal beside the availability badge above the quantity stepper. */
 .echo #services .rental-equipment-detail .rental-stock-actions{display:inline-flex;align-items:center;justify-content:flex-end;gap:8px;flex:none;direction:ltr}

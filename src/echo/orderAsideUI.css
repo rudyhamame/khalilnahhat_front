@@ -250,7 +250,7 @@ html[dir=rtl] .echo-artist-sequence:not(.hero-introduction) img.echo-continuous-
 }
 /* Arabic hero: the (mirrored) character sits on the left, copy on the right. */
 html[dir=rtl] .echo[data-page="home"][data-theme] .echo-artist-sequence:not(.hero-introduction) .echo-continuous-artist:not([data-archive-stage=true]){inset-inline-end:auto;right:auto;left:0;}
-@media(max-width:720px){html[dir=rtl] .echo[data-page="home"][data-theme] .echo-artist-sequence:not(.hero-introduction) .echo-continuous-artist:not([data-archive-stage=true]){left:-42%;}}
+@media(max-width:760px){html[dir=rtl] .echo[data-page="home"][data-theme] .echo-artist-sequence:not(.hero-introduction) .echo-continuous-artist:not([data-archive-stage=true]){left:-42%;}}
 html[dir=rtl] img.echo-continuous-artist{transform-origin:50% 50%!important;}
 
 /* Reveal the assistant upward from the bottom edge when Echo AI is opened. */

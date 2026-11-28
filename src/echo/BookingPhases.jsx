@@ -1,6 +1,6 @@
 import {bookingStepDefinition,hasBookingServices} from '../lib/bookingFlow.mjs';
 import {useEffect,useState} from 'react';
-import {useTreeSteps} from '../lib/tree';
+import {useTreeSteps,useTreeService} from '../lib/tree';
 import {requiredMark} from '../lib/bookingAtoms.mjs';
 import {fieldCode} from '../lib/eventPageModel';
 import './bookingPhases.css';
@@ -51,3 +51,11 @@ export function PhaseBar({ar=false}){
 // The STEP.SEC.ATOM number in front of a form label (pass a field `k`, or a ready-made `code` for a whole section).
 // star: put the required mark (from the Tree's live rule) right after a name that sits before the badge.
 export function FieldCode({k,code,star=false}){return <>{star&&requiredMark(k)}<i className="ysf-order" aria-hidden="true" data-booking-atom={k}>{code||fieldCode(k)}</i></>;}
+
+// A thin line with a small hint, opening or closing one service of the Echo Services step ("Start of DJ Khalil Nahhat" / "End of ..."). The name comes from the tree; rentals are one group.
+export function ServiceLine({id,kind='end',ar=false}){
+ const svc=useTreeService(id,ar),name=id==='rental'?(ar?'معدات التأجير':'Rental equipment'):svc.name;
+ if(id!=='rental'&&!svc.exists)return null;
+ const start=kind==='start';
+ return <div className="service-end" data-kind={kind} role="separator"><span>{ar?`${start?'بداية':'نهاية'} خدمة ${name}`:`${start?'Start':'End'} of ${name} service`}</span></div>;
+}

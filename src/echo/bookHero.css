@@ -20,12 +20,12 @@
 .book-hero-scroll svg{animation:book-hero-cue 1.8s ease-in-out infinite}
 @keyframes book-hero-cue{0%,100%{transform:translateY(-2px)}50%{transform:translateY(3px)}}
 .book-hero-scroll:focus-visible{outline:2px solid #a6e3ce;outline-offset:3px}
-@media(prefers-reduced-motion:reduce){.book-hero-photo,.book-hero-scroll svg{animation:none}}
+@media (prefers-reduced-motion:reduce){.book-hero-photo,.book-hero-scroll svg{animation:none}}
 
 /* Arabic uses book-hero-khalil-rtl.webp, a pre-mirrored copy of the same photo: no CSS flip, so no resampling. */
 
 /* Wide screens: photo left, copy right, scroll cue centred underneath. Narrow screens keep the stacked layout above. */
-@media(min-width:900px){
+@media (min-width:900px) and ((orientation:landscape) or (min-width:1101px)){
  .book-hero{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:minmax(0,1fr) auto 64px minmax(0,1fr) auto;align-items:center;justify-content:normal;column-gap:clamp(24px,5vw,80px)}
  .book-hero-photo{grid-column:1;grid-row:1/5;justify-self:end;align-self:end;height:100%;max-height:100%}
  .book-hero-intro{grid-column:2;grid-row:2;justify-self:start;text-align:start}
@@ -38,6 +38,6 @@
 html body .echo .book-hero{overflow:visible!important;overscroll-behavior:auto!important}
 
 /* Phones portrait: a bigger photograph, allowed to bleed past the side gutters. */
-@media(orientation:portrait) and (max-width:760px){
+@media (orientation:portrait) and (max-width:1100px){
  html body .echo .book-hero-photo{flex:1 1 0;width:auto;max-width:none;max-height:none;height:auto;min-height:0;margin-top:0}
 }

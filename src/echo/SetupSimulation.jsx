@@ -4,6 +4,7 @@ import {layoutEquipment,layoutGuests,layoutRoomZones,placeExtras,recommendedRoom
 import SeatingChart,{layoutPlanOf,useSeatingPlan} from './SeatingChart';
 import {GUEST_DRESS_CODES,normalizeGuestDressCode} from './guestWardrobe';
 import './setupSimulation.css';
+import './simulationHeader.css';
 export default function SetupSimulation({items,cart,services=[],event,ar=false,active,draftId}){
  const tr=(en,arabic)=>ar?arabic:en,canvas=useRef(null),engine=useRef(null),positions=useRef({}),isActive=useRef(active);isActive.current=active;
  const ownedEngines=useRef(new Set());
@@ -89,24 +90,14 @@ export default function SetupSimulation({items,cart,services=[],event,ar=false,a
  const changeView=value=>{setCameraView(value);engine.current?.view(value);};
  const zoom=factor=>{engine.current?.zoom(factor);};
  return <div className="setup-simulation"><div className="simulation-room">
+  <header className="simulation-header">
   <div className="simulation-topbar">
   <div className="simulation-guests-badge" role="status"><Users size={16} aria-hidden="true"/><span><b>{guestCount}</b> {guestCount===1?tr('guest','ضيف'):tr('guests','ضيوف')}</span><a href="/booking#booking-guests">{tr('Change','تغيير')}</a></div>
   <label className="simulation-dress-code"><span>{tr('Guest dress code','ملابس الضيوف')}</span><select value={dressCode} onChange={event=>changeDressCode(event.target.value)}>{GUEST_DRESS_CODES.map(option=><option key={option.id} value={option.id}>{ar?option.ar:option.en}</option>)}</select></label>
   <div className="simulation-extras"><button type="button" aria-pressed={extras.cake} onClick={()=>setExtras(value=>({...value,cake:!value.cake}))}><Cake size={17} aria-hidden="true"/>{extras.cake?tr('Remove cake','إزالة الكعكة'):tr('Add cake','إضافة كعكة')}</button><button type="button" aria-pressed={extras.sweetheart} onClick={()=>setExtras(value=>({...value,sweetheart:!value.sweetheart}))}><Crown size={17} aria-hidden="true"/>{extras.sweetheart?tr('Remove sweetheart table','إزالة طاولة العروسين'):tr('Add sweetheart table','إضافة طاولة العروسين')}</button></div>
   </div>
-  {selection&&sceneReady&&(()=>{const degrees=Math.round((((selection.rotation||0)*180/Math.PI)%360+360)%360),turnBy=delta=>engine.current?.rotateTo(((degrees+delta)%360)*Math.PI/180);
-   return <div className="simulation-rotate" role="group" aria-label={tr('Rotate selected item','تدوير العنصر المحدد')}>
-    <b>{ar?(selection.nameAr||selection.name):selection.name}</b>
-    <button type="button" aria-label={tr('Rotate left 15°','تدوير لليسار 15°')} title={tr('Rotate left 15°','تدوير لليسار 15°')} onClick={()=>turnBy(-15)}><RotateCcw size={18} aria-hidden="true"/></button>
-    <input type="range" min="0" max="355" step="5" value={degrees} aria-label={tr('Rotation','الدوران')} onChange={event=>engine.current?.rotateTo(Number(event.target.value)*Math.PI/180)}/>
-    <button type="button" aria-label={tr('Rotate right 15°','تدوير لليمين 15°')} title={tr('Rotate right 15°','تدوير لليمين 15°')} onClick={()=>turnBy(15)}><RotateCw size={18} aria-hidden="true"/></button>
-    <span>{degrees}°</span>
-   </div>;})()}
   {!seatingOpen&&<button type="button" className="simulation-seating-toggle" onClick={()=>setSeatingOpen(true)}><Armchair size={17} aria-hidden="true"/>{tr('Seating chart','مخطط الجلوس')}</button>}
-  {seatingOpen&&<SeatingChart world={{cake:extras.cake?placeExtras(zones,width,depth).cake:null,sweetheart:extras.sweetheart?placeExtras(zones,width,depth).sweetheart:null,units:layout.units,positions:positions.current}} plan={plan} setPlan={setPlan} zones={zones} recommended={recommended} guestCount={guestCount} ar={ar} onClose={()=>setSeatingOpen(false)}/>}
-  <div ref={canvas} tabIndex={-1} className="simulation-canvas" role="img" aria-label={tr('Interactive 3D room with movable equipment, tables and columns','غرفة ثلاثية الأبعاد بمعدات وطاولات وأعمدة قابلة للتحريك')} onPointerDown={()=>{setCameraView('custom');setTouring(false);}} onWheel={()=>{setCameraView('custom');setTouring(false);}}/>
-  {!sceneReady&&!error&&<p className="simulation-view-status" role="status">{tr('Loading your room…','جارٍ تحميل الغرفة…')}</p>}
-  {error&&<p className="simulation-error" role="status">{error} <button type="button" className="simulation-retry" onClick={()=>setRetryRoom(value=>value+1)}>{tr('Try again','حاول مرة أخرى')}</button></p>}
+  </header>
   <div className="simulation-camera-dock simulation-icon-dock" role="toolbar" aria-orientation="vertical" aria-label={tr('Camera controls','أدوات الكاميرا')}>
    {/* Icons only: every button keeps a text name for screen readers and a tooltip. */}
    <div className="simulation-drag-modes" role="group" aria-label={tr('Drag behavior','طريقة السحب')}>
@@ -128,6 +119,18 @@ export default function SetupSimulation({items,cart,services=[],event,ar=false,a
    </div>
    <p className="simulation-camera-hint" role="status">{touring?tr('Camera tour · click the room or the camera button to stop','جولة الكاميرا · انقر على الغرفة أو زر الكاميرا للإيقاف'):dragMode==='select'?tr('Select mode · click an item, then drag it to move or use the rotate bar · scroll to zoom','وضع التحديد · انقر على عنصر ثم اسحبه لتحريكه أو استخدم شريط التدوير · مرّر للتقريب'):panning?tr('Drag to move the view · scroll or pinch to zoom · use Select to move items','اسحب للتحريك · مرّر أو اقرص للتقريب'):tr('Drag the room to rotate it · scroll or pinch to zoom · use Select to move items','اسحب الغرفة لتدويرها · مرّر أو اقرص للتقريب · استخدم التحديد لتحريك العناصر')}</p>
   </div>
+  {selection&&sceneReady&&(()=>{const degrees=Math.round((((selection.rotation||0)*180/Math.PI)%360+360)%360),turnBy=delta=>engine.current?.rotateTo(((degrees+delta)%360)*Math.PI/180);
+   return <div className="simulation-rotate" role="group" aria-label={tr('Rotate selected item','تدوير العنصر المحدد')}>
+    <b>{ar?(selection.nameAr||selection.name):selection.name}</b>
+    <button type="button" aria-label={tr('Rotate left 15°','تدوير لليسار 15°')} title={tr('Rotate left 15°','تدوير لليسار 15°')} onClick={()=>turnBy(-15)}><RotateCcw size={18} aria-hidden="true"/></button>
+    <input type="range" min="0" max="355" step="5" value={degrees} aria-label={tr('Rotation','الدوران')} onChange={event=>engine.current?.rotateTo(Number(event.target.value)*Math.PI/180)}/>
+    <button type="button" aria-label={tr('Rotate right 15°','تدوير لليمين 15°')} title={tr('Rotate right 15°','تدوير لليمين 15°')} onClick={()=>turnBy(15)}><RotateCw size={18} aria-hidden="true"/></button>
+    <span>{degrees}°</span>
+   </div>;})()}
+  {seatingOpen&&<SeatingChart world={{cake:extras.cake?placeExtras(zones,width,depth).cake:null,sweetheart:extras.sweetheart?placeExtras(zones,width,depth).sweetheart:null,units:layout.units,positions:positions.current}} plan={plan} setPlan={setPlan} zones={zones} recommended={recommended} guestCount={guestCount} ar={ar} onClose={()=>setSeatingOpen(false)}/>}
+  <div ref={canvas} tabIndex={-1} className="simulation-canvas" role="img" aria-label={tr('Interactive 3D room with movable equipment, tables and columns','غرفة ثلاثية الأبعاد بمعدات وطاولات وأعمدة قابلة للتحريك')} onPointerDown={()=>{setCameraView('custom');setTouring(false);}} onWheel={()=>{setCameraView('custom');setTouring(false);}}/>
+  {!sceneReady&&!error&&<p className="simulation-view-status" role="status">{tr('Loading your room…','جارٍ تحميل الغرفة…')}</p>}
+  {error&&<p className="simulation-error" role="status">{error} <button type="button" className="simulation-retry" onClick={()=>setRetryRoom(value=>value+1)}>{tr('Try again','حاول مرة أخرى')}</button></p>}
   <div className="simulation-caption">{guestCount>0&&noteOn&&<span role="note" className="self-destruct-note">{tr('Guests stay as plain mannequins until each guest’s name and gender are added in the Seating chart. The chart is private to you: it stays on your device and Echo does not see it.','يبقى الضيوف كمجسّمات بلا ملامح إلى أن تضيف اسم كل ضيف وجنسه في مخطط الجلوس. المخطط خاص بك ويبقى على جهازك ولا تطّلع عليه Echo.')}</span>}{status.unplaced>0&&<span role="status">{tr(`${status.unplaced} equipment pieces need more space. Reduce quantities or the guest count.`,`${status.unplaced} قطع تحتاج إلى مساحة إضافية. قلل الكميات أو عدد الضيوف.`)}</span>}{status.failed>0&&<span>{tr('Some models use a simplified shape.','بعض المعدات معروضة بشكل مبسط.')}</span>}{guestLayout.omitted>0&&<span>{tr(`${guestLayout.shown} of ${guestLayout.total} guests shown.`, `يُعرض ${guestLayout.shown} من ${guestLayout.total} ضيفاً.`)}</span>}{layout.omitted>0&&<span>{tr(`First 60 of ${layout.total} units shown.`,`تُعرض أول 60 من ${layout.total} وحدة.`)}</span>}</div></div>
 </div>;
 }

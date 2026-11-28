@@ -1,5 +1,5 @@
 /* Compact Booking layout for phones, including short landscape screens. */
-@media(max-width:760px),(pointer:coarse) and (max-width:1100px) and (max-height:600px){
+@media (max-width:760px), (max-width:1100px) and (orientation:portrait), (pointer:coarse) and (max-width:1100px) and (max-height:600px){
  html body .echo.echo-public-page[data-page=home][data-theme] #echo-main>#availability.booking-journey{padding:20px 12px!important;font-size:14px}
  html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-journey-intro{margin-bottom:18px}
  html body .echo[data-page=home][data-theme] #availability.booking-journey h1{font-size:28px!important;line-height:1.15!important;margin:10px 0 12px}
@@ -41,17 +41,17 @@
  html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-phase{padding-top:24px}
  html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-phase h2{font-size:22px}
 }
-@media(min-width:360px) and (max-width:760px){
+@media (min-width:360px) and (max-width:760px) and (orientation:landscape){
  html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-venue-pair{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
-@media(max-width:760px),(pointer:coarse) and (max-width:1100px) and (max-height:600px){
+@media (max-width:760px), (max-width:1100px) and (orientation:portrait), (pointer:coarse) and (max-width:1100px) and (max-height:600px){
  html body .echo[data-page=home][data-theme] #availability.booking-journey select:not([multiple]),
  html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-venue-fields select:not([multiple]){font-size:13px!important;line-height:1.35!important;padding:7px 10px}
  html body .echo[data-page=home][data-theme] #availability.booking-journey select option{font-size:13px}
 }
 
 /* Phones: Booking page fields use a smaller type size (inputs, selects, textareas, placeholders). */
-@media(max-width:760px),(pointer:coarse) and (max-width:1100px) and (max-height:600px){
+@media (max-width:760px), (max-width:1100px) and (orientation:portrait), (pointer:coarse) and (max-width:1100px) and (max-height:600px){
  html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) :is(input:not([type=radio],[type=checkbox],[type=range]),select:not([multiple]),textarea),
  html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-field input,
  html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-venue-fields :is(input:not([type=radio],[type=checkbox]),select:not([multiple])){font-size:14px!important;line-height:1.35!important;min-height:40px;height:auto}
@@ -62,7 +62,7 @@
 }
 
 /* Phones: Step 3 and the services steps sit outside #availability. Their headers get exactly the previous steps' type sizes and spacing (no width, padding or grid changes). */
-@media(max-width:760px),(pointer:coarse) and (max-width:1100px) and (max-height:600px){
+@media (max-width:760px), (max-width:1100px) and (orientation:portrait), (pointer:coarse) and (max-width:1100px) and (max-height:600px){
  html body .echo[data-page=home][data-theme] .booking-services .booking-step-copy h2{font-size:22px!important;line-height:1.2!important;margin:10px 0}
  html body .echo[data-page=home][data-theme] .booking-services .booking-step-copy p{font-size:14px;line-height:1.55}
  html body .echo[data-page=home][data-theme] .booking-services .booking-step-number{font-size:11px;letter-spacing:.08em}
@@ -71,3 +71,72 @@
  html body .echo[data-page=home][data-theme] .booking-services .booking-reset{font-size:11px;min-height:34px;padding:6px 8px}
  html body .echo[data-page=home][data-theme] .booking-services :is(.avail-kicker,.avail-times .avail-kicker){font-size:11px;letter-spacing:.06em}
 }
+
+/* Fluid type: the event-type cards and the field placeholders scale with the screen (12px on a small phone up to 15px on a large screen). */
+html body .echo[data-page=home][data-theme] #availability.booking-journey .event-type-column [data-event-choice]{font-size:clamp(12px,.9vw + 8px,15px)}
+html body .echo[data-page=home][data-theme] #availability.booking-journey .event-type-column [data-event-choice] svg{width:clamp(16px,.6vw + 12px,20px);height:clamp(16px,.6vw + 12px,20px)}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) :is(input,textarea)::placeholder{font-size:clamp(12px,.5vw + 9px,15px)!important}
+
+/* Fluid type for the whole Booking page below desktop width: every text size is a range that follows the screen, not a fixed phone size. */
+@media (max-width:1000px){
+ html body .echo[data-page=home][data-theme] #availability.booking-journey h1{font-size:clamp(26px,5vw + 8px,44px)!important}
+ html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) :is(.booking-step-copy h2,.booking-phase h2){font-size:clamp(20px,2.4vw + 12px,30px)!important}
+ html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-step-copy p{font-size:clamp(13px,.6vw + 10px,16px)}
+ html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-card-title{font-size:clamp(15px,.5vw + 12px,19px)!important}
+ html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) :is(label,.booking-field>span,.avail-time-duration,.avail-phone-contact label){font-size:clamp(12px,.5vw + 9.5px,15px)}
+ html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) :is(.booking-field-hint,.personal-info-note,.booking-calendar-note,.booking-calendar-note small,.booking-clear-date,.avail-phone-contact legend){font-size:clamp(11px,.4vw + 9px,13.5px)}
+ html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) :is(.avail-kicker,.booking-step-number,.booking-reset,.booking-journey-intro>span){font-size:clamp(10.5px,.3vw + 9px,12.5px)}
+}
+
+/* Fluid buttons, tabs and icons on the Booking page: text, height, padding and icon size all follow the screen width. */
+html body .echo .phase-bar button{min-height:clamp(34px,1vw + 28px,42px);padding:0 clamp(9px,.6vw + 6px,14px);gap:clamp(5px,.4vw + 3px,8px);font-size:clamp(11.5px,.4vw + 9.5px,14px)}
+html body .echo .phase-bar button b{width:clamp(18px,.5vw + 15px,22px);height:clamp(18px,.5vw + 15px,22px);font-size:clamp(11px,.3vw + 9px,13px)}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) :is(.booking-reset,.avail-navigation button,.avail-navigation select,.djf-nav>button,.djf-add,.avail-times-clear){font-size:clamp(11.5px,.4vw + 9.5px,14px)}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) :is(.booking-reset,.avail-navigation button,.djf-nav>button,.djf-add,.djf-chips button,.avail-time-endpoint) svg{width:clamp(14px,.5vw + 11px,19px);height:clamp(14px,.5vw + 11px,19px)}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-card-title svg,html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-step-card>svg{width:clamp(18px,.8vw + 14px,24px);height:clamp(18px,.8vw + 14px,24px)}
+html body .echo .booking-footer-button{font-size:clamp(11.5px,.4vw + 9.5px,14px);min-height:clamp(38px,1vw + 30px,46px)}
+html body .echo .booking-footer :is(.booking-footer-button,.booking-footer-delete) svg{width:clamp(14px,.5vw + 11px,18px);height:clamp(14px,.5vw + 11px,18px)}
+html body .echo .booking-footer-steps b{font-size:clamp(10px,.3vw + 8.5px,12px)}
+
+/* Fluid checkboxes and radio buttons on the Booking page (the same 16px to 22px range as the icons). */
+html body .echo :is(#availability.booking-journey,.booking-services,.djf,.rentals-hero-form) input:is([type=checkbox],[type=radio]){flex:none;box-sizing:border-box;width:clamp(16px,.5vw + 12.5px,22px);height:clamp(16px,.5vw + 12.5px,22px);min-width:0;min-height:0;margin:0;accent-color:#e3d3a3}
+html body .echo :is(#availability.booking-journey,.booking-services,.djf,.rentals-hero-form) :is(input[type=checkbox],input[type=radio])+*,html body .echo :is(#availability.booking-journey,.booking-services,.djf,.rentals-hero-form) label:has(>input:is([type=checkbox],[type=radio])){font-size:clamp(12px,.5vw + 9.5px,15px)}
+
+/* Fluid venue section (02.04): fields, selects, placeholders, suggestions, hints and the map pin card follow the screen width. */
+html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-venue-fields :is(input:not([type=radio],[type=checkbox]),select:not([multiple])){font-size:clamp(13px,.5vw + 10.5px,15px)!important;height:clamp(38px,1vw + 30px,46px)!important;min-height:clamp(38px,1vw + 30px,46px)!important;padding-inline:clamp(10px,.5vw + 7px,14px)}
+html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-venue-fields :is(input,select)::placeholder{font-size:clamp(12px,.5vw + 9px,14.5px)!important}
+html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-venue-fields{gap:clamp(8px,.5vw + 6px,12px)}
+html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-venue-pair{gap:clamp(8px,.5vw + 6px,12px)}
+html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-venue-fields .avail-kicker{font-size:clamp(10.5px,.3vw + 9px,12.5px)}
+html body .echo[data-page=home][data-theme] #availability.booking-journey :is(.avail-venue-hint,.avail-venue-note,.avail-venue-lines,.booking-venue-mapnote){font-size:clamp(11.5px,.4vw + 9.5px,13.5px)}
+html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-venue-dropdown .avail-venue-grid button{padding:clamp(7px,.4vw + 5px,10px) clamp(9px,.5vw + 6px,12px);font-size:clamp(12.5px,.5vw + 10px,15px)}
+html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-venue-pincard strong{font-size:clamp(13px,.5vw + 10.5px,16px)}
+html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-venue-pincard span{font-size:clamp(11.5px,.4vw + 9.5px,13.5px)}
+html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-venue-fields :is(button,.avail-venue-close) svg{width:clamp(14px,.5vw + 11px,19px);height:clamp(14px,.5vw + 11px,19px)}
+
+/* ONE type scale for every card of the Booking page (step cards, equipment cards, genre / language / song cards, notes, references).
+   Each card shows the same three sizes (title, text, small) at the same screen width, so no card's text is bigger than another's. */
+html body .echo{--bk-fs-title:clamp(14px,.5vw + 11.5px,17px);--bk-fs-text:clamp(12.5px,.5vw + 10px,15px);--bk-fs-small:clamp(11px,.4vw + 9px,13px)}
+html body .echo :is(#availability.booking-journey,.booking-services,.djf,.rentals-hero-form) :is(.booking-card-title,.rw-card-copy strong,.djf-genre-head strong,.djf-lang>header>strong,.djf-pair>strong,.favourite-song-copy>strong,.djf-song-found strong,.youtube-result-copy strong,.djf-card>h3,.ref-block h4,.setup-notes-card>label,.djf-influence-name){font-size:var(--bk-fs-title)!important}
+html body .echo :is(#availability.booking-journey,.booking-services,.djf,.rentals-hero-form) :is(.djf-genre-desc,.djf-tag,.tag-input-chip,.tag-input-menu>li,.favourite-song-copy>span,.djf-influence-description,.djf-vocalist-meta,.rw-service-section-content>.rw-empty,.setup-notes-card label span,.booking-step-card :is(p,label,li,dd)){font-size:var(--bk-fs-text)}
+html body .echo :is(#availability.booking-journey,.booking-services,.djf,.rentals-hero-form) :is(.rw-card-copy small,.rw-card-tag,.favourite-song-copy>a,.youtube-result-copy small,.djf-song-found small,.djf-hint,.djf-empty,.tag-input-hint,.djf-note,.djf-dialects>p>small,.djf-no-dialects,.booking-step-card small){font-size:var(--bk-fs-small)}
+
+/* The small-caps labels of the Event step (EVENT TIME, GUESTS, VENUE, CONTACT) were 11px and 10.5px: now one size, the cards' small size. */
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) :is(.avail-kicker,.avail-times .avail-kicker,.avail-venue-fields .avail-kicker,.avail-time-heading>.avail-kicker){font-size:var(--bk-fs-small)!important}
+
+/* The two choice buttons of 03.01 (DJ), 03.02 (MC) and 03.03 (rental): their text wraps, but never past two lines (then "…"). */
+html body .echo[data-page=home][data-theme] .event-type-column:is(.dj-choice,.mc-choice) [data-event-choice]{white-space:normal;text-align:start;height:auto;line-height:1.25}
+html body .echo[data-page=home][data-theme] .event-type-column:is(.dj-choice,.mc-choice) [data-event-choice]>span{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden;white-space:normal;min-width:0;overflow-wrap:anywhere}
+
+/* No truncation: the choice buttons of 03.01 / 03.02 / 03.03 get the full card width (stacked), so their text fits in two lines at most. */
+html body .echo[data-page=home][data-theme] .event-type-column:is(.dj-choice,.mc-choice)>div[role=group]{display:flex;flex-direction:column;align-items:stretch;flex-wrap:nowrap;gap:clamp(6px,.6vw + 4px,10px)}
+html body .echo[data-page=home][data-theme] .event-type-column:is(.dj-choice,.mc-choice) [data-event-choice]{width:100%;box-sizing:border-box;padding-inline:clamp(10px,.8vw + 6px,14px)}
+html body .echo[data-page=home][data-theme] .event-type-column:is(.dj-choice,.mc-choice) [data-event-choice]>span{display:block;-webkit-line-clamp:unset;line-clamp:unset;overflow:visible;text-overflow:clip;text-wrap:balance;flex:1 1 auto;font-size:clamp(11.5px,.5vw + 9.5px,14px);line-height:1.25}
+
+/* Same rules at the specificity of the page's own choice-grid rule (it has an id inside :is), so they really apply: one button per row, full width. */
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .event-type-column:is(.dj-choice,.mc-choice)>div[role=group]{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:clamp(6px,.6vw + 4px,10px)}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .event-type-column:is(.dj-choice,.mc-choice) [data-event-choice]{width:100%!important;max-width:none!important;box-sizing:border-box;height:auto!important;white-space:normal!important;text-align:start}
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .event-type-column:is(.dj-choice,.mc-choice) [data-event-choice]>span{display:block!important;white-space:normal!important;overflow:visible!important;-webkit-line-clamp:unset!important;line-clamp:unset!important;text-overflow:clip!important;text-wrap:balance}
+
+/* Portrait and landscape alike (including the tablet-landscape and portrait-viewport layouts that make the choices a row): stacked, nothing scrolls sideways. */
+html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .event-type-column:is(.dj-choice,.mc-choice)>div[role=group]{overflow:visible!important;justify-content:stretch!important;grid-auto-flow:row!important}

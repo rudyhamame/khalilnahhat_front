@@ -62,9 +62,9 @@
 .rental-workbench .setup-quantity-picker{font-size:14px;color:#d3e5d8;gap:3px}.rental-workbench .setup-quantity-picker>span{font-size:12px;color:#c2d5c4}.rental-workbench .setup-quantity-picker input{font-size:14px;width:26px;color:#edf6f0}
 .rental-workbench .setup-add-booking{width:34px;height:34px;background:#d2bf8b;color:#1d272b;border-color:#e6d5a8}.rental-workbench .setup-add-booking.is-added{background:#cce4ce;color:#1b2c33}
 .rental-workbench :is(button,input):focus-visible{outline:2px solid #e4d09b;outline-offset:-3px}
-@media(max-width:1200px){.rental-workspace{grid-template-columns:175px minmax(0,1fr) 255px}.rental-services{padding-inline:9px}.rental-service-list button{font-size:13px;padding-inline:9px}.rental-object-caption{padding:18px 22px 24px}.rental-object-heading{padding:20px 22px}.rental-equipment-list{grid-template-rows:190px;grid-auto-rows:170px}.rental-equipment-list>button{min-height:170px;padding:12px 10px}.rental-equipment-list>button:first-child{min-height:190px}.rental-equipment-card-copy>span{font-size:13px}.rental-equipment-thumbnail{width:45px;height:45px}.rental-equipment-card-copy>small{font-size:12px}}
-@media(max-width:760px){.echo #services .rental-workbench{padding:5px;border-radius:21px}.rental-workspace{grid-template-columns:1fr;grid-template-rows:auto minmax(400px,1fr) 350px;gap:6px}.rental-services,.rental-center,.rental-equipment{border-radius:16px}.rental-services{padding:16px 12px;display:grid;grid-template-columns:1fr;gap:12px}.rental-services>.rental-label{padding:0 4px}.rental-service-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;max-height:150px}.rental-service-list button{min-height:40px;font-size:13px;padding:8px}.rental-item-info{padding:0;margin-top:0;display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px}.rental-item-info>p{display:none}.rental-booking{margin:0;padding:0;border:0;flex:1;justify-content:flex-end;gap:8px}.rental-object-heading{padding:17px 18px}.rental-model-stage{margin-inline:10px;min-height:210px}.rental-object-caption{padding:16px 20px 22px}.echo #services .rental-object-caption h3{font-size:35px;line-height:1.12;margin:7px 0 10px}.rental-equipment{padding:6px}.rental-equipment-list{grid-template-rows:none;grid-auto-rows:175px}.rental-equipment-list>button,.rental-equipment-list>button:first-child{min-height:175px}.rental-equipment-list>button:first-child{grid-column:auto}.rental-equipment-list>button:first-child .rental-equipment-thumbnail{width:45px;height:45px}.rental-equipment-card-copy>span{font-size:14px}.rental-equipment-heading{min-height:40px}.rental-equipment-list>button{gap:15px}}
-@media(prefers-reduced-motion:reduce){.rental-workbench button{transition:none}}
+@media (max-width:1200px){.rental-workspace{grid-template-columns:175px minmax(0,1fr) 255px}.rental-services{padding-inline:9px}.rental-service-list button{font-size:13px;padding-inline:9px}.rental-object-caption{padding:18px 22px 24px}.rental-object-heading{padding:20px 22px}.rental-equipment-list{grid-template-rows:190px;grid-auto-rows:170px}.rental-equipment-list>button{min-height:170px;padding:12px 10px}.rental-equipment-list>button:first-child{min-height:190px}.rental-equipment-card-copy>span{font-size:13px}.rental-equipment-thumbnail{width:45px;height:45px}.rental-equipment-card-copy>small{font-size:12px}}
+@media (max-width:760px), (max-width:1100px) and (orientation:portrait){.echo #services .rental-workbench{padding:5px;border-radius:21px}.rental-workspace{grid-template-columns:1fr;grid-template-rows:auto minmax(400px,1fr) 350px;gap:6px}.rental-services,.rental-center,.rental-equipment{border-radius:16px}.rental-services{padding:16px 12px;display:grid;grid-template-columns:1fr;gap:12px}.rental-services>.rental-label{padding:0 4px}.rental-service-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;max-height:150px}.rental-service-list button{min-height:40px;font-size:13px;padding:8px}.rental-item-info{padding:0;margin-top:0;display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px}.rental-item-info>p{display:none}.rental-booking{margin:0;padding:0;border:0;flex:1;justify-content:flex-end;gap:8px}.rental-object-heading{padding:17px 18px}.rental-model-stage{margin-inline:10px;min-height:210px}.rental-object-caption{padding:16px 20px 22px}.echo #services .rental-object-caption h3{font-size:35px;line-height:1.12;margin:7px 0 10px}.rental-equipment{padding:6px}.rental-equipment-list{grid-template-rows:none;grid-auto-rows:175px}.rental-equipment-list>button,.rental-equipment-list>button:first-child{min-height:175px}.rental-equipment-list>button:first-child{grid-column:auto}.rental-equipment-list>button:first-child .rental-equipment-thumbnail{width:45px;height:45px}.rental-equipment-card-copy>span{font-size:14px}.rental-equipment-heading{min-height:40px}.rental-equipment-list>button{gap:15px}}
+@media (prefers-reduced-motion:reduce){.rental-workbench button{transition:none}}
 
 .echo[data-page=home] #services .rental-object-caption h3{font-family:Georgia,'Times New Roman',serif!important}
 
@@ -96,10 +96,10 @@ html body .echo[data-page=home][data-theme] .rw-service-section-step .booking-st
 .rw-equipment-wheel>.rw-card:is(:hover,:focus-visible) .rw-card-copy strong{color:#f0d98b;text-shadow:0 0 12px #e3d3a3a6}
 .rw-equipment-wheel>.rw-card.is-picked,.rw-equipment-wheel>.rw-card.is-open{scroll-snap-align:center}
 .rw-equipment-wheel>.rw-card:focus-visible{outline-offset:-4px}
-@media(max-width:760px){.rw-service-section-step .booking-step-copy{align-self:start}}
-@media(max-width:520px){html body .echo[data-page=home][data-theme] .rw-service-section-step .booking-step-card>.booking-card-title:not([aria-hidden=true]){padding:12px 20px!important}}
-@media(max-width:560px){.rw-equipment-wheel>.rw-card{flex-basis:min(76vw,280px)}}
-@media(max-width:760px){html body .echo[data-page=home][data-theme] .rental-services-stack{padding-block:20px;padding-inline:0}}
+@media (max-width:760px), (max-width:1100px) and (orientation:portrait){.rw-service-section-step .booking-step-copy{align-self:start}}
+@media (max-width:520px), (max-width:1100px) and (orientation:portrait){html body .echo[data-page=home][data-theme] .rw-service-section-step .booking-step-card>.booking-card-title:not([aria-hidden=true]){padding:12px 20px!important}}
+@media (max-width:560px), (max-width:1100px) and (orientation:portrait){.rw-equipment-wheel>.rw-card{flex-basis:min(76vw,280px)}}
+@media (max-width:760px), (max-width:1100px) and (orientation:portrait){html body .echo[data-page=home][data-theme] .rental-services-stack{padding-block:20px;padding-inline:0}}
 
 .echo[data-page=home] #services [dir=rtl] .rental-object-caption h3{font-family:'Noto Sans Arabic',sans-serif!important}
 
@@ -107,7 +107,7 @@ html body .echo[data-page=home][data-theme] .rw-service-section-step .booking-st
 .echo #services .rental-label{margin:0}
 .echo #services .rental-equipment-heading{height:48px;min-height:48px;align-items:center}
 .echo #services .rental-equipment-heading>.rental-label{font-size:15px;font-weight:600;line-height:1.4;color:#edf3e9;letter-spacing:.025em}
-@media(max-width:760px){.echo #services .rental-equipment-heading{height:42px;min-height:42px}}
+@media (max-width:760px), (max-width:1100px) and (orientation:portrait){.echo #services .rental-equipment-heading{height:42px;min-height:42px}}
 
 .echo #services .rental-equipment-heading>span{font-size:14px;font-weight:600;line-height:1.4}
 
@@ -138,7 +138,7 @@ html body .echo[data-page=home][data-theme] .rw-service-section-step .booking-st
 
 .echo #services .rental-equipment-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex:none;height:auto;min-height:64px;margin:0 0 10px;padding:18px 14px;border:1px solid #d7c39124;border-radius:16px;background:radial-gradient(ellipse at top left,#d7c3910f,transparent 75%),linear-gradient(135deg,#272b2b,#1b2020);box-shadow:inset 0 1px 0 #ffffff08,0 4px 14px #00000018}
 .echo #services .rental-equipment-heading>.rental-label{margin:0;color:#d7c391;font-size:12px;font-weight:500;line-height:1.5;letter-spacing:.055em}
-@media(max-width:760px){.echo #services .rental-equipment-heading{height:auto;min-height:0;padding:10px 10px 12px}}
+@media (max-width:760px), (max-width:1100px) and (orientation:portrait){.echo #services .rental-equipment-heading{height:auto;min-height:0;padding:10px 10px 12px}}
 /* Equipment stack: make the card text easy to read — bigger, brighter, on a stronger scrim, never clipped. */
 .echo #services .rental-equipment-list>button:after{background:linear-gradient(180deg,#0c121540 0%,transparent 18%,#0c1215b3 48%,#0c1215fa 100%)}
 .echo #services .rental-equipment-list>button{padding:12px 12px 14px}
@@ -181,7 +181,7 @@ html body .echo[data-page=home][data-theme] .rw-service-section-step .booking-st
 .echo #services .rental-booking .setup-add-booking:hover:not(:disabled){background:#eddbac;transform:translateY(-1px)}
 .echo #services .rental-booking .setup-add-booking.is-added{background:#c6ddc7;color:#1c2d35;border-color:#d3e6cd}
 .echo #services .rental-booking :is(button,input):focus-visible{outline:2px solid #ead49b;outline-offset:3px}
-@media(prefers-reduced-motion:reduce){.echo #services .rental-booking button{transition:none}}
+@media (prefers-reduced-motion:reduce){.echo #services .rental-booking button{transition:none}}
 .echo #services .rental-booking .setup-quantity-picker>span{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
 .echo #services .rental-booking .setup-quantity-picker>span .setup-equipment-stock{margin:0}
 .rental-item-copy{display:grid;gap:8px;max-height:7.4em;overflow:hidden}
@@ -256,7 +256,7 @@ html body .echo[data-page=home][data-theme] .rw-service-section-step .booking-st
 .rental-with-feature{display:flex;gap:clamp(8px,1vw,14px);flex:1 1 auto;height:100%;min-height:0}
 .rental-with-feature>.rental-workspace{flex:1 1 0;min-width:0;height:100%}
 .rental-with-feature>.home-work-feature{flex:0 0 clamp(250px,22vw,340px);min-height:0;height:100%;box-sizing:border-box}
-@media(max-width:1000px){.rental-with-feature{flex-direction:column;height:auto}.rental-with-feature>.home-work-feature{flex:none;min-height:340px;height:auto}.rental-with-feature>.rental-workspace{height:auto}}
+@media (max-width:1000px){.rental-with-feature{flex-direction:column;height:auto}.rental-with-feature>.home-work-feature{flex:none;min-height:340px;height:auto}.rental-with-feature>.rental-workspace{height:auto}}
 .rental-with-feature .home-work-feature h2,.echo .rental-with-feature .home-work-feature h2{font-size:clamp(28px,2.7vw,42px)!important;line-height:1.05}
 
 /* Rentals page: a blurred copy of the DJ Khalil service artwork fills the background; the Services and Equipment panels are
@@ -281,7 +281,7 @@ html body .echo[data-page=home][data-theme] .rental-question-wrap+.rental-servic
 html body .echo[data-page=home][data-theme] .rental-question-step{margin-bottom:0!important;padding-bottom:0!important}
 
 /* Phones: the rental booking bar (quantity + Add to booking) is as short as it can be. */
-@media(max-width:760px){
+@media (max-width:760px), (max-width:1100px) and (orientation:portrait){
  html body .echo #services .rental-booking{flex-wrap:nowrap;gap:8px;margin-top:4px;padding:6px 8px;min-height:0;border-radius:12px}
  html body .echo #services .rental-booking .setup-quantity-picker{flex:0 1 auto;gap:0}
  html body .echo #services .rental-booking .setup-quantity-picker>span{display:none}

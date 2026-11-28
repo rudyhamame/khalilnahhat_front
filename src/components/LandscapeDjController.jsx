@@ -1,3 +1,4 @@
+import {Settings} from 'lucide-react';
 import {createTapTempo} from '../lib/tapTempo';
 import {createBeatGridAnalysis,measuredTrack,beatAnalysisKey} from '../lib/beatGridAnalysis';
 import {createDjAutoTrim,trimDecibels} from '../lib/djAutoTrim';
@@ -109,7 +110,7 @@ function Deck({dx,n,player,command=archivePlayerCommand,art,switchLayer,mediaTim
       <path d="M98 331 Q108 343 132 348" fill="none" stroke="#d6dbde" strokeWidth="1.1"/><path d="M280 331 Q270 343 246 348" fill="none" stroke="#d6dbde" strokeWidth="1.1"/>
     </g>
     <g className="deck-left"><Btn x={22} y={262} w={15} h={6} label="SHIFT" lit={shift} onClick={()=>setShift(!shift)} s={3}/><T x={42} y={279} s={3.2} f="#b3bbbf" max={64}>SHIFT + PAD · CLEAR</T>
-      <T x={50} y={313} s={4} f="#c5cacd">SEARCH</T><Btn x={34} y={328} w={16} round onClick={ready?()=>seek(now()-5):undefined} label="◀" ariaLabel="Search reverse"/><Btn x={65} y={328} w={16} round onClick={ready?()=>seek(now()+5):undefined} label="▶" ariaLabel="Search forward"/>
+      <T x={50} y={313} s={4} f="#c5cacd">SEARCH</T><Btn x={34} y={328} w={16} round onClick={ready?()=>seek(now()-5):undefined} ariaLabel="Search reverse"><path className="btn-glyph" d="M34 324.4V331.6L29 328ZM39 324.4V331.6L34 328Z" fill="#e4e9ec" pointerEvents="none"/></Btn><Btn x={65} y={328} w={16} round onClick={ready?()=>seek(now()+5):undefined} ariaLabel="Search forward"><path className="btn-glyph" d="M65 324.4V331.6L70 328ZM60 324.4V331.6L65 328Z" fill="#e4e9ec" pointerEvents="none"/></Btn>
       <g className={`ring-btn${transportReady?' is-live':''}`} role={transportReady?'button':undefined} tabIndex={player.track?0:-1} transform="translate(0 -4)" aria-label="Cue: stop and return to the start" onClick={()=>player.track&&command('stop')} onKeyDown={e=>{if((e.key==='Enter'||e.key===' ')){e.preventDefault();command('stop');}}}>
         <circle cx="49.5" cy="379" r="27" fill="#0c0d0e" stroke="#5c6063" strokeWidth="3"/><circle cx="49.5" cy="379" r="21" fill="none" stroke="#1d2022" strokeWidth="1"/><path d="M33 372 L66 386 M66 372 L33 386" stroke="#202426" strokeWidth="4"/><T x={49.5} y={381} s={7} f="#f1f3f4" w={800}>CUE</T></g>
       <g className={`ring-btn${transportReady?' is-live':''}${playing?' is-lit':''}`} role={transportReady?'button':undefined} tabIndex={transportReady?0:-1} aria-label={playing?'Pause':'Play'} aria-pressed={transportReady?Boolean(playing):undefined} onClick={()=>transportReady&&command('toggle')} onKeyDown={e=>{if(transportReady&&(e.key==='Enter'||e.key===' ')){e.preventDefault();command('toggle');}}}>
@@ -154,8 +155,7 @@ export default function LandscapeDjController({stems:mainStems,mic,audioGraph,un
   const [notice,setNotice]=useState('');
   const [decks,setDecks]=useState({});
   const footerId=useId();
-  const [footerExpanded,setFooterExpanded]=useState(()=>{try{return localStorage.getItem('echo-mixer-footer-collapsed')!=='true';}catch{return true;}});
-  useEffect(()=>{try{localStorage.setItem('echo-mixer-footer-collapsed',String(!footerExpanded));}catch{/* Storage may be unavailable. */}},[footerExpanded]);
+  const [footerExpanded,setFooterExpanded]=useState(false); // closed by default; the gear opens it
   const [layers,setLayers]=useState([1,2]);
   const [blend,setBlend]=useState(.5);
   const [settings,setSettings]=useState({});
@@ -535,7 +535,8 @@ export default function LandscapeDjController({stems:mainStems,mic,audioGraph,un
   </svg>}
   <LoadPicker library={library} onPick={loadDeck}/>
   </div></div>
-  <footer className={`ddj-ai-footer${footerExpanded?'':' is-collapsed'}`} aria-label="Mixer audio and remix controls">
+  <button type="button" className="ddj-settings-toggle" aria-expanded={footerExpanded} aria-controls={footerId} aria-label={footerExpanded?'Close mixer settings':'Open mixer settings'} title={footerExpanded?'Close mixer settings':'Open mixer settings'} onClick={()=>setFooterExpanded(value=>!value)}><Settings size={18} aria-hidden="true"/></button>
+  <footer hidden={!footerExpanded} className="ddj-ai-footer" aria-label="Mixer audio and remix controls">
     <div className="ddj-footer-heading">
       <strong className="ddj-footer-title">Mixer controls</strong>
       <div className="ddj-footer-indicators" aria-label="Active audio controls">

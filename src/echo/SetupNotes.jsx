@@ -11,7 +11,7 @@ export default function SetupNotes({ar=false}){
  const ctx=useEventOrder(),id=useId(),section=useRef(null),tr=(en,arabic)=>ar?arabic:en;
  const value=ctx?.order?.event?.setup?.requirements||'';
  const area=useRef(null);
- useLayoutEffect(()=>{const el=area.current;if(el){el.style.height='auto';el.style.height=`${el.scrollHeight+2}px`;}},[value]);// grows with its text, never scrolls
+ useLayoutEffect(()=>{const el=area.current;if(el){el.style.height='auto';el.style.height=`${el.scrollHeight+2}px`;}},[value]);// grows with its text up to the CSS max-height, then scrolls inside
  useEffect(()=>{if(window.location.hash==='#setup-notes')section.current?.scrollIntoView({block:'start'});},[]);
  return <section ref={section} id="setup-notes" className="echo-section setup-notes" dir={ar?'rtl':'ltr'} aria-labelledby={`${id}-title`}>
   <div className="setup-notes-copy"><h2 id={`${id}-title`}>{fieldName(PATH,ar)}</h2><p id={`${id}-hint`}>{tr('Anything we should know about the space or setup? Tell us about access, power, staging or other setup requirements.','هل هناك ما يجب أن نعرفه عن المكان أو التجهيز؟ أخبرنا عن الوصول أو الكهرباء أو المنصة أو أي متطلبات أخرى.')}</p></div>

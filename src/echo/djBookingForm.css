@@ -48,8 +48,8 @@ textarea.djf-input{padding:10px 12px;resize:vertical;min-height:96px}
 .djf-done{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 26px;border:0;border-radius:12px;background:var(--gold);color:#1b1d14;font:600 14px/1 inherit;cursor:pointer}
 .djf-done:hover{background:#efe2b8}
 .djf :is(button,input,select,textarea):focus-visible{outline:2px solid var(--gold);outline-offset:2px}
-@media(max-width:900px){.djf-body{grid-template-columns:minmax(0,1fr)}.djf-songs>li{grid-template-columns:auto minmax(0,1fr) auto}.djf-songs>li>select{grid-column:2/3}.djf-songs>li>input{grid-column:2/4;grid-row:2}.djf-head{flex-wrap:wrap}}
-@media(prefers-reduced-motion:reduce){.djf{animation:none}}
+@media (max-width:1000px){.djf-body{grid-template-columns:minmax(0,1fr)}.djf-songs>li{grid-template-columns:auto minmax(0,1fr) auto}.djf-songs>li>select{grid-column:2/3}.djf-songs>li>input{grid-column:2/4;grid-row:2}.djf-head{flex-wrap:wrap}}
+@media (prefers-reduced-motion:reduce){.djf{animation:none}}
 
 /* While the DJ form is open it is the only content of the viewport. */
 .home-work-layout.is-dj-form{display:block;height:100%;min-height:0;overflow:hidden}
@@ -103,7 +103,7 @@ textarea.djf-input{padding:10px 12px;resize:vertical;min-height:96px}
 .djf .djf-fields{display:contents;border:0;margin:0;padding:0;min-width:0}
 .djf .djf-fields:disabled{opacity:1}
 .djf .djf-body:has(.djf-fields:disabled){opacity:.6}
-@media(max-width:900px){.djf .djf-body{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:1000px){.djf .djf-body{grid-template-columns:minmax(0,1fr)}}
 
 /* Pro token input for favourite songs and artists. */
 .tag-input{position:relative;display:flex;flex-direction:column;gap:6px}
@@ -129,7 +129,7 @@ html body .echo[data-page=home][data-theme] .work-archive-front .home-work-layou
 .djf-card::-webkit-scrollbar,.djf .djf-body::-webkit-scrollbar{width:10px}
 .djf-card::-webkit-scrollbar-thumb,.djf .djf-body::-webkit-scrollbar-thumb{border:2px solid transparent;border-radius:999px;background:#ffffff40;background-clip:content-box}
 .djf-card::-webkit-scrollbar-thumb:hover,.djf .djf-body::-webkit-scrollbar-thumb:hover{background:#ffffff70;background-clip:content-box}
-@media(hover:none){.djf-card{max-height:none;overflow:visible}.djf-card>h3{position:static;margin:0;padding:0 0 4px;background:none}}
+@media (hover:none){.djf-card{max-height:none;overflow:visible}.djf-card>h3{position:static;margin:0;padding:0 0 4px;background:none}}
 
 /* The input is its own box; the added items sit below it as pills. */
 .tag-input-box{position:relative}
@@ -140,7 +140,7 @@ html body .echo[data-page=home][data-theme] .work-archive-front .home-work-layou
 .tag-input-pills{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 0;padding:0;list-style:none}
 /* Cards never get shorter than this, however little they hold. */
 .djf-card{min-height:180px}
-@media(hover:none){.djf-card{min-height:0}}
+@media (hover:none){.djf-card{min-height:0}}
 .djf-card{min-height:260px}
 .djf-card{min-height:340px}
 
@@ -178,7 +178,7 @@ html body .echo[data-page=home][data-theme] .work-archive-front .home-work-layou
 .djf-nav>button.is-open .djf-nav-count{background:var(--gold);color:#1b1d14}
 .djf .djf-main-card{flex:1 1 0;min-width:0;align-self:stretch;max-height:100%;min-height:0;overflow-y:auto;padding:20px 22px}
 .djf .djf-main-card>h3{top:-20px;margin:-20px -22px 0;padding:20px 22px 12px}
-@media(max-width:760px){.djf .djf-body{flex-direction:column;overflow-y:auto}.djf-nav{flex:none;flex-direction:row;position:static;overflow-x:auto;width:100%}.djf-nav>button{flex:none;width:auto}.djf .djf-main-card{max-height:none;overflow:visible;align-self:auto}}
+@media (max-width:760px), (max-width:1100px) and (orientation:portrait){.djf .djf-body{flex-direction:column;overflow-y:auto}.djf-nav{flex:none;flex-direction:row;position:static;overflow-x:auto;width:100%}.djf-nav>button{flex:none;width:auto}.djf .djf-main-card{max-height:none;overflow:visible;align-self:auto}}
 
 /* A section's main action (Add a song) sits at the far end of the title row. */
 .djf-card>h3>.djf-card-title{flex:0 1 auto}
@@ -190,7 +190,7 @@ html body .echo[data-page=home][data-theme] .work-archive-front .home-work-layou
 .djf-songs>li>.djf-link-input{grid-column:2/5;grid-row:2}
 .djf-combo>input{min-height:42px;padding:0 12px;font-size:13.5px}
 .djf-link-input[aria-invalid=true]{border-color:#e0a3a0}
-@media(max-width:900px){.djf-songs>li{grid-template-columns:auto minmax(0,1fr) auto}.djf-songs>li>.djf-combo:nth-child(2){grid-column:2/3}.djf-songs>li>.djf-combo:nth-child(4){grid-column:2/4;grid-row:3}.djf-songs>li>.djf-link-input{grid-column:2/4;grid-row:4}}
+@media (max-width:1000px){.djf-songs>li{grid-template-columns:auto minmax(0,1fr) auto}.djf-songs>li>.djf-combo:nth-child(2){grid-column:2/3}.djf-songs>li>.djf-combo:nth-child(4){grid-column:2/4;grid-row:3}.djf-songs>li>.djf-link-input{grid-column:2/4;grid-row:4}}
 /* Influence cards explain each choice while preserving multiple selection. */
 .djf-influences-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px;align-items:stretch}
 .djf .djf-influence-card{display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:10px;width:100%;min-width:0;padding:18px;border:1px solid var(--line);border-radius:14px;background:#ffffff05;color:var(--ink);font:inherit;text-align:start;cursor:pointer;transition:background .15s,border-color .15s}
@@ -228,7 +228,7 @@ html body .djf .djf-card>h3{backdrop-filter:none;-webkit-backdrop-filter:none;ba
 
 /* Wide screens: the Language & dialect card is lifted to the top of the form and the title block sits to its left,
    with Back, status and the section list stacked under the title. */
-@media(min-width:761px){
+@media (min-width:761px) and ((orientation:landscape) or (min-width:1101px)){
  html body .djf.djf{display:grid;grid-template-columns:250px minmax(0,1fr);grid-template-rows:auto auto auto auto minmax(0,1fr);column-gap:18px;row-gap:10px;align-content:start}
  html body .djf.djf .djf-head,html body .djf.djf .djf-body,html body .djf.djf .djf-fields{display:contents}
  html body .djf.djf .djf-back{grid-column:1;grid-row:1;justify-self:start}
@@ -245,7 +245,7 @@ html body .djf .djf-card>h3{backdrop-filter:none;-webkit-backdrop-filter:none;ba
 html body .djf .djf-search,html body .djf .djf-search input{background:transparent!important;box-shadow:none;-webkit-appearance:none;appearance:none}
 
 /* Services VP1: section tabs run horizontally, with the active form directly below them. */
-@media(min-width:761px){
+@media (min-width:761px) and ((orientation:landscape) or (min-width:1101px)){
  html body .rentals-hero-form .djf.djf{display:flex;flex-direction:column;align-content:normal}
  html body .rentals-hero-form .djf.djf .djf-head{display:flex}
  html body .rentals-hero-form .djf.djf .djf-body{display:flex;flex:1 1 0;flex-direction:column;align-items:stretch;gap:10px;min-height:0;overflow-y:auto}
@@ -261,9 +261,39 @@ html body .rentals-hero-form .djf-nav{gap:6px;padding:5px;border:1px solid var(-
 html body .rentals-hero-form .djf-nav>button{min-height:50px;border-radius:10px;font-size:clamp(11px,1.2vw,13px)}
 html body .rentals-hero-form .djf-nav-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center}
 html body .rentals-hero-form .djf-nav>button[aria-selected=true]{border-color:var(--gold-line);background:var(--gold-soft);color:var(--gold);box-shadow:inset 0 -2px 0 var(--gold)}
-@media(max-width:760px){
+@media (max-width:760px), (max-width:1100px) and (orientation:portrait){
  html body .rentals-hero-form .djf-nav{display:flex;flex-direction:row;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;scrollbar-width:thin}
  html body .rentals-hero-form .djf-nav>button{flex:0 0 min(70vw,190px);width:auto;scroll-snap-align:start}
 }
 
-@media(max-width:760px),(pointer:coarse) and (max-width:1100px) and (max-height:600px){.djf-note[data-loading-draft]{display:none!important}}
+@media (max-width:760px), (max-width:1100px) and (orientation:portrait), (pointer:coarse) and (max-width:1100px) and (max-height:600px){.djf-note[data-loading-draft]{display:none!important}}
+
+/* Fluid type for the items the client creates (favourite songs, artists, suggested songs, tags, chips, results): text follows the screen width. */
+html body .echo :is(.djf,.rentals-hero-form,.booking-services) :is(.djf-tag,.tag-input-chip,.tag-input-menu>li,.djf-pair>strong,.djf-song-found strong,.favourite-song-copy>strong,.youtube-result-copy strong){font-size:clamp(12.5px,.5vw + 10px,15px)}
+html body .echo :is(.djf,.rentals-hero-form,.booking-services) :is(.favourite-song-copy>span,.youtube-result-copy small,.djf-song-found small,.djf-song-found a,.favourite-song-copy>a,.djf-hint,.djf-empty,.tag-input-hint,.djf-note,.djf-choose>span,.djf-unsaved,.djf-same-moment,.djf-vocalist-meta,.djf-influence-description){font-size:clamp(11.5px,.4vw + 9.5px,13.5px)}
+html body .echo :is(.djf,.rentals-hero-form,.booking-services) :is(.djf-input,.djf-combo>input,.djf-songs .djf-input,.djf-moment select,.favourite-song-fields input){font-size:clamp(13px,.5vw + 10.5px,15px)}
+html body .echo :is(.djf,.rentals-hero-form,.booking-services) :is(.djf-input,.djf-combo>input,.tag-input input)::placeholder{font-size:clamp(12px,.5vw + 9px,14.5px)}
+html body .echo :is(.djf,.rentals-hero-form,.booking-services) :is(.djf-add,.djf-chips button,.song-entry-modes button,.favourite-song-fields>label){font-size:clamp(12px,.4vw + 10px,14px)}
+
+/* Fluid music genres: the card text, the description and the tick circle follow the screen width, like the checkboxes. */
+html body .echo .djf .djf-genre-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,clamp(180px,12vw + 130px,260px)),1fr));gap:clamp(8px,.6vw + 6px,14px)}
+html body .echo .djf .djf-genre-card{padding:clamp(10px,.6vw + 8px,16px) clamp(12px,.6vw + 9px,18px)}
+html body .echo .djf .djf-genre-head strong{font-size:clamp(14px,.5vw + 11.5px,17px)}
+html body .echo .djf .djf-genre-desc{font-size:clamp(12px,.4vw + 10px,14.5px)}
+html body .echo .djf .djf-genre-check{width:clamp(18px,.5vw + 14.5px,24px);height:clamp(18px,.5vw + 14.5px,24px)}
+html body .echo .djf .djf-genre-check svg{width:clamp(11px,.4vw + 9px,15px);height:clamp(11px,.4vw + 9px,15px)}
+
+/* Fluid language & dialect: language cards, names, dialect heading, chips, remove button and the language/dialect pairs. */
+html body .echo .djf .djf-lang{padding:clamp(10px,.6vw + 8px,16px) clamp(12px,.6vw + 9px,18px);border-radius:clamp(12px,.4vw + 10px,16px)}
+html body .echo .djf .djf-lang>header>strong,html body .echo .djf .djf-pair>strong{font-size:clamp(13.5px,.5vw + 11px,16.5px)}
+html body .echo .djf .djf-dialects>p{font-size:clamp(10.5px,.3vw + 9px,12.5px)}
+html body .echo .djf .djf-dialects>p>small,html body .echo .djf .djf-no-dialects,html body .echo .djf .djf-pair>strong small{font-size:clamp(11px,.4vw + 9px,13.5px)}
+html body .echo .djf .djf-dialects .djf-chips button,html body .echo .djf .djf-pair-dialects .djf-chips button{min-height:clamp(30px,.8vw + 25px,38px);padding:0 clamp(10px,.5vw + 7px,14px);font-size:clamp(12px,.4vw + 10px,14px)}
+html body .echo .djf .djf-lang-x{width:clamp(24px,.5vw + 21px,30px);height:clamp(24px,.5vw + 21px,30px)}
+html body .echo .djf .djf-lang-x svg{width:clamp(13px,.4vw + 11px,17px);height:clamp(13px,.4vw + 11px,17px)}
+html body .echo .djf .djf-pair{grid-template-columns:minmax(clamp(70px,8vw + 40px,120px),28%) minmax(0,1fr)}
+
+/* The card action (the "add" button of a music-preference card): centered and smaller. */
+html body .echo .djf .djf-card-action,html body .echo .dj-prefs-section .djf-card-action{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;width:100%;margin-inline:0;gap:clamp(6px,.6vw + 3px,8px)}
+html body .echo .djf .djf-card-action :is(.djf-add,button){align-self:center;min-height:clamp(28px,.8vw + 22px,32px);padding:0 clamp(10px,.6vw + 6px,13px);border-radius:10px;font-size:clamp(10.5px,.4vw + 8.5px,12px)}
+html body .echo .djf .djf-card-action :is(.djf-add,button) svg{width:clamp(12px,.3vw + 10px,14px);height:clamp(12px,.3vw + 10px,14px)}

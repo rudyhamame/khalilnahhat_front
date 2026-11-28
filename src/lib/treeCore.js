@@ -39,6 +39,10 @@ export function stepsOf(catalog){
  return {dj:Boolean(dj),mc:services.some(row=>row.id===MC_ID),rental:services.some(row=>row.id!==DJ_ID&&row.id!==MC_ID&&!row.selectionField),djName:dj?.name||'',djNameAr:dj?.nameAr||''};
 }
 export function setTreeSteps(next){steps=next;}
+// The catalogue behind the steps (services and equipment), kept beside them so plain modules can read the whole tree.
+let data={catalog:[],equipment:[]};
+export const treeData=()=>data;
+export function setTreeData(next){data={catalog:next.catalog||[],equipment:next.equipment||[]};}
 
 // ---- Data atoms: every atom of the booking is a node of the tree, identified by its id (the field path), with the step it lives in
 // and the branch of the tree that feeds it. The booking and the admin map both read the atoms from here.

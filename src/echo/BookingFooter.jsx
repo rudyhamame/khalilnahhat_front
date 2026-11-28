@@ -5,10 +5,11 @@ import {useEventOrder} from './eventOrderContext';
 import {confirmDeletion} from '../lib/confirmDeletion';
 import {BOOKING_TREE_STEPS,requiredMark} from '../lib/bookingAtoms.mjs';
 import {PUBLIC_PAGE_PATHS} from '../lib/publicPages';
-import {effectiveMissing} from '../lib/bookingNextStep';
-import {NAMES,SKIP,stepOfKey,REQUIRED_KEYS,REQUIRED_ALL,answered,nextRequiredKey,nextOptionalKey} from '../lib/footerAtoms';
+import {hasBookingServices} from '../lib/bookingFlow.mjs';
+import {treeAtomProgress} from '../lib/treeAtoms';
+import {NAMES,nextRequiredKey,nextOptionalKey} from '../lib/footerAtoms';
 import {fieldName} from '../lib/eventOrderCore.mjs';
-import {ATOM_KEYS,fieldCode} from '../lib/eventPageModel';
+import {fieldCode} from '../lib/eventPageModel';
 import {manualBookingFieldHref} from '../lib/bookingAtomReview';
 import SmartCartIcon from './SmartCartIcon';
 import './bookingFooter.css';
@@ -25,7 +26,7 @@ const go=event=>{const link=event.currentTarget,href=link.getAttribute('href'),h
 // App-container footer of the Booking page: the booking status and the way into the Echo AI Smart Cart.
 // It is always shown, even before any data atom is set.
 export default function BookingFooter({ar=false}){
-  const ctx=useEventOrder(),tr=(en,arabic)=>ar?arabic:en,{equipment:catalogEquipment}=useTree(),avail=useTreeSteps();
+  const ctx=useEventOrder(),tr=(en,arabic)=>ar?arabic:en,treeData=useTree(),avail=useTreeSteps();
   // Closed for this browser session; the floating cart icon comes back with it.
   const [closed,setClosed]=useState(()=>{try{return sessionStorage.getItem('echo-booking-footer')==='closed';}catch{return false;}});
   const close=()=>{setClosed(true);try{sessionStorage.setItem('echo-booking-footer','closed');}catch{/* private mode: closes for this view only */}};
@@ -37,18 +38,18 @@ export default function BookingFooter({ar=false}){
   if(!ctx?.order)return null;
   if(closed)return <button type="button" className={`booking-footer-tab${shown?'':' is-hidden'}`} dir={ar?'rtl':'ltr'} onClick={open} aria-label={tr('Open booking status','فتح حالة الحجز')}><ChevronUp size={16} aria-hidden="true"/>{tr('Booking status','حالة الحجز')}</button>;
   const label=(key)=>{const code=fieldCode(key),name=NAMES[key]?NAMES[key][ar?1:0]:fieldName(key,ar)||key;return `${code?code+' ':''}${name}${requiredMark(key)}`;};
-  const required=nextRequiredKey(ctx.order),optional=nextOptionalKey(ctx.order);
-  const link=key=>key?<a href={manualBookingFieldHref(key)} data-field={key} onClick={go}>{label(key)}</a>:<span className="booking-footer-done">{tr('All done','اكتمل')}</span>;
-  const missingKeys=effectiveMissing(ctx.order).map(field=>field.key).filter(key=>key!=='services'),stepOf=key=>parseInt(String(fieldCode(key)||'').slice(0,2),10);
-  const steps=STEPS.map(([en,arabic],index)=>{const n=index+1,optionalKeys=ATOM_KEYS.filter(key=>stepOfKey(key)===n&&!SKIP.has(key)&&!REQUIRED_ALL.has(key)),unansweredAsked=n===3?['music.djRequested','music.mcRequested'].filter(key=>!answered(ctx.order,key)).length:0,left=missingKeys.filter(key=>stepOf(key)===n).length+unansweredAsked, // the DJ and MC questions are asked in step 3: they count as done only once answered
-  reqTotal=Math.max(REQUIRED_KEYS(n).length,left),reqDone=reqTotal-left,chosen=ctx.order.equipment?.length||0,rest=optionalKeys.filter(key=>key!=='equipment'),optDone=rest.filter(key=>answered(ctx.order,key)).length+(n===3?chosen:0),optTotal=n===3?rest.length+Math.max(catalogEquipment.length,chosen):rest.length, // the rental equipment atoms belong to step 3, Echo Services
+  const atoms=treeAtomProgress(ctx.order,treeData),required=nextRequiredKey(ctx.order),optional=nextOptionalKey(ctx.order);
+  const link=key=>key?<a href={manualBookingFieldHref(key,ctx.signedIn)} data-field={key} onClick={go}>{label(key)}</a>:<span className="booking-footer-done">{tr('All done','اكتمل')}</span>;
+  // Source of truth: the Data atoms tree (admin dashboard), with its required/optional rules. Every count below comes from it.
+  const steps=STEPS.map(([en,arabic],index)=>{const n=index+1,mine=atoms.filter(atom=>atom.step===n),req=mine.filter(atom=>atom.required),opt=mine.filter(atom=>!atom.required),
+  left=req.filter(atom=>!atom.done).length,reqTotal=req.length,reqDone=reqTotal-left,optDone=opt.filter(atom=>atom.done).length,optTotal=opt.length,
   all=reqTotal+optTotal,percent=all?Math.round((reqDone+optDone)/all*100):0;
    return {n,name:ar?arabic:en,left,reqDone,reqTotal,optDone,optTotal,percent,state:left>0?'todo':reqTotal>0||optDone>0?'done':'optional'};});
-  const visible=steps.filter(step=>step.n!==3||avail.dj||avail.rental).map((step,at)=>({...step,pos:at+1})); // steps that exist in the catalogue, numbered as the page numbers them
+  const visible=steps.filter(step=>step.n!==3||hasBookingServices(avail)).map((step,at)=>({...step,pos:at+1})); // steps that exist in the catalogue, numbered as the page numbers them
   const goStep=n=>{const el=document.getElementById(`booking-phase-${n}`);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});else window.location.assign(`/booking#booking-phase-${n}`);}; // off the steps tab: open it at that step
   // Every data atom of the booking contract counts: total = the contract's atoms.
   // Every piece of catalogue equipment is its own atom, replacing the single `equipment` entry.
-  const chosenItems=ctx.order.equipment?.length||0,others=ATOM_KEYS.filter(key=>key!=='equipment'),total=others.length+Math.max(catalogEquipment.length,chosenItems),count=others.filter(key=>answered(ctx.order,key)).length+chosenItems,percent=Math.min(100,Math.round(count/total*100));
+  const total=atoms.length,count=atoms.filter(atom=>atom.done).length,percent=total?Math.min(100,Math.round(count/total*100)):0;
   // Empties the whole draft (details, equipment, conversation), then reloads the page so every form starts blank.
   const emptyDraft=async()=>{
     setEmptyFailed(false);
@@ -59,7 +60,7 @@ export default function BookingFooter({ar=false}){
   return <><div className="booking-footer-spacer" aria-hidden="true"/><footer className={`booking-footer${shown?'':' is-hidden'}`} dir={ar?'rtl':'ltr'} aria-label={tr('Booking status','حالة الحجز')}>
     <button type="button" className="booking-footer-close" onClick={close} aria-label={tr('Close booking status','إغلاق حالة الحجز')} title={tr('Close','إغلاق')}><X size={16} aria-hidden="true"/></button>
     <div className="booking-footer-main">
-    <ol className="booking-footer-steps" aria-label={tr('Step progress','تقدم الخطوات')}>{visible.map(step=><li key={step.n}><button type="button" className={`is-${step.state}`} onClick={()=>goStep(step.pos)} aria-label={`${tr('Step','الخطوة')} ${step.pos} ${step.name}: ${tr('required','مطلوب')} ${step.reqDone}/${step.reqTotal}, ${tr('optional','اختياري')} ${step.optDone}/${step.optTotal}`}><span className="step-line"><b>{step.pos}</b><em>{step.name}</em><i aria-hidden="true">{step.state==='done'&&step.percent===100?'✓':`${step.percent}%`}</i></span><u className="step-bar" aria-hidden="true"><s style={{width:`${step.percent}%`}}/></u><small className="step-counts">{step.reqTotal>0&&<span>{tr('Required','مطلوب')} {step.reqDone}/{step.reqTotal}</span>}{step.optTotal>0&&<span>{tr('Optional','اختياري')} {step.optDone}/{step.optTotal}</span>}</small></button></li>)}</ol>
+    <ol className="booking-footer-steps" aria-label={tr('Step progress','تقدم الخطوات')}>{visible.map(step=><li key={step.n}><button type="button" className={`is-${step.state}`} onClick={()=>goStep(step.pos)} aria-label={`${tr('Step','الخطوة')} ${step.pos} ${step.name}: ${tr('required','مطلوب')} ${step.reqDone}/${step.reqTotal}, ${tr('optional','اختياري')} ${step.optDone}/${step.optTotal}`}><span className="step-line"><b>{step.pos}</b><small className="step-total" title={`${tr('Required','مطلوب')} ${step.reqDone}/${step.reqTotal} · ${tr('Optional','اختياري')} ${step.optDone}/${step.optTotal}`}>{step.reqTotal>0&&<span className="is-required"><b>{step.reqDone}</b>/{step.reqTotal}*</span>}{step.optTotal>0&&<span className="is-optional"><b>{step.optDone}</b>/{step.optTotal}</span>}</small><em>{step.name}</em><i aria-hidden="true">{step.state==='done'&&step.percent===100?'✓':`${step.percent}%`}</i></span><u className="step-bar" aria-hidden="true"><s style={{width:`${step.percent}%`}}/></u><small className="step-counts">{step.reqTotal>0&&<span>{tr('Required','مطلوب')} {step.reqDone}/{step.reqTotal}</span>}{step.optTotal>0&&<span>{tr('Optional','اختياري')} {step.optDone}/{step.optTotal}</span>}</small></button></li>)}</ol>
     <div className="booking-footer-status" role="status">
       <span>{tr('Booking status','حالة الحجز')}</span>
       <strong>{count}/{total} {tr('details','تفصيل')}</strong>

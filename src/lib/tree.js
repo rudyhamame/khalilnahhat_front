@@ -6,12 +6,12 @@
 //  - equipment belongs to a service through its `equipmentCategoryId` (see rentalCatalog.js).
 import {useEffect,useSyncExternalStore} from 'react';
 import {apiRequest,fetchEquipment} from './api.js';
-import {setTreeSteps,stepsOf,treeSteps,withEquipmentCategoryIds} from './treeCore.js';
+import {setTreeData,setTreeSteps,stepsOf,treeSteps,withEquipmentCategoryIds} from './treeCore.js';
 
 let tree={catalog:[],equipment:[],loading:true,failed:false,steps:treeSteps()},inFlight=null,queued=false;
 const listeners=new Set();
 
-const publish=next=>{tree=next;setTreeSteps(next.steps);listeners.forEach(listener=>listener());};
+const publish=next=>{tree=next;setTreeSteps(next.steps);setTreeData(next);listeners.forEach(listener=>listener());};
 
 // The server builds the tree (GET /api/tree: catalogue and equipment joined by id, with the steps that exist); this is the only place the
 // booking fetches it. ponytail: the fallback below rebuilds the tree in the browser for a server that has no /tree yet; delete it once the
@@ -19,7 +19,7 @@ const publish=next=>{tree=next;setTreeSteps(next.steps);listeners.forEach(listen
 async function fetchTree(){
  try{
   const data=await apiRequest('/tree');
-  if(Array.isArray(data.catalog)&&Array.isArray(data.equipment)&&data.steps)return {catalog:data.catalog,equipment:data.equipment,steps:data.steps};
+  if(Array.isArray(data.catalog)&&Array.isArray(data.equipment)&&data.steps)return {catalog:data.catalog,equipment:data.equipment,steps:{mc:stepsOf(data.catalog).mc,...data.steps}}; // the server's steps carry no `mc` yet
  }catch{/* an older server: build the tree here */}
  const [catalog,equipment]=await Promise.all([apiRequest('/setup-catalog'),fetchEquipment()]);
  if(!Array.isArray(catalog.items)||!Array.isArray(equipment.items))throw new Error('Invalid rental catalog response');

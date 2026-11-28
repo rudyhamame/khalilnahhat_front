@@ -110,16 +110,16 @@ html body .echo.echo-public-page #echo-main:has(>#echo-ai){padding-inline:var(--
 .echo .ea-link:hover{text-decoration:underline}
 .ea :is(button,a,input,select):focus-visible{outline:2px solid var(--ea-mint);outline-offset:3px}
 /* Narrow screens: the summary moves under the conversation as a compact list. */
-@media(max-width:900px){
+@media(max-width:1000px){
  .ea-top{grid-template-columns:minmax(0,1fr) auto}.echo #echo-ai .echo-ai-header-assistant{grid-column:1/-1;grid-row:2;width:min(280px,100%)}.ea-brand small{display:none}
  .ea-body{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;overflow:auto}
  .ea-summary{border-inline-start:0;border-top:1px solid var(--ea-line);padding:14px 0 0;max-height:42%}
  .ea-chat{min-height:60svh}
 }
-@media(max-width:600px){.ea-views button span{display:none}.ea-working{display:none}}
+@media(max-width:760px){.ea-views button span{display:none}.ea-working{display:none}}
 /* "Working on ..." now sits in the middle of the header (it replaced the voice-call slot). */
 .ea-top>.ea-working{justify-self:center;margin:0;min-width:0;justify-content:center;text-align:center;flex-wrap:wrap}
-@media(max-width:900px){.ea-top>.ea-working{grid-column:1/-1;grid-row:2}}
+@media(max-width:1000px){.ea-top>.ea-working{grid-column:1/-1;grid-row:2}}
 
 /* Keep every map row reachable, and reserve space for the booking actions. */
 .echo-map-surface{min-width:0}
@@ -132,7 +132,7 @@ html body .echo.echo-public-page #echo-main:has(>#echo-ai){padding-inline:var(--
 .ea-steps{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain}
 .ea-step-text small{overflow:visible;text-overflow:clip;white-space:normal;overflow-wrap:anywhere}
 .ea-primary,.ea-link{white-space:normal;overflow-wrap:anywhere;padding:10px 14px}
-@media(max-width:900px){
+@media(max-width:1000px){
  .ea-body{display:flex;flex-direction:column;overflow-y:auto;overscroll-behavior:contain}
  .ea-chat{flex:none;min-height:0;height:clamp(300px,60svh,600px)}
  .ea-summary{flex:none;max-height:none;overflow:visible;padding-bottom:20px}
@@ -149,7 +149,7 @@ html:has(.echo-public-page #echo-ai),html:has(.echo-public-page #echo-ai) body{o
 html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#echo-ai.ea{gap:0}
 .ea-chat{padding:0}
 .ea-summary{padding-top:14px;padding-bottom:20px}
-@media(max-width:900px){.ea-summary{border-top:1px solid var(--ea-line)}}
+@media(max-width:1000px){.ea-summary{border-top:1px solid var(--ea-line)}}
 /* No gap between the conversation and the summary. */
 html body .echo .ea-body{gap:0}
 /* Summary panel: thin, equal padding on every edge. */
@@ -275,7 +275,7 @@ html body .echo.echo-public-page.echo-ai-overlay-page[data-page=home][data-theme
 .echo .ea-overlay-close:focus-visible{outline:2px solid var(--ea-mint);outline-offset:3px}
 .ea-overlay-error{flex-basis:100%;margin:0;color:#f0bd95;font-size:13px;line-height:1.5}
 @media(max-width:1000px){.ea-overlay .ea-board{overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain}}
-@media(max-width:600px){.ea-overlay .ea-working{display:none}.ea-overlay .ea-card--toolbar{padding:8px 12px}}
+@media(max-width:760px){.ea-overlay .ea-working{display:none}.ea-overlay .ea-card--toolbar{padding:8px 12px}}
 
 /* Booking review: compact header. */
 .ea-card--review .ea-card-head{gap:8px}
@@ -348,9 +348,9 @@ html body .echo .ea-review .ea-steps .ea-atom-controls button:first-child:not(.i
 html body .echo .ea-review .ea-steps .ea-atom-controls button:first-child[aria-pressed=true]{box-shadow:inset 0 0 0 1px #b48a42}
 .ea-atom-controls button:focus-visible{outline:2px solid #d9b970;outline-offset:2px}
 .ea-data-row[data-review=confirmed]{border-inline-start:2px solid #73d9ad;padding-inline-start:6px}
-[data-review=correction]{animation:ea-atom-correction 1.8s ease-in-out infinite;border-inline-start:2px solid #ffc06a}
+:is([data-review=correction],[data-review=editing]){animation:ea-atom-correction 1.8s ease-in-out infinite;border-inline-start:2px solid #ffc06a}
 @keyframes ea-atom-correction{50%{background:#ffc06a20;box-shadow:inset 0 0 0 1px #ffc06a66}}
-@media(prefers-reduced-motion:reduce){[data-review=correction]{animation:none;background:#ffc06a12}}
+@media(prefers-reduced-motion:reduce){:is([data-review=correction],[data-review=editing]){animation:none;background:#ffc06a12}}
 html body .echo .ea-primary:disabled{opacity:.45;cursor:not-allowed;filter:saturate(.35)}
 
 /* The Echo AI Smart Cart is a true overlay over the whole app, like the 3D Room: above the header, footer player, side navigation and every page layer. */
@@ -379,9 +379,11 @@ html body .echo.echo-ai-overlay-page:has(#echo-ai)>.echo-header{display:none!imp
 .ea-card.is-min .ea-card-head{flex-direction:column;gap:14px;margin:0;padding:0;border:0}
 .ea-card.is-min .ea-card-head>:not(.ea-card-icon):not(.ea-min){display:none}
 .ea-card.is-min .ea-card-head .ea-min{margin:0}
-@media(max-width:1000px){.ea-board{transition:none}.ea-card.is-min{flex:none!important;height:auto!important;padding:8px 14px;align-items:stretch}.ea-card.is-min .ea-card-head{flex-direction:row}.ea-card.is-min .ea-card-head>div{display:block}.ea-card.is-min .ea-card-head>div p{display:none}}
+@media(max-width:1000px){.ea-board{transition:none}.ea-card.is-min{flex:none!important;height:auto!important;padding:8px 14px;align-items:stretch}.ea-card.is-min .ea-card-head{flex-direction:row}.ea-card.is-min .ea-card-head>div{display:block}.ea-card.is-min .ea-card-head>div p{display:none}
+ /* Portrait phones and tablets: the cards are stacked, so minimizing collapses the card vertically to its header bar (the body is removed, not just hidden, so no height is left behind). */
+ .ea-card.is-min{min-height:0!important;max-height:none!important}.ea-card.is-min>.ea-card-body,.ea-card.is-min>:not(.ea-card-head){display:none}.ea-card.is-min .ea-card-head{width:100%;box-sizing:border-box}}
 /* Phones: no concept map. */
-@media(max-width:700px){.ea-card--map{display:none!important}}
+
 
 /* Map: its minimize button sits in the zoom toolbar; minimized, the toolbar shrinks to that button. */
 .ea-card--map.is-min{padding:10px 0}
@@ -460,3 +462,21 @@ html body .echo :is(.ea-step-text,.ea-step-details),html body .echo .ea-review :
 /* An equipment category is a group heading in the review, not a data atom: no code, no value. */
 html body .echo .ea-review .ea-data-row[data-category]{display:block;padding:8px 0 2px;border-bottom:0}
 html body .echo .ea-review .ea-data-row[data-category]>b{font-weight:700;color:#c9d8cf}
+/* Edit / tick / cancel: one size and one spacing wherever the review is shown (cart, concept map, equipment table). */
+html body .echo .ea-atom-controls{gap:6px;padding-inline:4px 2px}
+html body .echo .ea-atom-controls button{display:grid;place-items:center;flex:none;box-sizing:border-box;width:26px;height:26px;min-width:26px;min-height:26px;padding:0;border-radius:50%}
+html body .echo .ea-atom-controls button svg{width:13px;height:13px}
+html body .echo .ea-equipment-table td:last-child:has(>.ea-atom-controls){padding-inline:6px 0;width:1%;white-space:nowrap}
+
+/* Tabs: from the narrow (portrait) layout the three cards are tabs, one visible at a time. */
+.ea-tabs{display:none}
+@media(max-width:1000px){
+ .ea-tabs{display:flex;flex:none;gap:6px;padding:4px;border:1px solid #ffffff1f;border-radius:16px;background:#0d1418cc}
+ .ea-tabs button{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 8px;border:0;border-radius:12px;background:none;color:#cfdad3;font:600 13px/1.2 'Manrope',sans-serif;cursor:pointer}
+ .ea-tabs button span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .ea-tabs button[aria-selected=true]{background:var(--ea-mint,#a6e3ce);color:#0d1418}
+ .ea-tabs button:focus-visible{outline:2px solid var(--ea-mint,#a6e3ce);outline-offset:2px}
+ .ea-board[data-tab=chat]>.ea-card--map,.ea-board[data-tab=chat]>.ea-card--review,.ea-board[data-tab=map]>.ea-card--chat,.ea-board[data-tab=map]>.ea-card--review,.ea-board[data-tab=review]>.ea-card--chat,.ea-board[data-tab=review]>.ea-card--map{display:none!important}
+ .ea-board[data-tab=chat]>.ea-card--chat,.ea-board[data-tab=map]>.ea-card--map{height:clamp(420px,calc(100svh - 230px),900px)}
+ .ea-card .ea-min,.echo .echo-map-zoom .ea-min{display:none}
+}

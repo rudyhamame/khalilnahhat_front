@@ -9,6 +9,12 @@ html body .echo.echo-public-page[data-page=home][data-theme] #setup-notes.setup-
 .setup-notes-card textarea:focus-visible{outline:2px solid #e3d3a3;outline-offset:3px}
 .setup-notes-card textarea:disabled{opacity:.55;cursor:not-allowed}
 .setup-notes-meta{display:flex;justify-content:space-between;gap:14px;color:#b4b3a9;font-size:12px}
-@media(max-width:760px){html body .echo.echo-public-page[data-page=home][data-theme] #setup-notes.setup-notes{grid-template-columns:minmax(0,1fr);gap:20px}}
+@media (max-width:760px), (max-width:1100px) and (orientation:portrait){html body .echo.echo-public-page[data-page=home][data-theme] #setup-notes.setup-notes{grid-template-columns:minmax(0,1fr);gap:20px}}
 
 /* The line above Setup notes is drawn with the other Services separators (rentalsSoFar.css). */
+
+/* The notes box grows with its text up to a limit, then scrolls inside (up and down); at its ends the page scrolls on, so nothing traps the wheel or the finger. */
+.echo .setup-notes-card textarea{max-height:min(55svh,420px);overflow-y:auto;overscroll-behavior:auto;touch-action:pan-y;scrollbar-width:thin}
+
+/* The Booking page's closing sections (setup notes, references, additional notes, voucher) are not scroll boxes: they never catch the wheel or the finger, so the page scrolls over them. */
+html body .echo.echo-public-page[data-page=home][data-theme] #echo-main>:is(#setup-notes,#references,#additional-notes,#voucher,.booking-services,.booking-phase){overflow:visible!important;overscroll-behavior:auto!important}

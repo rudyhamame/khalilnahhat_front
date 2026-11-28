@@ -34,3 +34,6 @@
 
 /* Landscape: the voucher sits under the hero title (the wide-screen grid places it there too). */
 @media(orientation:landscape){.book-hero>.book-voucher{order:3;margin:12px 0 0}}
+
+/* Landscape on narrow screens: the voucher stays inside its column; the text wraps instead of running under the code. */
+@media(orientation:landscape){.book-hero>.book-voucher{max-width:100%;box-sizing:border-box;white-space:normal}.book-hero>.book-voucher .book-voucher-copy{flex:1 1 auto;min-width:0;flex-wrap:wrap;gap:0 8px}.book-hero>.book-voucher .book-voucher-copy :is(small,strong,em){white-space:nowrap}}

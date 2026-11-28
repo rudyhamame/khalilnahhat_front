@@ -4,7 +4,7 @@ import {useTree} from '../lib/tree';
 import {createAiTaskWriter,sameDraftValue} from '../lib/bookingDraftEdits';
 import {findVenues} from '../lib/venueSearch';
 import {venueResultReply} from '../lib/venueResultReply';
-import {bookingAtomCorrectionReply} from '../lib/bookingAtomReview';
+import {bookingAtomCorrectionReply,bookingAtomEditRequest} from '../lib/bookingAtomReview';
 import {venueSelectionChanges} from '../lib/bookingFlow.mjs';
 import {speakBrowserText} from '../lib/browserSpeech';
 import {numberedRentalCatalog} from '../lib/numberedRentalCatalog';
@@ -379,12 +379,14 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   useEffect(()=>{
     const correct=event=>{
       const {path,label}=event.detail||{};
-      if(!aiFields.some(field=>field.key===path)&&path!=='equipment')return;
+      // Atoms the AI cannot edit (account details, photos, files) still get the message, with the manual link only.
+      if(!aiFields.some(field=>field.key===path)&&path!=='equipment'){setTranscriptOpen(true);append({...bookingAtomEditRequest(path,label||fieldName(path,ar),ar),mode:'chat'});append({...bookingAtomCorrectionReply(path,label||fieldName(path,ar),ar),mode:'chat',blinkAt:Date.now()});return;}
       pendingSubject.current=null;
       taskModification.current={key:taskKey,path};
       setModifyingTask({key:taskKey,path});
       setTranscriptOpen(true);
-      append({...bookingAtomCorrectionReply(path,label||fieldName(path,ar),ar),mode:'chat'});
+      append({...bookingAtomEditRequest(path,label||fieldName(path,ar),ar),mode:'chat'}); // the client's click first, then Echo's answer
+      append({...bookingAtomCorrectionReply(path,label||fieldName(path,ar),ar),mode:'chat',blinkAt:Date.now()});
       requestAnimationFrame(()=>document.getElementById('ai-booking-message')?.focus({preventScroll:true}));
     };
     window.addEventListener('echo:booking-atom-correction',correct);
@@ -433,7 +435,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   useEffect(()=>{
     const opening=assistantOpening.current;
     if(!opening.visible||!opening.needsGreeting||mode!=='chat'||historyLoading||draftChoicePending.current||draftChoiceOpen||!orderDraft?.cloudReady||available!==true||aiPolicy?.chat?.enabled===false||busy)return;
-    opening.needsGreeting=false;
+    opening.needsGreeting=false;setInput(current=>current||tr('Summarize my booking so far.','لخّص حجزي حتى الآن.'));
     const session=orderDraft.assistantSession?.current;
     if(orderDraft.assistantSession)orderDraft.assistantSession.current={...session,draftId,greeted:true};
     const order=orderRef.current;

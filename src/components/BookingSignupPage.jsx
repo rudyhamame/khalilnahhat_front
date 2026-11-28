@@ -1,4 +1,4 @@
-import {useEffect,useState} from 'react';
+import {useEffect,useLayoutEffect,useRef,useState} from 'react';
 import {ArrowLeft,ArrowRight,Eye,EyeOff,LockKeyhole,Mail,MailCheck,UserRound} from 'lucide-react';
 import EchoShell from '../echo/EchoShell';
 import {useAccessViewport} from '../lib/useAccessViewport';
@@ -17,7 +17,22 @@ const readCustomer=()=>{try{return normalizeEventOrder(JSON.parse(localStorage.g
 
 // The login page's special form for a visitor who pressed "Submit booking": create the account from the Personal info already in the draft,
 // confirm the email with a code, then land back on the booking where it can be sent.
+// The card's height follows its content (step, error, fields); this slides it from the old height to the new one instead of jumping.
+function useAnimatedHeight(){
+ const ref=useRef(null),last=useRef(0);
+ useLayoutEffect(()=>{ // runs after every render of the page
+  const el=ref.current;if(!el)return;
+  el.style.height='';const next=el.offsetHeight,prev=last.current;last.current=next;
+  if(!prev||prev===next||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  el.style.height=prev+'px';el.style.overflow='hidden';void el.offsetHeight;
+  el.style.transition='height .35s cubic-bezier(.2,.8,.2,1)';el.style.height=next+'px';
+  const done=()=>{el.style.height='';el.style.overflow='';el.style.transition='';};
+  el.addEventListener('transitionend',done,{once:true});setTimeout(done,450);
+ });
+ return ref;
+}
 export default function BookingSignupPage({lang,onVerified}){
+ const wrap=useAnimatedHeight();
  const ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en;
  useAccessViewport();
  usePageMeta(tr('Create your account to send your booking | DJ Khalil × Echo','أنشئ حسابك لإرسال حجزك | دي جي خليل × إيكو'),tr('Create your account and confirm your email to send your booking to DJ Khalil and Echo.','أنشئ حسابك وأكّد بريدك الإلكتروني لإرسال حجزك إلى دي جي خليل وإيكو.'));
@@ -37,7 +52,7 @@ export default function BookingSignupPage({lang,onVerified}){
  return <EchoShell lang={lang}><section className="echo-access access-booking" dir={ar?'rtl':'ltr'} aria-labelledby="booking-access-title">
   <div className="access-backdrop" aria-hidden="true"/>
   <img className="access-hero-photo" src="/echo/login-hero-khalil.webp" width="1016" height="1536" alt="" aria-hidden="true" fetchPriority="high"/>
-  <div className="access-content"><div className="access-form-wrap">
+  <div className="access-content"><div className="access-form-wrap" ref={wrap}>
    <ol className="access-steps" aria-label={tr('Steps to send your booking','خطوات إرسال حجزك')}>{steps.map((label,index)=><li key={label} aria-current={index===current?'step':undefined} data-done={index<current?'':undefined}><b>{index+1}</b>{label}</li>)}</ol>
    <h1 id="booking-access-title">{step==='account'?<>{tr('Almost','أوشكنا')} <em>{tr('there.','على الانتهاء.')}</em></>:<>{tr('Check your','تحقق من')} <em>{tr('email.','بريدك.')}</em></>}</h1>
    {!ready?<>
@@ -64,7 +79,7 @@ export default function BookingSignupPage({lang,onVerified}){
       <label className="access-field" htmlFor="booking-access-code"><span>{tr('Verification code','رمز التحقق')}</span><span className="access-input"><MailCheck size={18} aria-hidden="true"/><input id="booking-access-code" inputMode="numeric" autoComplete="one-time-code" maxLength={6} placeholder="123456" required value={code} onChange={event=>setCode(event.target.value.replace(/\D/g,'').slice(0,6))}/></span></label>
      </fieldset>
      <button className="access-submit" type="submit" disabled={busy||code.length!==6}><span>{busy?tr('Checking…','جارٍ التحقق…'):tr('Confirm and continue','أكّد وتابع')}</span><ArrowRight size={18} aria-hidden="true"/></button>
-     <button type="button" className="access-text-link" onClick={()=>{writePending(null);setCode('');setError('');setStep('account');}}>{tr('Start over','ابدأ من جديد')}</button>
+     <button type="button" className="access-submit access-back" onClick={()=>window.location.assign('/echo-ai')}><ArrowLeft size={18} aria-hidden="true"/><span>{tr('Back to Booking','العودة إلى الحجز')}</span></button>
      <button type="button" className="access-text-link" disabled={busy||wait>0} onClick={resend}>{wait>0?tr(`Send a new code in ${wait}s`,`إرسال رمز جديد خلال ${wait} ث`):tr('Send a new code','إرسال رمز جديد')}</button>
     </form>
    </>}

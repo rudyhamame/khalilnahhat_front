@@ -1,7 +1,7 @@
 import {bookingServiceId,equipmentInService} from './rentalCatalog.js';
 import {MC_ID,DJ_ID} from './treeCore.js';
 
-const isMc=item=>item.id===MC_ID||item.selectionField==='music.mcRequested';
+export const isMc=item=>item.id===MC_ID||item.selectionField==='music.mcRequested';
 // MC hosting & announcements is always the first service (and so the one selected when the list opens); the others keep their order.
 export const rentalServices=catalog=>{const rows=catalog.filter(item=>item.kind==='service'&&item.isActive&&item.id!==DJ_ID);return [...rows.filter(isMc),...rows.filter(item=>!isMc(item))];};
 export function rentalServiceEquipment(service,equipment){

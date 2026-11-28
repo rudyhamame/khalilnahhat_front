@@ -3,7 +3,7 @@ import {useTree} from '../lib/tree';
 import useBookingAtomReview from './useBookingAtomReview';
 import {useEffect,useLayoutEffect,useRef,useState} from 'react';
 import {eventTypeLabel} from '../lib/eventTypeLabel';
-import {ArrowDownToLine,LoaderCircle,Sparkles,MessageCircle,CalendarDays,Disc3,Boxes,UserRound,Images,StickyNote,Check,ArrowUpRight,ClipboardList,Trash2,X,Minimize2,Maximize2} from 'lucide-react';
+import {ArrowDownToLine,LoaderCircle,Sparkles,MessageCircle,CalendarDays,Disc3,Boxes,UserRound,Images,StickyNote,Check,ArrowUpRight,ClipboardList,Trash2,X,Minimize2,Maximize2,Network} from 'lucide-react';
 import {EventOrderAside} from './EventOrderProvider';
 import {useEventOrder} from './eventOrderContext';
 import useEquipmentChanges from './useEquipmentChanges';
@@ -110,6 +110,8 @@ export default function HomeBookingAssistant({lang,user,token,auth,overlay=false
  const ctx=useEventOrder(),ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en;
  const {catalog,equipment:catalogEquipment,loading:catalogLoading}=useTree();
  const goals=activeGoals();
+ const [tab,setTab]=useState('chat'),[narrow,setNarrow]=useState(()=>window.matchMedia?.('(max-width:1000px)').matches||false); // narrow screens show one card at a time, picked by tabs
+ useEffect(()=>{const query=window.matchMedia('(max-width:1000px)'),change=()=>setNarrow(query.matches);query.addEventListener('change',change);return()=>query.removeEventListener('change',change);},[]);
  const [min,setMin]=useState({chat:false,map:false,review:false}),flip=key=>setMin(current=>({...current,[key]:!current[key]})),[goal,setGoal]=useState('event'),[view,setView]=useState('conversation'),[busy,setBusy]=useState(false);
  const overlayRoot=useRef(null),[closing,setClosing]=useState(false),[closeError,setCloseError]=useState('');
  useEffect(()=>{if(overlay)overlayRoot.current?.querySelector('.ea-overlay-close')?.focus({preventScroll:true});},[overlay]);
@@ -141,6 +143,7 @@ export default function HomeBookingAssistant({lang,user,token,auth,overlay=false
  const allAtoms=sections.flatMap(section=>section.lines.flatMap(line=>[line,...(line.items||[])]));
  const atomReview=useBookingAtomReview(ctx.user?.id||ctx.user?._id,ctx.draftId,allAtoms,!catalogLoading);
  const askForAlternative=line=>{
+  setTab('chat'); // the answer arrives in the conversation
   const section=sections.find(section=>section.lines.some(row=>row.key===line.key||row.items?.some(item=>item.key===line.key)));
   if(section)select(section.item.id,true);
   window.dispatchEvent(new CustomEvent('echo:booking-atom-correction',{detail:{path:line.reviewPath||line.key,label:line.label,atomKey:line.key}}));
@@ -159,15 +162,16 @@ export default function HomeBookingAssistant({lang,user,token,auth,overlay=false
  },onEdit:line=>{
   if(busy||!ctx.draftEditable)return;
   atomReview.edit(line);
-  const path=line.reviewPath||line.key;
-  window.location.assign(path.startsWith('customer.')&&!ctx.signedIn?`/booking?field=${encodeURIComponent(path)}#booking-phase-1`:manualBookingFieldHref(path));
+  // Echo asks in the conversation first (with an "Edit manually" link), even when the AI is off; empty atoms still open the Booking page.
+  if(line.empty)window.location.assign(manualBookingFieldHref(line.reviewPath||line.key,ctx.signedIn));
+  else askForAlternative(line);
  }};
  const unconfirmed=applicableReviewAtoms(allAtoms).filter(line=>atomReview.stateFor(line)!=='confirmed').length;
  const atomsConfirmed=missing===0&&unconfirmed===0&&!catalogLoading;
  const done=sections.filter(section=>section.progress.complete).length;
  const saveText=ctx.saveState==='account-saved'?tr('Saved to your account','محفوظ في حسابك'):ctx.saveState==='pending'?tr('Saving changes…','جارٍ الحفظ…'):tr('Draft in progress','المسودة قيد الإعداد');
  return <section ref={overlayRoot} id="echo-ai" className={`echo-section home-booking-assistant ea${overlay?' ea-overlay':''}`} aria-label="Echo AI" dir={ar?'rtl':'ltr'} onKeyDown={event=>{if(overlay&&event.key==='Escape'&&!event.defaultPrevented){event.preventDefault();void closeOverlay();}}}>
-  <div className="ea-board" style={{gridTemplateColumns:[['chat','1.15fr'],['map','1.1fr'],['review','1.4fr']].map(([key,size])=>min[key]?'minmax(56px,0fr)':`minmax(0,${size})`).join(' ')}}>
+  <div className="ea-board" data-tab={tab} style={{gridTemplateColumns:[['chat','1.15fr'],['map','1.1fr'],['review','1.4fr']].map(([key,size])=>min[key]?'minmax(56px,0fr)':`minmax(0,${size})`).join(' ')}}>
    {view==='details'&&<BookingDetailsDialog autoSubmit atomsConfirmed={atomsConfirmed} lang={lang} user={ctx.user} isSessionReady={ctx.isSessionReady} onCreateServiceRequest={ctx.onCreateServiceRequest} initialEvent={{eventDate:ctx.order.event?.date||'',startTime:ctx.order.event?.startTime||'',endTime:ctx.order.event?.endTime||''}} onClose={()=>setView('conversation')}/>}
    <article className="ea-card ea-card--toolbar" data-tone="0" aria-label={tr('Toolbar','شريط الأدوات')}>
     <div className="ea-brand"><span className="ea-vinyl" aria-hidden="true"/><strong>ECHO <span>AI</span></strong><small>{saveText}</small></div>
@@ -175,14 +179,15 @@ export default function HomeBookingAssistant({lang,user,token,auth,overlay=false
     {overlay&&<button type="button" className="ea-overlay-close" aria-label={tr('Close Echo AI','إغلاق إيكو AI')} title={tr('Close Echo AI','إغلاق إيكو AI')} disabled={closing} onClick={closeOverlay}><X size={20} aria-hidden="true"/></button>}
     {closeError&&<p className="ea-overlay-error" role="alert">{closeError}</p>}
    </article>
-   <article className={`ea-card ea-card--chat${min.chat?' is-min':''}`} data-tone="3" aria-label={tr('Conversation','المحادثة')}>
+   <div className="ea-tabs" role="tablist" aria-label={tr('Echo AI sections','أقسام إيكو AI')}>{[['chat',MessageCircle,tr('Conversation','المحادثة')],['map',Network,tr('Concept map','خريطة المفاهيم')],['review',ClipboardList,tr('Booking review','مراجعة الحجز')]].map(([key,Icon,label])=><button type="button" role="tab" key={key} id={`ea-tab-${key}`} aria-selected={tab===key} onClick={()=>setTab(key)}><Icon size={15} aria-hidden="true"/><span>{label}</span></button>)}</div>
+   <article className={`ea-card ea-card--chat${min.chat&&!narrow?' is-min':''}`} data-tone="3" aria-label={tr('Conversation','المحادثة')}>
     <header className="ea-card-head"><MessageCircle className="ea-card-icon" aria-hidden="true"/><div><h3>{tr('Conversation','المحادثة')}</h3><p>{tr('Tell Echo about your event','أخبر إيكو عن فعاليتك')}</p></div><button type="button" className="ea-min" aria-expanded={!min.chat} aria-label={min.chat?tr('Expand Conversation','توسيع المحادثة'):tr('Minimize Conversation','تصغير المحادثة')} title={min.chat?tr('Expand','توسيع'):tr('Minimize','تصغير')} onClick={()=>flip('chat')}>{min.chat?<Maximize2 size={15} aria-hidden="true"/>:<Minimize2 size={15} aria-hidden="true"/>}</button></header>
     <div className="ea-card-body"><div className="echo-ai-conversation-host"><EventOrderAside ar={ar} user={user} token={token} auth={auth} workspace selectedGoal={goal} silentGoal={silent} view={view} onConversation={()=>setView('conversation')} onBusyChange={setBusy}/></div></div>
    </article>
-   <article className={`ea-card ea-card--map${min.map?' is-min':''}`} data-tone="2" aria-label={tr('Concept map','خريطة المفاهيم')}>
+   <article className={`ea-card ea-card--map${min.map&&!narrow?' is-min':''}`} data-tone="2" aria-label={tr('Concept map','خريطة المفاهيم')}>
     <div className="ea-card-body"><BookingConceptMap order={ctx.order} ar={ar} onSelect={select} review={{stateFor:atomReview.stateFor}} toolbarExtra={<button type="button" className="ea-min" aria-expanded={!min.map} aria-label={min.map?tr('Expand Concept map','توسيع خريطة المفاهيم'):tr('Minimize Concept map','تصغير خريطة المفاهيم')} title={min.map?tr('Expand','توسيع'):tr('Minimize','تصغير')} onClick={()=>flip('map')}>{min.map?<Maximize2 size={15} aria-hidden="true"/>:<Minimize2 size={15} aria-hidden="true"/>}</button>}/></div>
    </article>
-   <article className={`ea-card ea-card--review${min.review?' is-min':''}`} data-tone="4" aria-label={tr('Booking review','مراجعة الحجز')}>
+   <article className={`ea-card ea-card--review${min.review&&!narrow?' is-min':''}`} data-tone="4" aria-label={tr('Booking review','مراجعة الحجز')}>
     <header className="ea-card-head"><ClipboardList className="ea-card-icon" aria-hidden="true"/><div><h3>{tr('Booking review','مراجعة الحجز')}</h3><p>{eventTypeLabel(ctx.order.event?.type,ar)||tr('Let’s plan your event','لنخطط لفعاليتك')}</p></div><button type="button" className="ea-delete" aria-label={tr('Delete draft','حذف المسودة')} title={tr('Delete draft','حذف المسودة')} disabled={ctx.clearing||(ctx.signedIn&&!ctx.cloudReady)} onClick={()=>{if(window.confirm(tr('Delete this draft? This cannot be undone.','حذف هذه المسودة؟ لا يمكن التراجع.')))void ctx.clear(true);}}><Trash2 size={16} aria-hidden="true"/></button><button type="button" className="ea-min" aria-expanded={!min.review} aria-label={min.review?tr('Expand Booking review','توسيع مراجعة الحجز'):tr('Minimize Booking review','تصغير مراجعة الحجز')} title={min.review?tr('Expand','توسيع'):tr('Minimize','تصغير')} onClick={()=>flip('review')}>{min.review?<Maximize2 size={15} aria-hidden="true"/>:<Minimize2 size={15} aria-hidden="true"/>}</button></header>
     <div className="ea-card-body ea-review">
      <div className="ea-summary-head">

@@ -42,3 +42,6 @@
 .echo-atom{display:inline-flex;align-items:center;gap:8px;padding:2px 4px 2px 9px;border:1px solid #ffffff1f;border-radius:7px;background:#ffffff0d;color:#f1f6f3;font:500 .88em/1.4 ui-monospace,'SFMono-Regular','JetBrains Mono',Menlo,Consolas,monospace;white-space:nowrap}
 .echo-atom>b{font-weight:500}
 .echo-atom>i{font-style:normal;padding:1px 6px;border-radius:5px;background:#a3d9c01f;color:#a3d9c0;font-size:.9em;font-variant-numeric:tabular-nums;letter-spacing:.04em}
+
+.echo-chat-message.is-blinking{animation:echo-message-blink 1s ease-in-out 3}
+@keyframes echo-message-blink{50%{border-color:#e3d3a3;background-color:#e3d3a31f;box-shadow:0 0 0 3px #e3d3a366}}

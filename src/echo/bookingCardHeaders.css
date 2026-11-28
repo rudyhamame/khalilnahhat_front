@@ -1,5 +1,5 @@
 /* Phone card headers: one aligned band for the order badge, title and action. */
-@media(max-width:760px),(pointer:coarse) and (max-width:1100px) and (max-height:600px){
+@media(max-width:760px),(max-width:1100px) and (orientation:portrait),(pointer:coarse) and (max-width:1100px) and (max-height:600px){
  html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-step-card{--booking-header-inset:clamp(24px,2.6vw,36px)}
  html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-step-card{--booking-header-inset:14px}
  html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-step-card>.booking-card-title:not([aria-hidden=true]){display:flex;align-items:center;gap:8px;min-height:64px;margin:calc(-1 * var(--booking-header-inset)) calc(-1 * var(--booking-header-inset)) 14px;padding:10px var(--booking-header-inset);border-radius:15px 15px 0 0;font-size:15px!important;line-height:1.35!important;white-space:normal;overflow-wrap:anywhere}
@@ -8,16 +8,16 @@
  html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-step-card>.booking-reset{top:15px;inset-inline-end:var(--booking-header-inset);height:34px;min-height:34px;padding:6px 9px;font-size:11px;gap:5px}
  html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-step-card>.booking-reset>svg{flex:none;width:13px;height:13px}
 }
-@media(max-width:520px){html body .echo[data-page=home][data-theme] .booking-services .booking-step-card{--booking-header-inset:20px}}
+@media(max-width:520px),(max-width:1100px) and (orientation:portrait){html body .echo[data-page=home][data-theme] .booking-services .booking-step-card{--booking-header-inset:20px}}
 
 /* Step 3 and the services cards are 20px padded on phones, but the header band used 24px: it ran wider than its card. Match the band to the card. */
-@media(max-width:520px){
+@media(max-width:520px),(max-width:1100px) and (orientation:portrait){
  html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-step .booking-step-card{--booking-header-inset:20px}
  html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-step .booking-step-card{--booking-header-inset:14px}
  html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-step .booking-step-card>.booking-card-title:not([aria-hidden=true]){margin-block-start:calc(-1 * var(--booking-header-inset))}
 }
 
 /* The line under a card title runs exactly the width of its card: the card's 1px border is included in the overhang. */
-@media(max-width:760px),(pointer:coarse) and (max-width:1100px) and (max-height:600px){
+@media(max-width:760px),(max-width:1100px) and (orientation:portrait),(pointer:coarse) and (max-width:1100px) and (max-height:600px){
  html body .echo[data-page=home][data-theme] :is(#availability.booking-journey,.booking-services) .booking-step .booking-step-card>.booking-card-title:not([aria-hidden=true]){box-sizing:border-box;margin-inline:calc(-1 * var(--booking-header-inset) - 1px);padding-inline:calc(var(--booking-header-inset) + 1px);width:auto;max-width:none;border-radius:15px 15px 0 0}
 }

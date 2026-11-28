@@ -1,7 +1,9 @@
+import {useState} from 'react';
 import MusicPreferenceValue from './MusicPreferenceValue';
 import {musicMessageFields} from '../lib/musicMessageFields';
 import {fieldName} from '../lib/eventOrderCore.mjs';
 import {ATOM_KEYS,fieldCode} from '../lib/eventPageModel';
+import {useEventOrder} from './eventOrderContext';
 import {manualBookingFieldHref} from '../lib/bookingAtomReview';
 import {formatVenueAddress} from '../lib/venueAddressFormat';
 import {Sparkles,UserRound,Phone,MessageSquare} from 'lucide-react';
@@ -56,11 +58,12 @@ function MessageText({text}){
  })}</>;
 }
 export default function EchoChatMessage({message,ar=false,onAction,onVenueSelect,venueDisabled=false}){
+  const signedIn=Boolean(useEventOrder()?.signedIn),[blinking]=useState(()=>Date.now()-(message.blinkAt||0)<5000); // a message that just asks the client something blinks once it appears; an old one on reload does not
  const assistant=message.role==='assistant',voice=message.mode==='voice',Source=voice?Phone:MessageSquare,Avatar=assistant?Sparkles:UserRound;
  const tr=(en,arabic)=>ar?arabic:en;
  const parsed=musicMessageFields(message.content),music=message.musicFields?.length?message.musicFields:parsed.fields;
  const text=parsed.fields.length?parsed.text:message.content;
- return <article className={`ai-booking-message echo-chat-message is-${message.role}`}>
+ return <article className={`ai-booking-message echo-chat-message is-${message.role}${blinking?' is-blinking':''}`}>
   <header className="echo-message-header"><span className="echo-message-avatar" aria-hidden="true"><Avatar size={13}/></span><strong>{assistant?'Echo AI':tr('You','أنت')}</strong><span className="echo-message-source" data-mode={voice?'voice':'chat'}><Source size={10} aria-hidden="true"/>{voice?tr('Voice call','مكالمة صوتية'):tr('Text','نص')}</span></header>
   <div className="echo-message-body">{text&&<MessageText text={text}/>}</div>
   {assistant&&message.venueResults?.length>0&&<div className="echo-message-venues" role="group" aria-label={tr('Matching venues','الأماكن المطابقة')} dir={ar?'rtl':'ltr'}>{message.venueResults.map((place,index)=><section className="echo-message-venue" key={`${place.sourceId||place.name}:${index}`}>
@@ -70,6 +73,6 @@ export default function EchoChatMessage({message,ar=false,onAction,onVenueSelect
    {onVenueSelect&&<button type="button" disabled={venueDisabled} onClick={()=>onVenueSelect(place)} aria-label={tr(`Use venue: ${place.name}`,`استخدام المكان: ${place.name}`)}>{tr('Use this venue','استخدام هذا المكان')}</button>}
   </section>)}</div>}
   {music.length>0&&<div className="echo-message-music">{music.map(({path,value},index)=><section className="echo-message-music-section" key={`${path}:${index}`}><h4>{fieldName(path,ar)}</h4><MusicPreferenceValue path={path} value={value} ar={ar}/></section>)}</div>}
-  {message.actions?.some(action=>action.goto||onAction)&&<div className="echo-message-actions" role="group">{message.actions.filter(action=>action.goto||onAction).map(action=>action.goto?<a key={action.label} href={manualBookingFieldHref(action.goto)}>{action.label}</a>:<button type="button" key={action.label} className={action.danger?'is-danger':''} onClick={()=>onAction(action.text)}>{action.label}</button>)}</div>}
+  {message.actions?.some(action=>action.goto||onAction)&&<div className="echo-message-actions" role="group">{message.actions.filter(action=>action.goto||onAction).map(action=>action.goto?<a key={action.label} href={manualBookingFieldHref(action.goto,signedIn)}>{action.label}</a>:<button type="button" key={action.label} className={action.danger?'is-danger':''} onClick={()=>onAction(action.text)}>{action.label}</button>)}</div>}
  </article>;
 }

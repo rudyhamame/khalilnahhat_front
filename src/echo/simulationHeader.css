@@ -1,0 +1,100 @@
+/* 3D Room header: one real bar stacking the top controls (guests, dress code, extras, seating chart). */
+html body .simulation-room>.simulation-header{position:absolute;z-index:6;top:0;inset-inline:0;display:flex;flex-wrap:wrap;align-items:center;gap:8px;box-sizing:border-box;padding:12px 64px 10px 16px;border-bottom:1px solid #ffffff1f;background:linear-gradient(180deg,#0d1012f2,#0d1012d9);backdrop-filter:blur(8px);pointer-events:none}
+html body .simulation-header>*{pointer-events:auto}
+html body .simulation-header .simulation-topbar{position:static;inset:auto;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+html body .simulation-header .simulation-seating-toggle{position:static;inset:auto;min-height:36px}
+.echo-room-3d .room-3d-close{top:12px}
+
+/* Portrait: the side toolbar moves to the bottom of the screen as a row. Landscape keeps it on the side. */
+@media (orientation:portrait){
+html body .echo-room-3d .simulation-camera-dock{position:absolute!important;inset:auto 12px 12px 12px!important;top:auto!important;transform:none!important;display:flex!important;flex-direction:row!important;flex-wrap:wrap;justify-content:center;gap:6px 12px;width:auto!important;max-width:none!important;max-height:none!important;overflow:visible!important;padding:8px 10px!important;border-radius:16px}
+html body .echo-room-3d .simulation-camera-dock>div{display:flex!important;flex-direction:row!important;grid-template-columns:none!important}
+html body .echo-room-3d .simulation-camera-hint{display:none}
+}
+html body .simulation-room>.simulation-header{justify-content:center;padding-inline:64px}
+html body .simulation-header .simulation-topbar{justify-content:center}
+@media (orientation:portrait){
+html body .echo-room-3d .simulation-camera-dock .simulation-zoom-controls{display:flex!important;flex-direction:row!important;flex-wrap:nowrap;gap:6px;padding-top:0;border-top:0}
+html body .echo-room-3d .simulation-camera-dock .simulation-zoom-controls button{flex:none!important;width:44px!important;height:44px}
+}
+@media (orientation:portrait){
+html body .echo-room-3d .simulation-camera-dock .simulation-zoom-controls button:not(.simulation-fit-room){display:grid!important;width:44px!important;height:44px!important;flex:none!important;grid-column:auto!important}
+html body .echo-room-3d .simulation-camera-dock .simulation-zoom-controls{grid-template-columns:none!important;width:auto!important}
+}
+/* Portrait: guests + dress code on row one, cake / sweetheart table on row two. */
+@media (orientation:portrait){
+html body .simulation-header .simulation-topbar{width:100%;inset-inline:auto}
+html body .simulation-header .simulation-topbar .simulation-extras{flex:0 0 100%;justify-content:center;flex-wrap:wrap}
+}
+/* Portrait: win over room3d.css's centred side-strip rules (incl. rtl and the 66px icon-dock width). */
+@media (orientation:portrait){
+html body .echo-room-3d .simulation-camera-dock.simulation-icon-dock,html body .echo-room-3d[dir=rtl] .simulation-camera-dock.simulation-icon-dock,html[dir=rtl] body .echo-room-3d .simulation-camera-dock.simulation-icon-dock{position:absolute!important;top:auto!important;bottom:12px!important;left:12px!important;right:12px!important;inset-inline:12px!important;transform:none!important;width:auto!important;max-width:none!important;max-height:none!important;flex-direction:row!important;flex-wrap:wrap!important;justify-content:center!important;overflow:visible!important}
+html body .echo-room-3d .simulation-camera-dock.simulation-icon-dock>:is(.simulation-drag-modes,.simulation-view-modes,.simulation-lighting-modes,.simulation-zoom-controls){flex-direction:row!important;padding:0 0 0 12px!important;border:0!important;border-inline-start:1px solid #ffffff1a!important}
+html body .echo-room-3d .simulation-camera-dock.simulation-icon-dock>.simulation-drag-modes{padding:0!important;border:0!important}
+}
+/* Portrait toolbar buttons: every one a centred 44px square; groups are compact rows. */
+@media (orientation:portrait){
+html body .echo-room-3d .simulation-camera-dock.simulation-icon-dock>div{display:flex!important;flex:0 0 auto!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:center!important;justify-content:center!important;gap:6px!important;width:auto!important;max-width:none!important}
+html body .echo-room-3d .simulation-camera-dock.simulation-icon-dock button,html body .echo-room-3d .simulation-camera-dock.simulation-icon-dock .simulation-zoom-controls button:not(.simulation-fit-room),html body .echo-room-3d .simulation-camera-dock.simulation-icon-dock .simulation-fit-room{display:inline-flex!important;align-items:center!important;justify-content:center!important;flex:0 0 44px!important;width:44px!important;min-width:44px!important;max-width:44px!important;height:44px!important;min-height:44px!important;padding:0!important;grid-column:auto!important}
+}
+/* Portrait: Seating chart joins row one (guests, dress code, seating); cake / sweetheart stay on row two. */
+@media (orientation:portrait){
+html body .simulation-header .simulation-topbar{display:contents}
+html body .simulation-header .simulation-guests-badge{order:1}
+html body .simulation-header .simulation-dress-code{order:2}
+html body .simulation-header .simulation-seating-toggle{order:3}
+html body .simulation-header .simulation-topbar .simulation-extras{order:4;flex:0 0 100%;justify-content:center}
+}
+/* One look for every header control: 40px gold-outlined dark pills, same font. */
+html body .simulation-header :is(.simulation-guests-badge,.simulation-dress-code,.simulation-seating-toggle,.simulation-extras button){box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;height:40px;margin:0;padding:0 14px;border:1px solid #e3d3a366;border-radius:999px;background:#0d1012ed;color:#e3d3a3;font:600 13px/1 'Manrope','Noto Sans Arabic',sans-serif;white-space:nowrap}
+html body .simulation-header .simulation-guests-badge{padding-inline-end:6px}
+html body .simulation-header .simulation-dress-code{padding-block:0}
+html body .simulation-header .simulation-dress-code>span{color:#e8efe9;font-weight:500}
+html body .simulation-header .simulation-dress-code select{min-height:28px;height:28px;border-radius:999px;padding-block:0}
+html body .simulation-header :is(.simulation-seating-toggle,.simulation-extras button):hover{background:#e3d3a31f}
+html body .simulation-header .simulation-extras button[aria-pressed="true"]{background:#e3d3a3;color:#0d1012}
+html body .simulation-header :is(.simulation-seating-toggle,.simulation-extras button):focus-visible{outline:2px solid #e3d3a3;outline-offset:3px}
+/* Portrait toolbar: no divider lines; each group is its own soft rounded segment. */
+@media (orientation:portrait){
+html body .echo-room-3d .simulation-camera-dock.simulation-icon-dock{gap:8px!important}
+html body .echo-room-3d .simulation-camera-dock.simulation-icon-dock>div,html body .echo-room-3d .simulation-camera-dock.simulation-icon-dock>div+div,html body .echo-room-3d .simulation-camera-dock.simulation-icon-dock>.simulation-drag-modes{gap:2px!important;padding:3px!important;border:0!important;border-radius:14px!important;background:#ffffff0f!important}
+}
+/* Portrait toolbar: each group is exactly as wide/tall as its buttons, never stretched. */
+@media (orientation:portrait){
+html body .echo-room-3d .simulation-camera-dock.simulation-icon-dock>div{flex:none!important;width:max-content!important;min-width:0!important;max-width:100%!important;height:auto!important;min-height:0!important;align-self:center!important;display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important}
+}
+/* Touching toolbar buttons never starts native text selection, callouts or tap highlight. */
+html body .echo-room-3d .simulation-camera-dock,html body .echo-room-3d .simulation-camera-dock *{-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+/* Portrait toolbar padding: even 5px inside each group, even 10px inside the bar. */
+@media (orientation:portrait){
+html body .echo-room-3d .simulation-camera-dock.simulation-icon-dock{padding:10px!important;gap:8px!important}
+html body .echo-room-3d .simulation-camera-dock.simulation-icon-dock>div,html body .echo-room-3d .simulation-camera-dock.simulation-icon-dock>div+div,html body .echo-room-3d .simulation-camera-dock.simulation-icon-dock>.simulation-drag-modes{padding:5px!important;gap:4px!important;box-sizing:border-box!important}
+}
+/* Portrait toolbar: only the outer bar has padding and width; the groups are transparent and add none. */
+@media (orientation:portrait){
+html body .echo-room-3d .simulation-camera-dock.simulation-icon-dock{padding:10px!important;gap:6px!important}
+html body .echo-room-3d .simulation-camera-dock.simulation-icon-dock>div,html body .echo-room-3d .simulation-camera-dock.simulation-icon-dock>div+div,html body .echo-room-3d .simulation-camera-dock.simulation-icon-dock>.simulation-drag-modes{display:contents!important}
+}
+/* Portrait toolbar: every group is a wrapper with the first group's padding, fit to its buttons. */
+@media (orientation:portrait){
+html body .echo-room-3d .simulation-camera-dock.simulation-icon-dock>div,html body .echo-room-3d .simulation-camera-dock.simulation-icon-dock>div+div,html body .echo-room-3d .simulation-camera-dock.simulation-icon-dock>.simulation-drag-modes{display:flex!important;flex:none!important;width:max-content!important;padding:5px!important;gap:4px!important;border:0!important;border-radius:14px!important;background:#ffffff0f!important;box-sizing:border-box!important}
+}
+/* Portrait toolbar: a group's width is exactly the sum of its buttons (44px each), no padding or gaps. */
+@media (orientation:portrait){
+html body .echo-room-3d .simulation-camera-dock.simulation-icon-dock>div,html body .echo-room-3d .simulation-camera-dock.simulation-icon-dock>div+div,html body .echo-room-3d .simulation-camera-dock.simulation-icon-dock>.simulation-drag-modes{padding:0!important;gap:0!important;width:max-content!important;min-width:0!important;max-width:none!important;overflow:hidden!important}
+}
+/* Remove the leftover 12px start padding / divider on each group (the earlier :is() rule outranked the padding reset). */
+@media (orientation:portrait){
+html body .echo-room-3d .simulation-camera-dock.simulation-icon-dock>:is(.simulation-drag-modes,.simulation-view-modes,.simulation-lighting-modes,.simulation-zoom-controls){padding:0!important;padding-inline:0!important;border:0!important;border-inline-start:0!important;margin:0!important}
+}
+/* Portrait toolbar: equal 5px padding on every side of each group. */
+@media (orientation:portrait){
+html body .echo-room-3d .simulation-camera-dock.simulation-icon-dock>:is(.simulation-drag-modes,.simulation-view-modes,.simulation-lighting-modes,.simulation-zoom-controls){padding:5px!important;padding-inline:5px!important;box-sizing:border-box!important;overflow:visible!important}
+}
+/* Portrait toolbar: 4px between buttons inside each group. */
+@media (orientation:portrait){
+html body .echo-room-3d .simulation-camera-dock.simulation-icon-dock>:is(.simulation-drag-modes,.simulation-view-modes,.simulation-lighting-modes,.simulation-zoom-controls){gap:4px!important}
+}
+/* Zoom out / zoom in / fit room look like every other toolbar button (no extra border or tile). */
+html body .echo-room-3d .simulation-camera-dock.simulation-icon-dock .simulation-zoom-controls button{border:1px solid transparent!important;border-radius:10px!important;background:transparent!important;color:#afbfca}
+html body .echo-room-3d .simulation-camera-dock.simulation-icon-dock .simulation-zoom-controls button:hover:not(:disabled){background:#ffffff0e!important;color:#fff}

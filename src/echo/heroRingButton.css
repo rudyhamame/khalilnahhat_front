@@ -44,7 +44,7 @@ html[dir=rtl] .hero-ring-cta:hover .hero-ring-arrow { translate: -3px 0; }
   0%, 100% { opacity: 1; box-shadow: 0 0 0 #d9b46e00; }
   50% { opacity: .62; box-shadow: 0 0 20px #d9b46e4d; }
 }
-@media(max-width:600px) {
+@media (max-width:600px), (max-width:1100px) and (orientation:portrait){
   .hero-introduction .hero-ring-cta { align-self: center; margin: 22px auto 0; }
 }
 @media(prefers-reduced-motion:reduce) {
@@ -53,7 +53,7 @@ html[dir=rtl] .hero-ring-cta:hover .hero-ring-arrow { translate: -3px 0; }
 }
 /* Explore Echo: more room above, same blink as the login "Continue as guest" button; original type. */
 html body .hero-introduction .hero-ring-cta{animation:hero-explore-guest-blink 1.6s ease-in-out infinite}
-@media(min-width:1025px) and (orientation:landscape){html body .hero-introduction .hero-ring-cta{margin-top:clamp(40px,6svh,64px)}}
+@media (min-width:1025px) and (orientation:landscape){html body .hero-introduction .hero-ring-cta{margin-top:clamp(40px,6svh,64px)}}
 @keyframes hero-explore-guest-blink{0%,100%{opacity:1;box-shadow:0 0 0 0 #d9b46e00}50%{opacity:.55;box-shadow:0 0 0 6px #d9b46e38}}
 @media(prefers-reduced-motion:reduce){html body .hero-introduction .hero-ring-cta{animation:none}}
 /* Split pill: two halves sharing one outline, divided by a thin line. */

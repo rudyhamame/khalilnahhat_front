@@ -3,6 +3,7 @@ import {getPath,isAnswered,fieldName} from './eventOrderCore.mjs';
 import {bookingSections} from './bookingSections.js';
 import {goalFields,goalProgress,goalValue,ownTypeApplies} from './bookingGoals.js';
 import {ATOM_KEYS} from './eventPageModel.js';
+import {treeAtomProgress} from './treeAtoms.js';
 import {rentalCategoryCode} from './bookingAtoms.mjs';
 
 // Review lines follow the booking contract order (its codes 01.01.01 → 04.03.01); the rental tree sits where the `equipment` atom is.
@@ -25,7 +26,7 @@ export function sectionLines(order,goal,ar,rentals=[],catalogLoading=false,{ever
  const tree=goal.id==='music'&&rentals.length>0,loading=goal.id==='music'&&catalogLoading&&!rentals.length;
  if(loading)return {progress,lines:[{key:'services',label:ar?'خدمات التأجير':'Rental services',value:ar?'جارٍ التحميل…':'Loading…',empty:true,required:false,group:2}]};
  // Rental equipment is listed as a tree: every equipment category with all of its equipment under it.
- const all=goalFields(goal).filter(field=>everyAtom?ATOM_KEYS.includes(field.key):ownTypeApplies(order,field.key)&&(!field.gate||getPath(order,field.gate)===true)&&field.key!=='services'); // services is internal logic, not a booking atom: DJ and MC have their own lines
+ const inTree=new Set(treeAtomProgress(order).map(atom=>atom.key)),all=goalFields(goal).filter(field=>everyAtom?ATOM_KEYS.includes(field.key):inTree.has(field.key)&&ownTypeApplies(order,field.key)&&(!field.gate||getPath(order,field.gate)===true)); // services is internal logic, not a booking atom: DJ and MC have their own lines
  // Every field of the section is listed with its value; fields not answered yet read "Not set yet".
  const lines=all.filter(field=>everyAtom||field.key!=='event.setup.requirements'||order.rental?.requested===true||isAnswered(getPath(order,field.key))).map(field=>({key:field.key,reviewValue:draftValue(order,field.key),label:(fieldName(field.key,ar)||(ar?field.ar||field.label:field.label)).replace(/\s*[(（](?:optional|only if|اختياري)[^)）]*[)）]/i,''),value:bookingFieldValue(order,field.key,ar,draftValue(order,field.key)),...(field.key.startsWith('music.')||field.key.startsWith('references.')?{rawValue:draftValue(order,field.key)}:{}),empty:!isAnswered(draftValue(order,field.key)),required:progress.missing.some(item=>item.key===field.key)}));
  if(tree&&order.rental?.requested===false&&order.equipment?.length){const decision=lines.find(line=>line.key==='rental.requested');if(decision)decision.value+=tr(' — selected equipment is still saved; remove it or enable rentals.',' — المعدات المختارة ما زالت محفوظة؛ احذفها أو فعّل التأجير.');}

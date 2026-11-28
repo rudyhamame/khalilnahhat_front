@@ -8,7 +8,7 @@
 .booking-footer-button:hover{background:#f0e3b8}
 .booking-footer-button:focus-visible{outline:2px solid #e3d3a3;outline-offset:3px}
 .booking-footer-spacer{height:140px}
-@media(max-width:560px){.booking-footer{gap:10px}.booking-footer-button{padding:0 14px;font-size:12px}.booking-footer-status>span{display:none}}
+@media (max-width:560px), (max-width:1100px) and (orientation:portrait){.booking-footer{gap:10px}.booking-footer-button{padding:0 14px;font-size:12px}.booking-footer-status>span{display:none}}
 html body .echo a.booking-footer-button,html body .echo a.booking-footer-button:visited,html body .echo a.booking-footer-button:hover{color:#0d1012!important;text-decoration:none}
 html body .echo a.booking-footer-button svg{color:#0d1012;stroke:currentColor}
 
@@ -20,13 +20,13 @@ html body .echo a.booking-footer-button svg{color:#0d1012;stroke:currentColor}
 html body .echo .booking-footer-next a{color:#e3d3a3;text-decoration:underline;text-underline-offset:3px}
 html body .echo .booking-footer-next a:hover{color:#fff}
 .booking-footer-done{color:#a6e3ce}
-@media(max-width:700px){.booking-footer-status>.booking-footer-bar{display:none}}
-@media(max-width:560px){.booking-footer{flex-wrap:wrap}.booking-footer-next{flex-basis:100%;order:3}}
+@media (max-width:760px), (max-width:1100px) and (orientation:portrait){.booking-footer-status>.booking-footer-bar{display:none}}
+@media (max-width:560px), (max-width:1100px) and (orientation:portrait){.booking-footer{flex-wrap:wrap}.booking-footer-next{flex-basis:100%;order:3}}
 
 /* The element the footer link scrolled to blinks a few times. */
 @keyframes booking-blink{0%,100%{box-shadow:0 0 0 0 #e3d3a300;outline-color:#e3d3a300}25%,75%{box-shadow:0 0 0 6px #e3d3a355;outline-color:#e3d3a3}50%{box-shadow:0 0 0 0 #e3d3a300;outline-color:#e3d3a300}}
 .is-blinking{outline:2px solid transparent;outline-offset:4px;border-radius:12px;animation:booking-blink .8s ease-in-out 3}
-@media(prefers-reduced-motion:reduce){.is-blinking{animation:none;outline-color:#e3d3a3}}
+@media (prefers-reduced-motion:reduce){.is-blinking{animation:none;outline-color:#e3d3a3}}
 
 /* Progress line per step, like the Booking status bar. */
 .booking-footer{flex-wrap:wrap}
@@ -44,7 +44,7 @@ html body .echo .booking-footer-next a:hover{color:#fff}
 .booking-footer-steps .is-optional{opacity:.75}
 .booking-footer-steps button:hover em{color:#fff}
 .booking-footer-steps button:focus-visible{outline:2px solid #e3d3a3;outline-offset:3px;border-radius:6px}
-@media(max-width:560px){.booking-footer-steps{gap:8px}.booking-footer-steps em{display:none}.booking-footer-steps i{display:none}}
+@media (max-width:560px), (max-width:1100px) and (orientation:portrait){.booking-footer-steps{gap:8px}.booking-footer-steps em{display:none}.booking-footer-steps i{display:none}}
 
 .booking-footer{padding-top:14px}
 .booking-footer-close{position:absolute;top:8px;inset-inline-start:var(--echo-viewport-gutter,16px);display:grid;place-items:center;width:28px;height:28px;padding:0;border:1px solid #ffffff2b;border-radius:50%;background:#ffffff0a;color:#d9e2dc;cursor:pointer;transition:background .15s,color .15s}
@@ -59,13 +59,13 @@ html body .echo .booking-footer-next a:hover{color:#fff}
 /* Slides away while scrolling up, back in while scrolling down. */
 .booking-footer,.booking-footer-tab{transition:transform .25s ease}
 .booking-footer.is-hidden,.booking-footer-tab.is-hidden{transform:translateY(110%)}
-@media(prefers-reduced-motion:reduce){.booking-footer,.booking-footer-tab{transition:none}}
+@media (prefers-reduced-motion:reduce){.booking-footer,.booking-footer-tab{transition:none}}
 
 /* Close button: a tab on the footer's top edge, outside its content area. */
 .booking-footer .booking-footer-close{top:-32px;width:44px;height:32px;border:1px solid #c3dfcd33;border-bottom:0;border-radius:12px 12px 0 0;background:#0b1315ee;backdrop-filter:blur(10px);box-shadow:0 -6px 20px #0005}
 .booking-footer{padding-top:12px}
 .booking-footer-steps .step-counts{display:flex;flex-wrap:wrap;gap:2px 10px;color:#9fb5a8;font:500 10.5px/1.3 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:.02em}
-@media(max-width:700px){.booking-footer-steps .step-counts{display:none}}
+@media (max-width:760px), (max-width:1100px) and (orientation:portrait){.booking-footer-steps .step-counts{display:none}}
 
 /* Delete Booking sits on top of the Open Echo Smart Cart button. */
 .booking-footer-actions{display:flex;flex:none;flex-direction:column;align-items:stretch;gap:8px}
@@ -75,7 +75,7 @@ html body .echo .booking-footer-next a:hover{color:#fff}
 .booking-footer-delete:focus-visible{outline:2px solid #e07a6a;outline-offset:3px}
 /* Same size as the Open Echo Smart Cart button below it. */
 .booking-footer-delete{min-height:44px;padding:0 22px;gap:10px;font:700 13px/1 'Manrope','Noto Sans Arabic',sans-serif}
-@media(max-width:560px){.booking-footer-delete{padding:0 14px;font-size:12px}}
+@media (max-width:560px), (max-width:1100px) and (orientation:portrait){.booking-footer-delete{padding:0 14px;font-size:12px}}
 .booking-footer-error{color:#f2a69a;font-size:11.5px;line-height:1.4;text-align:center}
 
 /* The steps, the status and the next-atom links form one block on the left; the two buttons stand to the right of that whole block. */
@@ -83,4 +83,71 @@ html body .echo .booking-footer-next a:hover{color:#fff}
 .booking-footer-main{display:flex;flex-wrap:wrap;align-items:center;flex:1;min-width:0;gap:0 16px}
 .booking-footer-main .booking-footer-steps{order:-1;flex-basis:100%;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);grid-template-columns:none}
 .booking-footer-actions{margin-inline-start:auto}
-@media(max-width:700px){.booking-footer{flex-wrap:wrap}.booking-footer-main{flex-basis:100%}.booking-footer-actions{flex-direction:row;flex-basis:100%;justify-content:flex-end}}
+@media (max-width:760px), (max-width:1100px) and (orientation:portrait){.booking-footer{flex-wrap:wrap}.booking-footer-main{flex-basis:100%}.booking-footer-actions{flex-direction:row;flex-basis:100%;justify-content:flex-end}}
+
+
+/* Portrait: the whole footer (padding, step row, counts, next links, buttons) scales with the screen width. */
+@media (max-width:1000px) and (orientation:portrait){
+ html body .echo .booking-footer{gap:clamp(8px,1.4vw + 4px,14px);padding:clamp(8px,1.2vw + 4px,14px) var(--echo-viewport-gutter,16px) calc(clamp(8px,1.2vw + 4px,14px) + env(safe-area-inset-bottom,0px))}
+ html body .echo .booking-footer-steps{gap:clamp(6px,1vw + 3px,12px);padding-bottom:clamp(6px,.8vw + 3px,10px)}
+ html body .echo .booking-footer-steps .step-line{gap:clamp(4px,.6vw + 2px,6px);font-size:clamp(9.5px,.5vw + 7.5px,12px)}
+ html body .echo .booking-footer-steps b{width:clamp(15px,.6vw + 12px,19px);height:clamp(15px,.6vw + 12px,19px);font-size:clamp(8.5px,.3vw + 7px,10.5px)}
+ html body .echo .booking-footer-steps .step-bar{height:clamp(3px,.3vw + 2px,5px)}
+ html body .echo .booking-footer-steps .step-counts{font-size:clamp(9px,.4vw + 7px,11px)}
+ html body .echo .booking-footer-status strong{font-size:clamp(12px,.5vw + 9.5px,15px)}
+ html body .echo .booking-footer-next dt{font-size:clamp(9.5px,.4vw + 7.5px,11.5px)}
+ html body .echo .booking-footer-next dd{font-size:clamp(11.5px,.5vw + 9px,14px)}
+ html body .echo .booking-footer :is(.booking-footer-button,.booking-footer-delete){min-height:clamp(38px,1.2vw + 30px,46px);padding:0 clamp(12px,1.4vw + 6px,22px);gap:clamp(6px,.8vw + 3px,10px);font-size:clamp(11.5px,.5vw + 9px,14px)}
+ html body .echo .booking-footer-actions{flex-direction:row;flex-wrap:wrap;flex-basis:100%;justify-content:center;align-items:center;margin-inline:0;gap:clamp(8px,1.4vw + 4px,14px)}
+ html body .echo .booking-footer-error{font-size:clamp(10.5px,.4vw + 8.5px,12.5px)}
+ html body .echo .booking-footer-spacer{height:clamp(120px,22vw + 40px,200px)}
+}
+
+/* Below desktop width (portrait or landscape): the footer has a centered handle on its top edge to close it, and a centered tab at the bottom to open it again; both scale with the screen. */
+@media (max-width:1000px){
+ html body .echo .booking-footer .booking-footer-close{inset-inline-start:50%;translate:-50% 0;width:clamp(64px,12vw + 24px,96px);height:clamp(26px,3vw + 18px,34px);top:calc(-1 * clamp(26px,3vw + 18px,34px) + 1px)}
+ html body .echo .booking-footer .booking-footer-close svg{display:none}
+ html body .echo .booking-footer .booking-footer-close::before{content:'';display:block;width:clamp(28px,5vw + 10px,44px);height:4px;border-radius:999px;background:#e3d3a3}
+ html body .echo .booking-footer-tab{inset-inline-start:50%;translate:-50% 0;min-height:clamp(32px,2vw + 26px,40px);font-size:clamp(11.5px,.5vw + 9px,14px)}
+}
+
+/* Everywhere: the close tab and the reopen tab scale too. */
+html body .echo .booking-footer .booking-footer-close{width:clamp(40px,2vw + 30px,52px);height:clamp(28px,1.4vw + 22px,36px);top:calc(-1 * clamp(28px,1.4vw + 22px,36px) + 1px)}
+html body .echo .booking-footer .booking-footer-close svg{width:clamp(14px,.5vw + 11px,18px);height:clamp(14px,.5vw + 11px,18px)}
+@media (max-width:1000px){html body .echo .booking-footer .booking-footer-close{width:clamp(72px,14vw + 24px,120px);height:clamp(30px,3vw + 20px,40px);top:calc(-1 * clamp(30px,3vw + 20px,40px) + 1px)}html body .echo .booking-footer .booking-footer-close::before{height:clamp(4px,.4vw + 2.5px,6px);width:clamp(32px,6vw + 12px,56px)}}
+
+/* Each step shows done/total (required + optional) right next to its number, on every screen size. */
+.booking-footer-steps .step-total{flex:none;display:inline-block;color:#9fb5a8;font:500 clamp(9.5px,.4vw + 7.5px,12px)/1.2 'Manrope','Noto Sans Arabic',sans-serif;font-variant-numeric:tabular-nums;white-space:nowrap}
+.booking-footer-steps .step-total b{display:inline;width:auto;height:auto;background:none;border-radius:0;color:#f4f7f3;font-size:inherit;font-weight:700}
+.booking-footer-steps .is-done .step-total b{color:#a6e3ce}
+
+/* done/total split: required first, with a star; optional after it, no star. */
+.booking-footer-steps .step-total{display:inline-flex;gap:clamp(4px,.4vw + 2px,8px)}
+.booking-footer-steps .step-total .is-required{color:#e3d3a3}
+.booking-footer-steps .step-total .is-required b{color:#e3d3a3}
+
+/* Portrait: "Next required" and "Next optional" share one line, each taking half the width (long names end in "…"). */
+@media (max-width:1000px) and (orientation:portrait){
+ html body .echo .booking-footer-next{display:flex;flex-direction:row;flex-wrap:nowrap;align-items:baseline;gap:clamp(8px,2vw + 2px,16px);flex-basis:100%;min-width:0}
+ html body .echo .booking-footer-next>div{display:flex;flex:1 1 0;min-width:0;flex-wrap:nowrap;align-items:baseline;gap:clamp(3px,.6vw + 1px,6px)}
+ html body .echo .booking-footer-next dt{flex:none;white-space:nowrap}
+ html body .echo .booking-footer-next dd{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+}
+
+/* Smaller footer handle (tab, bar and reopen tab). */
+html body .echo .booking-footer .booking-footer-close{width:clamp(30px,1.4vw + 24px,40px);height:clamp(20px,1vw + 15px,26px);top:calc(-1 * clamp(20px,1vw + 15px,26px) + 1px)}
+html body .echo .booking-footer .booking-footer-close svg{width:clamp(12px,.4vw + 10px,15px);height:clamp(12px,.4vw + 10px,15px)}
+@media (max-width:1000px){
+ html body .echo .booking-footer .booking-footer-close{width:clamp(48px,8vw + 20px,72px);height:clamp(20px,2vw + 12px,28px);top:calc(-1 * clamp(20px,2vw + 12px,28px) + 1px)}
+ html body .echo .booking-footer .booking-footer-close::before{width:clamp(22px,3.5vw + 8px,34px);height:clamp(3px,.3vw + 2px,4px)}
+ html body .echo .booking-footer-tab{min-height:clamp(26px,1.4vw + 20px,32px);padding:0 clamp(10px,1vw + 6px,14px);font-size:clamp(10.5px,.4vw + 8.5px,12.5px)}
+}
+
+/* Footer buttons in the page's own voice: warm gold on deep green glass, soft rose for the destructive one. */
+html body .echo .booking-footer :is(.booking-footer-button,.booking-footer-delete){border-radius:14px;letter-spacing:.02em;font-family:'Manrope','Noto Sans Arabic',sans-serif;text-decoration:none;transition:transform .18s,box-shadow .18s,background-color .18s,border-color .18s,color .18s}
+html body .echo .booking-footer .booking-footer-button{border:1px solid #f0dfae;background:linear-gradient(180deg,#efdfae,#cfb877);color:#1a2a22;font-weight:800;box-shadow:0 6px 18px #e3d3a31f,inset 0 1px 0 #fff6}
+html body .echo .booking-footer .booking-footer-button:hover{transform:translateY(-1px);box-shadow:0 10px 24px #e3d3a336,inset 0 1px 0 #fff8;background:linear-gradient(180deg,#f6e8bc,#d8c283)}
+html body .echo .booking-footer .booking-footer-delete{border:1px solid #e3d3a340;background:#ffffff08;color:#e9c3b9;font-weight:600;backdrop-filter:blur(4px)}
+html body .echo .booking-footer .booking-footer-delete:hover:not(:disabled){background:#e07a6a26;border-color:#e07a6a99;color:#ffd9d1;transform:translateY(-1px)}
+html body .echo .booking-footer :is(.booking-footer-button,.booking-footer-delete):focus-visible{outline:2px solid #e3d3a3;outline-offset:3px}
+html body .echo .booking-footer .booking-footer-button svg{color:#1a2a22}

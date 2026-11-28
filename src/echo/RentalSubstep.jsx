@@ -7,7 +7,7 @@ export default function RentalSubstep({ar=false,children}){
   <header className="dj-substep-head">
    <span className="dj-substep-node" aria-hidden="true"><Boxes size={18}/></span>
    <div>
-    <p className="dj-substep-kicker">{tr('SUB-STEP OF ECHO SERVICES','خطوة فرعية ضمن خدمات إيكو')}</p>
+    <p className="dj-substep-kicker">{tr('SUB-STEP OF RENTAL EQUIPMENT SERVICE','خطوة فرعية ضمن خدمة معدات التأجير')}</p>
     <h3>{tr('Rental Equipment','معدات التأجير')}</h3>
     <p>{tr('Choose the equipment for your event: every category with all of its equipment.','اختر المعدات لفعاليتك: كل فئة مع جميع معداتها.')}</p>
    </div>

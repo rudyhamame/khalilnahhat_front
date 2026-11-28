@@ -8,7 +8,7 @@
 .echo .hero-intro-language-buttons>button{border:1px solid #b6ded149;border-radius:9px;padding:9px 16px;min-height:42px;background:#101a1bd9;color:#d6ede5;font:500 14px/1.5 'Manrope','Noto Sans Arabic',sans-serif;cursor:pointer}
 .echo .hero-intro-language-buttons>button[aria-pressed=true]{color:#f1d79e;border-color:#c6a36399;background:#b78b4320}
 .hero-intro-language-buttons>button:focus-visible{outline:2px solid #f1d79e;outline-offset:3px}
-@media(max-width:760px){.hero-introduction .hero-record-video{top:1%;width:min(110vw,68svh)}.hero-intro-language-buttons{justify-content:center}.echo .hero-intro-language-buttons>button{padding:8px 14px}}
+@media (max-width:600px), (max-width:1100px) and (orientation:portrait){.hero-introduction .hero-record-video{top:1%;width:min(110vw,68svh)}.hero-intro-language-buttons{justify-content:center}.echo .hero-intro-language-buttons>button{padding:8px 14px}}
 /* Intro and About share the same dark backdrop. */
 .echo[data-page=home][data-theme]{--echo-intro-background:radial-gradient(ellipse at 50% 50%,#1C292C 0%,#0D1418 55%)}
 /* VP1 keeps the same background before and during the introduction. */
@@ -48,7 +48,7 @@
 .hero-introduction[data-language-selected=false] .hero-record-video>img,
 .hero-introduction[data-language-selected=false] .hero-character-frames{animation:none}
 
-@media(max-width:600px) and (orientation:portrait), (max-height:450px) and (orientation:landscape) and (any-pointer:coarse), (orientation:portrait) and (any-pointer:coarse){
+@media (max-width:1100px) and (orientation:portrait), (max-height:450px) and (orientation:landscape) and (any-pointer:coarse), (orientation:portrait) and (any-pointer:coarse){
  .hero-introduction .hero-character-window>.hero-record-video{
   width:min(110vw,68svh);
   top:50%;transform:translate(-50%,-50%);
@@ -58,54 +58,54 @@
 /* The record is always dead centre of the scene; HeroHeadAlign in EchoHome sizes and places the character so the head sits on that centre. */
 .hero-introduction .hero-character-window>.hero-record-video{top:50%;left:50%;transform:translate(-50%,-50%)}
 /* Desktop: the record keeps one visual size: window resizing does not change it and browser zoom is compensated (--echo-zoom is set in EchoHome). */
-@media(min-width:761px) and (pointer:fine){.hero-introduction .hero-character-window>.hero-record-video{width:min(calc(920px / var(--echo-zoom,1)),44vw,86svh)}}
+@media (min-width:761px) and (pointer:fine){.hero-introduction .hero-character-window>.hero-record-video{width:min(calc(920px / var(--echo-zoom,1)),44vw,86svh)}}
 /* No glow and nothing visible until the record video has loaded. */
 .hero-introduction .hero-record-video:not([data-loaded=true])::before{display:none}
 .hero-introduction .hero-character-window.is-loading>.hero-record-video,.hero-introduction .hero-character-window.is-loading>.hero-character-frames{visibility:hidden}
 
 /* Tablet landscape: the record and the character are scaled down together, kept centred in the middle. */
-@media(min-width:721px) and (max-width:1400px) and (orientation:landscape) and (any-pointer:coarse){
+@media (min-width:721px) and (max-width:1400px) and (orientation:landscape) and (any-pointer:coarse){
  html body .echo[data-page=home][data-theme] .hero-introduction .hero-character-window{scale:.88;transform-origin:50% 50%}
 }
 
 
 /* Short landscape screens (under 607px high, wider than a phone): same three-column hero, with the copy scaled to the available height. */
-@media(min-width:721px) and (max-height:606px) and (orientation:landscape){
+@media (min-width:721px) and (max-height:606px) and (orientation:landscape){
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .echo-hero-title{font-size:clamp(18px,4.6svh,28px)!important}
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .echo-hero-subline{font-size:clamp(11px,2.5svh,14px)!important;line-height:1.45}
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-book-cta,html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .hero-explore{padding-block:9px}
 }
 
 /* Under 1030px wide (landscape) the record/character shrink further so they fit between the left copy and the right-hand player without overlapping either. */
-@media(min-width:721px) and (max-width:1029px) and (orientation:landscape) and (any-pointer:coarse){
+@media (min-width:721px) and (max-width:1029px) and (orientation:landscape) and (any-pointer:coarse){
  html body .echo[data-page=home][data-theme] .hero-introduction .hero-character-window{scale:.8}
 }
-@media(min-width:721px) and (max-width:860px) and (orientation:landscape) and (any-pointer:coarse){
+@media (min-width:721px) and (max-width:860px) and (orientation:landscape) and (any-pointer:coarse){
  html body .echo[data-page=home][data-theme] .hero-introduction .hero-character-window{scale:.6}
 }
 
 
 /* Landscape screens wider than a phone (tablet and desktop), greeting not playing: only the title and the player, the player directly under the title (no gap, no app badge), with the Explore button centred under the player. */
-@media(min-width:721px) and (orientation:landscape){
+@media (min-width:721px) and (orientation:landscape){
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .hero-intro-player{position:static!important;inset:auto!important;width:100%!important;margin:14px 0 0!important}
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .hero-ring-cta{position:static!important;inset:auto!important;display:flex!important;margin:20px auto 0!important}
 }
 
 /* Landscape screens wider than a phone: the record/character complex and all its glows sit fully at the right edge (one shared offset, --cx). */
-@media(min-width:721px) and (orientation:landscape){
+@media (min-width:721px) and (orientation:landscape){
  html body .echo[data-page=home][data-theme] .hero-introduction{--cx:calc(50vw - var(--rec-d,44vw) / 2 - var(--echo-viewport-gutter,48px))}
  html body .echo[data-page=home][data-theme] .hero-introduction .hero-character-window{translate:var(--cx) 0}
 }
 
 /* Landscape tablet/desktop: the left column (title + player) fills all the room up to the record, at every width, with the transport buttons spread across the player. */
-@media(min-width:721px) and (orientation:landscape){
+@media (min-width:721px) and (orientation:landscape){
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group,html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .echo-hero-title{width:var(--title-room,calc(50vw - 24px))!important;max-width:none!important}
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .hero-intro-controls-inline{justify-content:space-between!important;width:100%}
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-copy-content .hero-intro-heading-group{margin-top:8px!important}
 }
 
 /* Landscape tablet/desktop: the 3D object stage sits in the left column, below the Explore button, over the page content (it never takes clicks). */
-@media(min-width:721px) and (orientation:landscape){
+@media (min-width:721px) and (orientation:landscape){
  html:not([dir=rtl]) body .echo[data-page=home] .hero-introduction>.hero-equipment-showcase{right:auto!important;inset-inline:var(--echo-viewport-gutter,48px) auto!important;top:calc(var(--echo-header-overlay-height,96px) + 300px)!important;bottom:24px!important;width:var(--title-room,calc(50vw - 24px))!important;max-width:none!important;z-index:6}
 }
 
@@ -113,7 +113,7 @@
 .hero-intro-player .hero-intro-subtitle.is-idle{display:none}
 
 /* Arabic (right-to-left): the home hero mirrored. The copy sits on the right, the record/character complex and all its glows at the left edge, the 3D stage under the copy on the right. */
-@media(min-width:721px) and (orientation:landscape){
+@media (min-width:721px) and (orientation:landscape){
  html[dir=rtl] body .echo[data-page=home][data-theme] .hero-introduction{--cx:calc(var(--rec-d,44vw) / 2 + var(--echo-viewport-gutter,48px) - 50vw)}
  html[dir=rtl] body .echo[data-page=home] .hero-introduction>.hero-equipment-showcase{left:auto!important;inset-inline:auto var(--echo-viewport-gutter,48px)!important;top:calc(var(--echo-header-overlay-height,96px) + 300px)!important;bottom:24px!important;width:var(--title-room,calc(50vw - 24px))!important;max-width:none!important;z-index:6}
 }
@@ -122,7 +122,7 @@ html[dir=rtl] body .echo[data-theme]>.echo-header .echo-brand-pair{flex-directio
 html[dir=rtl] body .echo[data-theme]>.echo-header .echo-brand-pair>img+img:not(#_){margin-inline-start:0!important;margin-inline-end:6px!important;object-position:right center!important}
 
 /* Landscape (tablet/desktop): the left column fills the hero's height, and the Skip to content button is centred vertically in the empty space under the player; it is also larger. */
-@media(min-width:721px) and (orientation:landscape){
+@media (min-width:721px) and (orientation:landscape){
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-copy-content .hero-intro-heading-group{display:flex!important;flex-direction:column;height:calc(100% - 90px);min-height:0}
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .hero-ring-cta{margin:auto!important;transform:scale(1.35);transform-origin:center}
 }
@@ -181,7 +181,7 @@ html body .echo .hero-intro-frame .hero-intro-subtitle{flex:1 1 auto;min-height:
 .hero-intro-stage .hero-equipment-object{height:calc(100% - 86px);min-height:0}
 
 /* While the greeting plays (title and paragraph unmounted) the player is centred in the left column; the Skip to content button sits at the column's bottom-left. */
-@media(min-width:721px) and (orientation:landscape){
+@media (min-width:721px) and (orientation:landscape){
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group.is-engaged{justify-content:center}
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group.is-engaged .hero-intro-frame{margin-inline:auto}
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .hero-ring-cta{margin:auto auto 0 0!important;align-self:flex-start;transform:scale(1.35);transform-origin:left bottom}
@@ -189,7 +189,7 @@ html body .echo .hero-intro-frame .hero-intro-subtitle{flex:1 1 auto;min-height:
 }
 
 /* The square grows to fit the 3D object: sideways in landscape (the object opens on the left, the transcript moves right), downwards in portrait (the object opens above the transcript). */
-@media(orientation:landscape){
+@media (orientation:landscape){
  .hero-intro-frame .hero-intro-stage{position:absolute;left:16px;top:44px;bottom:62px;width:0;height:auto;overflow:visible;transition:width .55s cubic-bezier(.3,.9,.3,1)}
  .hero-intro-frame .hero-intro-stage[data-active=true]{height:auto;width:calc(46% - 16px)}
  .hero-intro-player .hero-intro-frame{transition:width .55s cubic-bezier(.3,.9,.3,1)}
@@ -197,11 +197,11 @@ html body .echo .hero-intro-frame .hero-intro-subtitle{flex:1 1 auto;min-height:
  html body .echo .hero-intro-frame .hero-intro-subtitle{transition:margin .55s cubic-bezier(.3,.9,.3,1)}
  html body .echo .hero-intro-frame:has(.hero-intro-stage[data-active=true]) .hero-intro-subtitle{margin-inline-start:46%!important}
 }
-@media(orientation:portrait){
+@media (orientation:portrait){
  .hero-intro-frame .hero-intro-stage[data-active=true]{height:230px}
 }
 /* Greeting playing: the player is centred in the whole left column; the button stays at its bottom-left and the Android ad steps aside. */
-@media(min-width:721px) and (orientation:landscape){
+@media (min-width:721px) and (orientation:landscape){
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group.is-engaged{position:relative;height:calc(100% - 24px);margin-top:12px!important}
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group.is-engaged .hero-ring-cta{position:absolute!important;inset:auto auto 0 0!important;margin:0!important}
  html[dir=rtl] body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group.is-engaged .hero-ring-cta{inset:auto 0 0 auto!important}
@@ -209,7 +209,7 @@ html body .echo .hero-intro-frame .hero-intro-subtitle{flex:1 1 auto;min-height:
 }
 
 /* Landscape: the Skip to content button is centred under the record/character complex (its centre follows the complex's offset, --cx) at the bottom of the hero; the checkbox moves to the bottom of the left column to make room. */
-@media(min-width:721px) and (orientation:landscape){
+@media (min-width:721px) and (orientation:landscape){
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group.is-engaged{position:static}
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .hero-ring-cta,
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group.is-engaged .hero-ring-cta,
@@ -223,7 +223,7 @@ html body .echo .hero-intro-frame .hero-intro-subtitle{flex:1 1 auto;min-height:
 @media(prefers-reduced-motion:reduce){.hero-intro-heading-group.is-leaving-copy :is(.echo-hero-title,.echo-hero-subline,.hero-returning-greeting){animation:none}}
 
 /* Landscape: the Android badge sits opposite the Skip to content button, centred at the bottom of the left column (the button is centred under the record/character on the right); the checkbox steps up above it. */
-@media(min-width:721px) and (orientation:landscape){
+@media (min-width:721px) and (orientation:landscape){
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .client-app-badge--player,
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group.is-engaged .client-app-badge--player{display:flex!important;position:absolute!important;inset:auto auto 26px calc(var(--echo-viewport-gutter,48px) + var(--title-room,440px) / 2)!important;transform:translateX(-50%);margin:0!important;z-index:8}
  .hero-skip-login{bottom:calc(env(safe-area-inset-bottom,0px) + 88px)}
@@ -246,18 +246,18 @@ html body .echo .hero-intro-frame .hero-intro-subtitle .is-active{text-decoratio
 
 /* The square grows a lot more for the 3D object: sideways and taller in landscape (smooth width/height transition), much taller in portrait. */
 .hero-intro-player .hero-intro-frame{aspect-ratio:auto!important;width:min(100%,340px);height:340px;transition:width .6s cubic-bezier(.3,.9,.3,1),height .6s cubic-bezier(.3,.9,.3,1)}
-@media(orientation:landscape){
+@media (orientation:landscape){
  .hero-intro-player .hero-intro-frame:has(.hero-intro-stage[data-active=true]){width:min(100vw - 120px,760px);height:min(76svh,470px)}
  .hero-intro-frame .hero-intro-stage[data-active=true]{width:calc(54% - 16px)}
  html body .echo .hero-intro-frame:has(.hero-intro-stage[data-active=true]) .hero-intro-subtitle{margin-inline-start:54%!important}
 }
-@media(orientation:portrait){
+@media (orientation:portrait){
  .hero-intro-frame .hero-intro-stage[data-active=true]{height:300px}
  .hero-intro-player .hero-intro-frame:has(.hero-intro-stage[data-active=true]){height:min(86svh,640px)}
 }
 
 /* Greeting playing (landscape): the square is sized from the left column. It is a square filling 88% of the column's width (capped by the screen height) and stays centred in it; when a 3D object shows it widens to the full column width and grows taller. */
-@media(min-width:721px) and (orientation:landscape){
+@media (min-width:721px) and (orientation:landscape){
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group.is-engaged{--col:var(--title-room,calc(50vw - 24px));--sq:min(calc(var(--col) * .88),calc(100svh - 280px))}
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .is-engaged .hero-intro-player{width:var(--col)!important;max-width:none}
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .is-engaged .hero-intro-frame{width:var(--sq);height:var(--sq);margin-inline:auto}
@@ -265,17 +265,17 @@ html body .echo .hero-intro-frame .hero-intro-subtitle .is-active{text-decoratio
 }
 
 /* Home, landscape (tablet/desktop): two real columns of the same width. The left column is the left half of the page content (title, player, checkbox, Android badge), the right column the right half (the record/character complex and its glows, centred in it, with the Skip to content button under it). */
-@media(min-width:721px) and (orientation:landscape){
+@media (min-width:721px) and (orientation:landscape){
  html body .echo[data-page=home][data-theme] .hero-introduction{--title-room:calc(50vw - var(--echo-viewport-gutter,48px) - 24px)!important;--cx:25vw!important}
  html[dir=rtl] body .echo[data-page=home][data-theme] .hero-introduction{--cx:-25vw!important}
 }
 /* the complex fits inside its half (it never crosses the page edge or the column divider) */
-@media(min-width:721px) and (orientation:landscape){
+@media (min-width:721px) and (orientation:landscape){
  html body .echo[data-page=home][data-theme] .hero-introduction .hero-character-window{scale:min(.88,calc((50vw - var(--echo-viewport-gutter,48px) * 2) / min(70vw, 86svh, 920px)))}
 }
 
 /* hero-copy-content is a real two-column grid of equal widths: [1] the content (title, player...), [2] the stage where the record/character complex stands. */
-@media(min-width:721px) and (orientation:landscape){
+@media (min-width:721px) and (orientation:landscape){
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-copy-content{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:0;align-items:stretch}
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-copy-content>.hero-intro-heading-group{grid-column:1;width:100%!important;max-width:none!important;padding-inline-end:24px;box-sizing:border-box}
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-copy-content>.hero-copy-stage{grid-column:2;min-height:1px}
@@ -283,15 +283,15 @@ html body .echo .hero-intro-frame .hero-intro-subtitle .is-active{text-decoratio
  html[dir=rtl] body .echo[data-page=home][data-theme] .hero-introduction{--cx:calc(-25vw + var(--echo-viewport-gutter,48px) / 2)!important}
  html[dir=rtl] body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-copy-content>.hero-intro-heading-group{padding-inline-end:0;padding-inline-start:24px}
 }
-@media(max-width:720px),(orientation:portrait){.hero-copy-stage{display:none}}
+@media (max-width:720px),(orientation:portrait){.hero-copy-stage{display:none}}
 
 /* The greeting square is centred horizontally in its column. */
-@media(min-width:721px) and (orientation:landscape){
+@media (min-width:721px) and (orientation:landscape){
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .hero-intro-player{width:100%!important;margin-inline:0!important;position:static!important}
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .hero-intro-frame{margin-inline:auto!important}
 }
 /* Android badge: centred in the left column (the column spans from the gutter to the page centre). */
-@media(min-width:721px) and (orientation:landscape){
+@media (min-width:721px) and (orientation:landscape){
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .client-app-badge--player,
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group.is-engaged .client-app-badge--player{inset:auto auto 26px calc(25vw + var(--echo-viewport-gutter,48px) / 2)!important}
  html[dir=rtl] body .echo[data-page=home][data-theme] #echo-main .hero-introduction .client-app-badge--player{inset:auto auto 26px calc(75vw - var(--echo-viewport-gutter,48px) / 2)!important}
@@ -333,30 +333,30 @@ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-
 html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame .hero-intro-lines[lang=ar] .hero-intro-list p>span.is-active{font-weight:400!important;font-style:normal}
 
 /* Phones portrait: the greeting square never expands when the 3D stage activates. */
-@media(orientation:portrait) and (max-width:760px){
+@media (max-width:1100px) and (orientation:portrait){
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group{--col:calc(100vw - 110px);--sq:min(calc(var(--col) * .82),calc(100svh - 360px))}
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .is-engaged .hero-intro-frame,
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .is-engaged .hero-intro-frame:has(.hero-intro-stage[data-active=true]){width:var(--sq)!important;height:var(--sq)!important}
 }
 
 /* Phones portrait: the record and the character are scaled down together. */
-@media(orientation:portrait) and (max-width:760px){
+@media (max-width:1100px) and (orientation:portrait){
  html body .echo[data-page=home][data-theme] .hero-introduction .hero-character-window{scale:.75;transform-origin:50% 50%}
 }
 /* Phones portrait: the glows behind shrink by the same 75% (backdrop rings read --rec-d; the soft halo is scaled directly). */
-@media(orientation:portrait) and (max-width:760px){
+@media (max-width:1100px) and (orientation:portrait){
  html body .echo[data-page=home][data-theme] .hero-introduction{--rec-d:calc(min(44vw,86svh,920px) * .75)}
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction::before{scale:.75}
 }
 /* Phones portrait: push the record/character complex and its glows down together (--push). */
-@media(orientation:portrait) and (max-width:760px){
+@media (max-width:1100px) and (orientation:portrait){
  html body .echo[data-page=home][data-theme] .hero-introduction{--push:8svh}
  html body .echo[data-page=home][data-theme] .hero-introduction .hero-character-window{translate:0 var(--push)}
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction::before{translate:0 var(--push)}
 }
 
 /* Phones portrait: the greeting is one line (label + time) until tapped, then it opens to the square. */
-@media(orientation:portrait) and (max-width:760px){
+@media (max-width:1100px) and (orientation:portrait){
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-meta{cursor:pointer;pointer-events:auto}
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-audio-introduction .hero-intro-player .hero-intro-frame[data-open=false]{width:min(100%,260px)!important;height:44px!important;min-height:0!important;overflow:hidden}
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-audio-introduction .hero-intro-player .hero-intro-frame[data-open=false] :is(.hero-intro-stage,.hero-intro-subtitle,.hero-intro-seek,.hero-intro-controls){display:none!important}
@@ -364,20 +364,20 @@ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-
 }
 
 /* Phones portrait: the greeting sits right under the title (top-aligned, not centred in the column). */
-@media(orientation:portrait) and (max-width:760px){
+@media (max-width:1100px) and (orientation:portrait){
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group.is-engaged,
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group{justify-content:flex-start!important}
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .hero-intro-player{position:static!important;margin:14px 0 0!important}
 }
 
 /* Phones portrait: the greeting viewer is centred under the title. */
-@media(orientation:portrait) and (max-width:760px){
+@media (max-width:1100px) and (orientation:portrait){
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .hero-intro-player{width:100%!important;transform:none!important;translate:none!important;display:flex;flex-direction:column;align-items:center}
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-audio-introduction .hero-intro-player .hero-intro-frame{margin-inline:auto!important}
 }
 
 /* Phones portrait: the title and greeting sit higher, tucked up under the header. */
-@media(orientation:portrait) and (max-width:760px){
+@media (max-width:1100px) and (orientation:portrait){
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-copy-content .hero-intro-heading-group,
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-copy-content .hero-intro-heading-group.is-engaged{margin-top:6px!important}
 }
@@ -385,7 +385,7 @@ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-
 /* ===== Phones portrait: two real rows that never overlap =====
    Row 1: the content (title, greeting, Android badge), natural height.
    Row 2: the record and the character, filling the rest and clipped to their own row. */
-@media(orientation:portrait) and (max-width:760px){
+@media (max-width:1100px) and (orientation:portrait){
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction{display:grid!important;grid-template-rows:min-content minmax(0,1fr);grid-template-columns:minmax(0,1fr);--push:0px;--rec-d:0px}
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction::before{display:none}
  /* row 1 */
@@ -403,26 +403,26 @@ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-
 }
 
 /* Phones portrait: no "Skip the login next time" sentence on the hero. */
-@media(orientation:portrait) and (max-width:760px){
+@media (max-width:1100px) and (orientation:portrait){
  html body .hero-skip-login{display:none!important}
 }
 
 /* Phones portrait: the Android icon is the header copy (next to the language button); the in-page copy is hidden. */
 .client-app-badge--header{display:none!important}
-@media(orientation:portrait) and (max-width:760px){
+@media (max-width:1100px) and (orientation:portrait){
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group:not(#x):not(#y):not(#z) .client-app-badge:not(.client-app-badge--header){display:none!important}
  html body .echo .echo-header .client-app-badge--header{display:flex!important;position:absolute;top:26px;right:172px;margin:0;box-sizing:border-box;width:40px;height:40px;padding:0;gap:0;justify-content:center;align-items:center;z-index:5}
  html[dir=rtl] body .echo .echo-header .client-app-badge--header{right:auto;left:172px}
 }
 
 /* Phones portrait: the glow lives inside the record's own row (window::before + the record's halo), so it always follows the record. The old page-centred rings are removed. */
-@media(orientation:portrait) and (max-width:760px){
+@media (max-width:1100px) and (orientation:portrait){
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction{background:radial-gradient(ellipse at 50% 50%,#2f2c2d 0%,#0D1418 78%)!important}
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction>.hero-character-window::before{--d:min(92cqw,96cqh);background:radial-gradient(circle calc(var(--d) * .85) at 50% calc(50cqh + var(--d) / 2),#d8b89a30 0%,#8f6a5321 45%,#6d4b3310 70%,transparent 100%)}
 }
 
 /* Phones portrait: a small gap between the rows, and row 1 grows/shrinks smoothly so it pushes row 2 down/up (greeting open/close, playback). */
-@media(orientation:portrait) and (max-width:760px){
+@media (max-width:1100px) and (orientation:portrait){
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction{row-gap:10px}
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-audio-introduction .hero-intro-player .hero-intro-frame{transition:none}
 }
@@ -431,13 +431,13 @@ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-
 }
 
 /* Phones portrait: once the greeting is opened it sits at the very top of row 1. */
-@media(orientation:portrait) and (max-width:760px){
+@media (max-width:1100px) and (orientation:portrait){
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-copy-content .hero-intro-heading-group.is-engaged{margin-top:0!important}
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group.is-engaged .hero-intro-player{margin-top:0!important}
 }
 
 /* Phones portrait: the smaller opened square keeps its label and the five controls on one line each. */
-@media(orientation:portrait) and (max-width:760px){
+@media (max-width:1100px) and (orientation:portrait){
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame[data-open=true] .hero-intro-meta{white-space:nowrap;font-size:10px;letter-spacing:.08em;gap:6px}
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame[data-open=true] .hero-intro-meta time{font-size:10px;white-space:nowrap}
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame[data-open=true] .hero-intro-controls{flex-wrap:nowrap!important;gap:0!important;justify-content:space-between!important;padding-inline:6px}
@@ -446,24 +446,24 @@ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-
 }
 
 /* Header Android button: bare white icon (no background, border or padding). */
-@media(orientation:portrait) and (max-width:760px){
+@media (max-width:1100px) and (orientation:portrait){
  html body .echo .echo-header .client-app-badge--header{background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important;color:#fff!important;transform:none}
  html body .echo .echo-header .client-app-badge--header svg{color:#fff!important;width:26px;height:26px}
 }
-@media(orientation:portrait) and (max-width:760px){
+@media (max-width:1100px) and (orientation:portrait){
  html body .echo .echo-header .client-app-badge--header,
  html body .echo .echo-header .client-app-badge--header:is(:hover,:active,:focus,:focus-visible){transform:none!important;scale:none!important;transition:none!important;outline:0;-webkit-tap-highlight-color:transparent}
  html body .echo .echo-header .client-app-badge--header svg{transform:none!important;scale:none!important;transition:none!important}
 }
 
 /* Phones portrait: the opened square has ONE size, whether or not playback has started yet (no grow-then-shrink). */
-@media(orientation:portrait) and (max-width:760px){
+@media (max-width:1100px) and (orientation:portrait){
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-audio-introduction .hero-intro-player .hero-intro-frame[data-open=true],
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-audio-introduction .hero-intro-player .hero-intro-frame[data-open=true]:has(.hero-intro-stage[data-active=true]){width:var(--sq)!important;height:var(--player-h,140px)!important;aspect-ratio:auto!important;margin-inline:auto}
 }
 
 /* ===== Phones portrait: the greeting never grows in height. It is a one-line bar (44px); a tap grows it in WIDTH ONLY, to the full screen width, and shows the current line (replaced line by line). ===== */
-@media(orientation:portrait) and (max-width:760px){
+@media (max-width:1100px) and (orientation:portrait){
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-audio-introduction .hero-intro-player .hero-intro-frame,
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-audio-introduction .hero-intro-player .hero-intro-frame:has(.hero-intro-stage[data-active=true]){height:44px!important;min-height:0!important;overflow:hidden;cursor:pointer}
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-audio-introduction .hero-intro-player .hero-intro-frame[data-open=true],
@@ -474,13 +474,13 @@ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-
 @media(orientation:portrait) and (max-width:760px) and (prefers-reduced-motion:reduce){
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame[data-open=true]{transition:none!important}
 }
-@media(orientation:portrait) and (max-width:760px){
+@media (max-width:1100px) and (orientation:portrait){
 }
 
 
 /* Phones portrait, opened: the whole greeting is ONE continuous line of words; it slides under the centre mark at the pace of the speech (JS positions it from the audio time). */
 .hero-intro-ticker{display:none}
-@media(orientation:portrait) and (max-width:760px){
+@media (max-width:1100px) and (orientation:portrait){
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame[data-open=true] :is(.hero-intro-meta,.hero-intro-subtitle){display:none!important}
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame[data-open=true] .hero-intro-ticker{display:block;position:absolute;left:0;right:0;top:0;bottom:0;height:auto;overflow:hidden;pointer-events:none;-webkit-mask-image:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent);mask-image:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent)}
  .hero-intro-ticker-track{position:absolute;left:0;top:0;bottom:0;display:flex;align-items:center;white-space:nowrap;font:italic 500 24px/1 'Cormorant Garamond','Noto Sans Arabic',Georgia,serif;color:#6f817a;will-change:transform}
@@ -517,22 +517,42 @@ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-
 html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-player .hero-intro-frame .hero-intro-control-symbol>svg[class*=lucide-play]{fill:#2b2112}
 html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame .hero-intro-controls-inline>button:first-child .hero-intro-launch-face svg :is(path,polygon,circle,rect){fill:#2b2112!important;stroke:none!important}
 /* Breathing room around the left column (title, text, greeting card). */
-@media(min-width:601px){html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-copy-content>.hero-intro-heading-group:not(#_):not(#__){box-sizing:border-box!important;padding-top:clamp(20px,4svh,44px)!important;padding-bottom:clamp(44px,8svh,80px)!important;padding-inline-start:clamp(16px,2.4vw,40px)!important}}
+@media (min-width:601px) and ((orientation:landscape) or (min-width:1101px)){html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-copy-content>.hero-intro-heading-group:not(#_):not(#__){box-sizing:border-box!important;padding-top:clamp(20px,4svh,44px)!important;padding-bottom:clamp(44px,8svh,80px)!important;padding-inline-start:clamp(16px,2.4vw,40px)!important}}
 /* Short landscape screens (tablets): the greeting card scales with the screen height so the whole left column fits. */
-@media(min-width:601px){html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .hero-intro-player .hero-intro-frame:not(#_):not(#__){width:clamp(200px,calc(100svh - 400px),340px)!important;height:clamp(200px,calc(100svh - 400px),340px)!important;max-height:none!important}}
+@media (min-width:601px) and ((orientation:landscape) or (min-width:1101px)){html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .hero-intro-player .hero-intro-frame:not(#_):not(#__){width:clamp(200px,calc(100svh - 400px),340px)!important;height:clamp(200px,calc(100svh - 400px),340px)!important;max-height:none!important}}
 /* Skip to content: its size follows the screen (width and height) instead of a fixed scale. */
-@media(min-width:601px){
+@media (min-width:601px) and ((orientation:landscape) or (min-width:1101px)){
 html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-ring-cta:not(#_):not(#__):not(#___){transform:none!important;box-sizing:border-box;max-width:calc(100vw - 32px);min-height:clamp(34px,6.2svh,60px);padding:0 clamp(14px,2.2vw,32px);gap:clamp(6px,.8vw,12px);font-size:clamp(10.5px,1.25vw,17px)}
 html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-ring-cta:not(#_):not(#__):not(#___) button{font:inherit;letter-spacing:inherit;gap:inherit}
 html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-ring-cta:not(#_):not(#__):not(#___) .hero-ring-arrow{width:1.15em;height:1.15em}}
 /* Skip to content sits in the bottom corner: right in English, left in Arabic. */
-@media(min-width:601px){
+@media (min-width:601px) and ((orientation:landscape) or (min-width:1101px)){
 html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-ring-cta:not(#_):not(#__):not(#___){position:absolute!important;inset:auto clamp(16px,3vw,48px) clamp(14px,3svh,32px) auto!important;margin:0!important}
 html[dir=rtl] body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-ring-cta:not(#_):not(#__):not(#___){inset:auto auto clamp(14px,3svh,32px) clamp(16px,3vw,48px)!important}}
 /* The Home hero is one screen. Starting the greeting resizes the left column, which must never lengthen the page (it showed a black gap that pushed the page up): lock the page to the screen on tablets and desktops. */
-@media(min-width:601px) and (orientation:landscape){
+@media (min-width:601px) and (orientation:landscape){
 html:has(.echo[data-page=home] .hero-introduction),html:has(.echo[data-page=home] .hero-introduction) body{height:100svh!important;max-height:100svh!important;overflow:hidden!important;overscroll-behavior:none}
 html body .echo[data-page=home][data-theme] #echo-main .hero-introduction:not(#_):not(#__){max-height:100svh;overflow:hidden}}
 
 /* Greeting playing (landscape): the square grows to its engaged size (--sq); the 340px cap above only applies to the idle card. */
-@media(min-width:721px) and (orientation:landscape){html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group.is-engaged .hero-intro-player .hero-intro-frame:not(#_):not(#__){width:var(--sq)!important;height:var(--sq)!important}}
+@media (min-width:721px) and (orientation:landscape){html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group.is-engaged .hero-intro-player .hero-intro-frame:not(#_):not(#__){width:var(--sq)!important;height:var(--sq)!important}}
+
+/* Greeting message in portrait (phone and tablet): the card is cream, so the words are dark and clearly readable, in a clean sans-serif, and smaller.
+   Words still to come are a soft brown, spoken words are dark, the word being spoken is darkest with a gold underline. */
+@media(orientation:portrait) and (max-width:1100px){
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-player .hero-intro-frame .hero-intro-subtitle.hero-intro-lines{font-family:'Manrope','Noto Sans Arabic',system-ui,sans-serif!important;font-style:normal!important;font-weight:600!important;font-size:clamp(14px,4.6cqw,20px)!important;line-height:1.5!important;letter-spacing:0!important}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-player .hero-intro-frame .hero-intro-lines[lang=ar]{font-family:'Noto Sans Arabic','Cairo',sans-serif!important;line-height:1.8!important}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame .hero-intro-lines .hero-intro-list p>span{font-style:normal!important;font-weight:600!important;color:#6b5a3a!important;text-shadow:none!important}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame .hero-intro-lines .hero-intro-list p>span.is-said{color:#2b2112!important}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame .hero-intro-lines .hero-intro-list p>span.is-active{color:#15100a!important;font-weight:800!important;text-decoration:underline!important;text-decoration-color:#b5832e!important;text-decoration-thickness:2px!important;text-underline-offset:.22em!important}
+ html body .echo .hero-intro-lines .hero-intro-list .is-past{opacity:.5}
+ html body .echo .hero-intro-lines .hero-intro-list .is-next{opacity:.7}
+}
+
+/* The one-line greeting ticker in the portrait pill: the pill is cream, so the words are dark (they were pale grey and gold on cream), in a clean sans-serif and smaller. */
+@media(orientation:portrait) and (max-width:1100px){
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame .hero-intro-ticker-track{font:600 clamp(13px,3.6vw,17px)/1 'Manrope','Noto Sans Arabic',system-ui,sans-serif!important;font-style:normal!important;color:#7a6b4f!important}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame .hero-intro-ticker-track>span{font-style:normal!important;color:#7a6b4f!important}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame .hero-intro-ticker-track>span.is-said{color:#2b2112!important}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-frame .hero-intro-ticker-track>span.is-active{color:#15100a!important;font-weight:800!important;text-decoration:underline;text-decoration-color:#b5832e;text-decoration-thickness:2px;text-underline-offset:.28em}
+}

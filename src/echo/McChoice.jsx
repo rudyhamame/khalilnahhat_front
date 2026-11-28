@@ -23,7 +23,9 @@ export default function McRow({ar=false}){
   useEffect(()=>{if(!open)return undefined;const away=event=>{if(!menu.current?.contains(event.target)&&!listRef.current?.contains(event.target))setOpen(false);},esc=event=>{if(event.key==='Escape')setOpen(false);};document.addEventListener('pointerdown',away);document.addEventListener('keydown',esc);return()=>{document.removeEventListener('pointerdown',away);document.removeEventListener('keydown',esc);};},[open]);
   const removePair=index=>order?.setField('music.mcLanguagePairs',pairs.filter((_,at)=>at!==index));
   if(!svc.exists)return null; // the MC question exists only while an `mc` service is in the catalogue
-  return <BookingStep number={61} side="left" className="dj-service-step mc-service-step" title={tr(`Would you like ${svc.name} at your event?`,`هل تريد ${svc.name} في فعاليتك؟`)} cardTitle={<>{tr(`Add ${svc.name}`,`إضافة ${svc.name}`)}</>} copy={tr('Note: the MC is a third-party host, not DJ Khalil. Tell us if you want a host to announce and guide your night.','ملاحظة: مقدّم الحفل طرف ثالث وليس دي جي خليل. أخبرنا إن كنت تريد مقدّماً يعلن ويدير سهرتك.')}>
+  return <>
+  <img className="dj-service-hero mc-service-hero" src="/echo/mc-service-hero.webp" width="1254" height="1254" alt={tr('An MC in a suit speaking into a microphone, with sound waves around him','مقدّم حفلات بالبدلة يتحدث في الميكروفون وحوله موجات صوتية')} loading="lazy"/>
+  <BookingStep number={61} side="left" className="dj-service-step mc-service-step" title={tr(`Would you like ${svc.name} at your event?`,`هل تريد ${svc.name} في فعاليتك؟`)} cardTitle={<>{tr(`Add ${svc.name}`,`إضافة ${svc.name}`)}</>} copy={tr(`A host who welcomes your guests, announces the key moments (entrances, speeches, the first dance, the cake) and keeps the night flowing between the music. Please note the MC is a third-party host, not DJ Khalil. Tell us if you want one, then choose the languages and dialects your host should speak.`,`مقدّم يرحّب بضيوفك ويعلن اللحظات المهمة (الدخول، الكلمات، الرقصة الأولى، الكيكة) ويحافظ على إيقاع السهرة بين الأغاني. يرجى العلم أن المقدّم طرف ثالث وليس دي جي خليل. أخبرنا إن كنت تريد مقدّماً، ثم اختر اللغات واللهجات التي سيتحدث بها.`)}>
   <aside className="event-type-column mc-choice">
     <span className="avail-kicker"><FieldCode k="music.mcRequested"/>{svc.name.toUpperCase()+requiredMark("music.mcRequested")}</span>
     {svc.description&&<p className="mc-choice-copy">{svc.description}</p>}
@@ -40,5 +42,6 @@ export default function McRow({ar=false}){
     </div>
     {pairs.length>0&&<ul className="mc-language-list">{pairs.map((row,index)=><li key={`${row.language}-${row.dialect}`}><span>{row.dialect?`${row.language} (${row.dialect})`:row.language}</span><button type="button" disabled={locked} aria-label={tr('Remove','إزالة')} onClick={()=>removePair(index)}><X size={14} aria-hidden="true"/></button></li>)}</ul>}
   </aside>}
-  </BookingStep>;
+  </BookingStep>
+  </>;
 }

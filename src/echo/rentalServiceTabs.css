@@ -30,7 +30,7 @@ html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .re
 html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-center{grid-column:1;grid-row:1;min-width:0;min-height:0;overflow:hidden}
 html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-equipment{grid-column:2;grid-row:1;min-width:0;min-height:0;overflow:hidden}
 html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-model-stage{min-width:0;min-height:0}
-@media(max-width:760px){
+@media (max-width:760px), (max-width:1100px) and (orientation:portrait){
  html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-service-panel{grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:6px}
  html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-services{padding:8px}
  html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-model-stage{margin-inline:4px}
@@ -39,7 +39,7 @@ html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .re
  html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-service-summary{padding-inline:10px}
 }
 
-@media(orientation:portrait){
+@media (orientation:portrait){
  html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-service-select-label{display:block;margin:0;color:#c4d1c9;font-size:12px;line-height:1.4}
  html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-service-select{display:block;width:100%;min-width:0;min-height:44px;padding:9px 38px 9px 12px;border:1px solid #ffffff24;border-radius:9px;background:#101618;color:#edf5ef;font:500 14px/1.4 'Manrope','Noto Sans Arabic',sans-serif;color-scheme:dark}
  html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-service-bar{display:none}
@@ -111,7 +111,7 @@ html body .echo #services.rental-workbench--tabs .rental-equipment-detail .renta
 .rental-model-stage .generated-model-viewer>p[role=status]::before{content:"";width:30px;height:30px;border:3px solid #c1d1c533;border-top-color:#e7d6a4;border-radius:50%;animation:rental-spin .8s linear infinite}
 .rental-model-stage>p.rental-no-model{display:flex;flex-direction:column;align-items:center;gap:10px;color:#9fb0a4}
 @keyframes rental-spin{to{transform:rotate(360deg)}}
-@media(prefers-reduced-motion:reduce){.rental-model-stage .generated-model-viewer>p[role=status]::before{animation-duration:2.4s}}
+@media (prefers-reduced-motion:reduce){.rental-model-stage .generated-model-viewer>p[role=status]::before{animation-duration:2.4s}}
 
 /* The Services panel shares the selected service's artwork backdrop. */
 html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-services{position:relative;isolation:isolate;overflow:hidden}
@@ -133,7 +133,7 @@ html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .re
 html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-service-panel{grid-row:1}
 html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-service-bar{display:flex}
 html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs :is(.rental-service-select,.rental-service-select-label){display:none}
-@media(max-width:760px){
+@media (max-width:760px), (max-width:1100px) and (orientation:portrait){
  html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs>.rental-with-feature{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto minmax(360px,1fr);height:auto;min-height:100%}
  html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-with-feature>.home-work-feature{grid-column:1;grid-row:1;height:auto;min-height:220px}
  html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-with-feature>.rental-services{grid-column:1;grid-row:2}
@@ -150,6 +150,6 @@ html body .echo.echo-public-page[data-page=home][data-theme] #services .rental-w
 html body .echo #services .home-work-feature.is-dj-preferences .djf-title h2{
  font:600 clamp(22px,2vw,28px)/1.2 'Manrope','Noto Sans Arabic',sans-serif!important;letter-spacing:-.01em;text-transform:none;
 }
-@media(max-width:760px){
+@media (max-width:760px), (max-width:1100px) and (orientation:portrait){
  html body .echo.echo-public-page[data-page=home][data-theme] #services.rental-workbench--tabs>.rental-with-feature.is-dj-preferences{height:var(--echo-page-height,85svh);min-height:420px;flex:none}
 }
