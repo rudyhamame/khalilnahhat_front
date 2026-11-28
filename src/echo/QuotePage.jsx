@@ -136,7 +136,10 @@ export default function QuotePage({lang,user,isSessionReady,onCreateServiceReque
       // Photos and documents stayed in this browser until now; upload them only at submission.
       for(const [field,kind] of [['photos','photo'],['files','file']]){const staged=ctx.getOrder().references?.[field]||[];if(staged.some(isPending))ctx.setField('references.'+field,await uploadStaged(staged,kind,ctx.token));}
       // A signed-in client's name, email, phone and contact choices come from the account (the server uses it too); fill them in before checking, so a booking not yet imported is not rejected for them.
-      const order=applyAccountProfile(ctx.getOrder(),user);
+      let current=ctx.getOrder();
+      // The signed-in session user may not carry the profile (name, phone, contact choices): import the account details, as the "Get from account" button does, before checking.
+      if(!current.accountDetailsImported){try{await ctx.importAccountDetails?.();}catch{/* the check below lists whatever is still missing */}current=ctx.getOrder();}
+      const order=applyAccountProfile(current,user);
       const issues=validateEventOrder(order,{submission:true});
       if(issues.length){
         if(guided)selectTab(bookingIssueStep(order,issues));
