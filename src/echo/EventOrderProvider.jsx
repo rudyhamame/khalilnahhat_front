@@ -162,6 +162,18 @@ export function EventOrderProvider({user,token,lang,auth,children,isSessionReady
     return()=>clearTimeout(timer);
   },[order,active,user,token,cloudReady,draftId,pending]);
   useEffect(()=>{try{localStorage.setItem(draftIdKey(user),draftId);}catch{/* Cloud draft remains authoritative when storage is unavailable. */}},[user,draftId]);
+  // A refused save (a stale version, or a draft id the server no longer accepts) must not lock the booking: read what the server has now, then save this browser's copy again under a valid id. The newest copy wins.
+  const recovering=useRef('');
+  useEffect(()=>{
+    if(saveState!=='conflict'||!cloud.current||!user||!token||deleting.current||recovering.current===draftId)return;
+    recovering.current=draftId;
+    (async()=>{try{
+      const item=await cloud.current.recover();
+      const id=item?.draftId&&item.draftId!==draftId?item.draftId:item?.draftId?draftId:createDraftId();
+      if(id!==draftId)setDraftId(id);
+      await cloud.current.save(getOrder(),id);
+    }catch{/* the conflict notice stays and Reload still works */}})();
+  },[saveState,draftId,user,token]);// eslint-disable-line react-hooks/exhaustive-deps
   const begin=(source='manual',legacy)=>{
     if(deleting.current)return;
     if(!user||!token){setPanelOpen(true);return;}

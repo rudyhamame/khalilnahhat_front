@@ -493,3 +493,7 @@ html body .echo .ea-review .ea-summary-head{margin-bottom:10px}
 html body .echo .ea-review .ea-actions{flex:none;margin:10px -4px 0;padding:12px 4px 2px;border-top:1px solid #ffffff1f;background:linear-gradient(180deg,#17171800,#171718 30%);position:relative;z-index:1}
 html body .echo .ea-review .ea-actions>.ea-primary{width:100%}
 html body .echo .ea-review .ea-steps{padding-bottom:8px}
+/* "Reload to continue" after a save conflict: a clear button, not plain text. */
+html body .echo .ea-actions>small .ea-reload-draft{display:flex;align-items:center;justify-content:center;width:100%;min-height:40px;margin-top:8px;padding:0 18px;border:1px solid #e2c77980;border-radius:999px;background:#e2c7791a;color:#e2c779;font:700 13px/1 Manrope,'Noto Sans Arabic',sans-serif;cursor:pointer}
+html body .echo .ea-actions>small .ea-reload-draft:hover{background:#e2c77933}
+html body .echo .ea-actions>small .ea-reload-draft:focus-visible{outline:2px solid #e2c779;outline-offset:3px}

@@ -40,6 +40,8 @@ export function accountEventDraft(request,onState=()=>{}){
         catch(error){if(error.status!==409||attempt===2)throw error;await refresh();}
       }
     },{deletion:true}),
+    // After a conflict: forget the block, read the server's current version and draft id, so the caller can save its own copy again under them.
+    async recover(){blocked=false;const {item}=await request('/ai-booking/event-draft');version=item?.version||0;loadedDraftId=item?.draftId||null;return item;},
     block(){blocked=true;notify('conflict');},
     dispose(){disposed=true;},
   };
