@@ -67,9 +67,5 @@ export default function HomeContact({lang}) {
       </div>}
     </ViewportFit>
   </section>
-  <div className="home-contact-direct" dir={ar?'rtl':'ltr'}>
-    <a className="home-contact-address" href={`mailto:${contactEmail}`}><span dir="ltr">{contactEmail}</span><ArrowUpRight size={20}/></a>
-    <small>{tr('Your message goes straight to our bookings inbox.','تصل رسالتك مباشرة إلى صندوق بريد الحجوزات.')}</small>
-  </div>
   </>;
 }

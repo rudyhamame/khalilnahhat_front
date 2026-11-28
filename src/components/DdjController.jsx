@@ -11,7 +11,7 @@ import './ddjController.css';
 // A 4-channel performance DJ controller drawn from a reference photo. Coordinates are in photo-derived units (1047 x 495).
 const W=1047,H=495,DECK2=680,LABEL_H=26;// LABEL_H: room under the controller for the one-line model name
 const PORTRAIT='https://vps-ba7fb4cb.vps.ovh.ca/khalil-media/public/fcc07cbec08f08a9dd53156f897ced5d4c9c5b6792558668c95a123f5aa1b937.webp';
-const COLS=[{n:3,x:447},{n:1,x:498},{n:2,x:549.5},{n:4,x:599.5}];
+const XS=[447,498,549.5,599.5],DECK_ORDER=[1,2,3,4],STEM_ORDER=[1,2,3,4];// channels read 1-2-3-4 in both deck and split mode
 const STEM_OF={1:'vocals',2:'drums',3:'bass',4:'other'};
 const STEM_NAME={vocals:'VOCALS',drums:'DRUMS',bass:'BASS',other:'MUSIC'};
 const PAD_MODES=[['HOT CUE','KEYBOARD'],['PAD FX 1','PAD FX 2'],['BEAT JUMP','BEAT LOOP'],['SAMPLER','KEY SHIFT']];
@@ -131,7 +131,7 @@ function StandardController({stems,mic,masterMeter}){
       <Knob cx={397} cy={365} r={11} value={dv('mix',.5)} min={0} max={1} onChange={sd('mix')} label="MIXING" labelY={344}/><Knob cx={398} cy={407} r={11} value={dv('hp',.6)} min={0} max={1} onChange={sd('hp')} label="LEVEL" labelY={382}/>
       <g ref={micLevel} className="mic-ladder"><Ladder x={417.5} y={60} w={3} count={10} h={2.4} gap={1.2}/></g>
       {/* channels */}
-      {COLS.map(({n,x})=>{const name=STEM_OF[n],ch=stems?.mix?.[name]||{volume:1,muted:false,solo:false};
+      {(stemOn?STEM_ORDER:DECK_ORDER).map((n,i)=>{const x=XS[i];const name=STEM_OF[n],ch=stems?.mix?.[name]||{volume:1,muted:false,solo:false};
         return <g key={n} className="channel">
           <line x1={x-25.5} y1="22" x2={x-25.5} y2="428" stroke="#25282a" strokeWidth=".8"/>
           <Btn x={x-11} y={24} w={22} h={9} label="" ariaLabel={`Channel ${n} input`}/>

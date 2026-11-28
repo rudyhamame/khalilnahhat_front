@@ -47,7 +47,7 @@ export default function AboutPage({lang}){
     <h1 id="ab-title" className="ab-title">{ar?<>خليل نحّات<span>دي جي · مقدّم · صوت وإضاءة</span></>:<>Khalil Nahhat<span>DJ · MC · Sound & Lighting</span></>}</h1>
     <p className="ab-lede">{tr('Over a decade of DJ experience, bringing Arabic and multicultural celebrations to life across the GTA, with Echo’s sound, lighting and visual production behind every night.','أكثر من عشر سنوات من خبرة الدي جي، نُحيي فيها الاحتفالات العربية ومتعددة الثقافات في منطقة تورونتو الكبرى، مع إنتاج إيكو للصوت والإضاءة والمرئيات في كل ليلة.')}</p>
     <div className="ab-actions">
-     <a className="ab-button is-primary" href="/echo-ai">{tr('Plan your event','خطّط لمناسبتك')}<Arrow size={18} aria-hidden="true"/></a>
+     <a className="ab-button is-primary" href="/booking">{tr('Plan your event','خطّط لمناسبتك')}<Arrow size={18} aria-hidden="true"/></a>
      <a className="ab-button" href="/music">{tr('Hear the music','استمع إلى الموسيقى')}</a>
     </div>
    </div>

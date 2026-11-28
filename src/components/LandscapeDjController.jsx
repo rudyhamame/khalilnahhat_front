@@ -1,4 +1,5 @@
-import {Settings} from 'lucide-react';
+import {Settings,X} from 'lucide-react';
+import {publishArchiveMixerState} from '../lib/archivePlayerBridge';
 import {createTapTempo} from '../lib/tapTempo';
 import {createBeatGridAnalysis,measuredTrack,beatAnalysisKey} from '../lib/beatGridAnalysis';
 import {createDjAutoTrim,trimDecibels} from '../lib/djAutoTrim';
@@ -25,7 +26,7 @@ import './ddjController.css';
 
 // A 4-channel performance DJ controller drawn from a reference photo. Coordinates are in photo-derived units (1047 x 495).
 const W=1047,H=495,DECK2=680,LABEL_H=0;// LABEL_H: room under the controller for the one-line model name
-const COLS=[{n:3,x:447},{n:1,x:498},{n:2,x:549.5},{n:4,x:599.5}];
+const XS=[447,498,549.5,599.5],DECK_ORDER=[1,2,3,4],STEM_ORDER=[1,2,3,4];// channels read 1-2-3-4 in both deck and split mode
 const STEM_OF={1:'vocals',2:'drums',3:'bass',4:'other'};
 const STEM_NAME={vocals:'VOCALS',drums:'DRUMS',bass:'BASS',other:'MUSIC'};
 const PAD_MODES=['HOT CUE','BEAT LOOP','BEAT JUMP','KEY SHIFT'];
@@ -486,7 +487,7 @@ export default function LandscapeDjController({stems:mainStems,mic,audioGraph,un
       {typeof navigator.mediaDevices?.selectAudioOutput==='function'&&<Btn x={375} y={365} w={40} h={16} label="PHONES" lit={cueReady} onClick={configureCue} ariaLabel="Select headphone output"/>}
       <g ref={micLevel} className="mic-ladder"><Ladder x={417.5} y={60} w={3} count={10} h={2.4} gap={1.2}/></g>
       {/* channels */}
-      {COLS.map(({n,x})=>{const name=STEM_OF[n],ch=stems?.mix?.[name]||{volume:1,muted:false,solo:false};
+      {(stemOn?STEM_ORDER:DECK_ORDER).map((n,i)=>{const x=XS[i];const name=STEM_OF[n],ch=stems?.mix?.[name]||{volume:1,muted:false,solo:false};
         return <g key={n} ref={node=>{meters.current[n]=node;}} className="channel">
           <line x1={x-25.5} y1="22" x2={x-25.5} y2="428" stroke="#25282a" strokeWidth=".8"/>
           <T x={x} y={32} s={4}>CH {n}</T>
@@ -535,6 +536,7 @@ export default function LandscapeDjController({stems:mainStems,mic,audioGraph,un
   </svg>}
   <LoadPicker library={library} onPick={loadDeck}/>
   </div></div>
+  <button type="button" className="ddj-close-toggle" aria-label="Close mixer" title="Close mixer" onClick={()=>publishArchiveMixerState(false)}><X size={18} aria-hidden="true"/></button>
   <button type="button" className="ddj-settings-toggle" aria-expanded={footerExpanded} aria-controls={footerId} aria-label={footerExpanded?'Close mixer settings':'Open mixer settings'} title={footerExpanded?'Close mixer settings':'Open mixer settings'} onClick={()=>setFooterExpanded(value=>!value)}><Settings size={18} aria-hidden="true"/></button>
   <footer hidden={!footerExpanded} className="ddj-ai-footer" aria-label="Mixer audio and remix controls">
     <div className="ddj-footer-heading">

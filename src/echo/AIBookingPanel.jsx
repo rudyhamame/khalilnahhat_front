@@ -128,7 +128,6 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     // Switching between the form and chat is still the same assistant visit.
     // Only closing the whole panel ends the visit.
     if(orderDraft?.panelOpen===false){assistantOpening.current.visible=false;assistantOpening.current.needsGreeting=false;draftChoicePending.current=false;setDraftChoiceOpen(false);return;}
-    if(workspace&&assistantRequest===0){assistantOpening.current={visible:false,request:assistantRequest,needsGreeting:false};return;}
     // Voice navigation can reopen the assistant or switch its face. Neither
     // event is permission to interrupt an ongoing call with a draft choice.
     if(mode==='voice'||call!=='idle'||voicePickerOpen){
@@ -435,22 +434,12 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   useEffect(()=>{
     const opening=assistantOpening.current;
     if(!opening.visible||!opening.needsGreeting||mode!=='chat'||historyLoading||draftChoicePending.current||draftChoiceOpen||!orderDraft?.cloudReady||available!==true||aiPolicy?.chat?.enabled===false||busy)return;
-    opening.needsGreeting=false;setInput(current=>current||tr('Summarize my booking so far.','لخّص حجزي حتى الآن.'));
+    opening.needsGreeting=false;
     const session=orderDraft.assistantSession?.current;
     if(orderDraft.assistantSession)orderDraft.assistantSession.current={...session,draftId,greeted:true};
-    const order=orderRef.current;
-    const continuing=hasEventDraftContent(order)||history.current.length>0;
-    const name=user?.firstName?.trim();
-    const greeting=continuing?tr(`Welcome back${name?' '+name:''}! I’ve gone through your booking review.`,`أهلاً بعودتك${name?' '+name:''}! راجعتُ مراجعة حجزك.`):tr(`Hi${name?' '+name:''}! I’m Echo’s AI booking assistant. I’ll help you plan your event.`,`مرحباً${name?' '+name:''}! أنا مساعد الحجز الآلي لإيكو. سأساعدك في التخطيط لفعاليتك.`);
-    const summary=bookingDraftSummary(order,ar);
-    // Every visit starts by saying where the booking stands at the stage that was opened: that section's progress and what it still needs.
-    const stageGoal=bookingGoal(goalRef.current)||BOOKING_GOALS.find(item=>!goalProgress(order,item).complete)||BOOKING_GOALS[0],stage=goalProgress(order,stageGoal),stageNumber=BOOKING_GOALS.indexOf(stageGoal)+1,doneSections=BOOKING_GOALS.filter(item=>goalProgress(order,item).complete).length;
-    const stageLine=continuing?tr(`You’re at section ${stageNumber} of ${BOOKING_GOALS.length}, ${stageGoal.title}. ${stage.complete?'This section is complete.':stage.missing.length?`Still needed here: ${stage.missing.slice(0,4).map(field=>fieldName(field.key,false)||field.label).join(', ')}.`:'Nothing is filled in here yet.'} ${doneSections} of ${BOOKING_GOALS.length} sections are complete.`,`أنت في القسم ${stageNumber} من ${BOOKING_GOALS.length}، ${stageGoal.ar}. ${stage.complete?'هذا القسم مكتمل.':stage.missing.length?`المطلوب هنا: ${stage.missing.slice(0,4).map(field=>fieldName(field.key,true)||field.ar||field.label).join('، ')}.`:'لم يُملأ شيء هنا بعد.'} ${doneSections} من ${BOOKING_GOALS.length} أقسام مكتملة.`):'';
-    const recap=summary?tr(`Here’s the booking draft so far:\n${summary}\n\nTell me what you’d like to refine, or we can continue with the remaining details.`,`هذه مسودة الحجز حتى الآن:\n${summary}\n\nأخبرني بما تريد تعديله، أو نكمل التفاصيل المتبقية.`):'';
-    const pending=(sharedContext.current.tasks||[]).filter(task=>task.confirmed===null).flatMap(resolveAiTaskChanges);
-    const next=nextBookingStep(applyOrderPatch(order,pending),ar);
+    // The opening is a real chat turn: the client asks for a summary and the assistant answers it through the normal send flow.
     setTranscriptOpen(true);
-    append({role:'assistant',content:[greeting,stageLine,recap,next.text].filter(Boolean).join('\n\n'),mode:'chat',fieldPath:next.path||undefined});
+    send(tr('Summarize my booking so far. Group it by section, one short bullet list per section (a line starting with "- " for each detail). Then list the required details that are still missing as a bullet list, and ask for the first one.','لخّص حجزي حتى الآن. قسّمه حسب الأقسام، مع قائمة نقاط قصيرة لكل قسم (سطر يبدأ بـ "- " لكل تفصيل). ثم اذكر التفاصيل المطلوبة الناقصة كقائمة نقاط، واسألني عن أولها.'));
   },[assistantFace,assistantRequest,orderDraft?.panelOpen,orderDraft?.cloudReady,historyLoading,draftChoiceOpen,mode,available,aiPolicy,busy,append,user,ar]);
   const closeCall=useCallback(()=>{
     const current=resources.current;resources.current={};
@@ -491,7 +480,8 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     const leave=()=>closeCall();window.addEventListener('pagehide',leave);
     return()=>{alive.current=false;clearTimeout(timer);document.removeEventListener('visibilitychange',refocus);request.current?.abort();closeCall();window.removeEventListener('pagehide',leave);};
   },[closeCall,applyStatus]);
-  useEffect(()=>{log.current?.scrollTo({top:log.current.scrollHeight,behavior:'instant'});},[messages,busy,streamReply]);
+  useEffect(()=>{const box=log.current;if(!box)return;const last=[...box.querySelectorAll('.ai-booking-message')].at(-1);// show the top of the newest message, not its end
+    if(last)box.scrollTo({top:box.scrollTop+last.getBoundingClientRect().top-box.getBoundingClientRect().top,behavior:'instant'});else box.scrollTo({top:box.scrollHeight,behavior:'instant'});},[messages,busy,streamReply]);
   useEffect(()=>{if(orderDraft?.clearing){request.current?.abort();closeCall();setCall('idle');}},[orderDraft?.clearing,closeCall]);
   const customerPrice=aiPolicy?.customerPricing?.policy==='manual_invoice'?aiPolicy.customerPricing[mode==='chat'?'chatReplyCents':'voiceSessionCents']:0;
   const permitted=available&&(mode==='chat'||(user&&token))&&consent&&(!orderDraft||(orderDraft.cloudReady&&!orderDraft.clearing&&!['conflict','delete-conflict','load-failed'].includes(orderDraft.saveState)))&&aiPolicy?.[mode]?.enabled!==false&&(!customerPrice||pricingAccepted||!(user&&token)); // visitors without an account chat for free: nothing is billed
