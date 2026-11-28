@@ -128,7 +128,7 @@ export default function HomeBookingAssistant({lang,user,token,auth,overlay=false
  },[]);
  // When Echo updates the draft, scroll Booking review to the changed values and make them glow.
  // Back from creating the account (/echo-ai?send=1): the signed-in client lands on the review & send dialog once the draft is ready.
- useEffect(()=>{if(!ctx.user||!ctx.token||!ctx.draftEditable||!new URLSearchParams(window.location.search).has('send'))return;window.history.replaceState(null,'',window.location.pathname+window.location.hash);/* the account was created from the personal info entered before verification: bring it into the booking first, so nothing is lost or asked again */(async()=>{if(!ctx.getOrder?.().accountDetailsImported){try{await ctx.importAccountDetails?.();}catch{/* the review lists whatever is still missing */}}setView('details');})();},[ctx.user,ctx.token,ctx.draftEditable]);
+ useEffect(()=>{if(!ctx.user||!ctx.token||!ctx.draftEditable||!new URLSearchParams(window.location.search).has('send'))return;window.history.replaceState(null,'',window.location.pathname+window.location.hash);/* the account was created from the personal info entered before verification: bring it into the booking first, so nothing is lost or asked again */setResumedSend(true);(async()=>{if(!ctx.getOrder?.().accountDetailsImported){try{await ctx.importAccountDetails?.();}catch{/* the review lists whatever is still missing */}}setView('details');})();},[ctx.user,ctx.token,ctx.draftEditable]);
  const steps=useRef(null);
  useChangeHighlight({rootRef:steps,changed,flashClass:'ea-flash',delay:150,reveal:(rows,list)=>{
   const box=list.getBoundingClientRect(),first=rows[0].getBoundingClientRect();
@@ -148,6 +148,14 @@ export default function HomeBookingAssistant({lang,user,token,auth,overlay=false
   if(section)select(section.item.id,true);
   window.dispatchEvent(new CustomEvent('echo:booking-atom-correction',{detail:{path:line.reviewPath||line.key,label:line.label,atomKey:line.key}}));
  };
+ const [resumedSend,setResumedSend]=useState(false);// set when the client comes back from creating the account: the entries were already confirmed before the account step
+ // A signed-in client's account details come into the booking by themselves (once per draft), so Personal info is never left "Not set yet".
+ const autoImported=useRef('');
+ useEffect(()=>{
+  if(!ctx.user||!ctx.token||!ctx.draftEditable||!ctx.cloudReady||ctx.order.accountDetailsImported||autoImported.current===ctx.draftId)return;
+  autoImported.current=ctx.draftId;
+  Promise.resolve(ctx.importAccountDetails?.()).catch(()=>false).then(done=>{if(!done)autoImported.current='';});// retry on the next change if it could not run yet
+ },[ctx.user,ctx.token,ctx.draftEditable,ctx.cloudReady,ctx.draftId,ctx.order.accountDetailsImported]);
  const [importingAccount,setImportingAccount]=useState(false),[accountImportError,setAccountImportError]=useState('');
  const getAccountDetails=async()=>{
   if(importingAccount)return;setImportingAccount(true);setAccountImportError('');
@@ -171,7 +179,7 @@ export default function HomeBookingAssistant({lang,user,token,auth,overlay=false
  const saveText=ctx.saveState==='account-saved'?tr('Saved to your account','محفوظ في حسابك'):ctx.saveState==='pending'?tr('Saving changes…','جارٍ الحفظ…'):tr('Draft in progress','المسودة قيد الإعداد');
  return <section ref={overlayRoot} id="echo-ai" className={`echo-section home-booking-assistant ea${overlay?' ea-overlay':''}`} aria-label="Echo AI" dir={ar?'rtl':'ltr'} onKeyDown={event=>{if(overlay&&event.key==='Escape'&&!event.defaultPrevented){event.preventDefault();void closeOverlay();}}}>
   <div className="ea-board" data-tab={tab} style={{gridTemplateColumns:[['chat','1.15fr'],['map','1.1fr'],['review','1.4fr']].map(([key,size])=>min[key]?'minmax(56px,0fr)':`minmax(0,${size})`).join(' ')}}>
-   {view==='details'&&<BookingDetailsDialog autoSubmit atomsConfirmed={atomsConfirmed} lang={lang} user={ctx.user} isSessionReady={ctx.isSessionReady} onCreateServiceRequest={ctx.onCreateServiceRequest} initialEvent={{eventDate:ctx.order.event?.date||'',startTime:ctx.order.event?.startTime||'',endTime:ctx.order.event?.endTime||''}} onClose={()=>setView('conversation')}/>}
+   {view==='details'&&<BookingDetailsDialog autoSubmit atomsConfirmed={atomsConfirmed||resumedSend} lang={lang} user={ctx.user} isSessionReady={ctx.isSessionReady} onCreateServiceRequest={ctx.onCreateServiceRequest} initialEvent={{eventDate:ctx.order.event?.date||'',startTime:ctx.order.event?.startTime||'',endTime:ctx.order.event?.endTime||''}} onClose={()=>setView('conversation')}/>}
    <article className="ea-card ea-card--toolbar" data-tone="0" aria-label={tr('Toolbar','شريط الأدوات')}>
     <div className="ea-brand"><span className="ea-vinyl" aria-hidden="true"/><strong>ECHO <span>AI</span></strong><small>{saveText}</small></div>
     <p className="ea-working"><span>{tr('Working on','نعمل على')}</span><strong>{ar?selected.ar:selected.title}</strong></p>

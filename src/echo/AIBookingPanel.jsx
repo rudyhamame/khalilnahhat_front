@@ -616,7 +616,17 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       let data;
       if(reference?.kind==='images')data={reply:'Inspiration links received.',orderPatch:reference.patch,section:'booking'};
       else{
-      const response=await fetch(`${apiBaseUrl}/ai-booking/chat`,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/x-ndjson',...(token?{Authorization:`Bearer ${token}`}:{})},body:JSON.stringify({responseFormat:'patch',language:ar?'ar':'en',requestId,...pricingFields,messages:next,context:assistantContext(),consent:true,bookingStage:stageOf(orderRef.current),...(draftAvailable()&&orderRef.current?{order:aiOrderContext(orderRef.current)}:{})}),signal:controller.signal});
+      const callChat=()=>fetch(`${apiBaseUrl}/ai-booking/chat`,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/x-ndjson',...(token?{Authorization:`Bearer ${token}`}:{})},body:JSON.stringify({responseFormat:'patch',language:ar?'ar':'en',requestId,...pricingFields,messages:next,context:assistantContext(),consent:true,bookingStage:stageOf(orderRef.current),...(draftAvailable()&&orderRef.current?{order:aiOrderContext(orderRef.current)}:{})}),signal:controller.signal});
+      // A gateway error page (HTML, or a 502/503/504) is a short outage, not an answer: retry twice, then say so plainly. The requestId keeps the retry safe.
+      let response;
+      for(let attempt=0;;attempt++){
+        response=await callChat();
+        const outage=(response.headers.get('content-type')||'').includes('text/html')||[502,503,504].includes(response.status);
+        if(!outage)break;
+        if(attempt>=2)throw new Error(tr('The assistant is temporarily unavailable. Your draft was not changed. Please try again in a moment.','المساعد غير متاح مؤقتاً. لم يتغير مسودتك. حاول مرة أخرى بعد قليل.'));
+        await new Promise(resolve=>setTimeout(resolve,1500*(attempt+1)));
+        if(controller.signal.aborted)throw new DOMException('Aborted','AbortError');
+      }
       data=await readBookingResponse(response);
       }
       if(!alive.current)return;
