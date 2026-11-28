@@ -115,17 +115,18 @@ export function EventOrderProvider({user,token,lang,auth,children,isSessionReady
       if(item&&edited.current){if(item.draftId)setDraftId(item.draftId);client.block();setCloudReady(true);return;}
       // Details entered as a guest before signing in or signing up are merged into the account draft.
       let guestDraft=null;try{const raw=localStorage.getItem(ownerKey(null));if(raw){const parsed=normalizeEventOrder(JSON.parse(raw));if(hasEventDraftContent(parsed)||parsed.equipment?.length)guestDraft=parsed;}}catch{/* An unreadable guest draft is ignored. */}
-      if(item){
+      // The browser's guest copy is kept until the booking is SUBMITTED (see finish), never deleted just because an account now exists.
+      const accountHasBooking=Boolean(item&&(hasEventDraftContent(normalizeEventOrder(item.order))||normalizeEventOrder(item.order).equipment?.length));
+      if(item&&(accountHasBooking||!guestDraft)){
         if(item.draftId)setDraftId(item.draftId);
-        // The booking already lives in the database: it is the only copy. The browser's guest copy is deleted, not merged.
         const merged=normalizeEventOrder(item.order);
         setStored(merged);restoreOrderCart(merged.equipment||[]);setActive(true);setSaveState('account-saved');
-        try{localStorage.removeItem(ownerKey(null));localStorage.removeItem('echo-quote-draft:guest');localStorage.removeItem(bookingConversationKey('guest',draftId));}catch{/* Optional storage. */}
       }
       else if(guestDraft){
+        // A new account, or an account whose draft is still empty: the booking entered as a guest becomes the account draft.
+        if(item?.draftId)setDraftId(item.draftId);
         const merged=mergeGuestDraft(blankProfile(),guestDraft);
         setStored(merged);restoreOrderCart(merged.equipment||[]);setActive(true);setSaveState('pending');
-        try{localStorage.removeItem(ownerKey(null));}catch{/* Optional storage. */}
       }
       else {
         if(!edited.current){setStored(blankProfile());restoreOrderCart([]);setActive(false);setDraftId(crypto.randomUUID());try{localStorage.removeItem(ownerKey(user));localStorage.removeItem(bookingConversationKey(user?.id||user?._id||user?.username,draftId));localStorage.removeItem(`echo-quote-draft:${user?.id||user?._id||'guest'}`);}catch{}}
@@ -188,6 +189,8 @@ export function EventOrderProvider({user,token,lang,auth,children,isSessionReady
   const blankProfile=()=>applyDraftAccountProfile(createEventOrder(),user);
   const finish=async receipt=>{
     setLastSubmission({reference:receipt,cleaning:true});
+    // Submitted: only now does the booking leave this browser (the guest copy, its chat and its review ticks).
+    try{for(const area of [localStorage,sessionStorage])for(const key of Object.keys(area))if(key===ownerKey(null)||key==='echo-quote-draft:guest'||key.startsWith('echo-booking-conversation:v1:guest:')||key.startsWith('echo-atom-review:v1:guest:'))area.removeItem(key);}catch{/* Optional storage. */}
     const cleared=await clear(true);
     setLastSubmission({reference:receipt,cleaning:false,cleared});
     return cleared;

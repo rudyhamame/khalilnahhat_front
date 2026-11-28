@@ -106,3 +106,15 @@ html body .echo .booking-submit-error>p{padding:14px 16px;border:1px solid #d9b9
 html body .echo .booking-submit-error>a.booking-submit-open{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 24px;border-radius:999px;background:#e2c779;color:#14181a;font:700 14px/1 Manrope,'Noto Sans Arabic',sans-serif;text-decoration:none;transition:filter .2s,transform .2s}
 html body .echo .booking-submit-error>a.booking-submit-open:hover{filter:brightness(1.08);transform:translateY(-1px)}
 html body .echo .booking-submit-error>a.booking-submit-open:focus-visible{outline:2px solid #e2c779;outline-offset:3px}
+/* Submit dialog: when the form is taller than the screen (e.g. "Let's try again"), the heading stays and the content scrolls inside the dialog. */
+html body .echo.booking-details-dialog.is-submission{display:flex;flex-direction:column;max-height:90dvh!important;overflow:hidden}
+html body .echo.booking-details-dialog.is-submission .booking-details-heading{flex:none}
+html body .echo.booking-details-dialog.is-submission .booking-details-content{display:block;flex:1 1 auto;min-height:0;height:auto;overflow-y:auto;overscroll-behavior:contain}
+/* "We could not send it yet": two real buttons, the retry in gold and Open Echo AI Smart Cart as an outlined button beside it. */
+html body .echo .booking-auto-send-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+html body .echo .booking-auto-send-actions>button{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 22px;border-radius:999px;font:700 14px/1 Manrope,'Noto Sans Arabic',sans-serif;cursor:pointer;text-decoration:none}
+html body .echo .booking-auto-send-actions>.booking-auto-send-secondary{border:1px solid #e2c77980;background:transparent;color:#e2c779}
+html body .echo .booking-auto-send-actions>.booking-auto-send-secondary:hover{background:#e2c7791a}
+html body .echo .booking-auto-send-actions>button:focus-visible{outline:2px solid #e2c779;outline-offset:3px}
+html body .echo .booking-auto-send-actions{justify-content:center}
+html body .echo .booking-submit-error:has(.booking-auto-send-actions) :is(h2,p){text-align:center}

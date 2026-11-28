@@ -50,6 +50,12 @@ export function createBookingConversationRecorder(write,id=uuid(),{owner,storage
    for(const message of normalizeMessages(messages)){if(!known.has(message.id)&&!queued.has(message.id)){pending.push(message);queued.add(message.id);}known.add(message.id);}
    persist();return flush();
   },
+  // Write every message to the server, even ones already marked as known: the server ignores a message id it already has, so this is safe and guarantees nothing is attached to a booking without being saved.
+  saveAll(messages){
+   const queued=new Set(pending.map(message=>message.id));
+   for(const message of normalizeMessages(messages)){if(!queued.has(message.id)){pending.push(message);queued.add(message.id);}known.add(message.id);}
+   persist();return flush();
+  },
   pendingMessages:()=>pending.map(message=>({...message})),
   remember(messages){for(const message of normalizeMessages(messages))known.add(message.id);persist();},
   retry:flush,

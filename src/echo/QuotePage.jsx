@@ -57,7 +57,7 @@ function OrderField({field,ar,user,optionNames={}}){
   </label>;
 }
 
-export default function QuotePage({lang,user,isSessionReady,onCreateServiceRequest,guided=false,submitSlot=null,autoSubmit=false,atomsConfirmed=false,embedded=false,onSubmissionStateChange}){
+export default function QuotePage({lang,user,isSessionReady,onCreateServiceRequest,guided=false,submitSlot=null,autoSubmit=false,atomsConfirmed=false,embedded=false,onSubmissionStateChange,onOpenSmartCart}){
   const ctx=useEventOrder(),cart=useCart(),ar=lang.lang==='ar';
   const [state,setState]=useState({busy:false,error:'',done:null});
   useEffect(()=>{onSubmissionStateChange?.(state.done?'received':state.error?'error':state.busy||autoSubmit&&atomsConfirmed?'sending':'review');},[onSubmissionStateChange,state.done,state.error,state.busy,autoSubmit,atomsConfirmed]);
@@ -72,6 +72,7 @@ export default function QuotePage({lang,user,isSessionReady,onCreateServiceReque
 
   const voucherInput=ctx.order.additional.voucherCode||'',setVoucherInput=value=>ctx.setField('additional.voucherCode',value||null);
   const [voucher,setVoucher]=useState(null),[voucherState,setVoucherState]=useState({busy:false,error:''}),[voucherRetry,setVoucherRetry]=useState(0);
+  const [voucherChecked,setVoucherChecked]=useState({code:'',ok:false});// the code the server has finished checking, and its verdict
   const voucherOptOut=useRef(false),voucherOfferGate=useRef(null);
   if(!voucherOfferGate.current)voucherOfferGate.current=createVoucherOfferGate();
   const applyVoucher=()=>setVoucherRetry(value=>value+1);
@@ -80,7 +81,7 @@ export default function QuotePage({lang,user,isSessionReady,onCreateServiceReque
     const code=voucherInput.trim();
     if(!code||!ctx.token){setVoucherState({busy:false,error:''});return;}
     setVoucherState({busy:true,error:''});
-    const timer=setTimeout(()=>apiRequest('/vouchers/validate',{method:'POST',token:ctx.token,body:{code}}).then(result=>{if(alive){setVoucher(result.voucher);setVoucherState({busy:false,error:''});}}).catch(error=>{if(alive)setVoucherState({busy:false,error:error.message||tr('This voucher is not valid.','هذه القسيمة غير صالحة.')});}),300);
+    const timer=setTimeout(()=>apiRequest('/vouchers/validate',{method:'POST',token:ctx.token,body:{code}}).then(result=>{if(alive){setVoucher(result.voucher);setVoucherState({busy:false,error:''});setVoucherChecked({code,ok:true});}}).catch(error=>{if(alive){setVoucherState({busy:false,error:error.message||tr('This voucher is not valid.','هذه القسيمة غير صالحة.')});setVoucherChecked({code,ok:false});}}),300);
     return()=>{alive=false;clearTimeout(timer);};
   },[voucherInput,ctx.token,voucherRetry]);
   useEffect(()=>{
@@ -162,12 +163,18 @@ export default function QuotePage({lang,user,isSessionReady,onCreateServiceReque
     finally{submitting.current=false;}
   };
   // Sent straight from Echo AI: once the signed-in client's draft is ready the booking goes out; the form only appears if something is missing and they ask to see it.
-  useEffect(()=>{if(!atomsConfirmed||!autoSubmit||autoRan.current||!user||!isSessionReady||!ctx.draftEditable)return;autoRan.current=true;submit();});
+  useEffect(()=>{
+    if(!atomsConfirmed||!autoSubmit||autoRan.current||!user||!isSessionReady||!ctx.draftEditable)return;
+    // A voucher (often the promotion applied automatically) is checked by the server first. Wait for that; a code it rejects is dropped so an automatic send is never blocked by it.
+    const code=voucherInput.trim();
+    if(code){if(voucherChecked.code!==code||voucherState.busy)return;if(!voucherChecked.ok){setVoucherInput('');return;}}
+    autoRan.current=true;submit();
+  });
   if(!user)return <OrderSignIn ar={ar}/>;
   if(!isSessionReady)return <p role="status">{tr('Checking your sign-in…','جارٍ التحقق من تسجيل الدخول…')}</p>;
   if(state.done)return <BookingConfirmation code={state.done} ar={ar} heading={!embedded} cleanupError={state.error}/>;
   if(autoSubmit&&!atomsConfirmed)return <section className="booking-submit-error" role="status"><p>{tr('Confirm every entry in Booking review before submitting.','أكّد جميع المعلومات في مراجعة الحجز قبل الإرسال.')}</p><a className="booking-submit-open" href="/echo-ai">{tr('Open Booking review','فتح مراجعة الحجز')}</a></section>;
-  if(autoSubmit&&!showForm)return state.error?<section className="booking-submit-error" role="status" aria-live="polite"><h2>{tr('We could not send it yet','تعذر الإرسال حتى الآن')}</h2><p role="alert">{state.error}</p><div className="booking-auto-send-actions"><button className="echo-btn" type="button" onClick={()=>{setState({busy:false,error:'',done:null});submit();}}>{tr('Try again','حاول مرة أخرى')}</button><button className="echo-link" type="button" onClick={()=>setShowForm(true)}>{tr('Open the details to fix it','افتح التفاصيل لتصحيحها')}</button></div></section>:<BookingSendingState ar={ar}/>;
+  if(autoSubmit&&!showForm)return state.error?<section className="booking-submit-error" role="status" aria-live="polite"><h2>{tr('We could not send it yet','تعذر الإرسال حتى الآن')}</h2><p role="alert">{state.error}</p><div className="booking-auto-send-actions"><button className="echo-btn" type="button" onClick={()=>{setState({busy:false,error:'',done:null});submit();}}>{tr('Try again','حاول مرة أخرى')}</button><button className="echo-btn booking-auto-send-secondary" type="button" onClick={()=>onOpenSmartCart?onOpenSmartCart():setShowForm(true)}>{onOpenSmartCart?tr('Open Echo AI Smart Cart','افتح عربة إيكو الذكية'):tr('Open the details to fix it','افتح التفاصيل لتصحيحها')}</button></div></section>:<BookingSendingState ar={ar}/>;
   return <section className={guided?"egb-draft-form":"echo-section"}><p>{tr('One event brief, whether you plan manually or with AI. Review every detail before submitting. * Required for your quotation.','ملف موحد لفعاليتك سواء خططت يدوياً أو مع الذكاء الاصطناعي. راجع التفاصيل قبل الإرسال. * مطلوب لعرض السعر.')}</p>
     <div className="echo-draft-bar"><button className="echo-link" type="button" disabled={state.busy} onClick={ctx.save}>{tr('Save progress','حفظ التقدم')}</button></div>
     {['account-failed','conflict'].includes(ctx.saveState)&&<p role="alert">{ctx.saveState==='conflict'?tr('This draft changed in another tab. Reload this page before editing again.','تغيرت المسودة في تبويب آخر. أعد تحميل الصفحة قبل التعديل.'):tr('The draft could not be saved or deleted. Your details are kept; please retry.','تعذر حفظ المسودة أو حذفها. بقيت تفاصيلك محفوظة؛ أعد المحاولة.')}</p>}

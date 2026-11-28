@@ -472,7 +472,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     await closeCall();setCall('idle');
     await aiTaskWriter.current.flush();
     const current=recorder.current;
-    if(current?.draftId===draftId){current.writer.remember(history.current);return await current.writer.retry();}
+    if(current?.draftId===draftId)return await current.writer.saveAll(history.current);// writes any message the server does not have yet, so nothing is attached to the booking unsaved
     return {draftId,messageIds:history.current.map(message=>message.id)};
   }),[draftId,closeCall]);
   useEffect(()=>{
