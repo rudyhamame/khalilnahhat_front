@@ -138,7 +138,6 @@ function RequestedServices({requests,onQuoteAction,authToken,ar=false}){
       </div>
      </header>
      <div className="booking-detail-sections">{request.order?<BookingDraftReview stepped order={{...request.order,customer:{...request.order.customer,...customerNameParts({...request.order.customer,fullName:request.order.customer?.fullName||request.customerName}),email:request.order.customer?.email||request.customerEmail}}} snapshot ar={ar} edit={request.journey.step!==null?{onSave:(path,value,acknowledgeReset)=>onQuoteAction(request.id,'order-edit',{path,value,quoteRevision:request.quoteRevision,acknowledgeReset})}:null}/>:<section className="booking-detail-section is-wide"><h4>{tr('Booking details')}</h4><BookingCardFallback request={request} ar={ar}/></section>}</div>
-     {!request.journey.showsPrices&&request.items?.length>0&&<section className="booking-detail-section is-wide"><h4>{tr('Rental services & equipment')}</h4><ul>{request.items.map(item=><li key={item.serviceId}>{item.name} × {item.quantity}</li>)}</ul></section>}
      {!request.journey.showsPrices&&(request.journey.awaitingClient||request.journey.canNegotiate)&&<BookingNegotiation ar={ar} request={request} token={authToken} onQuoteAction={onQuoteAction}/>}
      {request.journey.isBooked&&<><PaymentsBlock ar={ar} request={request} token={authToken}/><PlanningForm ar={ar} request={request} onQuoteAction={onQuoteAction}/></>}
     </article>

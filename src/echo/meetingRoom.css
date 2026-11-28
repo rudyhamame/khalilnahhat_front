@@ -59,7 +59,7 @@
 .meeting-room-embedded .meeting-room-body{display:flex;flex-direction:column;overflow:visible}
 .meeting-room-embedded .meeting-room-call{flex:none;min-height:0;padding:12px;gap:12px}
 .meeting-room-embedded .meeting-room-stage{flex:none;height:190px;min-height:190px}
-.meeting-room-embedded .meeting-room-chat{flex:none;height:300px;min-height:260px;max-height:360px;border-inline-start:0;border-top:1px solid var(--aw-line,#ffffff1f)}
+.meeting-room-embedded .meeting-room-chat{flex:none;height:calc(100dvh - 180px);min-height:260px;max-height:none;border-inline-start:0;border-top:1px solid var(--aw-line,#ffffff1f)}
 .meeting-room-embedded .meeting-room-device-fields{grid-template-columns:minmax(0,1fr)}
 .meeting-room-embedded .meeting-room-device-help{flex-wrap:wrap}
 .meeting-room-embedded .meeting-room-device-tests{width:100%}
