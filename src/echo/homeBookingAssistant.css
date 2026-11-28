@@ -480,3 +480,16 @@ html body .echo .ea-equipment-table td:last-child:has(>.ea-atom-controls){paddin
  .ea-board[data-tab=chat]>.ea-card--chat,.ea-board[data-tab=map]>.ea-card--map{height:clamp(420px,calc(100svh - 230px),900px)}
  .ea-card .ea-min,.echo .echo-map-zoom .ea-min{display:none}
 }
+/* Portrait: the toolbar and tabs stay compact and the open tab's card grows to fill exactly the rest of one viewport. The page itself never scrolls; a long card scrolls inside. */
+@media(max-width:1000px) and (orientation:portrait){
+ .ea-overlay .ea-board{overflow:hidden}
+ .ea-overlay .ea-board>.ea-card:not(.ea-card--toolbar){flex:1 1 0!important;height:auto!important;min-height:0!important;max-height:none!important}
+ .ea-overlay .ea-card--review>.ea-card-body{flex:1;min-height:0;overflow:hidden}
+ .ea-overlay .ea-review .ea-steps{flex:1 1 0!important;min-height:0!important;overflow-y:auto!important;overscroll-behavior:contain}
+}
+/* Booking review footer: a real footer pinned to the bottom of the card (steps scroll above it), with its own divider, padding and background. */
+html body .echo .ea-review{gap:0}
+html body .echo .ea-review .ea-summary-head{margin-bottom:10px}
+html body .echo .ea-review .ea-actions{flex:none;margin:10px -4px 0;padding:12px 4px 2px;border-top:1px solid #ffffff1f;background:linear-gradient(180deg,#17171800,#171718 30%);position:relative;z-index:1}
+html body .echo .ea-review .ea-actions>.ea-primary{width:100%}
+html body .echo .ea-review .ea-steps{padding-bottom:8px}

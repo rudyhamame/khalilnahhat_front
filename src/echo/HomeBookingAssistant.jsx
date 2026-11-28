@@ -168,7 +168,6 @@ export default function HomeBookingAssistant({lang,user,token,auth,overlay=false
  }};
  const unconfirmed=applicableReviewAtoms(allAtoms).filter(line=>atomReview.stateFor(line)!=='confirmed').length;
  const atomsConfirmed=missing===0&&unconfirmed===0&&!catalogLoading;
- const done=sections.filter(section=>section.progress.complete).length;
  const saveText=ctx.saveState==='account-saved'?tr('Saved to your account','محفوظ في حسابك'):ctx.saveState==='pending'?tr('Saving changes…','جارٍ الحفظ…'):tr('Draft in progress','المسودة قيد الإعداد');
  return <section ref={overlayRoot} id="echo-ai" className={`echo-section home-booking-assistant ea${overlay?' ea-overlay':''}`} aria-label="Echo AI" dir={ar?'rtl':'ltr'} onKeyDown={event=>{if(overlay&&event.key==='Escape'&&!event.defaultPrevented){event.preventDefault();void closeOverlay();}}}>
   <div className="ea-board" data-tab={tab} style={{gridTemplateColumns:[['chat','1.15fr'],['map','1.1fr'],['review','1.4fr']].map(([key,size])=>min[key]?'minmax(56px,0fr)':`minmax(0,${size})`).join(' ')}}>
@@ -190,9 +189,6 @@ export default function HomeBookingAssistant({lang,user,token,auth,overlay=false
    <article className={`ea-card ea-card--review${min.review&&!narrow?' is-min':''}`} data-tone="4" aria-label={tr('Booking review','مراجعة الحجز')}>
     <header className="ea-card-head"><ClipboardList className="ea-card-icon" aria-hidden="true"/><div><h3>{tr('Booking review','مراجعة الحجز')}</h3><p>{eventTypeLabel(ctx.order.event?.type,ar)||tr('Let’s plan your event','لنخطط لفعاليتك')}</p></div><button type="button" className="ea-delete" aria-label={tr('Delete draft','حذف المسودة')} title={tr('Delete draft','حذف المسودة')} disabled={ctx.clearing||(ctx.signedIn&&!ctx.cloudReady)} onClick={()=>{if(window.confirm(tr('Delete this draft? This cannot be undone.','حذف هذه المسودة؟ لا يمكن التراجع.')))void ctx.clear(true);}}><Trash2 size={16} aria-hidden="true"/></button><button type="button" className="ea-min" aria-expanded={!min.review} aria-label={min.review?tr('Expand Booking review','توسيع مراجعة الحجز'):tr('Minimize Booking review','تصغير مراجعة الحجز')} title={min.review?tr('Expand','توسيع'):tr('Minimize','تصغير')} onClick={()=>flip('review')}>{min.review?<Maximize2 size={15} aria-hidden="true"/>:<Minimize2 size={15} aria-hidden="true"/>}</button></header>
     <div className="ea-card-body ea-review">
-     <div className="ea-summary-head">
-      <div className="ea-progress" role="progressbar" aria-valuemin="0" aria-valuemax={goals.length} aria-valuenow={done} aria-label={tr('Sections complete','الأقسام المكتملة')}><i style={{width:`${done/goals.length*100}%`}}/></div>
-     </div>
      <ol className="ea-steps" ref={steps}>{sections.map(({item,progress,lines},index)=>{const Icon=icons[goal.id]||ClipboardList;return <li key={item.id}>
       <button type="button" aria-current={goal===item.id?'step':undefined} disabled={busy} onClick={()=>select(item.id,true)}>
        <span className="ea-step-icon" data-done={progress.complete?'':undefined}>{progress.complete?<Check size={15} aria-hidden="true"/>:<Icon size={15} aria-hidden="true"/>}</span>
