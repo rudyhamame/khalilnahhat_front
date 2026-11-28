@@ -17,6 +17,7 @@ import {missingOrderFields} from '../lib/eventOrderCore.mjs';
 import {useConceptMapNavigation} from './useConceptMapNavigation';
 import './glowCards.css';
 import './homeBookingAssistant.css';
+import {isPending,stagedFile} from '../lib/pendingFiles';
 
 // One icon per booking section id.
 const icons={contact:UserRound,event:CalendarDays,music:Disc3,rentals:Boxes,additional:StickyNote};
@@ -105,6 +106,13 @@ export function BookingConceptMap({order,ar,onSelect,review,toolbarExtra=null}){
   </div></div></div>
  </div></div>;
 }
+// Photos and documents wait in this browser's file store until the booking is submitted. List the ones whose file is gone, so the client sees it before submitting.
+function useMissingStagedFiles(order){
+ const staged=[...(order.references?.photos||[]),...(order.references?.files||[])].filter(isPending),key=staged.map(item=>item.sha256).join(',');
+ const [missing,setMissing]=useState([]);
+ useEffect(()=>{let alive=true;Promise.all(staged.map(async item=>(await stagedFile(item.sha256))?null:item.name||'file')).then(names=>{if(alive)setMissing(names.filter(Boolean));});return()=>{alive=false;};},[key]);// eslint-disable-line react-hooks/exhaustive-deps
+ return missing;
+}
 // Arriving from creating the account (/echo-ai?send=1): the booking is sent straight away, so Echo's opening summary request is skipped once (it would only keep Echo busy and cost an AI call).
 if(typeof window!=='undefined')window.__echoSendFlow=new URLSearchParams(window.location.search).has('send');
 export default function HomeBookingAssistant({lang,user,token,auth,overlay=false}){
@@ -150,6 +158,7 @@ export default function HomeBookingAssistant({lang,user,token,auth,overlay=false
   if(section)select(section.item.id,true);
   window.dispatchEvent(new CustomEvent('echo:booking-atom-correction',{detail:{path:line.reviewPath||line.key,label:line.label,atomKey:line.key}}));
  };
+ const missingFiles=useMissingStagedFiles(ctx.order);
  const [resumedSend,setResumedSend]=useState(false);// set when the client comes back from creating the account: the entries were already confirmed before the account step
  // A signed-in client's account details come into the booking by themselves (once per draft), so Personal info is never left "Not set yet".
  const autoImported=useRef('');
@@ -209,8 +218,8 @@ export default function HomeBookingAssistant({lang,user,token,auth,overlay=false
       <span className="ea-step-text ea-step-details"><AtomGroups lines={lines} progress={progress} tr={tr} review={review}/></span>
      </li>;})}</ol>
      <div className="ea-actions">
-      <button type="button" className="ea-primary" disabled={!atomsConfirmed||busy||!ctx.draftEditable} onClick={async()=>{if(!atomsConfirmed)return;if(!ctx.user||!ctx.token){/* a visitor creates the account on the login page's special form, with the draft saved first */try{await ctx.save?.(ctx.getOrder());}catch{/* the draft is also autosaved */}try{localStorage.setItem('khalil-auth-return','/echo-ai?send=1');}catch{/* optional */}window.location.assign('/login?booking=1');return;}ctx.reviewDraft();/* reviewDraft fires "booking-review" next frame, which resets the view to the conversation; show the review screen after it */requestAnimationFrame(()=>requestAnimationFrame(()=>setView('details')));}}>{ctx.user&&ctx.token?tr('Submit booking','إرسال الحجز'):tr('Create account & submit','أنشئ حسابك وأرسل')}<ArrowUpRight size={16} aria-hidden="true"/></button>
-      <small role="status">{ctx.pendingRequest?<>{tr('Your booking request is already sent and being handled. ','طلب حجزك أُرسل بالفعل وهو قيد المعالجة. ')}<a href="/dashboard/bookings">{tr('Follow it in your dashboard','تابعه في لوحة التحكم')}</a></>:['conflict','delete-conflict'].includes(ctx.saveState)?<>{tr('This draft was changed in another tab or device. ','تم تغيير هذه المسودة في تبويب أو جهاز آخر. ')}<button type="button" className="ea-reload-draft" onClick={()=>window.location.reload()}>{tr('Reload to continue','أعد التحميل للمتابعة')}</button></>:missing?tr(`${missing} required details left`,`${missing} تفاصيل مطلوبة متبقية`):unconfirmed?tr(`Confirm ${unconfirmed} entered entries before submitting.`,`أكّد ${unconfirmed} معلومة مُدخلة قبل الإرسال.`):busy?tr('Echo is still working. You can submit in a moment.','إيكو لا يزال يعمل. يمكنك الإرسال بعد لحظات.'):!ctx.draftEditable?tr('Saving your draft. You can submit in a moment.','جارٍ حفظ مسودتك. يمكنك الإرسال بعد لحظات.'):tr('All entries confirmed. Ready to submit.','تم تأكيد جميع المعلومات. الحجز جاهز للإرسال.')}</small>
+      <button type="button" className="ea-primary" disabled={!atomsConfirmed||busy||!ctx.draftEditable||missingFiles.length>0} onClick={async()=>{if(!atomsConfirmed||missingFiles.length)return;if(!ctx.user||!ctx.token){/* a visitor creates the account on the login page's special form, with the draft saved first */try{await ctx.save?.(ctx.getOrder());}catch{/* the draft is also autosaved */}try{localStorage.setItem('khalil-auth-return','/echo-ai?send=1');}catch{/* optional */}window.location.assign('/login?booking=1');return;}ctx.reviewDraft();/* reviewDraft fires "booking-review" next frame, which resets the view to the conversation; show the review screen after it */requestAnimationFrame(()=>requestAnimationFrame(()=>setView('details')));}}>{ctx.user&&ctx.token?tr('Submit booking','إرسال الحجز'):tr('Create account & submit','أنشئ حسابك وأرسل')}<ArrowUpRight size={16} aria-hidden="true"/></button>
+      <small role="status">{ctx.pendingRequest?<>{tr('Your booking request is already sent and being handled. ','طلب حجزك أُرسل بالفعل وهو قيد المعالجة. ')}<a href="/dashboard/bookings">{tr('Follow it in your dashboard','تابعه في لوحة التحكم')}</a></>:missingFiles.length?tr(`“${missingFiles[0]}”${missingFiles.length>1?` and ${missingFiles.length-1} more`:''} is no longer stored in this browser. Remove it and add it again in Inspiration photos or Event documents.`,`«${missingFiles[0]}»${missingFiles.length>1?` و${missingFiles.length-1} أخرى`:''} لم يعد محفوظاً في هذا المتصفح. احذفه وأضفه من جديد في صور الإلهام أو مستندات الفعالية.`):['conflict','delete-conflict'].includes(ctx.saveState)?<>{tr('This draft was changed in another tab or device. ','تم تغيير هذه المسودة في تبويب أو جهاز آخر. ')}<button type="button" className="ea-reload-draft" onClick={()=>window.location.reload()}>{tr('Reload to continue','أعد التحميل للمتابعة')}</button></>:missing?tr(`${missing} required details left`,`${missing} تفاصيل مطلوبة متبقية`):unconfirmed?tr(`Confirm ${unconfirmed} entered entries before submitting.`,`أكّد ${unconfirmed} معلومة مُدخلة قبل الإرسال.`):busy?tr('Echo is still working. You can submit in a moment.','إيكو لا يزال يعمل. يمكنك الإرسال بعد لحظات.'):!ctx.draftEditable?tr('Saving your draft. You can submit in a moment.','جارٍ حفظ مسودتك. يمكنك الإرسال بعد لحظات.'):tr('All entries confirmed. Ready to submit.','تم تأكيد جميع المعلومات. الحجز جاهز للإرسال.')}</small>
      </div>
     </div>
    </article>
