@@ -584,20 +584,43 @@ html body .echo-access.access-recovery .access-form-wrap h1 em{display:block;mar
 
 /* Native scrolling must stay available as soon as a field is focused,
    including browsers that do not report the keyboard's viewport resize. */
-html.echo-access-open[data-access-editing]{height:auto!important;min-height:100%;overflow-y:auto!important;overflow-x:clip;overscroll-behavior-y:auto}
-html.echo-access-open[data-access-editing] body{position:static!important;inset:auto!important;height:auto!important;min-height:100%;overflow:visible!important}
-html.echo-access-open[data-access-editing] :is(#root,.echo-page-surface){height:auto!important;min-height:0;overflow:visible!important}
-html.echo-access-open[data-access-editing] .echo{height:auto!important;min-height:var(--echo-access-visible-height,100dvh);overflow:visible!important}
-html.echo-access-open[data-access-editing] #echo-main{flex:none;height:auto!important;min-height:0;overflow:visible!important}
-html.echo-access-open[data-access-editing] body .echo-access:not(.echo-order-access){flex:none;height:auto!important;min-height:0!important;max-height:none!important;padding-top:12px!important;padding-bottom:calc(32px + var(--echo-access-keyboard-inset,0px))!important;overflow:visible!important;align-items:center;justify-content:flex-start;touch-action:pan-y pinch-zoom}
-html.echo-access-open[data-access-editing] body .echo-access:not(.echo-order-access) .access-pair{flex:none!important;width:100%!important;height:auto!important;min-height:0!important;margin:0!important;padding-block:0!important;transform:none!important;translate:none!important;transition:none;align-self:stretch!important;align-items:start!important}
-html.echo-access-open[data-access-editing] body .echo-access:not(.echo-order-access) .access-content{flex:none;height:auto!important;min-height:0;max-height:none!important;overflow:visible!important;transform:none!important;translate:none!important;padding-block:0!important;align-items:flex-start!important}
-html.echo-access-open[data-access-editing] body .echo-access:not(.echo-order-access) .access-form-wrap{margin-block:0!important}
-html.echo-access-open[data-access-editing] body .echo-access .access-hero-photo{opacity:.12!important;animation:none!important}
-html.echo-access-open[data-access-editing] body .echo-access .access-field{scroll-margin-block:24px}
+html.echo-access-open[data-access-keyboard]{height:auto!important;min-height:100%;overflow-y:auto!important;overflow-x:clip;overscroll-behavior-y:auto}
+html.echo-access-open[data-access-keyboard] body{position:static!important;inset:auto!important;height:auto!important;min-height:100%;overflow:visible!important}
+html.echo-access-open[data-access-keyboard] :is(#root,.echo-page-surface){height:auto!important;min-height:0;overflow:visible!important}
+html.echo-access-open[data-access-keyboard] .echo{height:auto!important;min-height:var(--echo-access-visible-height,100dvh);overflow:visible!important}
+html.echo-access-open[data-access-keyboard] #echo-main{flex:none;height:auto!important;min-height:0;overflow:visible!important}
+html.echo-access-open[data-access-keyboard] body .echo-access:not(.echo-order-access){flex:none;height:auto!important;min-height:0!important;max-height:none!important;padding-top:12px!important;padding-bottom:calc(32px + var(--echo-access-keyboard-inset,0px))!important;overflow:visible!important;align-items:center;justify-content:flex-start;touch-action:pan-y pinch-zoom}
+html.echo-access-open[data-access-keyboard] body .echo-access:not(.echo-order-access) .access-pair{flex:none!important;width:100%!important;height:auto!important;min-height:0!important;margin:0!important;padding-block:0!important;transform:none!important;translate:none!important;transition:none;align-self:stretch!important;align-items:start!important}
+html.echo-access-open[data-access-keyboard] body .echo-access:not(.echo-order-access) .access-content{flex:none;height:auto!important;min-height:0;max-height:none!important;overflow:visible!important;transform:none!important;translate:none!important;padding-block:0!important;align-items:flex-start!important}
+html.echo-access-open[data-access-keyboard] body .echo-access:not(.echo-order-access) .access-form-wrap{margin-block:0!important}
+html.echo-access-open[data-access-keyboard] body .echo-access .access-hero-photo{opacity:.12!important;animation:none!important}
+html.echo-access-open[data-access-keyboard] body .echo-access .access-field{scroll-margin-block:24px}
 /* Booking signup page: the card is as wide as its content (steps, summary, form), never narrower than the usual card and never wider than the screen. */
 html body .echo-access.access-booking:not(.echo-order-access) .access-form-wrap{box-sizing:border-box;width:fit-content;min-width:min(430px,100%);max-width:min(600px,100%)}
 /* Booking signup page, phone/tablet portrait: like the login pair, the card sits at the bottom IN FRONT of the character (head clear above it), never behind the photo. */
 @media(max-width:1000px) and (orientation:portrait),(min-width:1001px) and (orientation:landscape){
  html.echo-access-open body .echo-access.access-booking .access-content{position:relative;z-index:3;width:100%;margin-top:auto;padding:0}
 }
+/* Booking signup: the character is centred on every screen (the card sits in front of it at the bottom); the login pair's right-edge placement and tear shape do not apply here. */
+html.echo-access-open body .echo-access.access-booking:not(.echo-order-access) .access-hero-photo,html[dir=rtl].echo-access-open body .echo-access.access-booking:not(.echo-order-access) .access-hero-photo{left:50%!important;right:auto!important;transform:translateX(-50%)!important;clip-path:none;animation:access-photo-in 1s cubic-bezier(.2,.8,.2,1) both}
+/* Booking signup, desktop landscape: the card is vertically centred (portrait keeps it at the bottom). */
+@media(min-width:1001px) and (orientation:landscape){
+ html.echo-access-open body .echo-access.access-booking .access-content,html body .echo-access.access-booking .access-content{margin-block:auto;align-self:center}
+}
+/* Booking signup, every landscape screen (tablets included): the card fills the row and is vertically centred in it. */
+@media(orientation:landscape){
+ html body .echo-access.access-booking:not(.echo-order-access) .access-content{align-self:stretch;display:flex;align-items:center!important;justify-content:center;margin-block:0;min-height:0}
+ html body .echo-access.access-booking:not(.echo-order-access) .access-form-wrap{margin-block:auto}
+}
+/* Booking signup (landscape): the section itself is a box that fits its space, never taller than it, and the card is centred inside that box (not in the whole page); a card taller than the box scrolls inside it. */
+@media(orientation:landscape){
+ html body .echo-access.access-booking:not(.echo-order-access){display:grid;grid-template-columns:minmax(0,1fr);place-items:center;box-sizing:border-box;flex:1 1 auto;height:100%;min-height:0!important;max-height:100%;overflow:hidden;padding-block:12px}
+ html body .echo-access.access-booking:not(.echo-order-access) .access-content{grid-column:1;width:100%;max-height:100%;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+ html body .echo-access.access-booking:not(.echo-order-access) .access-form-wrap{margin-block:auto}
+}
+/* Booking signup: the whole section is exactly one viewport tall on every screen; anything taller (the card) scrolls inside it. */
+html body .echo-access.access-booking:not(.echo-order-access){box-sizing:border-box;height:100svh;min-height:0!important;max-height:100svh;overflow:hidden}
+html body .echo-access.access-booking:not(.echo-order-access) .access-content{min-height:0;max-height:100%;overflow-y:auto;overscroll-behavior:contain}
+/* Booking signup: exactly the visible screen below the site header, beating the generic #echo-main>section height rule. */
+html body .echo.echo-public-page[data-page] #echo-main>section.echo-access.access-booking{box-sizing:border-box!important;height:calc(var(--echo-visible-viewport-height,100svh) - var(--echo-header-height,0px))!important;min-height:0!important;max-height:calc(var(--echo-visible-viewport-height,100svh) - var(--echo-header-height,0px))!important;overflow:hidden!important;display:grid!important;place-items:center!important;padding-block:12px!important}
+html body .echo.echo-public-page[data-page] #echo-main>section.echo-access.access-booking>.access-content{grid-column:1;width:100%;max-height:100%;min-height:0;overflow-y:auto;overscroll-behavior:contain;align-self:center}

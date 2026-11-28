@@ -98,3 +98,11 @@ html body .echo .booking-submit-error h2{margin:0;font:600 23px/1.35 Manrope,'No
 .booking-submit-error>a{color:#e2c779}
 .booking-submit-error .booking-auto-send-actions{padding:0;margin:0}
 @media(max-width:600px){html body .echo.booking-details-dialog.is-submission{width:calc(100vw - 24px);border-radius:18px}.echo.booking-details-dialog.is-submission .booking-details-heading{padding:20px}.booking-submit-error{padding:20px}}
+/* Submit dialog: a compact card (it was stretched tall and empty) with the message as a callout and one clear action. */
+html body .echo.booking-details-dialog.is-submission{height:auto!important;min-height:0!important;max-height:90dvh;overflow:hidden;box-shadow:0 30px 90px #000a}
+html body .echo.booking-details-dialog.is-submission .booking-details-content{display:block;flex:none;height:auto}
+html body .echo .booking-submit-error{display:grid;justify-items:stretch;gap:20px;padding:24px 26px 26px}
+html body .echo .booking-submit-error>p{padding:14px 16px;border:1px solid #d9b97033;border-inline-start:3px solid #e2c779;border-radius:12px;background:#d9b9700f;color:#e8ecdf;font-size:14px;line-height:1.65}
+html body .echo .booking-submit-error>a.booking-submit-open{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 24px;border-radius:999px;background:#e2c779;color:#14181a;font:700 14px/1 Manrope,'Noto Sans Arabic',sans-serif;text-decoration:none;transition:filter .2s,transform .2s}
+html body .echo .booking-submit-error>a.booking-submit-open:hover{filter:brightness(1.08);transform:translateY(-1px)}
+html body .echo .booking-submit-error>a.booking-submit-open:focus-visible{outline:2px solid #e2c779;outline-offset:3px}

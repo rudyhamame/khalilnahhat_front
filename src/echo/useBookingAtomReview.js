@@ -2,10 +2,12 @@ import {useEffect,useState} from 'react';
 import {atomReviewState,currentAtomReviews,reviewBookingAtom,editBookingAtom} from '../lib/bookingAtomReview';
 
 const read=key=>{try{const value=JSON.parse(localStorage.getItem(key)||'{}');return value&&typeof value==='object'&&!Array.isArray(value)?value:{};}catch{return {};}};
+// Entries confirmed as a visitor carry over to the account created afterwards (same draft); currentAtomReviews drops any whose value has changed since.
+const load=(owner,draftId,key)=>owner?{...read(`echo-atom-review:v1:guest:${draftId}`),...read(key)}:read(key);
 export default function useBookingAtomReview(owner,draftId,lines,ready=true){
  const key=`echo-atom-review:v1:${owner||'guest'}:${draftId}`;
- const [stored,setStored]=useState(()=>({key,reviews:read(key)}));
- const saved=stored.key===key?stored.reviews:read(key);
+ const [stored,setStored]=useState(()=>({key,reviews:load(owner,draftId,key)}));
+ const saved=stored.key===key?stored.reviews:load(owner,draftId,key);
  const reviews=ready?currentAtomReviews(saved,lines):saved;
  const serialized=JSON.stringify(reviews);
  useEffect(()=>{
