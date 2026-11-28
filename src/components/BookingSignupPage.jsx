@@ -1,5 +1,5 @@
 import {useEffect,useLayoutEffect,useRef,useState} from 'react';
-import {ArrowLeft,ArrowRight,Eye,EyeOff,LockKeyhole,Mail,MailCheck,UserRound} from 'lucide-react';
+import {ArrowLeft,ArrowRight,Eye,EyeOff,LoaderCircle,LockKeyhole,Mail,MailCheck,UserRound} from 'lucide-react';
 import EchoShell from '../echo/EchoShell';
 import {useAccessViewport} from '../lib/useAccessViewport';
 import {usePageMeta} from '../echo/meta';
@@ -38,18 +38,19 @@ export default function BookingSignupPage({lang,onVerified}){
  usePageMeta(tr('Create your account to send your booking | DJ Khalil × Echo','أنشئ حسابك لإرسال حجزك | دي جي خليل × إيكو'),tr('Create your account and confirm your email to send your booking to DJ Khalil and Echo.','أنشئ حسابك وأكّد بريدك الإلكتروني لإرسال حجزك إلى دي جي خليل وإيكو.'));
  const [customer]=useState(readCustomer),email=(customer.email||'').trim(),nameParts=customerNameParts(customer),firstName=(nameParts.firstName||'').trim(),lastName=(nameParts.lastName||'').trim();
  const [pending]=useState(()=>readPending(email));
+ const [sending,setSending]=useState(false),[notice,setNotice]=useState('');// after the code is confirmed the page becomes a full-screen "Sending your booking…" until the booking is sent
  const [step,setStep]=useState(pending?'code':'account'),[password,setPassword]=useState(''),[confirm,setConfirm]=useState(''),[show,setShow]=useState(false),[code,setCode]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState(''),[wait,setWait]=useState(pending?Math.max(0,Math.ceil((pending.resendAt-Date.now())/1000)):0),[exists,setExists]=useState(false);
  useEffect(()=>{if(wait<=0)return undefined;const timer=setTimeout(()=>setWait(value=>value-1),1000);return()=>clearTimeout(timer);},[wait]);
  const ready=Boolean(email&&firstName&&lastName),mismatch=confirm.length>0&&password!==confirm;
  const fail=problem=>{if(problem.status===409||problem.payload?.code==='ACCOUNT_EXISTS')setExists(true);setError(problem.message||tr('Something went wrong. Try again.','حدث خطأ. حاول مرة أخرى.'));};
  const create=async event=>{event.preventDefault();if(busy||password!==confirm)return;setBusy(true);setError('');setExists(false);
   try{const result=await apiRequest('/booking-signup/start',{method:'POST',body:{firstName,lastName,email,password,phoneNumber:customer.phone||'',company:customer.company||'',...(customer.contactMethod?{preferredContact:customer.contactMethod}:{}),...(customer.phoneContact?{phoneContact:customer.phoneContact}:{})}});const seconds=Number(result?.retryAfter)||60;writePending({email,sentAt:Date.now(),resendAt:Date.now()+seconds*1000});setStep('code');setWait(seconds);}catch(problem){fail(problem);}finally{setBusy(false);}};
- const resend=async()=>{setBusy(true);setError('');try{await apiRequest('/booking-signup/resend',{method:'POST',body:{email}});writePending({email,sentAt:Date.now(),resendAt:Date.now()+60000});setWait(60);}catch(problem){fail(problem);}finally{setBusy(false);}};
+ const resend=async()=>{setBusy(true);setError('');setNotice('');try{const result=await apiRequest('/booking-signup/resend',{method:'POST',body:{email}});const seconds=Number(result?.retryAfter)||60;writePending({email,sentAt:Date.now(),resendAt:Date.now()+seconds*1000});setWait(seconds);setCode('');setNotice(result?.sent===false?tr(`A code was sent a moment ago. You can ask for another in ${seconds}s.`,`أُرسل رمز قبل لحظات. يمكنك طلب رمز آخر خلال ${seconds} ث.`):tr(`A new code was sent to ${email}. Check your inbox and spam folder; the old code no longer works.`,`أُرسل رمز جديد إلى ${email}. تحقق من البريد الوارد والبريد المزعج؛ الرمز القديم لم يعد يعمل.`));}catch(problem){fail(problem);}finally{setBusy(false);}};
  const verify=async event=>{event.preventDefault();if(busy)return;setBusy(true);setError('');
-  try{const result=await apiRequest('/booking-signup/verify',{method:'POST',body:{email,code:code.trim()}});writePending(null);onVerified?.(result);window.location.assign(SEND_PATH);}catch(problem){fail(problem);setBusy(false);}};
+  try{const result=await apiRequest('/booking-signup/verify',{method:'POST',body:{email,code:code.trim()}});writePending(null);onVerified?.(result);setSending(true);window.location.assign(SEND_PATH);}catch(problem){fail(problem);setBusy(false);}};
  const steps=[tr('Create account','إنشاء الحساب'),tr('Confirm email','تأكيد البريد'),tr('Send booking','إرسال الحجز')];
  const current=step==='account'?0:1;
- return <EchoShell lang={lang}><section className="echo-access access-booking" dir={ar?'rtl':'ltr'} aria-labelledby="booking-access-title">
+ return <EchoShell lang={lang}>{sending&&<div className="booking-signup-sending" role="status" aria-live="assertive" dir={ar?'rtl':'ltr'}><LoaderCircle size={44} aria-hidden="true"/><h2>{tr('Sending your booking…','جارٍ إرسال حجزك…')}</h2><p>{tr('Your email is confirmed. Please keep this page open; you will land on your bookings in a moment.','تم تأكيد بريدك. أبقِ هذه الصفحة مفتوحة، وستصل إلى حجوزاتك بعد لحظات.')}</p></div>}<section className="echo-access access-booking" dir={ar?'rtl':'ltr'} aria-labelledby="booking-access-title">
   <div className="access-backdrop" aria-hidden="true"/>
   <img className="access-hero-photo" src="/echo/login-hero-khalil.webp" width="1016" height="1536" alt="" aria-hidden="true" fetchPriority="high"/>
   <div className="access-content"><div className="access-form-wrap" ref={wrap}>
@@ -75,6 +76,7 @@ export default function BookingSignupPage({lang,onVerified}){
     <div className="access-verify" role="status"><MailCheck size={34} aria-hidden="true"/><strong>{tr('We sent you a code','أرسلنا إليك رمزاً')}</strong><p>{tr(`Enter the 6-digit code sent to ${email}. It works for 10 minutes.`,`أدخل الرمز المكوّن من 6 أرقام المُرسل إلى ${email}. صالح لمدة 10 دقائق.`)}</p></div>
     <form className="access-form" onSubmit={verify} aria-busy={busy}>
      {error&&<p className="access-error" role="alert">{error}</p>}
+     {notice&&!error&&<p className="access-notice" role="status">{notice}</p>}
      <fieldset className="access-fields" disabled={busy}><legend className="access-sr-only">{tr('Verification code','رمز التحقق')}</legend>
       <label className="access-field" htmlFor="booking-access-code"><span>{tr('Verification code','رمز التحقق')}</span><span className="access-input"><MailCheck size={18} aria-hidden="true"/><input id="booking-access-code" inputMode="numeric" autoComplete="one-time-code" maxLength={6} placeholder="123456" required value={code} onChange={event=>setCode(event.target.value.replace(/\D/g,'').slice(0,6))}/></span></label>
      </fieldset>

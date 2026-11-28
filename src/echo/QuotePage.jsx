@@ -156,6 +156,8 @@ export default function QuotePage({lang,user,isSessionReady,onCreateServiceReque
       // Retire only after a durable receipt; the request keeps its own conversation snapshot.
       const retired=await ctx.finish(receipt);
       setState({busy:false,error:retired?'':tr('Request sent. The old draft could not be cleared; please delete it before starting another.','تم إرسال الطلب. تعذر حذف المسودة السابقة؛ احذفها قبل البدء من جديد.'),done:receipt});
+      // Sent from Echo AI: the client follows the request's status on the Booking tab of their dashboard (after the old draft is retired, so that call is never cut off).
+      if(autoSubmit&&retired)window.location.assign('/dashboard/bookings');
     }catch(error){setState({busy:false,error:error.message||tr('Could not submit your request.','تعذر إرسال الطلب.'),done:null});}
     finally{submitting.current=false;}
   };

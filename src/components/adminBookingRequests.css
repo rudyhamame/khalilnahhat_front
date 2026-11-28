@@ -791,3 +791,11 @@ html body .admin-booking-detail-heading .booking-publish-action .booking-heading
 /* ADMIN quote tab scrolls: the aside is a bounded scroll area again (the "no scroll" rule above is for the client's quote). */
 .admin-workspace .admin-booking-detail-body[data-view=quote] .booking-quote-aside{overflow-x:hidden!important;overflow-y:auto!important;height:100%!important;max-height:100%!important;min-height:0!important;overscroll-behavior:contain;scrollbar-width:thin}
 .admin-workspace .admin-booking-detail-body[data-view=quote] .booking-quote-panel{overflow:visible!important;flex:none!important}
+/* Client dashboard, Booking tab: the empty detail column is a centred, readable card with one clear action. */
+.client-booking-empty{display:grid;justify-items:center;align-content:center;gap:14px;min-height:min(420px,60vh);margin:24px;padding:40px 28px;border:1px dashed #ffffff2e;border-radius:22px;background:radial-gradient(70% 90% at 50% 0%,#e2c7790f,transparent 70%),#ffffff05;text-align:center}
+.client-booking-empty-mark{display:grid;place-items:center;width:68px;height:68px;border-radius:50%;border:1px solid #e2c77955;background:#e2c7791a;color:#e2c779}
+.client-booking-empty h3{margin:0;font:700 clamp(20px,2.4vw,26px)/1.25 Manrope,'Noto Sans Arabic',sans-serif;letter-spacing:-.02em;color:#f1f4ec}
+.client-booking-empty p{margin:0;max-width:38ch;color:#b7c8b9;font-size:14px;line-height:1.75}
+.client-booking-empty .primary-button{display:inline-flex;align-items:center;justify-content:center;min-height:46px;margin-top:6px;padding:0 26px;border-radius:999px;background:#e2c779;color:#14181a;font:700 13px/1 Manrope,sans-serif;letter-spacing:.08em;text-decoration:none;transition:filter .2s,transform .2s}
+.client-booking-empty .primary-button:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.client-booking-empty .primary-button:focus-visible{outline:2px solid #e2c779;outline-offset:3px}

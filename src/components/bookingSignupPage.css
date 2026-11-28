@@ -16,3 +16,11 @@
 .access-booking .access-submit.access-back{background:none;color:var(--access-text);border:1px solid var(--access-pill);box-shadow:none}
 .access-booking .access-submit.access-back:hover{border-color:var(--access-accent);color:var(--access-accent)}
 [dir=rtl] .access-back svg{transform:scaleX(-1)}
+/* After the code is confirmed: the whole page is one "Sending your booking…" screen. */
+.booking-signup-sending{position:fixed;inset:0;z-index:1000;display:grid;place-content:center;justify-items:center;gap:14px;padding:24px;text-align:center;background:radial-gradient(60% 50% at 50% 40%,#1b2a30,#0b1013);color:#eef4ef}
+.booking-signup-sending>svg{color:#e2c779;animation:booking-signup-spin 1s linear infinite}
+.booking-signup-sending h2{margin:0;font:700 clamp(24px,4vw,34px)/1.2 Manrope,'Noto Sans Arabic',sans-serif;letter-spacing:-.02em}
+.booking-signup-sending p{margin:0;max-width:34ch;color:#b7c8b9;font-size:15px;line-height:1.7}
+@keyframes booking-signup-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.booking-signup-sending>svg{animation:none}}
+.access-booking .access-notice{margin:0;padding:10px 14px;border:1px solid #8ad1bb55;border-radius:12px;background:#8ad1bb14;color:var(--access-text);font-size:.85rem;line-height:1.6}
