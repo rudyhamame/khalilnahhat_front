@@ -105,6 +105,8 @@ export function BookingConceptMap({order,ar,onSelect,review,toolbarExtra=null}){
   </div></div></div>
  </div></div>;
 }
+// Arriving from creating the account (/echo-ai?send=1): the booking is sent straight away, so Echo's opening summary request is skipped once (it would only keep Echo busy and cost an AI call).
+if(typeof window!=='undefined')window.__echoSendFlow=new URLSearchParams(window.location.search).has('send');
 export default function HomeBookingAssistant({lang,user,token,auth,overlay=false}){
  const changed=useEquipmentChanges();
  const ctx=useEventOrder(),ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en;

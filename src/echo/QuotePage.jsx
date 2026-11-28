@@ -24,7 +24,7 @@ import { useCart,readCart } from './cart';
 import { buildQuoteItems } from './quoteItems';
 import {apiRequest} from '../lib/api';
 import { useEventOrder } from './eventOrderContext';
-import { contract, aiFields, isAnswered, getPath, validValue, missingOrderFields, validateEventOrder, orderToLegacy, optionName } from '../lib/eventOrderCore.mjs';
+import { contract, aiFields, isAnswered, getPath, validValue, missingOrderFields, validateEventOrder, orderToLegacy, optionName, applyAccountProfile } from '../lib/eventOrderCore.mjs';
 import { getBookingSubmissionIdentity, bookingSubmissionReceipt, loadBookingSubmissionIdentity, storeBookingSubmissionIdentity } from './bookingSubmission';
 
 const labels={wedding_entrance:'Custom wedding entrance',ai_customization:'AI-assisted customization'};
@@ -135,7 +135,8 @@ export default function QuotePage({lang,user,isSessionReady,onCreateServiceReque
       const conversation=await ctx.flushConversation?.();
       // Photos and documents stayed in this browser until now; upload them only at submission.
       for(const [field,kind] of [['photos','photo'],['files','file']]){const staged=ctx.getOrder().references?.[field]||[];if(staged.some(isPending))ctx.setField('references.'+field,await uploadStaged(staged,kind,ctx.token));}
-      const order=ctx.getOrder();
+      // A signed-in client's name, email, phone and contact choices come from the account (the server uses it too); fill them in before checking, so a booking not yet imported is not rejected for them.
+      const order=applyAccountProfile(ctx.getOrder(),user);
       const issues=validateEventOrder(order,{submission:true});
       if(issues.length){
         if(guided)selectTab(bookingIssueStep(order,issues));

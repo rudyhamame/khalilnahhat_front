@@ -442,6 +442,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     if(orderDraft.assistantSession)orderDraft.assistantSession.current={...session,draftId,greeted:true};
     // The opening is a real chat turn: the client asks for a summary and the assistant answers it through the normal send flow.
     setTranscriptOpen(true);
+    if(window.__echoSendFlow){window.__echoSendFlow=false;return;}// the automatic send after sign-up needs no summary
     const openingRequest=tr('Summarize my booking so far. Group it by section, one short bullet list per section (a line starting with "- " for each detail). Then list the required details that are still missing as a bullet list, and ask for the first one.','لخّص حجزي حتى الآن. قسّمه حسب الأقسام، مع قائمة نقاط قصيرة لكل قسم (سطر يبدأ بـ "- " لكل تفصيل). ثم اذكر التفاصيل المطلوبة الناقصة كقائمة نقاط، واسألني عن أولها.');
     if(history.current.at(-2)?.content===openingRequest)return;// already asked and answered at the end of this conversation: do not repeat it on every refresh
     send(openingRequest);
@@ -468,6 +469,8 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   },[token]);
   const conversationStatus=useRef(null);conversationStatus.current={busy,historyLoading};
   useEffect(()=>draftContextRef.current?.registerConversationSaver?.(async()=>{
+    // Echo may still be answering (the opening summary) or loading the chat: wait for it, up to a minute, instead of failing an automatic send.
+    for(let waited=0;(conversationStatus.current.busy||conversationStatus.current.historyLoading)&&waited<60000;waited+=250)await new Promise(resolve=>setTimeout(resolve,250));
     if(conversationStatus.current.busy||conversationStatus.current.historyLoading)throw new Error(tr('Wait for Echo to finish before submitting your booking.','انتظر حتى ينتهي إيكو قبل إرسال طلب الحجز.'));
     await closeCall();setCall('idle');
     await aiTaskWriter.current.flush();
