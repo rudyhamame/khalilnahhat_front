@@ -660,8 +660,8 @@
             "ar": "اسم المكان",
             "maxLength": 160,
             "required": true,
-            "short": "Venue",
-            "shortAr": "المكان"
+            "short": "Venue name",
+            "shortAr": "اسم المكان"
           },
           {
             "key": "event.venue.address",

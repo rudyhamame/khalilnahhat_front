@@ -55,7 +55,7 @@
 .meeting-room-embedded{color:var(--aw-text,#e8efeb);font-family:inherit}
 .meeting-room-embedded>header{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:12px;border-bottom:1px solid var(--aw-line,#ffffff1f)}
 .meeting-room-embedded>header small{display:block;margin-top:4px;color:var(--aw-muted,#9fb2a8);font-size:12px}
-.meeting-room-embedded>header>div{flex-basis:100%;font-size:14px}
+.meeting-room-embedded>header>div{flex:1;min-width:0;font-size:14px}
 .meeting-room-embedded .meeting-room-body{display:flex;flex-direction:column;overflow:visible}
 .meeting-room-embedded .meeting-room-call{flex:none;min-height:0;padding:12px;gap:12px}
 .meeting-room-embedded .meeting-room-stage{flex:none;height:190px;min-height:190px}

@@ -14,7 +14,6 @@ html body :is(.client-workspace,.admin-workspace) .bdr-atoms .ea-group>em::befor
 
 html body :is(.client-workspace,.admin-workspace) .bdr-atoms .ea-data-row{display:grid!important;grid-template-columns:5.6em minmax(0,.9fr) minmax(0,1.6fr) 28px!important;column-gap:16px!important;row-gap:0!important;align-items:center!important;min-height:40px;padding:6px 0;border:0;border-bottom:1px solid color-mix(in srgb,var(--aw-line,#2a2a30) 70%,transparent);font-size:14px}
 html body :is(.client-workspace,.admin-workspace) .bdr-atoms .ea-data-row:last-child{border-bottom:0}
-html body :is(.client-workspace,.admin-workspace) .bdr-atoms .ea-data-row:hover{background:color-mix(in srgb,var(--aw-text,#eee) 4%,transparent)}
 html body :is(.client-workspace,.admin-workspace) .bdr-atoms .ea-data-row>i.ea-atom-code{justify-self:start;min-width:0;padding:0;border:0;border-radius:0;background:none;color:var(--aw-muted,#9a9aa3);font:500 11px/1 ui-monospace,Menlo,Consolas,monospace;letter-spacing:.04em}
 html body :is(.client-workspace,.admin-workspace) .bdr-atoms .ea-data-row>b{margin:0;color:var(--aw-muted,#b4b4bd);font-weight:500;overflow-wrap:anywhere}
 html body :is(.client-workspace,.admin-workspace) .bdr-atoms .ea-data-value{min-width:0;color:var(--aw-text,#eee);font-weight:500;overflow-wrap:anywhere}
@@ -27,7 +26,7 @@ html body :is(.client-workspace,.admin-workspace) .bdr-atoms .ea-data-row:not([d
 /* The edit pencil is a bare icon (no box), quiet until the row is hovered or focused. */
 html body :is(.client-workspace,.admin-workspace) .bdr-atoms .ea-atom-controls{display:flex;justify-content:flex-end;margin:0}
 html body :is(.client-workspace,.admin-workspace) .bdr-atoms .ea-atom-controls button{display:grid;place-items:center;width:auto;height:auto;margin:0;padding:0;border:0;border-radius:0;background:none;box-shadow:none;color:var(--aw-muted,#9a9aa3);opacity:.55;cursor:pointer}
-html body :is(.client-workspace,.admin-workspace) .bdr-atoms .ea-data-row:hover .ea-atom-controls button,html body :is(.client-workspace,.admin-workspace) .bdr-atoms .ea-atom-controls button:focus-visible{opacity:1;color:#e6b95a}
+html body :is(.client-workspace,.admin-workspace) .bdr-atoms .ea-atom-controls button:focus-visible{opacity:1;color:#e6b95a}
 
 /* Lists (genres, languages, songs) read as quiet chips inside the value column. */
 html body :is(.client-workspace,.admin-workspace) .bdr-atoms .music-value-list>[role=listitem]{padding:2px 10px;border:1px solid var(--aw-line,#2a2a30);border-radius:999px;background:none;font-size:12.5px}
@@ -39,7 +38,6 @@ html body :is(.client-workspace,.admin-workspace) .bdr-atoms .music-value-list>[
 
 /* Equipment categories: no lines under the category name, none around or inside its equipment table. */
 html body :is(.client-workspace,.admin-workspace) .bdr-atoms .ea-data-row[data-category]{border-bottom:0!important;min-height:0}
-html body :is(.client-workspace,.admin-workspace) .bdr-atoms .ea-data-row[data-category]:hover{background:none}
 html body :is(.client-workspace,.admin-workspace) .bdr-atoms .ea-equipment-table{border:0!important;border-radius:0!important}
 html body :is(.client-workspace,.admin-workspace) .bdr-atoms .ea-equipment-table :is(th,td,tr,thead,tbody){border:0!important;box-shadow:none!important}
 
@@ -58,3 +56,27 @@ html body .client-workspace .bdr-stepped .bdr-section[hidden]{display:none!impor
 .client-workspace .bdr-step-navigation button:disabled{opacity:.4;cursor:default}
 .client-workspace :is(.bdr-steps [role=tab],.bdr-step-navigation button,.bdr-stepped [role=tabpanel]):focus-visible{outline:2px solid #e6b95a;outline-offset:3px}
 @media(max-width:700px){.client-workspace .bdr-steps{flex-wrap:wrap}.client-workspace .bdr-steps [role=tab]{flex:1 1 calc(50% - 8px);justify-content:flex-start;padding:10px;font-size:12px}}
+
+/* One look per step, matching its goal. */
+html body .client-workspace .bdr-hint{order:3;flex-basis:100%;margin:2px 0 0;color:var(--aw-muted,#9a9aa3);font-size:12.5px}
+html body .client-workspace .bdr-section>header{flex-wrap:wrap}
+/* Personal info + Event info: short facts, shown as a two-column grid of label-over-value tiles. */
+html body .client-workspace .bdr-section:is([data-goal=contact],[data-goal=event]) .bdr-atoms .ea-group{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+html body .client-workspace .bdr-section:is([data-goal=contact],[data-goal=event]) .bdr-atoms .ea-group>em{grid-column:1/-1}
+html body .client-workspace .bdr-section:is([data-goal=contact],[data-goal=event]) .bdr-atoms .ea-data-row{grid-template-columns:minmax(0,1fr) auto 28px!important;grid-template-areas:"name code edit" "value value edit";row-gap:2px!important;padding:12px 14px;border:1px solid var(--aw-line,#2a2a30);border-radius:10px;background:color-mix(in srgb,var(--aw-text,#eee) 4%,transparent)}
+html body .client-workspace .bdr-section:is([data-goal=contact],[data-goal=event]) .bdr-atoms .ea-data-row>b{grid-area:name;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+html body .client-workspace .bdr-section:is([data-goal=contact],[data-goal=event]) .bdr-atoms .ea-data-row>.ea-data-value{grid-area:value;font-size:15px}
+html body .client-workspace .bdr-section:is([data-goal=contact],[data-goal=event]) .bdr-atoms .ea-data-row>.ea-atom-controls{grid-area:edit}
+/* Echo Services: a gold rail marks the booked service; equipment stays a dense list. */
+html body .client-workspace .bdr-section[data-goal=music] .bdr-atoms .ea-data-row{padding:8px 0 8px 12px;border-inline-start:2px solid color-mix(in srgb,#e6b95a 55%,transparent)}
+html body .client-workspace .bdr-section[data-goal=music] .bdr-atoms .ea-data-row[data-category]{border-inline-start:0;padding-inline-start:0;color:#e6b95a}
+/* Additional info: free text, so rows are roomy and read as paragraphs. */
+html body .client-workspace .bdr-section[data-goal=additional] .bdr-atoms .ea-data-row{grid-template-columns:minmax(0,1fr) auto 28px!important;grid-template-areas:"name code edit" "value value edit";padding:14px 0;row-gap:6px!important;align-items:start!important}
+html body .client-workspace .bdr-section[data-goal=additional] .bdr-atoms .ea-data-value{line-height:1.65;white-space:pre-wrap}
+@media(max-width:700px){html body .client-workspace .bdr-section:is([data-goal=contact],[data-goal=event]) .bdr-atoms .ea-group{grid-template-columns:minmax(0,1fr)}}
+/* Order badge sits opposite each atom's title. */
+html body .client-workspace .bdr-section:is([data-goal=contact],[data-goal=event],[data-goal=additional]) .bdr-atoms .ea-data-row>i.ea-atom-code{grid-area:code;justify-self:end;padding:3px 7px;border:1px solid var(--aw-line,#2a2a30);border-radius:6px;color:#e6b95a}
+html body .client-workspace .bdr-section[data-goal=additional] .bdr-atoms .ea-data-row>:is(b,.ea-data-value,.ea-atom-controls){grid-area:auto}
+html body .client-workspace .bdr-section[data-goal=additional] .bdr-atoms .ea-data-row>b{grid-area:name}
+html body .client-workspace .bdr-section[data-goal=additional] .bdr-atoms .ea-data-row>.ea-data-value{grid-area:value}
+html body .client-workspace .bdr-section[data-goal=additional] .bdr-atoms .ea-data-row>.ea-atom-controls{grid-area:edit}

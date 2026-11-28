@@ -1,4 +1,4 @@
-.atom-editor{width:min(520px,92vw);padding:20px;border:1px solid var(--aw-line,#444);border-radius:12px;background:var(--aw-raised,#1a1a1f);color:var(--aw-text,#eee)}
+.atom-editor{position:fixed;inset:0;margin:auto;max-height:90dvh;overflow:auto;width:min(520px,92vw);padding:20px;border:1px solid var(--aw-line,#444);border-radius:12px;background:var(--aw-raised,#1a1a1f);color:var(--aw-text,#eee)}
 .atom-editor::backdrop{background:#000a}
 .atom-editor h3{margin:0 0 12px;font-size:16px}
 .atom-editor :is(input,select,textarea){width:100%;box-sizing:border-box;padding:9px 10px;border:1px solid var(--aw-line,#555);border-radius:8px;background:transparent;color:inherit;font:inherit}
@@ -10,3 +10,6 @@
 .atom-editor-actions{display:flex;gap:8px;margin-top:16px}
 .atom-editor-actions>button[type=submit]{border-color:#e6b95a;background:#e6b95a;color:#121216;font-weight:600}
 .atom-editor [role=alert]{color:#e08a85;margin:10px 0 0}
+.atom-editor-other{display:grid;gap:6px;margin-top:12px;font-size:13px}
+.atom-editor form{display:grid;gap:14px}.atom-editor h3,.atom-editor [role=alert],.atom-editor p{margin:0}
+.atom-editor-other{margin-top:0}

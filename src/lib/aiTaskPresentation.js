@@ -5,7 +5,7 @@ const legacyLabels={
  'music.djRequested':['DJ service','خدمة الدي جي'],'music.mcRequested':['MC service','تقديم الحفل'],'rental.requested':['Services','الخدمات'],
  'event.type':['Event','الفعالية'],'event.date':['Date','التاريخ'],'event.startTime':['Start time','وقت البدء'],'event.endTime':['End time','وقت الانتهاء'],'event.guestCount':['Guests','الضيوف'],
  'customer.firstName':['First name','الاسم الأول'],'customer.lastName':['Last name','اسم العائلة'],'customer.email':['Email','البريد الإلكتروني'],'customer.phone':['Phone','الهاتف'],'customer.contactMethod':['Contact method','طريقة التواصل'],'customer.company':['Company','الشركة'],
- 'event.venue.name':['Venue','المكان'],'event.venue.address':['Address','العنوان'],'event.venue.city':['City','المدينة'],'event.venue.postalCode':['Postal code','الرمز البريدي'],'event.venue.country':['Country','الدولة'],'event.venue.setting':['Setting','الموقع'],
+ 'event.venue.name':['Venue name','اسم المكان'],'event.venue.address':['Address','العنوان'],'event.venue.city':['City','المدينة'],'event.venue.postalCode':['Postal code','الرمز البريدي'],'event.venue.country':['Country','الدولة'],'event.venue.setting':['Setting','الموقع'],
  'event.setup.requirements':['Setup notes','ملاحظات التجهيز'],'services':['Services','الخدمات'],'equipment':['Equipment','المعدات'],'music.styles':['Music','الموسيقى'],'additional.notes':['Notes','ملاحظات'],
 };
 const humanize=value=>{const text=String(value).replace(/([a-z])([A-Z])/g,'$1 $2').replace(/[_-]/g,' ');return text.charAt(0).toUpperCase()+text.slice(1);};

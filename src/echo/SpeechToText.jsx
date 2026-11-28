@@ -21,7 +21,18 @@ export default function SpeechToText({ar,value,onChange,onListeningChange,disabl
   return()=>{client.dispose();dictation.current=null;callbacks.current.onListeningChange(false);window.removeEventListener('pagehide',stop);document.removeEventListener('visibilitychange',visibility);};
  },[]);
  useEffect(()=>{if(disabled){dictation.current?.cancel();}},[disabled]);
- const active=state!=='idle';
+ const active=state!=='idle',meter=useRef(null);
+ // Browser dictation gives no volume, so a parallel analyser on the microphone drives the --level ring around the button.
+ useEffect(()=>{
+  if(!active||!navigator.mediaDevices?.getUserMedia)return;
+  let stopped=false,frame=0,stream,context;
+  navigator.mediaDevices.getUserMedia({audio:true}).then(media=>{
+   if(stopped){media.getTracks().forEach(track=>track.stop());return;}
+   stream=media;context=new AudioContext();const analyser=context.createAnalyser();analyser.fftSize=256;context.createMediaStreamSource(media).connect(analyser);
+   const data=new Uint8Array(analyser.fftSize),tick=()=>{analyser.getByteTimeDomainData(data);let peak=0;for(const v of data)peak=Math.max(peak,Math.abs(v-128));meter.current?.style.setProperty('--level',Math.min(1,peak/64).toFixed(2));frame=requestAnimationFrame(tick);};tick();
+  }).catch(()=>{});
+  return()=>{stopped=true;cancelAnimationFrame(frame);stream?.getTracks().forEach(track=>track.stop());context?.close();meter.current?.style.setProperty('--level','0');};
+ },[active]);
  const errors={
   'not-allowed':tr('Microphone access was not allowed. Enable it in your browser, or type your message.','لم يُسمح بالميكروفون. فعّله من المتصفح أو اكتب رسالتك.'),
   'service-not-allowed':tr('Your browser has blocked speech recognition. You can still type.','حظر المتصفح التعرف على الكلام. يمكنك الكتابة.'),
@@ -33,7 +44,7 @@ export default function SpeechToText({ar,value,onChange,onListeningChange,disabl
  const label=active?tr('Stop dictation','إيقاف الإملاء'):tr('Dictate your message','إملاء رسالتك');
  const message=error?errors[error]||tr('Dictation is unavailable right now. You can still type.','الإملاء غير متاح حالياً. يمكنك الكتابة.'):supported===false?tr('Dictation is not supported in this browser. You can still type.','متصفحك لا يدعم الإملاء. يمكنك الكتابة.'):active?tr('Listening… Your words appear in the message box.','أستمع… يظهر كلامك في حقل الرسالة.'):tr('Dictation uses your browser’s speech service. Review your text before sending.','يستخدم الإملاء خدمة الكلام في متصفحك. راجع النص قبل إرساله.');
  return <div className="echo-stt">
-  <button type="button" className={`ai-booking-tts echo-stt-mic${active?' is-listening':''}`} disabled={disabled||!supported} aria-pressed={active} aria-label={label} title={`${supported===false?message:label} · ${tr('Browser speech service','خدمة الكلام في المتصفح')}`} onClick={()=>{if(active){dictation.current?.stop();return;}setError('');dictation.current?.start({text:value,lang:language});}}>{active?<Square size={13} fill="currentColor"/>:<Mic size={17}/>}</button>
+  <button type="button" ref={meter} className={`ai-booking-tts echo-stt-mic${active?' is-listening':''}`} disabled={disabled||!supported} aria-pressed={active} aria-label={label} title={`${supported===false?message:label} · ${tr('Browser speech service','خدمة الكلام في المتصفح')}`} onClick={()=>{if(active){dictation.current?.stop();return;}setError('');dictation.current?.start({text:value,lang:language});}}>{active?<Square size={13} fill="currentColor"/>:<Mic size={17}/>}</button>
   <span className={active||error?'echo-stt-status':'ai-booking-sr'} role={error?'alert':'status'}>{message}</span>
  </div>;
 }
